@@ -1,0 +1,9 @@
+<resources>
+    <!-- Launchers should appear instantly, so there is no splash screen: just the night color. -->
+    <style name="Theme.AmpliDrive" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/ampli_night</item>
+        <item name="android:windowBackground">@color/ampli_night</item>
+        <item name="android:windowShowWallpaper">false</item>
+    </style>
+</resources>

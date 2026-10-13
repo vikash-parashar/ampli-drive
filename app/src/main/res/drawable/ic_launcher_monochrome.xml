@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli mark: a volume knob turned up. Source: mp3-player-brand/logo-icon.svg -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.9" android:scaleY="0.9" android:pivotX="54" android:pivotY="54">
+        <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd" android:pathData="M35,56 A19,19 0 1,0 73,56 A19,19 0 1,0 35,56 Z M51.5,42 A2.5,2.5 0 0,1 56.5,42 L56.5,56 A2.5,2.5 0 0,1 51.5,56 Z" />
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M30.62,69.50 L26.29,72.00 M27.00,56.00 L22.00,56.00 M30.62,42.50 L26.29,40.00 M40.50,32.62 L38.00,28.29 M54.00,29.00 L54.00,24.00 M67.50,32.62 L70.00,28.29 M77.38,42.50 L81.71,40.00 M81.00,56.00 L86.00,56.00 M77.38,69.50 L81.71,72.00" />
+    </group>
+</vector>
