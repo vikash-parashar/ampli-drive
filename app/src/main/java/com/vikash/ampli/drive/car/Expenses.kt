@@ -17,13 +17,17 @@ data class FuelFill(
 
 enum class ExpenseKind { Service, Repair, Toll, Parking, Other }
 
-/** A non-fuel expense. Tolls come from the FASTag history automatically ([fromFastag]). */
+/**
+ * A non-fuel expense. Tolls are copied from the FASTag SMS history automatically
+ * ([fromFastag], with [sourceId] naming the toll so it is never copied twice; see TollSync).
+ */
 data class Expense(
     val time: Long,
     val kind: ExpenseKind,
     val rupees: Double,
     val note: String = "",
     val fromFastag: Boolean = false,
+    val sourceId: String? = null,
 )
 
 /** Distance between two full-tank fills and the fuel it took. */

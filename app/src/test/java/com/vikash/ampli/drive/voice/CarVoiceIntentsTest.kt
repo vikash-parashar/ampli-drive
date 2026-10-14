@@ -23,4 +23,13 @@ class CarVoiceIntentsTest {
         assertTrue(VoiceIntents.parse("navigate to MRF tyres") is VoiceIntent.Navigate)
         assertTrue(VoiceIntents.parse("take me to the service centre") is VoiceIntent.Navigate)
     }
+
+    @Test
+    fun reportAProblem() {
+        assertEquals(VoiceIntent.ReportProblem, VoiceIntents.parse("hey ampli report a problem"))
+        assertEquals(VoiceIntent.ReportProblem, VoiceIntents.parse("send feedback"))
+        assertEquals(VoiceIntent.ReportProblem, VoiceIntents.parse("मुझे शिकायत करनी है", "hi"))
+        // Still an engine question, not a report.
+        assertEquals(VoiceIntent.EngineStatus, VoiceIntents.parse("engine problem"))
+    }
 }

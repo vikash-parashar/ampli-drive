@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.media.AudioManager
 import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -19,6 +20,7 @@ import com.vikash.ampli.drive.car.CarMonitorService
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
+import com.vikash.ampli.drive.voice.VoiceKeys
 import com.vikash.ampli.drive.voice.VoiceService
 import kotlinx.coroutines.launch
 
@@ -87,6 +89,8 @@ class MainActivity : ComponentActivity() {
         app.car.onForeground()
         // Keeps the drive monitored while Google Maps or another app is in front.
         if (app.car.store.settings.value.backgroundMonitor) CarMonitorService.start(this)
+        // Help & feedback reports waiting from an offline moment go out once online.
+        app.feedback.watchNetwork()
     }
 
     override fun onResume() {
@@ -121,19 +125,57 @@ class MainActivity : ComponentActivity() {
         when (intent?.getStringExtra(EXTRA_VOICE_ACTION)) {
             VOICE_OPEN_HELP -> screen.value = Screen.Help
             VOICE_CRASH -> screen.value = Screen.Crash
+            // The form itself waits until the car is stopped.
+            VOICE_FEEDBACK -> screen.value = Screen.Feedback
             null -> Unit
             else -> screen.value = Screen.Home
         }
         intent?.removeExtra(EXTRA_VOICE_ACTION)
     }
 
-    /** Steering-wheel voice key or a search key, when the head unit passes it to the home app. */
+    /**
+     * Steering-wheel voice key or a search key, when the head unit passes it to the home app.
+     * A long press of the headset-hook or play/pause key also starts listening; a short press
+     * is handed on to the music player as usual. (With another app in front, VoiceKeyActivity
+     * answers the assist intents those keys turn into.)
+     */
+    private var voiceLongPressed = false
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) {
+        if (VoiceKeys.isVoiceKey(keyCode)) {
             if (event.repeatCount == 0) app.voice.start()
             return true
         }
+        if (VoiceKeys.isLongPressVoiceKey(keyCode)) {
+            if (event.repeatCount == 0) {
+                voiceLongPressed = false
+                event.startTracking()
+            }
+            return true
+        }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
+        if (VoiceKeys.isLongPressVoiceKey(keyCode)) {
+            voiceLongPressed = true
+            app.voice.start()
+            return true
+        }
+        return super.onKeyLongPress(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (VoiceKeys.isLongPressVoiceKey(keyCode)) {
+            if (event.isTracking && !event.isCanceled && !voiceLongPressed) {
+                // Short press: play/pause the music as if we had never looked at it.
+                val am = getSystemService(AudioManager::class.java)
+                am?.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
+                am?.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+            }
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
     }
 
     private fun startSensors() {
@@ -155,5 +197,6 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
         const val VOICE_OPEN_HELP = "help"
         const val VOICE_CRASH = "crash"
+        const val VOICE_FEEDBACK = "feedback"
     }
 }

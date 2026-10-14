@@ -41,6 +41,9 @@ enum class Screen {
 
     /** Car hub and its screens; [Crash] is the SOS countdown started by crash detection. */
     Car, Parked, Papers, Expenses, Obd, Tyres, Crash,
+
+    /** Settings › Help & feedback (also "Hey Ampli, report a problem"). */
+    Feedback,
 }
 
 @Composable
@@ -161,6 +164,7 @@ fun DriveRoot(
                                     emergencyReturn = Screen.Settings
                                     onNavigate(Screen.Emergency)
                                 },
+                                onOpenFeedback = { onNavigate(Screen.Feedback) },
                             )
                         }
                         Screen.Help, Screen.Sos, Screen.Crash -> {
@@ -222,12 +226,17 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
                             FastagScreen(app = app, onBack = { onNavigate(Screen.Home) })
                         }
+                        Screen.Feedback -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Settings) }
+                            FeedbackScreen(app = app, onBack = { onNavigate(Screen.Settings) })
+                        }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
                     if (showPro) ProUnlockSheet(app = app, onDismiss = { showPro = false })
+                    BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
                     // Settings opened from the Home dock returns to Home.
                     LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
                     // "Hey Ampli" sheet over whichever screen is showing.
@@ -239,4 +248,32 @@ fun DriveRoot(
         }
       }
     }
+}
+
+/**
+ * Background alerts (on by default) keep using location after the driver leaves the launcher,
+ * so Play's prominent disclosure is shown once, after location is allowed and before the drive
+ * monitor first starts. "No thanks" switches background alerts off; Settings › Car turns them
+ * back on (and shows this again).
+ */
+@Composable
+private fun BackgroundDisclosureHost(app: DriveApp, resumeTick: Int) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val settings by app.car.store.settings.collectAsStateWithLifecycle()
+    val accepted by app.prefs.bgDisclosureAccepted.collectAsStateWithLifecycle()
+    val hasFine = remember(resumeTick) {
+        context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+    if (!settings.backgroundMonitor || accepted || !hasFine) return
+    DisclosureDialog(
+        kind = Disclosure.BackgroundLocation,
+        onAgree = {
+            app.prefs.setBgDisclosureAccepted(true)
+            com.vikash.ampli.drive.car.CarMonitorService.start(context)
+        },
+        onDecline = {
+            app.car.store.updateSettings { it.copy(backgroundMonitor = false) }
+            app.car.applySettings()
+        },
+    )
 }

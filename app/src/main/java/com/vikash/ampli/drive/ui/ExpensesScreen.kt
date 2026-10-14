@@ -61,16 +61,9 @@ import com.vikash.ampli.drive.car.ExpenseKind
 import com.vikash.ampli.drive.car.FuelFill
 import com.vikash.ampli.drive.car.Mileage
 import com.vikash.ampli.drive.car.MonthTotal
-import com.vikash.ampli.drive.fastag.FastagKind
-import com.vikash.ampli.drive.fastag.TollEvent
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import java.io.File
 import java.time.format.TextStyle
-
-/** FASTag debits as toll expenses, so the log needs no double entry. */
-fun tollExpenses(events: List<TollEvent>): List<Expense> = events
-    .filter { it.kind == FastagKind.Debit && it.amount != null }
-    .map { Expense(it.time, ExpenseKind.Toll, it.amount!!, it.plaza ?: "", fromFastag = true) }
 
 private sealed interface LogRow {
     val time: Long
@@ -84,11 +77,10 @@ fun ExpensesScreen(app: DriveApp, onBack: () -> Unit, onUnlockPro: () -> Unit) {
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
     val fills by app.car.store.fills.collectAsStateWithLifecycle()
-    val own by app.car.store.expenses.collectAsStateWithLifecycle()
-    val tollEvents by app.fastag.events.collectAsStateWithLifecycle()
+    // FASTag tolls are already in here (TollSync), so nothing is merged at display time.
+    val expenses by app.car.store.expenses.collectAsStateWithLifecycle()
     val odo by app.car.store.odometerKm.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
-    val expenses = remember(own, tollEvents) { own + tollExpenses(tollEvents) }
     val avg = remember(fills) { Mileage.average(fills) }
     val last = remember(fills) { Mileage.segments(fills).maxByOrNull { it.endTime }?.kmPerLitre }
     val perKm = remember(fills, expenses) { Mileage.costPerKm(fills, expenses) }
@@ -120,7 +112,7 @@ fun ExpensesScreen(app: DriveApp, onBack: () -> Unit, onUnlockPro: () -> Unit) {
                         { if (pro.isPro) exportCsv(context, fills, expenses) else onUnlockPro() },
                         Modifier.fillMaxWidth(), icon = Icons.Filled.FileDownload, primary = false,
                     )
-                    Text(stringResource(R.string.expenses_tolls_note), fontSize = dims.t(2.2f), color = theme.muted)
+                    Text(stringResource(R.string.expenses_tolls_auto), fontSize = dims.t(2.2f), color = theme.muted)
                 }
                 Pane(Modifier.weight(1.1f).fillMaxHeight()) {
                     if (rows.isEmpty()) {
@@ -133,7 +125,7 @@ fun ExpensesScreen(app: DriveApp, onBack: () -> Unit, onUnlockPro: () -> Unit) {
                                 LogLine(row, onDelete = {
                                     when (row) {
                                         is LogRow.Fuel -> app.car.store.deleteFill(row.fill.time)
-                                        is LogRow.Cost -> app.car.store.deleteExpense(row.expense.time)
+                                        is LogRow.Cost -> app.car.store.deleteExpense(row.expense)
                                     }
                                 })
                             }
@@ -264,13 +256,9 @@ private fun LogLine(row: LogRow, onDelete: () -> Unit) {
             Text(detail, fontSize = dims.t(2.1f, min = 12f), color = theme.muted, maxLines = 1)
         }
         Text(rupees(amount), style = theme.numberStyle(glowColor = null), fontSize = dims.t(3f, min = 17f))
-        val fromFastag = row is LogRow.Cost && row.expense.fromFastag
-        if (!fromFastag) {
-            IconButton(onClick = onDelete, modifier = Modifier.size(56.dp)) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete), tint = theme.muted)
-            }
-        } else {
-            Box(Modifier.size(56.dp))
+        // A FASTag toll can be deleted too: it is then hidden and never copied again.
+        IconButton(onClick = onDelete, modifier = Modifier.size(56.dp)) {
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete), tint = theme.muted)
         }
     }
 }

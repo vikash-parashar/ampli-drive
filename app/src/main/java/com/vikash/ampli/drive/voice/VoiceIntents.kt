@@ -34,6 +34,9 @@ sealed interface VoiceIntent {
     data object TyrePressure : VoiceIntent
     data object EngineStatus : VoiceIntent
     data object WhereParked : VoiceIntent
+
+    /** "Report a problem", "send feedback": opens Help & feedback (the form waits until parked). */
+    data object ReportProblem : VoiceIntent
     data object Cancel : VoiceIntent
     data class Unknown(val text: String) : VoiceIntent
 }
@@ -63,6 +66,7 @@ object VoiceIntents {
         if (kw.pause.any { has(t, it) }) return VoiceIntent.Pause
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
+        if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
         carQuestion(t)?.let { return it }
         if (kw.camera.any { has(t, it) }) return VoiceIntent.NextCamera
         if (kw.auto.any { has(t, it) }) return VoiceIntent.OpenAndroidAuto
@@ -102,6 +106,12 @@ object VoiceIntents {
         CAR_ENGINE.any { has(t, it) } -> VoiceIntent.EngineStatus
         else -> null
     }
+
+    private val REPORT = listOf(
+        "report a problem", "report problem", "report an issue", "report a bug", "report bug",
+        "send feedback", "give feedback", "feedback", "complaint", "contact support",
+        "problem report", "शिकायत", "समस्या बताओ", "समस्या बताना", "फीडबैक", "shikayat", "samasya batao",
+    ).map { normalize(it) }
 
     private val CAR_PARKED = listOf(
         "where did i park", "where have i parked", "where is my car", "where s my car", "find my car",

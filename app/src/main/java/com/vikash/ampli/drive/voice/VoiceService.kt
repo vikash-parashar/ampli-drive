@@ -61,6 +61,7 @@ class VoiceService : Service() {
     private var speech: SpeechService? = null
     private var initialised = false
 
+    private var tuning = WakeSensitivity.tuning(3)
     private var assistantBusy = false
     private var enabled = true
     private var inCall = false
@@ -126,6 +127,15 @@ class VoiceService : Service() {
                 if (busy) evaluate() else main.postDelayed(rearm, REARM_DELAY_MS)
             }
         }
+        // A new sensitivity takes effect by reopening the recognizer with the new grammar.
+        scope.launch {
+            app.prefs.wakeSensitivity.collect { level ->
+                if (speech != null && WakeSensitivity.tuning(level) != tuning) {
+                    stopMic()
+                    evaluate()
+                }
+            }
+        }
         scope.launch {
             val loaded = withContext(Dispatchers.IO) {
                 try {
@@ -152,7 +162,10 @@ class VoiceService : Service() {
     private fun startMic() {
         val m = model ?: return
         try {
-            val r = Recognizer(m, SAMPLE_RATE, GRAMMAR)
+            tuning = WakeSensitivity.tuning(app.prefs.wakeSensitivity.value)
+            val r = Recognizer(m, SAMPLE_RATE, tuning.grammarJson)
+            // Per-word confidences, for the sensitivity threshold.
+            r.setWords(true)
             val s = SpeechService(r, SAMPLE_RATE)
             recognizer = r
             speech = s
@@ -178,8 +191,8 @@ class VoiceService : Service() {
     }
 
     private val wakeListener = object : RecognitionListener {
-        override fun onPartialResult(hypothesis: String?) = checkWake(hypothesis, "partial")
-        override fun onResult(hypothesis: String?) = checkWake(hypothesis, "text")
+        override fun onPartialResult(hypothesis: String?) = checkWake(hypothesis, partial = true)
+        override fun onResult(hypothesis: String?) = checkWake(hypothesis, partial = false)
         override fun onFinalResult(hypothesis: String?) = Unit
         override fun onTimeout() = Unit
         override fun onError(exception: Exception?) {
@@ -188,13 +201,26 @@ class VoiceService : Service() {
         }
     }
 
-    private fun checkWake(json: String?, key: String) {
-        val text = try {
-            JSONObject(json ?: return).optString(key)
+    private fun checkWake(json: String?, partial: Boolean) {
+        val wake = try {
+            val o = JSONObject(json ?: return)
+            if (partial) {
+                WakeSensitivity.acceptsPartial(o.optString("partial"), tuning)
+            } else {
+                val arr = o.optJSONArray("result")
+                val words = if (arr == null) {
+                    emptyList()
+                } else {
+                    (0 until arr.length()).mapNotNull { i ->
+                        arr.optJSONObject(i)?.let { w -> w.optString("word") to w.optDouble("conf", 1.0) }
+                    }
+                }
+                WakeSensitivity.acceptsFinal(o.optString("text"), words, tuning)
+            }
         } catch (_: Exception) {
             return
         }
-        if (isWake(text)) {
+        if (wake) {
             stopMic()
             app.voice.start()
         }
@@ -243,22 +269,6 @@ class VoiceService : Service() {
         private const val SAMPLE_RATE = 16000f
         private const val REARM_DELAY_MS = 700L
         private const val RETRY_MS = 5_000L
-
-        /**
-         * Vosk grammar: only these phrases (or "[unk]") can be recognised, which keeps CPU low
-         * and false wakes rare. "Ampli" may be missing from the model's vocabulary, so the
-         * dictionary words it sounds like are listed too.
-         */
-        private val GRAMMAR = """["hey ampli", "hello ampli", "ok ampli", "okay ampli", "hey amply", "hello amply", "ok amply", "okay amply", "hey ample", "hello ample", "ok ample", "[unk]"]"""
-
-        private val LEADS = setOf("hey", "hello", "ok", "okay", "hi")
-        private val NAMES = setOf("ampli", "amply", "ample")
-
-        /** A wake phrase anywhere in what Vosk heard, e.g. "[unk] hey amply". */
-        internal fun isWake(text: String): Boolean {
-            val words = text.lowercase().split(' ').filter { it.isNotBlank() }
-            return words.zipWithNext().any { (a, b) -> a in LEADS && b in NAMES }
-        }
 
         fun start(context: Context): Boolean {
             val app = context.applicationContext as DriveApp

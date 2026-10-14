@@ -10,6 +10,7 @@ import com.vikash.ampli.drive.cameras.CameraRepository
 import com.vikash.ampli.drive.cameras.LiveCameraAlerts
 import com.vikash.ampli.drive.emergency.EmergencyStore
 import com.vikash.ampli.drive.fastag.FastagStore
+import com.vikash.ampli.drive.feedback.FeedbackRepository
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.location.SpeedTracker
 import com.vikash.ampli.drive.media.MediaHub
@@ -48,6 +49,9 @@ class DriveApp : Application() {
     /** "Hey Ampli": the conversation, and the offline wake-word model it downloads once. */
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }
     val wakeModel: WakeModel by lazy { WakeModel(this) }
+
+    /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
+    val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
 
     /** Android 12: strings fetched through the app context follow the in-app language too. */
     override fun attachBaseContext(base: Context) {

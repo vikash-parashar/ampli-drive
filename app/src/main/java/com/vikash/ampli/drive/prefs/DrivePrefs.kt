@@ -78,6 +78,59 @@ class DrivePrefs(context: Context) {
     private val _cameraOverOnly = MutableStateFlow(sp.getBoolean(KEY_CAM_OVER_ONLY, false))
     val cameraOverOnly: StateFlow<Boolean> = _cameraOverOnly.asStateFlow()
 
+    /** "Hey Ampli" wake-word sensitivity, 1 (strict) to 5 (eager). See WakeSensitivity. */
+    private val _wakeSensitivity = MutableStateFlow(sp.getInt(KEY_WAKE_SENS, WAKE_SENS_DEFAULT).coerceIn(1, 5))
+    val wakeSensitivity: StateFlow<Int> = _wakeSensitivity.asStateFlow()
+
+    /** Floating speed bubble over other apps (needs "Display over other apps"). Off by default. */
+    private val _bubble = MutableStateFlow(sp.getBoolean(KEY_BUBBLE, false))
+    val bubble: StateFlow<Boolean> = _bubble.asStateFlow()
+
+    /** Where the bubble was dragged to, in screen pixels; -1 means not placed yet. */
+    var bubbleX: Int
+        get() = sp.getInt(KEY_BUBBLE_X, -1)
+        set(value) { sp.edit().putInt(KEY_BUBBLE_X, value).apply() }
+    var bubbleY: Int
+        get() = sp.getInt(KEY_BUBBLE_Y, -1)
+        set(value) { sp.edit().putInt(KEY_BUBBLE_Y, value).apply() }
+
+    /**
+     * Play "prominent disclosure" answers. Location keeps running in the drive monitor after the
+     * launcher is left, and the wake word records audio while other apps are open, so each is
+     * explained (and agreed to) before it starts or before the permission is asked for.
+     */
+    private val _bgDisclosure = MutableStateFlow(sp.getBoolean(KEY_BG_DISCLOSURE, false))
+    val bgDisclosureAccepted: StateFlow<Boolean> = _bgDisclosure.asStateFlow()
+
+    var micDisclosureAccepted: Boolean
+        get() = sp.getBoolean(KEY_MIC_DISCLOSURE, false)
+        set(value) { sp.edit().putBoolean(KEY_MIC_DISCLOSURE, value).apply() }
+
+    /**
+     * Random id for Help & feedback reports, so the driver can see their own tickets. Made on
+     * first use; not the Android ID or the advertising ID, and nothing else is linked to it.
+     */
+    val installId: String
+        get() = sp.getString(KEY_INSTALL_ID, null) ?: java.util.UUID.randomUUID().toString().also {
+            sp.edit().putString(KEY_INSTALL_ID, it).apply()
+        }
+
+    fun setWakeSensitivity(level: Int) {
+        val v = level.coerceIn(1, 5)
+        sp.edit().putInt(KEY_WAKE_SENS, v).apply()
+        _wakeSensitivity.value = v
+    }
+
+    fun setBubble(value: Boolean) {
+        sp.edit().putBoolean(KEY_BUBBLE, value).apply()
+        _bubble.value = value
+    }
+
+    fun setBgDisclosureAccepted(value: Boolean) {
+        sp.edit().putBoolean(KEY_BG_DISCLOSURE, value).apply()
+        _bgDisclosure.value = value
+    }
+
     /** When the assistant last said the full greeting (wall-clock ms), so it isn't repeated every time. */
     var lastVoiceGreeting: Long
         get() = sp.getLong(KEY_VOICE_GREETED, 0L)
@@ -192,6 +245,15 @@ class DrivePrefs(context: Context) {
         private const val KEY_CAM_DISTANCE = "camera_distance"
         private const val KEY_CAM_OVER_ONLY = "camera_over_only"
         private const val KEY_REDUCE_GLASS = "reduce_glass"
+        private const val KEY_WAKE_SENS = "wake_sensitivity"
+        private const val KEY_BUBBLE = "speed_bubble"
+        private const val KEY_BUBBLE_X = "speed_bubble_x"
+        private const val KEY_BUBBLE_Y = "speed_bubble_y"
+        private const val KEY_BG_DISCLOSURE = "disclosure_background_location"
+        private const val KEY_MIC_DISCLOSURE = "disclosure_microphone"
+        private const val KEY_INSTALL_ID = "install_id"
+
+        const val WAKE_SENS_DEFAULT = 3
 
         /** Choices for the camera alert distance, in metres. */
         val CAMERA_DISTANCES = listOf(300, 500, 800)
