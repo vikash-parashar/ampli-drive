@@ -382,7 +382,6 @@
     <string name="expenses_add_other">खर्च जोड़ें</string>
     <string name="expenses_export">CSV एक्सपोर्ट</string>
     <string name="expenses_export_pro">CSV एक्सपोर्ट (Pro)</string>
-    <string name="expenses_tolls_note">FASTag टोल: इन्हें टोल के रूप में जोड़ें। FASTag स्टेटमेंट अपने-आप नहीं पढ़े जाते।</string>
     <string name="expenses_empty">अभी कुछ दर्ज नहीं। किमी/लीटर देखने के लिए दो बार टंकी फुल कराएँ।</string>
     <string name="expenses_monthly">मासिक खर्च</string>
     <string name="expenses_full_short">फुल</string>

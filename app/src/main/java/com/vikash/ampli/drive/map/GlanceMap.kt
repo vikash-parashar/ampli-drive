@@ -1,6 +1,10 @@
 package com.vikash.ampli.drive.map
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Typeface
 import android.location.Location
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,6 +28,10 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.sources.GeoJsonSource
 
 /**
  * Everything MapLibre lives in this file, so a MapLibre upgrade or a build problem only
@@ -35,6 +43,53 @@ const val GLANCE_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 const val GLANCE_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors"
 
 private const val FOLLOW_ZOOM = 15.5
+private const val PARKED_SOURCE = "ampli-parked"
+private const val PARKED_LAYER = "ampli-parked-pin"
+private const val PARKED_ICON = "ampli-parked-icon"
+
+/** A one-point FeatureCollection (empty when not parked). */
+internal fun parkedGeoJson(spot: Pair<Double, Double>?): String {
+    if (spot == null) return """{"type":"FeatureCollection","features":[]}"""
+    val (lat, lon) = spot
+    return String.format(
+        java.util.Locale.US,
+        """{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[%.7f,%.7f]},"properties":{}}]}""",
+        lon, lat,
+    )
+}
+
+/** A map pin with a white "P", drawn in code so it needs no font from the map style. */
+private fun parkedPinBitmap(context: Context, color: Int): Bitmap {
+    val d = context.resources.displayMetrics.density
+    val w = (34 * d).toInt()
+    val h = (46 * d).toInt()
+    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(bmp)
+    val r = w / 2f
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+    val edge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = COLOR_WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 2.5f * d
+    }
+    val path = Path().apply {
+        moveTo(r, h.toFloat() - d)
+        lineTo(r - r * 0.55f, r * 1.6f)
+        lineTo(r + r * 0.55f, r * 1.6f)
+        close()
+    }
+    c.drawPath(path, fill)
+    c.drawCircle(r, r, r - 2 * d, fill)
+    c.drawCircle(r, r, r - 2 * d, edge)
+    val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = COLOR_WHITE
+        textSize = r * 1.1f
+        textAlign = Paint.Align.CENTER
+        typeface = Typeface.DEFAULT_BOLD
+    }
+    c.drawText("P", r, r + text.textSize * 0.36f, text)
+    return bmp
+}
 private const val MAX_FPS = 30
 private val COLOR_WHITE: Int = 0xFFFFFFFF.toInt()
 
@@ -49,6 +104,8 @@ fun GlanceMap(
     modifier: Modifier = Modifier,
     styleUrl: String = GLANCE_STYLE_URL,
     puckColor: Int = 0xFFE11D48.toInt(),
+    /** Where the car is parked (lat, lon): drawn as a "P" pin. */
+    parked: Pair<Double, Double>? = null,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -87,6 +144,7 @@ fun GlanceMap(
 
     LaunchedEffect(location) { holder.update(location) }
     LaunchedEffect(styleUrl, puckColor) { holder.setLook(styleUrl, puckColor) }
+    LaunchedEffect(parked) { holder.setParked(parked) }
 
     AndroidView(factory = { mapView }, modifier = modifier)
 }
@@ -104,6 +162,7 @@ private class MapHolder(
     private var started = false
     private var resumed = false
     private var destroyed = false
+    private var parked: Pair<Double, Double>? = null
 
     fun onMapReady(context: Context, map: MapLibreMap) {
         if (destroyed) return
@@ -141,8 +200,37 @@ private class MapHolder(
         loadedUrl = url
         map.setStyle(Style.Builder().fromUri(url)) { style ->
             if (destroyed) return@setStyle
+            // A new style drops our own layers: put the parking pin back.
+            addParkedLayer(style)
             // The location component re-adds its layers on every new style by itself.
             if (!tracking) enableTracking(appContext, map, style) else recolourPuck(map)
+        }
+    }
+
+    /** Parked car moved or cleared. */
+    fun setParked(spot: Pair<Double, Double>?) {
+        parked = spot
+        val style = map?.style ?: return
+        if (!style.isFullyLoaded) return
+        (style.getSource(PARKED_SOURCE) as? GeoJsonSource)?.setGeoJson(parkedGeoJson(spot)) ?: addParkedLayer(style)
+    }
+
+    private fun addParkedLayer(style: Style) {
+        try {
+            if (style.getImage(PARKED_ICON) == null) style.addImage(PARKED_ICON, parkedPinBitmap(appContext, puckColor))
+            if (style.getSource(PARKED_SOURCE) == null) style.addSource(GeoJsonSource(PARKED_SOURCE, parkedGeoJson(parked)))
+            if (style.getLayer(PARKED_LAYER) == null) {
+                style.addLayer(
+                    SymbolLayer(PARKED_LAYER, PARKED_SOURCE).withProperties(
+                        PropertyFactory.iconImage(PARKED_ICON),
+                        PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
+                        PropertyFactory.iconAllowOverlap(true),
+                        PropertyFactory.iconIgnorePlacement(true),
+                    ),
+                )
+            }
+        } catch (_: Exception) {
+            // Without the pin the parked pill still shows where the car is.
         }
     }
 

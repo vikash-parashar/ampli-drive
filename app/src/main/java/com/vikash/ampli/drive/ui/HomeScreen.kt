@@ -151,7 +151,9 @@ fun HomeScreen(
         ) {
             val map = @Composable { m: Modifier, showTurn: Boolean ->
                 Box(m) {
+                    val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
                     MapPane(
+                        parked = parkedSpot?.let { it.lat to it.lon },
                         gps = gps,
                         onOpenNavigation = openNav,
                         onRequestPermissions = onRequestPermissions,

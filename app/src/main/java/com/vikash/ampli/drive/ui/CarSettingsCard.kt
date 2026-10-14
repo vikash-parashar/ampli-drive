@@ -14,6 +14,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,13 +33,29 @@ import com.vikash.ampli.drive.car.CarSettings
 import com.vikash.ampli.drive.car.FatigueTimer
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
-/** Settings › Car: break reminder, crash detection, weather alerts, background monitoring, tyre limits. */
+/** Settings › Car: break reminder, crash detection, weather alerts, background alerts, speed bubble, tyre limits. */
 @Composable
-internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit) {
+internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: Int = 0) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
     val s by app.car.store.settings.collectAsStateWithLifecycle()
+    val bubble by app.prefs.bubble.collectAsStateWithLifecycle()
+    val canOverlay = remember(resumeTick) { Settings.canDrawOverlays(context) }
+    var askDisclosure by remember { mutableStateOf(false) }
+    if (askDisclosure) {
+        DisclosureDialog(
+            kind = Disclosure.BackgroundLocation,
+            onAgree = {
+                askDisclosure = false
+                app.prefs.setBgDisclosureAccepted(true)
+                app.car.store.updateSettings { it.copy(backgroundMonitor = true) }
+                app.car.applySettings()
+                CarMonitorService.start(context)
+            },
+            onDecline = { askDisclosure = false },
+        )
+    }
     fun update(change: (CarSettings) -> CarSettings) {
         app.car.store.updateSettings(change)
         app.car.applySettings()
@@ -69,8 +91,24 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit) {
             }
             CarSwitch(stringResource(R.string.weather_setting), stringResource(R.string.weather_setting_hint), s.weatherAlerts) { v -> update { it.copy(weatherAlerts = v) } }
             CarSwitch(stringResource(R.string.monitor_setting), stringResource(R.string.monitor_setting_hint), s.backgroundMonitor) { v ->
-                update { it.copy(backgroundMonitor = v) }
-                if (v) CarMonitorService.start(context) else CarMonitorService.stop(context)
+                if (v && !app.prefs.bgDisclosureAccepted.value) {
+                    askDisclosure = true
+                } else {
+                    update { it.copy(backgroundMonitor = v) }
+                    if (v) CarMonitorService.start(context) else CarMonitorService.stop(context)
+                }
+            }
+            Text(stringResource(R.string.bg_alerts_note), fontSize = dims.t(2.2f), color = theme.muted)
+            CarSwitch(
+                stringResource(R.string.bubble_setting),
+                stringResource(if (bubble && !canOverlay) R.string.bubble_setting_needs_permission else R.string.bubble_setting_hint),
+                bubble,
+            ) { v ->
+                app.prefs.setBubble(v)
+                // Asked for only when switched on: Android's "Display over other apps" page.
+                if (v && !Settings.canDrawOverlays(context)) {
+                    startSafely(context, Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName)))
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                 Text(stringResource(R.string.tyres_low_setting), fontSize = dims.t(2.6f), color = theme.muted)

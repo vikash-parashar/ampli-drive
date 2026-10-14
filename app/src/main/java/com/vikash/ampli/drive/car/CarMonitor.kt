@@ -49,8 +49,14 @@ class CarMonitor(private val app: DriveApp) {
     private val parking = ParkingDetector()
     private val crash = CrashDetector()
 
+    private val _foreground = MutableStateFlow(false)
+    /** Launcher in front (MainActivity started), as a flow for the speed bubble. */
+    val foregroundState: StateFlow<Boolean> = _foreground.asStateFlow()
+
     /** Launcher in front (MainActivity started). */
-    @Volatile var foreground = false
+    var foreground: Boolean
+        get() = _foreground.value
+        set(value) { _foreground.value = value }
 
     // ------------------------------------------------------------------ Public state
 
@@ -99,6 +105,8 @@ class CarMonitor(private val app: DriveApp) {
         fatigue.thresholdMs = store.settings.value.breakAfterMin * FatigueTimer.MINUTE
         app.tpms.onNewAlert = { wheel, alert, seen -> onTyreAlert(wheel, alert, seen.reading.psi) }
         scope.launch { store.wheels.collect { app.tpms.wheels = it } }
+        // FASTag tolls into the expense log. The first run copies the stored history (backfill).
+        scope.launch { app.fastag.events.collect { store.syncTolls(it) } }
         scope.launch { store.settings.collect { app.tpms.limits = it.tpmsLimits } }
         // Spoken engine warnings and new trouble codes while the OBD dongle is connected.
         scope.launch {
@@ -199,6 +207,25 @@ class CarMonitor(private val app: DriveApp) {
         store.flushOdometer()
         val loc = lastLocation ?: return
         parking.onStopped(System.currentTimeMillis(), loc.latitude, loc.longitude, if (loc.hasAccuracy()) loc.accuracy else null)?.let { park(it) }
+    }
+
+    /**
+     * A vendor ACC broadcast (see IgnitionActions). Off ends the trip: the parking spot is saved
+     * from the last fix, the odometer is written and the break timer starts afresh. On starts a
+     * new trip with a fresh break timer.
+     */
+    fun onIgnition(event: IgnitionEvent) {
+        when (event) {
+            IgnitionEvent.Off -> {
+                onIgnitionOff()
+                odometer.reset()
+            }
+            IgnitionEvent.On -> Unit
+        }
+        fatigue.reset()
+        _drivingMs.value = 0L
+        _breakDue.value = false
+        CarNotifier.cancel(app, CarNotifier.ID_BREAK)
     }
 
     private fun park(spot: ParkedSpot) {

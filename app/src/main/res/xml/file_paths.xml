@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <cache-path name="exports" path="exports/" />
+    <!-- Help & feedback: screenshot and log attachments for the email fallback. -->
+    <cache-path name="feedback" path="feedback/" />
 </paths>

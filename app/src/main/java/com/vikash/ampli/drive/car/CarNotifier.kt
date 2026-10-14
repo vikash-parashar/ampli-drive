@@ -65,12 +65,14 @@ object CarNotifier {
         context.getSystemService(NotificationManager::class.java)?.cancel(id)
     }
 
-    fun monitorNotification(context: Context): Notification {
+    /** [text] replaces the usual line, e.g. with the next speed camera. */
+    fun monitorNotification(context: Context, text: String? = null): Notification {
         ensureChannels(context)
         return Notification.Builder(context, CHANNEL_MONITOR)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentTitle(context.getString(R.string.car_monitor_title))
-            .setContentText(context.getString(R.string.car_monitor_text))
+            .setContentText(text ?: context.getString(R.string.car_monitor_text))
+            .setOnlyAlertOnce(true)
             .setContentIntent(openApp(context))
             .setOngoing(true)
             .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)

@@ -16,6 +16,11 @@ android {
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
         versionName = "0.1.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
 
+        // Ampli owner server for Help & feedback. CI fills it from the OWNER_API_URL repository
+        // variable; empty means "no server yet" and the app falls back to an email.
+        val ownerApi = (System.getenv("OWNER_API_URL") ?: "").trim().replace("\"", "")
+        buildConfigField("String", "OWNER_API_URL", "\"$ownerApi\"")
+
         // Head units are ARM. Dropping the x86 MapLibre libraries keeps the APK much smaller.
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")

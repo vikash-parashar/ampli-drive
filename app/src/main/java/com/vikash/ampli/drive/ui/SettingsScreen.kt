@@ -3,6 +3,8 @@ package com.vikash.ampli.drive.ui
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.net.Uri
+import android.content.Intent
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.widget.Toast
@@ -32,6 +34,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Policy
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -88,6 +93,7 @@ fun SettingsScreen(
     onOpenFastag: () -> Unit,
     onOpenEmergency: () -> Unit,
     onOpenCar: () -> Unit = {},
+    onOpenFeedback: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -208,7 +214,7 @@ fun SettingsScreen(
                 action = stringResource(R.string.action_edit),
                 onAction = onOpenEmergency,
             )
-            CarSettingsCard(app = app, onOpenCar = onOpenCar)
+            CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
@@ -217,6 +223,13 @@ fun SettingsScreen(
                 status = stringResource(R.string.screen_on_hint),
                 checked = keepScreenOn,
                 onChange = app.prefs::setKeepScreenOn,
+            )
+            LinkRow(
+                icon = Icons.Filled.Feedback,
+                title = stringResource(R.string.feedback_title),
+                hint = stringResource(R.string.feedback_settings_hint),
+                action = stringResource(R.string.action_open),
+                onClick = onOpenFeedback,
             )
             InfoCard(
                 logo = true,
@@ -228,6 +241,14 @@ fun SettingsScreen(
                     stringResource(R.string.cameras_attribution),
                     stringResource(R.string.weather_attribution),
                 ),
+            )
+            // Settings › About › Privacy policy (also required by Play).
+            LinkRow(
+                icon = Icons.Filled.Policy,
+                title = stringResource(R.string.privacy_title),
+                hint = stringResource(R.string.privacy_hint),
+                action = stringResource(R.string.action_open),
+                onClick = { startSafely(context, Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))) },
             )
         }
     }
@@ -317,6 +338,26 @@ internal fun SettingRow(
             if (action != null) {
                 BigButton(text = action, onClick = onAction, primary = !ok)
             }
+        }
+    }
+}
+
+/** Privacy policy, published from docs/privacy-policy.html with GitHub Pages. */
+const val PRIVACY_POLICY_URL = "https://vikash-parashar.github.io/ampli-drive/privacy-policy.html"
+
+@Composable
+private fun LinkRow(icon: ImageVector, title: String, hint: String, action: String, onClick: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    SettingCard {
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+        ) {
+            Icon(icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(32.dp))
+            Box(Modifier.weight(1f)) { CardTitle(title, hint) }
+            BigButton(text = action, onClick = onClick, primary = false)
         }
     }
 }

@@ -23,6 +23,9 @@
     <!-- Drive monitor: break timer, odometer, crash detection and parking spot while Maps is in front. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Optional floating speed bubble over Google Maps. Asked for only when the driver switches
+         the bubble on in Settings › Car. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- "Play <song> from my storage" (MediaStore, USB and SD included). -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission
@@ -146,6 +149,27 @@
             </intent-filter>
         </activity>
 
+        <!-- Steering-wheel / hardware voice key while another app is in front: Android turns that
+             key into one of these intents. Transparent; it stays only while "Hey Ampli" talks. -->
+        <activity
+            android:name=".VoiceKeyActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+                <action android:name="android.intent.action.VOICE_ASSIST" />
+                <action android:name="android.intent.action.VOICE_COMMAND" />
+                <action android:name="android.intent.action.SEARCH_LONG_PRESS" />
+                <action android:name="android.speech.action.WEB_SEARCH" />
+                <action android:name="android.speech.action.VOICE_SEARCH_HANDS_FREE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- Reads media sessions (any player), the Google Maps navigation notification and
              FASTag toll SMS notifications (no READ_SMS permission). -->
         <service
@@ -164,7 +188,9 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
-        <!-- Drive monitor (location). Started only from the visible launcher; off in Settings › Car. -->
+        <!-- Background alerts (location): speed cameras, break timer, crash detection, parking spot and
+             the speed bubble while Google Maps is in front. Started only from the visible launcher,
+             after the in-app location disclosure; off in Settings › Car. -->
         <service
             android:name=".car.CarMonitorService"
             android:exported="false"

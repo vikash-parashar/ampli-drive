@@ -214,12 +214,36 @@ class CarStore(private val context: Context) {
     }
 
     fun addExpense(e: Expense) = writeExpenses((_expenses.value + e).sortedByDescending { it.time })
-    fun deleteExpense(time: Long) = writeExpenses(_expenses.value.filterNot { it.time == time })
+
+    /** Deletes [e]. A FASTag toll is also remembered as hidden, so the sync never re-adds it. */
+    fun deleteExpense(e: Expense) {
+        e.sourceId?.let { id ->
+            val hidden = hiddenTolls() + id
+            sp.edit().putString(KEY_HIDDEN_TOLLS, JSONArray(hidden.toList().takeLast(MAX_ROWS)).toString()).apply()
+        }
+        writeExpenses(_expenses.value.filterNot { it == e })
+    }
+
+    /** Copies new FASTag toll debits into the log (also the one-time backfill of old ones). */
+    @Synchronized
+    fun syncTolls(events: List<com.vikash.ampli.drive.fastag.TollEvent>) {
+        val add = TollSync.newExpenses(_expenses.value, events, hiddenTolls())
+        if (add.isNotEmpty()) writeExpenses((_expenses.value + add).sortedByDescending { it.time })
+    }
+
+    private fun hiddenTolls(): Set<String> = try {
+        val arr = JSONArray(sp.getString(KEY_HIDDEN_TOLLS, "[]"))
+        (0 until arr.length()).mapTo(LinkedHashSet()) { arr.getString(it) }
+    } catch (_: Exception) {
+        emptySet()
+    }
 
     private fun writeExpenses(list: List<Expense>) {
         val arr = JSONArray()
         list.take(MAX_ROWS).forEach {
-            arr.put(JSONObject().put("t", it.time).put("k", it.kind.name).put("r", it.rupees).put("n", it.note))
+            val o = JSONObject().put("t", it.time).put("k", it.kind.name).put("r", it.rupees).put("n", it.note)
+            it.sourceId?.let { id -> o.put("src", id) }
+            arr.put(o)
         }
         sp.edit().putString(KEY_EXPENSES, arr.toString()).apply()
         _expenses.value = list.take(MAX_ROWS)
@@ -234,6 +258,8 @@ class CarStore(private val context: Context) {
                     kind = runCatching { ExpenseKind.valueOf(it.optString("k")) }.getOrDefault(ExpenseKind.Other),
                     rupees = it.optDouble("r"),
                     note = it.optString("n"),
+                    fromFastag = it.has("src"),
+                    sourceId = if (it.has("src")) it.optString("src") else null,
                 )
             }
         }
@@ -292,6 +318,7 @@ class CarStore(private val context: Context) {
         const val KEY_ODO = "odometer_m"
         const val KEY_FILLS = "fills"
         const val KEY_EXPENSES = "expenses"
+        const val KEY_HIDDEN_TOLLS = "hidden_tolls"
         const val KEY_PARKED = "parked"
         const val KEY_WHEELS = "tpms_wheels"
         const val KEY_OBD = "obd_address"

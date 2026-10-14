@@ -51,6 +51,8 @@ fun MapPane(
     onRequestPermissions: () -> Unit,
     modifier: Modifier = Modifier,
     showTurn: Boolean = true,
+    /** Parked car (lat, lon), pinned on the map. */
+    parked: Pair<Double, Double>? = null,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -84,6 +86,7 @@ fun MapPane(
                         location = location,
                         styleUrl = theme.map.url,
                         puckColor = theme.mapPuck.toArgb(),
+                        parked = parked,
                         modifier = Modifier.fillMaxSize(),
                     )
                     // Tint so the tiles sit in the theme's colour world (green HUD, magenta synthwave…).

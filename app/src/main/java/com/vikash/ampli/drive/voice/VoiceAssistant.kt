@@ -264,6 +264,11 @@ class VoiceAssistant(private val app: DriveApp) {
                 say(res, lang, R.string.voice_sos)
                 return null
             }
+            VoiceIntent.ReportProblem -> {
+                bringLauncherForward(MainActivity.VOICE_FEEDBACK)
+                say(res, lang, R.string.voice_feedback)
+                return null
+            }
             VoiceIntent.Greeting -> {
                 say(res, lang, greeting(res))
                 return Expect.Destination

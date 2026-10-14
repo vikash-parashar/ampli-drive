@@ -23,6 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import kotlin.math.roundToInt
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,12 +74,34 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
         if (always && model == WakeModel.State.Ready) VoiceService.start(context)
     }
 
-    fun turnOn() {
+    /** Disclosure pending: 0 none, 1 before switching the wake word on, 2 before the mic permission only. */
+    var askMic by remember { mutableIntStateOf(0) }
+    val sensitivity by app.prefs.wakeSensitivity.collectAsStateWithLifecycle()
+
+    fun requestMic() {
         val perms = buildList {
             add(Manifest.permission.RECORD_AUDIO)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
         }
         turnOnLauncher.launch(perms.toTypedArray())
+    }
+
+    // Play's prominent disclosure before the microphone permission and before listening starts.
+    fun turnOn() {
+        if (app.prefs.micDisclosureAccepted) requestMic() else askMic = 1
+    }
+
+    if (askMic != 0) {
+        DisclosureDialog(
+            kind = Disclosure.Microphone,
+            onAgree = {
+                val forAlways = askMic == 1
+                askMic = 0
+                app.prefs.micDisclosureAccepted = true
+                if (forAlways) requestMic() else permLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO))
+            },
+            onDecline = { askMic = 0 },
+        )
     }
 
     fun toggle(on: Boolean) {
@@ -112,6 +137,24 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
                 }
                 ThemedSwitch(always) { toggle(it) }
             }
+            if (always) {
+                // Wake-word sensitivity: 1 strict … 5 eager (WakeSensitivity).
+                Column {
+                    Text(
+                        stringResource(R.string.voice_sensitivity_title) + " · " + stringResource(sensitivityLabel(sensitivity)),
+                        color = theme.text, fontSize = dims.t(2.6f, min = 15f),
+                    )
+                    Slider(
+                        value = sensitivity.toFloat(),
+                        onValueChange = { app.prefs.setWakeSensitivity(it.roundToInt()) },
+                        valueRange = 1f..5f,
+                        steps = 3,
+                        colors = SliderDefaults.colors(thumbColor = theme.accent, activeTrackColor = theme.accent),
+                    )
+                    Text(stringResource(R.string.voice_sensitivity_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f))
+                }
+            }
+            Text(stringResource(R.string.voice_key_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f))
             // Model download state, with a retry when it failed.
             val modelText = when (val m = model) {
                 WakeModel.State.Missing -> stringResource(R.string.voice_model_missing)
@@ -131,7 +174,9 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
                     stringResource(if (hasMic) R.string.voice_mic_ok else R.string.voice_mic_needed),
                 ok = hasMic,
                 action = if (hasMic) null else stringResource(R.string.action_allow),
-                onAction = { permLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO)) },
+                onAction = {
+                    if (app.prefs.micDisclosureAccepted) permLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO)) else askMic = 2
+                },
                 secondary = if (hasMic) null else stringResource(R.string.action_app_settings),
                 onSecondary = { Launchers.openAppDetails(context) },
             )
@@ -144,6 +189,12 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
             )
         }
     }
+}
+
+private fun sensitivityLabel(level: Int): Int = when (level) {
+    1, 2 -> R.string.voice_sensitivity_strict
+    3 -> R.string.voice_sensitivity_normal
+    else -> R.string.voice_sensitivity_eager
 }
 
 @Composable
