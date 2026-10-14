@@ -246,7 +246,7 @@ class VoiceService : Service() {
         stopMic()
         audio?.let {
             try {
-                modeWatcher?.close()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) modeWatcher?.close()
                 modeWatcher = null
                 it.unregisterAudioPlaybackCallback(playbackCallback)
             } catch (_: Exception) {
