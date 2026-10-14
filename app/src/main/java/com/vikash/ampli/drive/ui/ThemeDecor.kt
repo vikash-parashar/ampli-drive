@@ -306,7 +306,7 @@ private fun DrawScope.drawSynthwave() {
 }
 
 /** Tiny tiled bitmaps for repeating patterns. */
-private fun patternBrush(decoration: Decoration, density: Float, color: Int = 0x29FF9933): Brush? {
+private fun patternBrush(decoration: Decoration, density: Float, tint: Int = 0x29FF9933): Brush? {
     val bitmap = when (decoration) {
         Decoration.Carbon -> {
             val cell = max(2, (4 * density).toInt())
@@ -325,7 +325,7 @@ private fun patternBrush(decoration: Decoration, density: Float, color: Int = 0x
                 if (density >= 2f) bmp.setPixel(0, step - 2, 0x0A39FF88)
             }
         }
-        Decoration.Jaali -> jaaliTile((56 * density).toInt().coerceAtLeast(32), color)
+        Decoration.Jaali -> jaaliTile((56 * density).toInt().coerceAtLeast(32), tint)
         else -> null
     } ?: return null
     return ShaderBrush(ImageShader(bitmap.asImageBitmap(), TileMode.Repeated, TileMode.Repeated))
