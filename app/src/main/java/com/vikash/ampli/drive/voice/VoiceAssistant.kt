@@ -328,7 +328,12 @@ class VoiceAssistant(private val app: DriveApp) {
         val pending = scope.async { runCatching { PlaceSearch.search(destination, here) } }
         styled(res, lang, HaryanviLines.Event.Searching, res.getString(R.string.voice_searching, destination), destination)
         val places = pending.await().getOrElse {
-            say(res, lang, R.string.voice_search_failed)
+            // No place search (offline?): Google Maps searches the name itself.
+            if (VoiceActions.startNavigationByName(app, destination)) {
+                styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, destination), destination)
+            } else {
+                say(res, lang, R.string.voice_search_failed)
+            }
             return null
         }
         if (places.isEmpty()) {

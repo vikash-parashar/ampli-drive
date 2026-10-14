@@ -641,4 +641,33 @@
     <string name="autostart_bt_offer">Also run when %1$s connects?</string>
     <string name="autostart_bt_none">Connect your phone to also run it when the phone connects.</string>
     <string name="autostart_limits">Runs while Car Hub is the home screen. Some units send no ignition signal; then it runs after boot only.</string>
+
+    <!-- Haryanvi navigation prompts -->
+    <string name="nav_prompts_title">Haryanvi navigation prompts</string>
+    <string name="nav_prompts_hint">Ampli speaks Google Maps\' turns: in desi Haryanvi with the Haryanvi voice style, in plain words with Standard.</string>
+    <string name="nav_prompts_need_access">Needs notification access to read Google Maps\' next turn.</string>
+    <string name="nav_prompts_mute_maps">Mute Google Maps\' voice (speaker icon while navigating) so you only hear Ampli.</string>
+    <string name="nav_prompts_open_maps">Open Google Maps</string>
+    <string name="nav_turn_left">turn left</string>
+    <string name="nav_turn_right">turn right</string>
+    <string name="nav_slight_left">keep slightly left</string>
+    <string name="nav_slight_right">keep slightly right</string>
+    <string name="nav_sharp_left">take a sharp left</string>
+    <string name="nav_sharp_right">take a sharp right</string>
+    <string name="nav_u_turn">make a U-turn</string>
+    <string name="nav_keep_left">keep left</string>
+    <string name="nav_keep_right">keep right</string>
+    <string name="nav_flyover">take the flyover</string>
+    <string name="nav_ramp">take the ramp</string>
+    <string name="nav_exit">take the exit</string>
+    <string name="nav_roundabout">at the roundabout, follow the route</string>
+    <string name="nav_roundabout_exit">at the roundabout, take exit %1$d</string>
+    <string name="nav_arrive">You have arrived</string>
+    <string name="nav_continue">Continue straight</string>
+    <string name="nav_in_distance">In %1$s, %2$s</string>
+    <string name="nav_now">Now, %1$s</string>
+    <string name="nav_distance_m">%1$d metres</string>
+    <string name="nav_distance_km">%1$s kilometres</string>
+    <string name="nav_speed_limit">Slow down, the limit is %1$d</string>
+    <string name="nav_speed_ease_off">Please ease off, you are still above the limit of %1$d</string>
 </resources>

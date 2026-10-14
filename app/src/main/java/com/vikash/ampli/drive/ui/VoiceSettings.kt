@@ -248,3 +248,55 @@ internal fun VoiceStyleCard(app: DriveApp) {
         }
     }
 }
+
+/**
+ * Settings › Haryanvi navigation prompts: Ampli speaks Google Maps' turns (desi lines in the
+ * Haryanvi voice style, plain Hindi/English otherwise). Needs notification access to read Maps'
+ * navigation notification; Maps' own voice should be muted so turns aren't said twice.
+ */
+@Composable
+internal fun NavPromptsCard(app: DriveApp) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val on by app.prefs.navPrompts.collectAsStateWithLifecycle()
+    val listening = com.vikash.ampli.drive.service.DriveNotificationListener.connected
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable { app.prefs.setNavPrompts(!on) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+            ) {
+                Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.nav_prompts_title), stringResource(R.string.nav_prompts_hint)) }
+                ThemedSwitch(on) { app.prefs.setNavPrompts(it) }
+            }
+            if (on) {
+                if (!listening) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+                        Text(
+                            stringResource(R.string.nav_prompts_need_access),
+                            color = theme.warning,
+                            fontSize = dims.t(2.4f, min = 13f),
+                            modifier = Modifier.weight(1f),
+                        )
+                        BigButton(text = stringResource(R.string.action_allow), onClick = { Launchers.openNotificationAccess(context) }, primary = true)
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+                    Text(
+                        stringResource(R.string.nav_prompts_mute_maps),
+                        color = theme.muted,
+                        fontSize = dims.t(2.4f, min = 13f),
+                        modifier = Modifier.weight(1f),
+                    )
+                    BigButton(
+                        text = stringResource(R.string.nav_prompts_open_maps),
+                        onClick = { Launchers.openPackage(context, Launchers.GOOGLE_MAPS) },
+                        primary = false,
+                    )
+                }
+            }
+        }
+    }
+}

@@ -243,6 +243,7 @@ fun SettingsScreen(
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
             VoiceStyleCard(app = app)
+            NavPromptsCard(app = app)
             CarStartCard(app = app)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             ToggleRow(

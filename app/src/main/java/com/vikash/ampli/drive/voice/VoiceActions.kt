@@ -39,6 +39,18 @@ object VoiceActions {
         return start(context, geo)
     }
 
+    /**
+     * Place search failed (no internet, server down): let Google Maps search [query] itself and
+     * start turn-by-turn to its best match.
+     */
+    fun startNavigationByName(context: Context, query: String): Boolean {
+        if (query.isBlank()) return false
+        val nav = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${Uri.encode(query)}&mode=d"))
+            .setPackage(Launchers.GOOGLE_MAPS)
+        if (start(context, nav)) return true
+        return start(context, Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=${Uri.encode(query)}")))
+    }
+
     // ---------------------------------------------------------------------------- Local music
 
     fun audioPermission(): String =

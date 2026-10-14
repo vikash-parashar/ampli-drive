@@ -314,6 +314,9 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
     val obd by app.obd.state.collectAsStateWithLifecycle()
     val autoStart by app.prefs.autoStart.collectAsStateWithLifecycle()
     val style by app.prefs.voiceStyle.collectAsStateWithLifecycle()
+    val navPrompts by app.prefs.navPrompts.collectAsStateWithLifecycle()
+    val navDebug by app.navPrompter.debug.collectAsStateWithLifecycle()
+    val navTurn by com.vikash.ampli.drive.nav.NavTurnRepository.turn.collectAsStateWithLifecycle()
     val now by androidx.compose.runtime.produceState(SystemClock.elapsedRealtime()) {
         while (true) {
             delay(1000)
@@ -381,6 +384,26 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                     null,
                 )
                 DiagRow("OBD (RPM)", obd.phase.name + (obd.rpm?.let { " · ${it.toInt()} rpm" } ?: ""), obd.phase == com.vikash.ampli.drive.obd.ObdState.Phase.Connected)
+            }
+            DiagSection("Navigation prompts") {
+                val listener = com.vikash.ampli.drive.service.DriveNotificationListener.connected
+                DiagRow("Prompts", "on=${yes(navPrompts)} · style ${style.key}", null)
+                DiagRow("Notification access", yes(listener), listener)
+                DiagRow("Maps navigating", yes(navTurn != null), null)
+                val d = navDebug
+                if (d == null) {
+                    DiagRow("Last Maps notification", "(none yet)", null)
+                } else {
+                    val wall = System.currentTimeMillis()
+                    DiagRow("Last Maps notification", "\"${d.title}\" / \"${d.text ?: "-"}\" · ${(wall - d.atMs) / 1000} s ago", null)
+                    DiagRow(
+                        "Parsed",
+                        d.parsed?.let { p -> p.maneuver.name + " · " + (p.distanceM?.let { "$it m" } ?: "no distance") + (p.exitNumber?.let { " · exit $it" } ?: "") }
+                            ?: "not recognised",
+                        d.parsed != null,
+                    )
+                    DiagRow("Last spoken", d.lastSpoken ?: "-", null)
+                }
             }
             DiagSection("Network") {
                 for ((url, result) in net) DiagRow(url.removePrefix("https://").substringBefore('/'), result, result.startsWith("HTTP 2") || result.startsWith("HTTP 3"))

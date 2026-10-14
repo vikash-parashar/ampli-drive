@@ -324,6 +324,9 @@ object VoiceIntents {
             "जाना है", "जाना", "ले चलो", "चलो", "ले चलें", "चलें", "पहुंचाओ", "पहुँचाओ", "रास्ता दिखाओ",
             "रास्ता", "नेविगेट करो", "नेविगेट", "jana hai", "jaana hai", "jana", "jaana", "le chalo",
             "chalo", "chalen", "rasta dikhao", "raasta dikhao", "rasta", "raasta", "pahunchao",
+            // Haryanvi: "Rohtak le chal", "Sonipat chalna sai", "Panipat jaana sai".
+            "ले चल", "ले चाल", "चलना है", "चालणा सै", "चलणा सै", "जाणा सै", "le chal", "le chaal",
+            "chalna hai", "chalna sai", "chalna se", "jaana sai", "jana sai", "jana se",
         ),
         play = listOf(
             "बजाओ", "बजा दो", "चलाओ", "चला दो", "सुनाओ", "लगाओ", "प्ले करो", "प्ले", "bajao", "baja do",

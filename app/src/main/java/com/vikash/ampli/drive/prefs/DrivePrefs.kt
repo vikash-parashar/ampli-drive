@@ -118,6 +118,18 @@ class DrivePrefs(context: Context) {
      * the default: it composes like any other view, so Compose clipping and glass layers can't
      * hide it, which is the likely cause of the blank white map on some head units.
      */
+    /**
+     * "Haryanvi navigation prompts": Ampli speaks Google Maps' next turn (read from its
+     * navigation notification) in the chosen voice style. Off by default.
+     */
+    private val _navPrompts = MutableStateFlow(sp.getBoolean(KEY_NAV_PROMPTS, false))
+    val navPrompts: StateFlow<Boolean> = _navPrompts.asStateFlow()
+
+    fun setNavPrompts(value: Boolean) {
+        sp.edit().putBoolean(KEY_NAV_PROMPTS, value).apply()
+        _navPrompts.value = value
+    }
+
     private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
     val mapTextureMode: StateFlow<Boolean> = _mapTextureMode.asStateFlow()
 
@@ -387,6 +399,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_LAST_MEDIA_PKG = "last_media_package"
         private const val KEY_VOICE_STYLE = "voice_style"
         private const val KEY_MAP_TEXTURE = "map_texture_mode"
+        private const val KEY_NAV_PROMPTS = "nav_prompts"
         private const val KEY_START_GREETED = "start_greeting_at"
         private const val KEY_START_GREET_PENDING = "start_greeting_pending"
         private const val KEY_BOOT_COUNT = "last_boot_count"

@@ -67,7 +67,7 @@ class HaryanviLinesTest {
 
     @Test
     fun familySafe() {
-        val banned = listOf("beti", "teri beti", "chod", "chutiya", "saala", "sala", "kamina", "kutta", "gaand", "lund", "randi", "harami", "bhosdi")
+        val banned = listOf("beti", "teri beti", "chod", "chutiya", "saala", "sala", "kamina", "kutta", "gaand", "gand", "lund", "randi", "harami", "bhosdi")
         for ((_, lines) in HaryanviLines.allLines) {
             for (l in lines) {
                 val words = l.roman.lowercase().split(Regex("[^a-z]+"))
