@@ -28,6 +28,9 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import com.vikash.ampli.drive.nav.route.LatLon
+import org.maplibre.android.location.LocationComponentConstants
+import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
@@ -43,6 +46,29 @@ const val GLANCE_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 const val GLANCE_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors"
 
 private const val FOLLOW_ZOOM = 15.5
+
+/** While navigating: closer, tilted, and the car low on the screen so more road ahead shows. */
+private const val NAV_ZOOM = 17.0
+private const val NAV_TILT = 45.0
+private const val NAV_CAR_FROM_TOP = 0.72
+private const val NAV_ANIM_MS = 700L
+private const val ROUTE_SOURCE = "ampli-route"
+private const val ROUTE_CASING = "ampli-route-casing"
+private const val ROUTE_LINE = "ampli-route-line"
+private const val EMPTY_FEATURES = """{"type":"FeatureCollection","features":[]}"""
+
+/** The route as one LineString feature (empty collection without a route). */
+internal fun routeGeoJson(points: List<LatLon>?): String {
+    if (points == null || points.size < 2) return EMPTY_FEATURES
+    val sb = StringBuilder(points.size * 24 + 96)
+    sb.append("""{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[""")
+    points.forEachIndexed { i, p ->
+        if (i > 0) sb.append(',')
+        sb.append('[').append(String.format(java.util.Locale.US, "%.6f,%.6f", p.lon, p.lat)).append(']')
+    }
+    sb.append("]}}]}")
+    return sb.toString()
+}
 private const val PARKED_SOURCE = "ampli-parked"
 private const val PARKED_LAYER = "ampli-parked-pin"
 private const val PARKED_ICON = "ampli-parked-icon"
@@ -111,6 +137,12 @@ fun GlanceMap(
     textureMode: Boolean = true,
     /** Nothing drawn [NO_FRAME_TIMEOUT_MS] after the map was made: the caller may try the other mode. */
     onNoFrames: () -> Unit = {},
+    /** In-app navigation route, drawn as a line; [routeKey] changes when the route does. */
+    route: List<LatLon>? = null,
+    routeKey: Int = 0,
+    routeColor: Int = puckColor,
+    /** Turn-by-turn camera: zoomed in, tilted, car low on the screen. */
+    navigating: Boolean = false,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -171,6 +203,9 @@ fun GlanceMap(
     LaunchedEffect(location) { holder.update(location) }
     LaunchedEffect(styleUrl, puckColor) { holder.setLook(styleUrl, puckColor) }
     LaunchedEffect(parked) { holder.setParked(parked) }
+    LaunchedEffect(routeKey, route == null) { holder.setRoute(routeGeoJson(route)) }
+    LaunchedEffect(routeColor) { holder.setRouteColor(routeColor) }
+    LaunchedEffect(navigating, mapView) { mapView.post { holder.setNavigating(navigating, mapView.height) } }
 
     AndroidView(factory = { mapView }, modifier = modifier)
 }
@@ -231,6 +266,10 @@ private class MapHolder(
     private var resumed = false
     private var destroyed = false
     private var parked: Pair<Double, Double>? = null
+    private var routeJson: String = EMPTY_FEATURES
+    private var routeColor: Int = puckColor
+    private var navigating = false
+    private var viewHeight = 0
 
     fun onMapReady(context: Context, map: MapLibreMap) {
         if (destroyed) return
@@ -326,7 +365,8 @@ private class MapHolder(
         try {
             map.setStyle(builder) { style ->
                 if (destroyed) return@setStyle
-                // A new style drops our own layers: put the parking pin back.
+                // A new style drops our own layers: put the route and the parking pin back.
+                addRouteLayers(style)
                 addParkedLayer(style)
                 // The location component re-adds its layers on every new style by itself.
                 if (!tracking) enableTracking(appContext, map, style) else recolourPuck(map)
@@ -343,6 +383,78 @@ private class MapHolder(
         val style = map?.style ?: return
         if (!style.isFullyLoaded) return
         (style.getSource(PARKED_SOURCE) as? GeoJsonSource)?.setGeoJson(parkedGeoJson(spot)) ?: addParkedLayer(style)
+    }
+
+    /** New route (or none). */
+    fun setRoute(json: String) {
+        routeJson = json
+        val style = map?.style ?: return
+        if (!style.isFullyLoaded) return
+        (style.getSource(ROUTE_SOURCE) as? GeoJsonSource)?.setGeoJson(json) ?: addRouteLayers(style)
+    }
+
+    fun setRouteColor(color: Int) {
+        if (color == routeColor) return
+        routeColor = color
+        try {
+            (map?.style?.getLayer(ROUTE_LINE) as? LineLayer)?.setProperties(PropertyFactory.lineColor(color))
+        } catch (_: Exception) {
+        }
+    }
+
+    /** The route line under the parking pin and the car, with a white casing so it reads on any map. */
+    private fun addRouteLayers(style: Style) {
+        try {
+            if (style.getSource(ROUTE_SOURCE) == null) style.addSource(GeoJsonSource(ROUTE_SOURCE, routeJson))
+            val below = when {
+                style.getLayer(PARKED_LAYER) != null -> PARKED_LAYER
+                style.getLayer(LocationComponentConstants.SHADOW_LAYER) != null -> LocationComponentConstants.SHADOW_LAYER
+                style.getLayer(LocationComponentConstants.ACCURACY_LAYER) != null -> LocationComponentConstants.ACCURACY_LAYER
+                else -> null
+            }
+            fun add(layer: LineLayer) = if (below != null) style.addLayerBelow(layer, below) else style.addLayer(layer)
+            if (style.getLayer(ROUTE_CASING) == null) {
+                add(
+                    LineLayer(ROUTE_CASING, ROUTE_SOURCE).withProperties(
+                        PropertyFactory.lineColor(COLOR_WHITE),
+                        PropertyFactory.lineWidth(13f),
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                    ),
+                )
+            }
+            if (style.getLayer(ROUTE_LINE) == null) {
+                add(
+                    LineLayer(ROUTE_LINE, ROUTE_SOURCE).withProperties(
+                        PropertyFactory.lineColor(routeColor),
+                        PropertyFactory.lineWidth(8f),
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                    ),
+                )
+            }
+        } catch (_: Exception) {
+            // Without the line the banner and voice still guide.
+        }
+    }
+
+    /** Turn-by-turn camera on or off. [heightPx] places the car low on the screen. */
+    fun setNavigating(on: Boolean, heightPx: Int) {
+        navigating = on
+        if (heightPx > 0) viewHeight = heightPx
+        val m = map ?: return
+        if (tracking) applyNavCamera(m) else pending?.let { moveTo(m, it) }
+    }
+
+    private fun applyNavCamera(map: MapLibreMap) {
+        try {
+            val lc = map.locationComponent
+            val top = if (navigating && viewHeight > 0) viewHeight * (2 * NAV_CAR_FROM_TOP - 1) else 0.0
+            lc.paddingWhileTracking(doubleArrayOf(0.0, top, 0.0, 0.0), NAV_ANIM_MS)
+            lc.zoomWhileTracking(if (navigating) NAV_ZOOM else FOLLOW_ZOOM, NAV_ANIM_MS)
+            lc.tiltWhileTracking(if (navigating) NAV_TILT else 0.0, NAV_ANIM_MS)
+        } catch (_: Exception) {
+        }
     }
 
     private fun addParkedLayer(style: Style) {
@@ -409,6 +521,7 @@ private class MapHolder(
             lc.setRenderMode(RenderMode.GPS)
             tracking = true
             pending?.let { lc.forceLocationUpdate(it) }
+            if (navigating) applyNavCamera(map)
         } catch (_: Exception) {
             // Without the puck the map still re-centres on each fix.
             tracking = false
@@ -418,7 +531,7 @@ private class MapHolder(
     private fun moveTo(map: MapLibreMap, location: Location) {
         val position = CameraPosition.Builder()
             .target(LatLng(location.latitude, location.longitude))
-            .zoom(FOLLOW_ZOOM)
+            .zoom(if (navigating) NAV_ZOOM else FOLLOW_ZOOM)
             .bearing(if (location.hasBearing()) location.bearing.toDouble() else 0.0)
             .build()
         map.moveCamera(CameraUpdateFactory.newCameraPosition(position))

@@ -35,6 +35,7 @@ Location is used on the unit. It is sent off the unit only in these cases:
 
 - **Open-Meteo** (api.open-meteo.com): your position and two points ahead on your route, to warn of storms, heavy rain or fog. No name, account or id.
 - **Photon** (photon.komoot.io, OpenStreetMap data): when you ask "Hey Ampli" for a place, the place name and your position (to find the nearest results).
+- **Routing server** (OSRM, OpenStreetMap data; during testing the OSRM project's public server router.project-osrm.org): when you navigate on the Ampli map, your position and the destination's coordinates, to work out the route. Sent again if you leave the route.
 - **OpenFreeMap** (tiles.openfreemap.org): map tiles for the area shown, as any map does.
 - **SOS**: only if you send it, your position goes in the SMS or message you send to your own contacts (see below).
 

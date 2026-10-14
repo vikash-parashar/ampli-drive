@@ -12,6 +12,7 @@ import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.cameras.CameraRepository
 import com.vikash.ampli.drive.i18n.AppLanguages
+import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.system.Launchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -328,6 +329,13 @@ class VoiceAssistant(private val app: DriveApp) {
         val pending = scope.async { runCatching { PlaceSearch.search(destination, here) } }
         styled(res, lang, HaryanviLines.Event.Searching, res.getString(R.string.voice_searching, destination), destination)
         val places = pending.await().getOrElse {
+            if (app.prefs.navApp.value == NavApp.Ampli) {
+                // Ampli map: show why on the navigation screen, with Try again and Google Maps.
+                app.navigator.failSearch(destination, network = true)
+                bringLauncherForward(MainActivity.VOICE_NAVIGATE)
+                say(res, lang, R.string.voice_search_failed)
+                return null
+            }
             // No place search (offline?): Google Maps searches the name itself.
             if (VoiceActions.startNavigationByName(app, destination)) {
                 styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, destination), destination)
@@ -369,6 +377,13 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private suspend fun navigateTo(place: Place, res: Context, lang: String) {
         _state.update { it.copy(options = emptyList()) }
+        if (app.prefs.navApp.value == NavApp.Ampli) {
+            // Car Hub's own map (Settings › Navigate with): the route loads while Ampli talks.
+            app.navigator.start(place)
+            bringLauncherForward(MainActivity.VOICE_NAVIGATE)
+            styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, place.name), place.name)
+            return
+        }
         styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, place.name), place.name)
         if (!VoiceActions.startNavigation(app, place)) say(res, lang, R.string.voice_nav_failed)
     }

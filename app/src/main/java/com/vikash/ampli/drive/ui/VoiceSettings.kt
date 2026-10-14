@@ -41,6 +41,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.VoiceActions
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.WakeModel
+import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.prefs.VoiceStyle
 
 /** Settings › Voice: the wake-word switch, its model download, and the permissions voice needs. */
@@ -244,6 +245,25 @@ internal fun VoiceStyleCard(app: DriveApp) {
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
                 Chip(stringResource(R.string.voice_style_standard), style == VoiceStyle.Standard, { app.prefs.setVoiceStyle(VoiceStyle.Standard) })
                 Chip(stringResource(R.string.voice_style_haryanvi), style == VoiceStyle.Haryanvi, { app.prefs.setVoiceStyle(VoiceStyle.Haryanvi) })
+            }
+        }
+    }
+}
+
+/**
+ * Settings › Navigate with: Car Hub's own map with turn-by-turn (default), or Google Maps. Voice
+ * destinations, the Navigate button and map taps follow this.
+ */
+@Composable
+internal fun NavigateWithCard(app: DriveApp) {
+    val dims = LocalDims.current
+    val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+            CardTitle(stringResource(R.string.nav_with_title), stringResource(R.string.nav_with_hint))
+            Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+                Chip(stringResource(R.string.nav_with_ampli), navApp == NavApp.Ampli, { app.prefs.setNavApp(NavApp.Ampli) })
+                Chip(stringResource(R.string.nav_with_google), navApp == NavApp.GoogleMaps, { app.prefs.setNavApp(NavApp.GoogleMaps) })
             }
         }
     }

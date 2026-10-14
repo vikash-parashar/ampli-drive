@@ -317,6 +317,9 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
     val navPrompts by app.prefs.navPrompts.collectAsStateWithLifecycle()
     val navDebug by app.navPrompter.debug.collectAsStateWithLifecycle()
     val navTurn by com.vikash.ampli.drive.nav.NavTurnRepository.turn.collectAsStateWithLifecycle()
+    val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
+    val inApp by app.navigator.state.collectAsStateWithLifecycle()
+    val navDiag by app.navigator.diagnostics.collectAsStateWithLifecycle()
     val now by androidx.compose.runtime.produceState(SystemClock.elapsedRealtime()) {
         while (true) {
             delay(1000)
@@ -385,6 +388,34 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 )
                 DiagRow("OBD (RPM)", obd.phase.name + (obd.rpm?.let { " · ${it.toInt()} rpm" } ?: ""), obd.phase == com.vikash.ampli.drive.obd.ObdState.Phase.Connected)
             }
+            DiagSection("Navigation") {
+                DiagRow("Navigate with", navApp.key, null)
+                DiagRow(
+                    "Routing server",
+                    navDiag.server + if (navDiag.demoServer) " (OSRM public demo: testing only)" else "",
+                    !navDiag.demoServer,
+                )
+                val wall = System.currentTimeMillis()
+                DiagRow(
+                    "Last route",
+                    navDiag.lastStatus + if (navDiag.lastAtMs > 0) " · ${(wall - navDiag.lastAtMs) / 1000} s ago · took ${navDiag.lastTookMs} ms" else "",
+                    if (navDiag.lastAtMs == 0L) null else !navDiag.lastStatus.startsWith("FAILED"),
+                )
+                DiagRow(
+                    "Route",
+                    "${navDiag.steps} steps · " + String.format(Locale.US, "%.1f km", navDiag.routeKm) +
+                        " · speed limits ${if (navDiag.hasSpeedLimits) "yes" else "none"}",
+                    null,
+                )
+                DiagRow("Off route / reroutes", "${navDiag.offRouteCount} / ${navDiag.rerouteCount}", null)
+                val p = inApp.progress
+                DiagRow(
+                    "Now",
+                    inApp.phase.name + (inApp.failure?.let { " · $it" } ?: "") +
+                        (p?.let { " · step ${it.stepIndex + 1} in ${it.distanceToStepM.toInt()} m · ${it.distanceFromRouteM.toInt()} m from line" } ?: ""),
+                    null,
+                )
+            }
             DiagSection("Navigation prompts") {
                 val listener = com.vikash.ampli.drive.service.DriveNotificationListener.connected
                 DiagRow("Prompts", "on=${yes(navPrompts)} · style ${style.key}", null)
@@ -417,6 +448,8 @@ private val NET_HOSTS = listOf(
     "https://tiles.openfreemap.org/styles/liberty",
     "https://tile.openstreetmap.org/0/0/0.png",
     "https://alphacephei.com/vosk/models/",
+    // In-app navigation routing (a tiny route in Delhi).
+    BuildConfig.ROUTING_BASE_URL.trimEnd('/') + "/route/v1/driving/77.2090,28.6139;77.2167,28.6200?overview=false",
 )
 
 /** One HTTPS request, so TLS (old CA store) and DNS problems show by name. */

@@ -23,6 +23,14 @@ android {
         val ownerApi = (System.getenv("OWNER_API_URL") ?: "").trim().replace("\"", "")
         buildConfigField("String", "OWNER_API_URL", "\"$ownerApi\"")
 
+        // In-app navigation routes (OSRM HTTP API). CI fills it from the ROUTING_BASE_URL
+        // repository variable. Without it, the OSRM project's public demo server is used, which is
+        // for TESTING ONLY (no SLA, ~1 request/s, not allowed for production apps): point this at
+        // your own OSRM server before release.
+        val routingBase = (System.getenv("ROUTING_BASE_URL") ?: "").trim().replace("\"", "")
+            .ifEmpty { "https://router.project-osrm.org" }
+        buildConfigField("String", "ROUTING_BASE_URL", "\"$routingBase\"")
+
         // Head units are ARM. Dropping the x86 MapLibre libraries keeps the APK much smaller.
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")

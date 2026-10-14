@@ -1,0 +1,168 @@
+package com.vikash.ampli.drive.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
+import com.vikash.ampli.drive.voice.Place
+import com.vikash.ampli.drive.voice.PlaceSearch
+import com.vikash.ampli.drive.voice.VoiceActions
+import kotlinx.coroutines.launch
+import java.util.Locale
+
+/**
+ * "Where to?": type a place (or tap the mic for "Hey Ampli"), pick one of the matches, and
+ * Car Hub's own navigation starts. Opened by the dock's Navigate button and by tapping the map
+ * when Settings › Navigate with is "Ampli map".
+ */
+@Composable
+fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val keyboard = LocalSoftwareKeyboardController.current
+    var query by remember { mutableStateOf("") }
+    var results by remember { mutableStateOf<List<Place>?>(null) }
+    var searching by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    var searched by remember { mutableStateOf("") }
+
+    fun search() {
+        val q = query.trim()
+        if (q.isEmpty() || searching) return
+        keyboard?.hide()
+        searching = true
+        failed = false
+        searched = q
+        scope.launch {
+            results = try {
+                PlaceSearch.search(q, app.speedTracker.state.value.location)
+            } catch (_: Exception) {
+                failed = true
+                null
+            }
+            searching = false
+        }
+    }
+
+    fun go(place: Place) {
+        // DriveRoot switches to the navigation screen when the navigator asks.
+        app.navigator.start(place)
+    }
+
+    Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.8f))) {
+        ScreenHeader(title = stringResource(R.string.nav_search_title), hint = stringResource(R.string.nav_search_hint), onBack = onBack)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it.take(120) },
+                label = { Text(stringResource(R.string.nav_search_field)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { search() }),
+                modifier = Modifier.weight(1f),
+            )
+            BigButton(text = stringResource(R.string.nav_search_button), onClick = { search() }, icon = Icons.Filled.Search)
+            BigButton(
+                text = stringResource(R.string.nav_search_speak),
+                onClick = {
+                    onBack()
+                    app.voice.start()
+                },
+                icon = Icons.Filled.Mic,
+                primary = false,
+            )
+        }
+        Column(
+            Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(dims.d(1.2f)),
+        ) {
+            val list = results
+            when {
+                searching -> Box(Modifier.fillMaxWidth().padding(dims.d(3f)), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = theme.accent)
+                }
+                failed -> SettingCard {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+                        Text(stringResource(R.string.nav_search_failed), color = theme.text, fontSize = dims.t(2.8f, min = 16f), modifier = Modifier.weight(1f))
+                        BigButton(text = stringResource(R.string.action_retry), onClick = { search() })
+                        BigButton(
+                            text = stringResource(R.string.nav_open_google),
+                            onClick = { VoiceActions.startNavigationByName(context, searched) },
+                            icon = Icons.Filled.Map,
+                            primary = false,
+                        )
+                    }
+                }
+                list != null && list.isEmpty() -> Text(
+                    stringResource(R.string.nav_search_none, searched),
+                    color = theme.muted,
+                    fontSize = dims.t(2.8f, min = 16f),
+                )
+                list != null -> list.forEach { place -> PlaceRow(place, onGo = { go(place) }) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaceRow(place: Place, onGo: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    SettingCard {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable(onClick = onGo),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+        ) {
+            Icon(Icons.Filled.Place, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(32.dp))
+            Column(Modifier.weight(1f)) {
+                Text(place.name, color = theme.text, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val sub = listOfNotNull(
+                    place.area,
+                    place.distanceKm?.let { String.format(Locale.getDefault(), "%.1f km", it) },
+                ).joinToString(" · ")
+                if (sub.isNotEmpty()) Text(sub, color = theme.muted, fontSize = dims.t(2.4f, min = 14f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            BigButton(text = stringResource(R.string.nav_go), onClick = onGo)
+        }
+    }
+}

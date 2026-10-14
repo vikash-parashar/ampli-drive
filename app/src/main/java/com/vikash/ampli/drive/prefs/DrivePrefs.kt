@@ -27,6 +27,16 @@ enum class VoiceStyle(val key: String) {
     }
 }
 
+/** Settings › Navigate with: Car Hub's own map (default) or Google Maps. */
+enum class NavApp(val key: String) {
+    Ampli("ampli"),
+    GoogleMaps("google_maps");
+
+    companion object {
+        fun from(key: String?): NavApp = entries.firstOrNull { it.key == key } ?: Ampli
+    }
+}
+
 /** Settings › When the car starts. */
 enum class AutoStartMode(val key: String) {
     Off("off"),
@@ -128,6 +138,15 @@ class DrivePrefs(context: Context) {
     fun setNavPrompts(value: Boolean) {
         sp.edit().putBoolean(KEY_NAV_PROMPTS, value).apply()
         _navPrompts.value = value
+    }
+
+    /** Where a destination is navigated to: Car Hub's own map (default) or Google Maps. */
+    private val _navApp = MutableStateFlow(NavApp.from(sp.getString(KEY_NAV_APP, null)))
+    val navApp: StateFlow<NavApp> = _navApp.asStateFlow()
+
+    fun setNavApp(value: NavApp) {
+        sp.edit().putString(KEY_NAV_APP, value.key).apply()
+        _navApp.value = value
     }
 
     private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
@@ -400,6 +419,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_VOICE_STYLE = "voice_style"
         private const val KEY_MAP_TEXTURE = "map_texture_mode"
         private const val KEY_NAV_PROMPTS = "nav_prompts"
+        private const val KEY_NAV_APP = "nav_app"
         private const val KEY_START_GREETED = "start_greeting_at"
         private const val KEY_START_GREET_PENDING = "start_greeting_pending"
         private const val KEY_BOOT_COUNT = "last_boot_count"

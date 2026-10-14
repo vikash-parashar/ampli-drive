@@ -50,6 +50,9 @@ enum class Screen {
 
     /** Settings › Voice › Check voice, and Settings › About › Diagnostics. */
     VoiceCheck, Diagnostics,
+
+    /** Car Hub's own turn-by-turn, and its "Where to?" search. */
+    Navigation, NavSearch,
 }
 
 @Composable
@@ -149,6 +152,8 @@ fun DriveRoot(
                                 onOpenCar = { onNavigate(Screen.Car) },
                                 onOpenParked = { onNavigate(Screen.Parked) },
                                 onRequestPermissions = onRequestPermissions,
+                                onOpenNavScreen = { onNavigate(Screen.Navigation) },
+                                onOpenNavSearch = { onNavigate(Screen.NavSearch) },
                             )
                             TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                             CarAlertHost(app = app)
@@ -247,6 +252,15 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }
                             DiagnosticsScreen(app = app, onBack = { onNavigate(Screen.Settings) })
                         }
+                        Screen.Navigation -> {
+                            // Back leaves the trip running; the home screen shows its card.
+                            BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            NavigationScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                        }
+                        Screen.NavSearch -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            NavSearchScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                        }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
@@ -276,6 +290,15 @@ fun DriveRoot(
                         )
                     }
                     BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
+                    // A trip started (voice, search, retry): show the navigation screen, unless the
+                    // SOS countdown is up.
+                    val navOpen by app.navigator.openRequest.collectAsStateWithLifecycle()
+                    LaunchedEffect(navOpen) {
+                        if (navOpen != 0) {
+                            app.navigator.consumeOpenRequest()
+                            if (screen != Screen.Crash && screen != Screen.Sos) onNavigate(Screen.Navigation)
+                        }
+                    }
                     // Settings opened from the Home dock returns to Home.
                     LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
                     // "Hey Ampli" sheet over whichever screen is showing.

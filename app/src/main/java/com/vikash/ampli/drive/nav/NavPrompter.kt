@@ -22,9 +22,10 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
- * Settings › Haryanvi navigation prompts. Car Hub hands navigation to Google Maps; this reads
- * Maps' next-turn notification (via [NavTurnRepository], filled by the notification listener),
- * and speaks each manoeuvre once ahead and once "abhi", in the Haryanvi desi voice style or, in
+ * Speaks navigation turns. Two sources: Car Hub's own turn-by-turn ([InAppNavigator], via
+ * [onInAppTurn]), and, with Settings › Haryanvi navigation prompts on while Google Maps is
+ * navigating, Maps' next-turn notification (via [NavTurnRepository], filled by the notification
+ * listener). Each manoeuvre is said once ahead and once "ib/abhi", in the Haryanvi desi voice style or, in
  * the Standard style, in plain Hindi/English. The [Speaker][com.vikash.ampli.drive.voice.Speaker]
  * ducks music while it talks. The line also shows under the floating speed bubble ([caption]).
  *
@@ -33,6 +34,8 @@ import java.util.Locale
 class NavPrompter(private val app: DriveApp) {
     private val scope = MainScope()
     private val planner = NavPromptPlanner()
+    /** Car Hub's own turn-by-turn ([InAppNavigator]): same timing, separate memory. */
+    private val inAppPlanner = NavPromptPlanner()
     private val nag = OverLimitNag()
     private val picker = LinePicker()
     private var started = false
@@ -63,9 +66,29 @@ class NavPrompter(private val app: DriveApp) {
             NavTurnRepository.turn.collect { onTurn(it) }
         }
         scope.launch {
-            combine(app.speedTracker.state, app.cameraAlerts.speedLimitKmh) { gps, limit -> gps.speedKmh to limit }
-                .collect { (speed, limit) -> onSpeed(speed, limit) }
+            combine(app.speedTracker.state, app.cameraAlerts.speedLimitKmh, app.navigator.state) { gps, cameraLimit, nav ->
+                // In-app navigation knows the posted limit from the route (OSRM maxspeed) when
+                // OpenStreetMap has it; otherwise the speed-camera database's limit is used.
+                val inApp = nav.phase == NavSession.Phase.Active
+                Triple(gps.speedKmh, (if (inApp) nav.progress?.limitKmh else null) ?: cameraLimit, inApp)
+            }.collect { (speed, limit, inApp) -> onSpeed(speed, limit, inApp) }
         }
+    }
+
+    /**
+     * The next manoeuvre of Car Hub's own navigation ([InAppNavigator]), null when it ends. Spoken
+     * whatever the "Haryanvi navigation prompts" switch says (that one is for Google Maps), unless
+     * the driver muted the navigation screen.
+     */
+    fun onInAppTurn(turn: ParsedTurn?) {
+        if (turn == null) {
+            inAppPlanner.reset()
+            return
+        }
+        val prompt = inAppPlanner.onTurn(turn) ?: return
+        _debug.value = Debug("in-app", turn.key, turn, _debug.value?.lastSpoken, System.currentTimeMillis())
+        if (app.navigator.muted.value) return
+        say { haryanvi -> if (haryanvi) desiText(prompt) else standardText(prompt) }
     }
 
     private fun onTurn(turn: NextTurn?) {
@@ -80,9 +103,11 @@ class NavPrompter(private val app: DriveApp) {
         say { haryanvi -> if (haryanvi) desiText(prompt) else standardText(prompt) }
     }
 
-    private fun onSpeed(speedKmh: Float?, limitKmh: Int?) {
+    private fun onSpeed(speedKmh: Float?, limitKmh: Int?, inApp: Boolean) {
         val prefs = app.prefs
-        if (!prefs.navPrompts.value || NavTurnRepository.turn.value == null) return
+        val mapsPrompts = prefs.navPrompts.value && NavTurnRepository.turn.value != null
+        val inAppPrompts = inApp && !app.navigator.muted.value
+        if (!mapsPrompts && !inAppPrompts) return
         val level = nag.onSpeed(SystemClock.elapsedRealtime(), speedKmh, limitKmh)
         if (level == OverLimitNag.Level.None) return
         // Pro camera voice alerts already say "slow down" near the camera.
