@@ -28,6 +28,12 @@ sealed interface VoiceIntent {
     /** "SOS", "help me", "emergency": opens the Help panel. Never sends anything by itself. */
     data object Sos : VoiceIntent
     data object Greeting : VoiceIntent
+
+    /** Car questions: "how many km to next service", "tyre pressure", "engine status", "where did I park". */
+    data object ServiceDue : VoiceIntent
+    data object TyrePressure : VoiceIntent
+    data object EngineStatus : VoiceIntent
+    data object WhereParked : VoiceIntent
     data object Cancel : VoiceIntent
     data class Unknown(val text: String) : VoiceIntent
 }
@@ -57,6 +63,7 @@ object VoiceIntents {
         if (kw.pause.any { has(t, it) }) return VoiceIntent.Pause
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
+        carQuestion(t)?.let { return it }
         if (kw.camera.any { has(t, it) }) return VoiceIntent.NextCamera
         if (kw.auto.any { has(t, it) }) return VoiceIntent.OpenAndroidAuto
         if (kw.next.any { has(t, it) } && (words <= 4 || kw.music.any { has(t, it) })) return VoiceIntent.Next
@@ -83,6 +90,43 @@ object VoiceIntents {
         if (words <= 6 && kw.greeting.any { has(t, it) }) return VoiceIntent.Greeting
         return VoiceIntent.Unknown(text.trim())
     }
+
+    /**
+     * Car questions, English and Hindi (any app language). Checked before "navigate", because
+     * "find my car" and "where is my car" would otherwise start a place search.
+     */
+    private fun carQuestion(t: String): VoiceIntent? = when {
+        CAR_PARKED.any { has(t, it) } -> VoiceIntent.WhereParked
+        CAR_SERVICE.any { has(t, it) } -> VoiceIntent.ServiceDue
+        CAR_TYRES.any { has(t, it) } -> VoiceIntent.TyrePressure
+        CAR_ENGINE.any { has(t, it) } -> VoiceIntent.EngineStatus
+        else -> null
+    }
+
+    private val CAR_PARKED = listOf(
+        "where did i park", "where have i parked", "where is my car", "where s my car", "find my car",
+        "my parked car", "parking spot", "where i parked",
+        "गाड़ी कहाँ", "गाड़ी कहां", "गाडी कहाँ", "गाडी कहां", "कार कहाँ", "कार कहां", "कहाँ पार्क", "कहां पार्क",
+        "gaadi kahan", "gadi kahan", "gaadi kaha", "gadi kaha", "car kahan", "car kaha", "kahan park", "kaha park",
+    ).map { normalize(it) }
+
+    private val CAR_SERVICE = listOf(
+        "next service", "service due", "km to service", "kilometres to service", "kilometers to service",
+        "when is the service", "when is service", "service kab", "agli service", "next servicing",
+        "अगली सर्विस", "सर्विस कब", "सर्विसिंग कब",
+    ).map { normalize(it) }
+
+    private val CAR_TYRES = listOf(
+        "tyre pressure", "tire pressure", "tyre pressures", "tire pressures", "check the tyres", "check tyres",
+        "how are my tyres", "how are the tyres", "air in the tyres",
+        "टायर प्रेशर", "टायर में हवा", "टायरों में हवा", "टायर कैसे", "tyre me hawa", "tyre mein hawa", "tayar me hawa",
+    ).map { normalize(it) }
+
+    private val CAR_ENGINE = listOf(
+        "engine status", "engine health", "check engine", "engine light", "engine problem", "engine temperature",
+        "how is the engine", "fault code", "fault codes", "obd",
+        "इंजन कैसा", "इंजन की हालत", "इंजन स्टेटस", "इंजन ठीक", "engine kaisa", "engine ki halat", "engine theek",
+    ).map { normalize(it) }
 
     /** The place name in a free answer such as "Phoenix Mall please" after "Where to?". */
     fun destinationFrom(text: String, language: String = "en"): String {
