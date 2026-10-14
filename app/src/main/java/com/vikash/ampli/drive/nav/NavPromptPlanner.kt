@@ -78,29 +78,36 @@ class NavPromptPlanner {
 }
 
 /**
- * "Slow down" while navigating: speaks when the speed stays above the known limit (+[MARGIN_KMH])
- * for [HOLD_MS], then waits [COOLDOWN_MS] before saying it again. Plain Kotlin, unit-tested.
+ * "Slow down" while navigating: [Level.SlowDown] when the speed stays above the known limit
+ * (+[MARGIN_KMH]) for [HOLD_MS]; if the driver is still over it [EASE_OFF_AFTER_MS] later without
+ * having slowed down, [Level.EaseOff] ("chhod de bhai, race chhod de"). After slowing down, a
+ * new warning waits [COOLDOWN_MS]. Plain Kotlin, unit-tested.
  */
 class OverLimitNag {
+    enum class Level { None, SlowDown, EaseOff }
+
     private var overSinceMs = -1L
     private var lastSaidMs = -1L
 
-    /** True when the slow-down line should be spoken now. */
-    fun onSpeed(nowMs: Long, speedKmh: Float?, limitKmh: Int?): Boolean {
+    fun onSpeed(nowMs: Long, speedKmh: Float?, limitKmh: Int?): Level {
         if (speedKmh == null || limitKmh == null || limitKmh <= 0 || speedKmh <= limitKmh + MARGIN_KMH) {
             overSinceMs = -1L
-            return false
+            return Level.None
         }
         if (overSinceMs < 0) overSinceMs = nowMs
-        if (nowMs - overSinceMs < HOLD_MS) return false
-        if (lastSaidMs >= 0 && nowMs - lastSaidMs < COOLDOWN_MS) return false
+        if (nowMs - overSinceMs < HOLD_MS) return Level.None
+        // Over the limit without a break since the last warning: the stronger line.
+        val sustained = lastSaidMs >= 0 && overSinceMs <= lastSaidMs
+        val wait = if (sustained) EASE_OFF_AFTER_MS else COOLDOWN_MS
+        if (lastSaidMs >= 0 && nowMs - lastSaidMs < wait) return Level.None
         lastSaidMs = nowMs
-        return true
+        return if (sustained) Level.EaseOff else Level.SlowDown
     }
 
     companion object {
         const val MARGIN_KMH = 3
         const val HOLD_MS = 3_000L
+        const val EASE_OFF_AFTER_MS = 30_000L
         const val COOLDOWN_MS = 60_000L
     }
 }

@@ -669,4 +669,5 @@
     <string name="nav_distance_m">%1$d metres</string>
     <string name="nav_distance_km">%1$s kilometres</string>
     <string name="nav_speed_limit">Slow down, the limit is %1$d</string>
+    <string name="nav_speed_ease_off">Please ease off, you are still above the limit of %1$d</string>
 </resources>

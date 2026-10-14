@@ -658,4 +658,5 @@
     <string name="nav_distance_m">%1$d मीटर</string>
     <string name="nav_distance_km">%1$s किलोमीटर</string>
     <string name="nav_speed_limit">स्पीड कम करें, सीमा %1$d है</string>
+    <string name="nav_speed_ease_off">कृपया स्पीड कम करें, आप अब भी %1$d की सीमा से ऊपर हैं</string>
 </resources>

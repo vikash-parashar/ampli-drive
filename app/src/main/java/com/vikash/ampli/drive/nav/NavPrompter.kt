@@ -83,15 +83,18 @@ class NavPrompter(private val app: DriveApp) {
     private fun onSpeed(speedKmh: Float?, limitKmh: Int?) {
         val prefs = app.prefs
         if (!prefs.navPrompts.value || NavTurnRepository.turn.value == null) return
-        if (!nag.onSpeed(SystemClock.elapsedRealtime(), speedKmh, limitKmh)) return
+        val level = nag.onSpeed(SystemClock.elapsedRealtime(), speedKmh, limitKmh)
+        if (level == OverLimitNag.Level.None) return
         // Pro camera voice alerts already say "slow down" near the camera.
         if (prefs.pro.value.isPro && prefs.cameraVoice.value && prefs.cameraAlerts.value) return
         val limit = limitKmh ?: return
         say { haryanvi ->
             if (haryanvi) {
-                desiLine(HaryanviLines.Event.SpeedLimit, limit)
+                val event = if (level == OverLimitNag.Level.EaseOff) HaryanviLines.Event.SpeedEaseOff else HaryanviLines.Event.SpeedLimit
+                desiLine(event, limit)
             } else {
-                Spoken(localized().getString(R.string.nav_speed_limit, limit), language())
+                val id = if (level == OverLimitNag.Level.EaseOff) R.string.nav_speed_ease_off else R.string.nav_speed_limit
+                Spoken(localized().getString(id, limit), language())
             }
         }
     }

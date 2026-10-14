@@ -89,22 +89,34 @@ class NavPromptPlannerTest {
     @Test
     fun overLimitNagHoldsAndCoolsDown() {
         val n = OverLimitNag()
-        assertFalse(n.onSpeed(0, 70f, 60))
-        assertFalse(n.onSpeed(2_000, 70f, 60))
-        assertTrue(n.onSpeed(3_000, 70f, 60))
-        assertFalse(n.onSpeed(10_000, 70f, 60))
-        assertFalse(n.onSpeed(40_000, 55f, 60))
-        assertFalse(n.onSpeed(70_000, 70f, 60))
-        assertTrue(n.onSpeed(73_500, 70f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(0, 70f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(2_000, 70f, 60))
+        assertEquals(OverLimitNag.Level.SlowDown, n.onSpeed(3_000, 70f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(10_000, 70f, 60))
+        // Slowed down, then over again: a fresh warning only after the cooldown.
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(40_000, 55f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(50_000, 70f, 60))
+        assertEquals(OverLimitNag.Level.SlowDown, n.onSpeed(63_000, 70f, 60))
+    }
+
+    @Test
+    fun sustainedOverspeedEasesOff() {
+        val n = OverLimitNag()
+        n.onSpeed(0, 80f, 60)
+        assertEquals(OverLimitNag.Level.SlowDown, n.onSpeed(3_000, 80f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(20_000, 80f, 60))
+        assertEquals(OverLimitNag.Level.EaseOff, n.onSpeed(33_000, 80f, 60))
+        assertEquals(OverLimitNag.Level.None, n.onSpeed(50_000, 80f, 60))
+        assertEquals(OverLimitNag.Level.EaseOff, n.onSpeed(63_000, 80f, 60))
     }
 
     @Test
     fun overLimitNagIgnoresSmallOverAndUnknownLimit() {
         val n = OverLimitNag()
         for (t in 0L..20_000L step 1000) {
-            assertFalse(n.onSpeed(t, 62f, 60))
-            assertFalse(n.onSpeed(t, 90f, null))
-            assertFalse(n.onSpeed(t, null, 60))
+            assertEquals(OverLimitNag.Level.None, n.onSpeed(t, 62f, 60))
+            assertEquals(OverLimitNag.Level.None, n.onSpeed(t, 90f, null))
+            assertEquals(OverLimitNag.Level.None, n.onSpeed(t, null, 60))
         }
     }
 }
