@@ -7,6 +7,7 @@ import android.os.LocaleList
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.i18n.AppLanguages
+import com.vikash.ampli.drive.voice.HaryanviLines
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,26 +79,42 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
         if (!prefs.pro.value.isPro || !prefs.cameraVoice.value) return
         val lang = AppLanguages.current(app, prefs.language.value)
         val res = localized(lang)
-        val lines = ArrayList<String>(2)
-        var beep = false
-        for (e in events) {
-            when (e) {
-                is CameraAlertEngine.Event.Announce -> lines += if (e.camera.maxspeed != null) {
-                    res.getString(R.string.camera_voice_ahead, e.roundedMeters, e.camera.maxspeed)
-                } else {
-                    res.getString(R.string.camera_voice_ahead_nolimit, e.roundedMeters)
-                }
-                is CameraAlertEngine.Event.SlowDown -> lines += res.getString(R.string.camera_voice_slow_down)
-                is CameraAlertEngine.Event.Beep -> beep = true
-                is CameraAlertEngine.Event.Cleared -> Unit
-            }
-        }
-        if (lines.isEmpty() && !beep) return
         val old = speech
         speech = scope.launch {
             old?.join()
+            val lines = ArrayList<String>(2)
+            var beep = false
+            var speakLang = lang
+            for (e in events) {
+                // Haryanvi desi style (Settings › Voice style): the same alert in desi words.
+                val desi = when (e) {
+                    is CameraAlertEngine.Event.Announce -> if (e.camera.maxspeed != null) {
+                        app.desi.line(HaryanviLines.Event.CameraAhead, e.roundedMeters, e.camera.maxspeed ?: 0)
+                    } else {
+                        app.desi.line(HaryanviLines.Event.CameraAheadNoLimit, e.roundedMeters)
+                    }
+                    is CameraAlertEngine.Event.SlowDown -> app.desi.line(HaryanviLines.Event.OverSpeed)
+                    else -> null
+                }
+                if (desi != null) {
+                    lines += desi.text
+                    speakLang = desi.language
+                    continue
+                }
+                when (e) {
+                    is CameraAlertEngine.Event.Announce -> lines += if (e.camera.maxspeed != null) {
+                        res.getString(R.string.camera_voice_ahead, e.roundedMeters, e.camera.maxspeed)
+                    } else {
+                        res.getString(R.string.camera_voice_ahead_nolimit, e.roundedMeters)
+                    }
+                    is CameraAlertEngine.Event.SlowDown -> lines += res.getString(R.string.camera_voice_slow_down)
+                    is CameraAlertEngine.Event.Beep -> beep = true
+                    is CameraAlertEngine.Event.Cleared -> Unit
+                }
+            }
+            if (lines.isEmpty() && !beep) return@launch
             if (beep) app.speaker.alertBeep()
-            if (lines.isNotEmpty()) app.speaker.say(lines.joinToString(" "), lang)
+            if (lines.isNotEmpty()) app.speaker.say(lines.joinToString(" "), speakLang)
         }
     }
 

@@ -17,6 +17,51 @@ data class ThemeChoice(
     val fixedId: String,
 )
 
+/** How Car Hub talks. [Haryanvi] swaps the playful lines for desi ones; safety prompts never change. */
+enum class VoiceStyle(val key: String) {
+    Standard("standard"),
+    Haryanvi("haryanvi");
+
+    companion object {
+        fun from(key: String?): VoiceStyle = entries.firstOrNull { it.key == key } ?: Standard
+    }
+}
+
+/** Settings › When the car starts. */
+enum class AutoStartMode(val key: String) {
+    Off("off"),
+
+    /** Open the phone-mirroring app (ZLink, AutoKit, Android Auto…). */
+    Mirror("mirror"),
+
+    /** Start music, then open the navigation app (Google Maps resumes its route). */
+    MapsMusic("maps_music");
+
+    companion object {
+        fun from(key: String?): AutoStartMode = entries.firstOrNull { it.key == key } ?: Off
+    }
+}
+
+data class AutoStartSettings(
+    val mode: AutoStartMode = AutoStartMode.Off,
+    /** Null: the best match by label/package (see AppMatch, role Mirror). */
+    val mirrorPackage: String? = null,
+    /** Null: Google Maps, else the best navigation-app match. */
+    val navPackage: String? = null,
+    /** Wait after boot / ignition so the unit settles (Wi-Fi, Bluetooth, audio). */
+    val delaySec: Int = DEFAULT_DELAY_S,
+    /** Maps + music: bring Car Hub back after this many seconds; 0 leaves the map in front. */
+    val returnAfterSec: Int = 0,
+    /** Also run when this Bluetooth phone connects (its name); null = boot and ignition only. */
+    val btDeviceName: String? = null,
+) {
+    companion object {
+        const val DEFAULT_DELAY_S = 8
+        val DELAY_CHOICES = listOf(3, 8, 15, 30)
+        val RETURN_CHOICES = listOf(0, 10, 30)
+    }
+}
+
 /** Pro entitlement. [purchased] is the cached Play Billing result; [testUnlock] only counts in debug builds. */
 data class ProState(val purchased: Boolean, val testUnlock: Boolean) {
     val isPro: Boolean get() = purchased || (BuildConfig.DEBUG && testUnlock)
@@ -50,6 +95,91 @@ class DrivePrefs(context: Context) {
     /** Package the dock's "Auto" button opens (a phone-link app such as ZLink), or null. */
     private val _autoPackage = MutableStateFlow(sp.getString(KEY_AUTO_PKG, null))
     val autoPackage: StateFlow<String?> = _autoPackage.asStateFlow()
+
+    /** Package the dock's Music button opens, picked by the driver; null means "work it out". */
+    private val _musicPackage = MutableStateFlow(sp.getString(KEY_MUSIC_PKG, null))
+    val musicPackage: StateFlow<String?> = _musicPackage.asStateFlow()
+
+    /** Package the dock's Phone button (and Help-panel calls) open, picked by the driver; null = automatic. */
+    private val _phonePackage = MutableStateFlow(sp.getString(KEY_PHONE_PKG, null))
+    val phonePackage: StateFlow<String?> = _phonePackage.asStateFlow()
+
+    /** The last app seen with an active media session, for the Music button when nothing plays now. */
+    var lastMediaPackage: String?
+        get() = sp.getString(KEY_LAST_MEDIA_PKG, null)
+        set(value) { if (value != lastMediaPackage) sp.edit().putString(KEY_LAST_MEDIA_PKG, value).apply() }
+
+    /** "Voice style": standard, or the playful Haryanvi desi pack (free, off by default). */
+    private val _voiceStyle = MutableStateFlow(VoiceStyle.from(sp.getString(KEY_VOICE_STYLE, null)))
+    val voiceStyle: StateFlow<VoiceStyle> = _voiceStyle.asStateFlow()
+
+    /**
+     * Draw the glance map into a TextureView (true) or a GLSurfaceView (false). TextureView is
+     * the default: it composes like any other view, so Compose clipping and glass layers can't
+     * hide it, which is the likely cause of the blank white map on some head units.
+     */
+    private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
+    val mapTextureMode: StateFlow<Boolean> = _mapTextureMode.asStateFlow()
+
+    /** When the car-start actions (greeting, auto start) last ran (wall clock), so they run once per start. */
+    var lastCarStartAt: Long
+        get() = sp.getLong(KEY_START_GREETED, 0L)
+        set(value) { sp.edit().putLong(KEY_START_GREETED, value).apply() }
+
+    /** Set by the boot receiver; the launcher runs the car-start actions when it shows. */
+    var carStartPending: Boolean
+        get() = sp.getBoolean(KEY_START_GREET_PENDING, false)
+        set(value) { sp.edit().putBoolean(KEY_START_GREET_PENDING, value).apply() }
+
+    /** Settings.Global.BOOT_COUNT seen last time, to notice a reboot without a boot broadcast. */
+    var lastBootCount: Int
+        get() = sp.getInt(KEY_BOOT_COUNT, -1)
+        set(value) { sp.edit().putInt(KEY_BOOT_COUNT, value).apply() }
+
+    /** Settings › When the car starts. Off by default. */
+    private val _autoStart = MutableStateFlow(readAutoStart())
+    val autoStart: StateFlow<AutoStartSettings> = _autoStart.asStateFlow()
+
+    fun setAutoStart(value: AutoStartSettings) {
+        sp.edit()
+            .putString(KEY_AS_MODE, value.mode.key)
+            .putString(KEY_AS_MIRROR, value.mirrorPackage)
+            .putString(KEY_AS_NAV, value.navPackage)
+            .putInt(KEY_AS_DELAY, value.delaySec)
+            .putInt(KEY_AS_RETURN, value.returnAfterSec)
+            .putString(KEY_AS_BT, value.btDeviceName)
+            .apply()
+        _autoStart.value = value
+    }
+
+    private fun readAutoStart() = AutoStartSettings(
+        mode = AutoStartMode.from(sp.getString(KEY_AS_MODE, null)),
+        mirrorPackage = sp.getString(KEY_AS_MIRROR, null),
+        navPackage = sp.getString(KEY_AS_NAV, null),
+        delaySec = sp.getInt(KEY_AS_DELAY, AutoStartSettings.DEFAULT_DELAY_S),
+        returnAfterSec = sp.getInt(KEY_AS_RETURN, 0),
+        btDeviceName = sp.getString(KEY_AS_BT, null),
+    )
+
+    fun setMusicPackage(pkg: String?) {
+        sp.edit().putString(KEY_MUSIC_PKG, pkg).apply()
+        _musicPackage.value = pkg
+    }
+
+    fun setPhonePackage(pkg: String?) {
+        sp.edit().putString(KEY_PHONE_PKG, pkg).apply()
+        _phonePackage.value = pkg
+    }
+
+    fun setVoiceStyle(style: VoiceStyle) {
+        sp.edit().putString(KEY_VOICE_STYLE, style.key).apply()
+        _voiceStyle.value = style
+    }
+
+    fun setMapTextureMode(value: Boolean) {
+        sp.edit().putBoolean(KEY_MAP_TEXTURE, value).apply()
+        _mapTextureMode.value = value
+    }
 
     /** "Always listen for Hey Ampli": off by default; VoiceService runs only while this is on. */
     private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
@@ -252,6 +382,20 @@ class DrivePrefs(context: Context) {
         private const val KEY_BG_DISCLOSURE = "disclosure_background_location"
         private const val KEY_MIC_DISCLOSURE = "disclosure_microphone"
         private const val KEY_INSTALL_ID = "install_id"
+        private const val KEY_MUSIC_PKG = "music_package"
+        private const val KEY_PHONE_PKG = "phone_package"
+        private const val KEY_LAST_MEDIA_PKG = "last_media_package"
+        private const val KEY_VOICE_STYLE = "voice_style"
+        private const val KEY_MAP_TEXTURE = "map_texture_mode"
+        private const val KEY_START_GREETED = "start_greeting_at"
+        private const val KEY_START_GREET_PENDING = "start_greeting_pending"
+        private const val KEY_BOOT_COUNT = "last_boot_count"
+        private const val KEY_AS_MODE = "autostart_mode"
+        private const val KEY_AS_MIRROR = "autostart_mirror_package"
+        private const val KEY_AS_NAV = "autostart_nav_package"
+        private const val KEY_AS_DELAY = "autostart_delay_s"
+        private const val KEY_AS_RETURN = "autostart_return_s"
+        private const val KEY_AS_BT = "autostart_bt_device"
 
         const val WAKE_SENS_DEFAULT = 3
 

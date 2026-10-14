@@ -67,4 +67,36 @@ class ThemeAccessTest {
         assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_DAY))
         assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_NIGHT))
     }
+
+    /** Head-unit report: with Pro on, picking a Pro theme must change the theme on screen. */
+    @Test
+    fun proSelectionShowsInFixedMode() {
+        val fixed = ThemeChoice(auto = false, dayId = DrivePrefs.DEFAULT_DAY, nightId = DrivePrefs.DEFAULT_NIGHT, fixedId = DrivePrefs.DEFAULT_NIGHT)
+        for (night in listOf(false, true)) {
+            val picked = ThemeAccess.select(fixed, "cyan_glass", forNight = night)
+            assertEquals("cyan_glass", ThemeAccess.resolveId(picked, night = night, isPro = true, known = known))
+        }
+    }
+
+    @Test
+    fun proSelectionShowsInAutoModeForTheSlotShowingNow() {
+        val auto = ThemeChoice(auto = true, dayId = DrivePrefs.DEFAULT_DAY, nightId = DrivePrefs.DEFAULT_NIGHT, fixedId = "")
+        for (night in listOf(false, true)) {
+            // The picker's chip points at the slot showing now.
+            val picked = ThemeAccess.select(auto, "cyan_glass", forNight = night)
+            assertEquals("cyan_glass", ThemeAccess.resolveId(picked, night = night, isPro = true, known = known))
+            // And the other slot keeps its own theme.
+            assertEquals(
+                if (night) DrivePrefs.DEFAULT_DAY else DrivePrefs.DEFAULT_NIGHT,
+                ThemeAccess.resolveId(picked, night = !night, isPro = true, known = known),
+            )
+        }
+    }
+
+    @Test
+    fun proSelectionWithoutProFallsBack() {
+        val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = DrivePrefs.DEFAULT_NIGHT)
+        val picked = ThemeAccess.select(fixed, "cyan_glass", forNight = true)
+        assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(picked, night = true, isPro = false, known = known))
+    }
 }

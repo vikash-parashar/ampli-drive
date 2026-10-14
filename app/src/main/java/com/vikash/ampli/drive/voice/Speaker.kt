@@ -68,6 +68,19 @@ class Speaker(context: Context) {
         return engine
     }
 
+    /** True when a TTS engine started and has a voice for [locale] (any country variant counts). */
+    suspend fun hasVoice(locale: Locale): Boolean {
+        val engine = engine(localeFor ?: "") ?: return false
+        return try {
+            engine.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** False when no TTS engine answered; the caller can then keep text on screen longer. */
+    suspend fun isAvailable(): Boolean = engine(localeFor ?: "") != null
+
     private fun finish(id: String?) {
         // Called on a TTS binder thread; CompletableDeferred is thread-safe.
         synchronized(pending) { pending.remove(id ?: return) }?.complete(Unit)
@@ -76,7 +89,11 @@ class Speaker(context: Context) {
     /** Speaks [text] and returns when it has finished (or after a safety timeout). */
     suspend fun say(text: String, appLanguage: String) {
         if (text.isBlank()) return
-        val engine = engine(appLanguage) ?: return
+        val engine = engine(appLanguage) ?: run {
+            // No TTS engine on this unit: leave the reply on screen long enough to read it.
+            delay(2_500L + text.length * 50L)
+            return
+        }
         val id = UUID.randomUUID().toString()
         val done = CompletableDeferred<Unit>()
         synchronized(pending) { pending[id] = done }

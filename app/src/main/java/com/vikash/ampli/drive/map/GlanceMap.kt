@@ -96,7 +96,8 @@ private val COLOR_WHITE: Int = 0xFFFFFFFF.toInt()
 /**
  * MapLibre glance map that follows [location]. Call it only once a first fix exists, so the
  * map never opens zoomed out on a country view. [styleUrl] and [puckColor] follow the
- * home-screen theme; a style that fails to load falls back to [GLANCE_STYLE_URL].
+ * home-screen theme; a style that fails to load falls back to [GLANCE_STYLE_URL], and when that
+ * fails or is too slow too, to a basic OpenStreetMap raster map ([BASIC_STYLE_JSON]).
  */
 @Composable
 fun GlanceMap(
@@ -106,20 +107,45 @@ fun GlanceMap(
     puckColor: Int = 0xFFE11D48.toInt(),
     /** Where the car is parked (lat, lon): drawn as a "P" pin. */
     parked: Pair<Double, Double>? = null,
+    /** Draw through a TextureView (true) or a GLSurfaceView (false); see DrivePrefs.mapTextureMode. */
+    textureMode: Boolean = true,
+    /** Nothing drawn [NO_FRAME_TIMEOUT_MS] after the map was made: the caller may try the other mode. */
+    onNoFrames: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val holder = remember { MapHolder(context.applicationContext, styleUrl, puckColor) }
-    val mapView = remember {
+    val holder = remember(textureMode) { MapHolder(context.applicationContext, styleUrl, puckColor) }
+    val mapView = remember(textureMode) {
         MapLibre.getInstance(context.applicationContext)
+        MapLogs.install()
+        MapDiagnostics.update { MapStatus(textureMode = textureMode, phase = MapStatus.Phase.NotStarted) }
         val options = MapLibreMapOptions.createFromAttributes(context)
             .attributionEnabled(false)
             .logoEnabled(false)
+            // TextureView composes like a normal view: Compose clips and glass layers can't hide it.
+            .textureMode(textureMode)
         MapView(context, options).also { view ->
             view.onCreate(null)
             view.setMaximumFps(MAX_FPS)
-            view.addOnDidFailLoadingMapListener { _ -> holder.onStyleFailed() }
+            view.addOnDidFailLoadingMapListener { message ->
+                MapDiagnostics.error("Style failed: $message")
+                holder.onStyleFailed()
+            }
+            view.addOnDidFinishLoadingStyleListener { holder.onStyleLoaded() }
+            view.addOnDidFinishLoadingMapListener { MapDiagnostics.update { it.copy(phase = MapStatus.Phase.MapLoaded) } }
+            view.addOnDidFinishRenderingMapListener { _ ->
+                if (!MapDiagnostics.status.value.drewFrame) MapDiagnostics.update { it.copy(drewFrame = true) }
+            }
             view.getMapAsync { map -> holder.onMapReady(context, map) }
+        }
+    }
+
+    // GL trouble: some head-unit GPUs draw nothing in one of the two surface types.
+    LaunchedEffect(mapView) {
+        kotlinx.coroutines.delay(NO_FRAME_TIMEOUT_MS)
+        if (!MapDiagnostics.status.value.drewFrame) {
+            MapDiagnostics.error("No map frame drawn in ${NO_FRAME_TIMEOUT_MS / 1000} s (textureMode=$textureMode)")
+            onNoFrames()
         }
     }
 
@@ -147,6 +173,48 @@ fun GlanceMap(
     LaunchedEffect(parked) { holder.setParked(parked) }
 
     AndroidView(factory = { mapView }, modifier = modifier)
+}
+
+/** Nothing drawn this long after the map view was made: try the other surface type once. */
+const val NO_FRAME_TIMEOUT_MS = 20_000L
+
+/** The vector style must load within this long, or the basic raster map takes over. */
+private const val STYLE_TIMEOUT_MS = 10_000L
+
+/** After the style loads, tiles that keep failing for this long also switch to the basic map. */
+private const val TILES_TIMEOUT_MS = 15_000L
+
+/**
+ * Routes MapLibre's own log (tile and style HTTP errors, shader errors) to logcat under
+ * [MapDiagnostics.TAG] and counts warnings and errors for Settings › About › Diagnostics.
+ */
+private object MapLogs : org.maplibre.android.log.LoggerDefinition {
+    private var installed = false
+
+    fun install() {
+        if (installed) return
+        installed = true
+        try {
+            org.maplibre.android.log.Logger.setLoggerDefinition(this)
+            org.maplibre.android.log.Logger.setVerbosity(org.maplibre.android.log.Logger.WARN)
+        } catch (_: Throwable) {
+        }
+    }
+
+    private fun record(tag: String, msg: String, tr: Throwable?) {
+        MapDiagnostics.error("$tag: $msg" + (tr?.let { " (${it.javaClass.simpleName}: ${it.message})" } ?: ""))
+    }
+
+    override fun v(tag: String, msg: String) = Unit
+    override fun v(tag: String, msg: String, tr: Throwable) = Unit
+    override fun d(tag: String, msg: String) = Unit
+    override fun d(tag: String, msg: String, tr: Throwable) = Unit
+    override fun i(tag: String, msg: String) = Unit
+    override fun i(tag: String, msg: String, tr: Throwable) = Unit
+    override fun w(tag: String, msg: String) = record(tag, msg, null)
+    override fun w(tag: String, msg: String, tr: Throwable) = record(tag, msg, tr)
+    override fun e(tag: String, msg: String) = record(tag, msg, null)
+    override fun e(tag: String, msg: String, tr: Throwable) = record(tag, msg, tr)
 }
 
 /** Keeps MapView lifecycle calls balanced and buffers the location until the style loads. */
@@ -181,29 +249,91 @@ private class MapHolder(
         styleUrl = url
         puckColor = puck
         val m = map ?: return
-        if (url != loadedUrl) {
+        // Once on the basic map, stay on it for this map view: the vector host didn't work.
+        if (url != loadedUrl && !basic) {
             loadStyle(m)
         } else if (puckChanged && tracking) {
             recolourPuck(m)
         }
     }
 
-    /** A style URL that cannot load (offline or renamed) falls back to the default style once. */
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+    private var basic = false
+    private var styleLoaded = false
+    private var errorsAtStyleLoad = 0
+
+    /** Vector style too slow: no style at all after [STYLE_TIMEOUT_MS]. */
+    private val styleWatchdog = Runnable {
+        if (!destroyed && !basic && !styleLoaded) {
+            MapDiagnostics.error("Style not loaded after ${STYLE_TIMEOUT_MS / 1000} s: $loadedUrl")
+            useBasic()
+        }
+    }
+
+    /** Style loaded but tiles keep failing (blocked host, TLS): no full map and new errors. */
+    private val tilesWatchdog = Runnable {
+        val st = MapDiagnostics.status.value
+        if (!destroyed && !basic && st.phase != MapStatus.Phase.MapLoaded && st.netErrorCount > errorsAtStyleLoad) {
+            MapDiagnostics.error("Vector tiles not loading; switching to the basic map")
+            useBasic()
+        }
+    }
+
+    /**
+     * A style that cannot load: a theme style falls back to the default vector style once, and
+     * the default one falls back to the basic raster map.
+     */
     fun onStyleFailed() {
-        if (destroyed || styleUrl == GLANCE_STYLE_URL) return
-        styleUrl = GLANCE_STYLE_URL
-        map?.let { loadStyle(it) }
+        if (destroyed || basic) return
+        if (styleUrl != GLANCE_STYLE_URL) {
+            styleUrl = GLANCE_STYLE_URL
+            map?.let { loadStyle(it) }
+        } else {
+            useBasic()
+        }
+    }
+
+    fun onStyleLoaded() {
+        styleLoaded = true
+        errorsAtStyleLoad = MapDiagnostics.status.value.netErrorCount
+        main.removeCallbacks(styleWatchdog)
+        MapDiagnostics.update { if (it.phase == MapStatus.Phase.MapLoaded) it else it.copy(phase = MapStatus.Phase.StyleLoaded) }
+        if (!basic) {
+            main.removeCallbacks(tilesWatchdog)
+            main.postDelayed(tilesWatchdog, TILES_TIMEOUT_MS)
+        }
+    }
+
+    private fun useBasic() {
+        val m = map ?: return
+        basic = true
+        main.removeCallbacks(styleWatchdog)
+        main.removeCallbacks(tilesWatchdog)
+        MapDiagnostics.update { it.copy(basic = true) }
+        applyStyle(m, Style.Builder().fromJson(BASIC_STYLE_JSON), "basic:osm-raster")
     }
 
     private fun loadStyle(map: MapLibreMap) {
-        val url = styleUrl
-        loadedUrl = url
-        map.setStyle(Style.Builder().fromUri(url)) { style ->
-            if (destroyed) return@setStyle
-            // A new style drops our own layers: put the parking pin back.
-            addParkedLayer(style)
-            // The location component re-adds its layers on every new style by itself.
-            if (!tracking) enableTracking(appContext, map, style) else recolourPuck(map)
+        main.removeCallbacks(styleWatchdog)
+        main.postDelayed(styleWatchdog, STYLE_TIMEOUT_MS)
+        applyStyle(map, Style.Builder().fromUri(styleUrl), styleUrl)
+    }
+
+    private fun applyStyle(map: MapLibreMap, builder: Style.Builder, label: String) {
+        loadedUrl = if (label.startsWith("basic:")) loadedUrl else label
+        styleLoaded = false
+        MapDiagnostics.update { it.copy(styleUrl = label, phase = MapStatus.Phase.LoadingStyle) }
+        try {
+            map.setStyle(builder) { style ->
+                if (destroyed) return@setStyle
+                // A new style drops our own layers: put the parking pin back.
+                addParkedLayer(style)
+                // The location component re-adds its layers on every new style by itself.
+                if (!tracking) enableTracking(appContext, map, style) else recolourPuck(map)
+            }
+        } catch (e: Exception) {
+            MapDiagnostics.error("setStyle: ${e.message}")
+            MapDiagnostics.update { it.copy(phase = MapStatus.Phase.Failed) }
         }
     }
 
@@ -323,6 +453,8 @@ private class MapHolder(
     fun destroy(view: MapView) {
         if (destroyed) return
         destroyed = true
+        main.removeCallbacks(styleWatchdog)
+        main.removeCallbacks(tilesWatchdog)
         tracking = false
         map = null
         view.onDestroy()

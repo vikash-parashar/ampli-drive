@@ -32,7 +32,19 @@ data class GpsState(
     val speedKmh: Float? = null,
     val satellitesUsed: Int = 0,
     val satellitesInView: Int = 0,
+    /** Where [location] came from. Network fixes only place the map; they never drive the speedometer. */
+    val source: LocationSource = LocationSource.None,
+    /** No GPS fix since GPS started, for long enough to say so (indoors, garage, bad antenna). */
+    val noFixLong: Boolean = false,
+    /** Trip average over moving time (see [TripAverage]), km/h. */
+    val avgKmh: Float? = null,
+    /** Last speed-giving fix: elapsedRealtime ms, provider name and whether it carried a speed. */
+    val lastFixElapsedMs: Long = 0L,
+    val lastFixProvider: String? = null,
+    val lastFixHasSpeed: Boolean = false,
 )
+
+enum class LocationSource { None, LastKnown, Gps, Network, Passive, Fused }
 
 /** Gets every GPS fix: [smoothedKmh] is what the speedometer shows, [rawKmh] the unsmoothed reading. */
 fun interface FixListener {
@@ -81,6 +93,11 @@ class SpeedTracker(
             samples.clear()
             _state.update { it.copy(providerEnabled = false, speedKmh = null, satellitesUsed = 0) }
         }
+
+        // Abstract before Android 11: without it, an Android 10 unit that reports a GPS status
+        // change would throw AbstractMethodError.
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) = Unit
     }
 
     private val gnssCallback = object : GnssStatus.Callback() {
@@ -96,6 +113,145 @@ class SpeedTracker(
         override fun onStopped() {
             _state.update { it.copy(satellitesUsed = 0, satellitesInView = 0) }
         }
+    }
+
+    private var gpsFixSinceStart = false
+    private var networkOn = false
+
+    /** Network fixes for the map while GPS has none: indoors, or a unit with a weak GPS antenna. */
+    private val networkListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            // A fresh GPS fix always wins.
+            if (lastFixAt != 0L && SystemClock.elapsedRealtime() - lastFixAt < STALE_MS) return
+            _state.update { it.copy(location = location, source = LocationSource.Network) }
+        }
+
+        override fun onProviderEnabled(provider: String) = Unit
+        override fun onProviderDisabled(provider: String) = Unit
+
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) = Unit
+    }
+
+    /** Two minutes without a GPS fix: say so, and place the map from the network provider. */
+    private val noFixCheck = Runnable {
+        if (!running || gpsFixSinceStart) return@Runnable
+        _state.update { it.copy(noFixLong = true) }
+        startNetwork()
+    }
+
+    private val trip = TripAverage()
+    private var passiveOn = false
+    private var fusedOn = false
+
+    /**
+     * Fixes other apps (Google Maps, the unit's own navigation) get through any path, including
+     * vendor GPS stacks. A "gps" fix here counts as our own; others only place the map.
+     */
+    private val passiveListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            if (location.provider == LocationManager.GPS_PROVIDER) {
+                val prev = lastFix
+                if (prev == null || location.elapsedRealtimeNanos > prev.elapsedRealtimeNanos) handleFix(location, LocationSource.Passive)
+            } else {
+                networkListener.onLocationChanged(location)
+            }
+        }
+
+        override fun onProviderEnabled(provider: String) = Unit
+        override fun onProviderDisabled(provider: String) = Unit
+
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) = Unit
+    }
+
+    /** "fused" from LocationManager (Play services or the vendor), when the unit lists it. Used only without GPS fixes. */
+    private val fusedListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            if (lastFixAt != 0L && SystemClock.elapsedRealtime() - lastFixAt < STALE_MS && _state.value.source == LocationSource.Gps) return
+            handleFix(location, LocationSource.Fused)
+        }
+
+        override fun onProviderEnabled(provider: String) = Unit
+        override fun onProviderDisabled(provider: String) = Unit
+
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) = Unit
+    }
+
+    /** Ignition on: a new trip for the average speed. */
+    fun resetTrip() {
+        trip.reset()
+        _state.update { it.copy(avgKmh = null) }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startPassive() {
+        val m = lm ?: return
+        if (passiveOn) return
+        try {
+            if (!m.allProviders.contains(LocationManager.PASSIVE_PROVIDER)) return
+            m.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0L, 0f, passiveListener, Looper.getMainLooper())
+            passiveOn = true
+        } catch (_: Exception) {
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startFused() {
+        val m = lm ?: return
+        if (fusedOn) return
+        try {
+            if (!m.allProviders.contains(FUSED) || !m.isProviderEnabled(FUSED)) return
+            m.requestLocationUpdates(FUSED, UPDATE_INTERVAL_MS, 0f, fusedListener, Looper.getMainLooper())
+            fusedOn = true
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun stopExtras() {
+        try {
+            if (passiveOn) lm?.removeUpdates(passiveListener)
+            if (fusedOn) lm?.removeUpdates(fusedListener)
+        } catch (_: Exception) {
+        }
+        passiveOn = false
+        fusedOn = false
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startNetwork() {
+        val m = lm ?: return
+        startFused()
+        if (networkOn) return
+        try {
+            if (!m.allProviders.contains(LocationManager.NETWORK_PROVIDER) || !m.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) return
+            if (_state.value.location == null) {
+                m.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)?.let { loc ->
+                    _state.update { it.copy(location = loc, source = LocationSource.Network) }
+                }
+            }
+            m.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, NETWORK_INTERVAL_MS, 0f, networkListener, Looper.getMainLooper())
+            networkOn = true
+        } catch (_: Exception) {
+            // No network provider permission or provider on this ROM: the map waits for GPS.
+        }
+    }
+
+    private fun stopNetwork() {
+        if (!networkOn) return
+        networkOn = false
+        try {
+            lm?.removeUpdates(networkListener)
+        } catch (_: Exception) {
+        }
+    }
+
+    /** Names of the location providers this unit has, for Settings › About › Diagnostics. */
+    fun providers(): List<String> = try {
+        lm?.allProviders.orEmpty().map { p -> p + if (lm?.isProviderEnabled(p) == true) "" else " (off)" }
+    } catch (_: Exception) {
+        emptyList()
     }
 
     /** Clears the speed when fixes stop arriving (tunnel, parking garage). */
@@ -123,7 +279,13 @@ class SpeedTracker(
 
         val hasGps = lm.allProviders.contains(LocationManager.GPS_PROVIDER)
         _state.update { it.copy(hasGps = hasGps) }
-        if (!hasGps) return
+        if (!hasGps) {
+            // No GPS chip at all: the map can still follow the network position.
+            running = true
+            startPassive()
+            startNetwork()
+            return
+        }
 
         try {
             val last = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
@@ -131,8 +293,13 @@ class SpeedTracker(
                 it.copy(
                     providerEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER),
                     location = last ?: it.location,
+                    source = if (last != null) LocationSource.LastKnown else it.source,
+                    noFixLong = false,
                 )
             }
+            gpsFixSinceStart = false
+            main.postDelayed(noFixCheck, NO_FIX_FALLBACK_MS)
+            startPassive()
             lm.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 UPDATE_INTERVAL_MS,
@@ -159,6 +326,9 @@ class SpeedTracker(
         if (!running) return
         running = false
         main.removeCallbacks(staleCheck)
+        main.removeCallbacks(noFixCheck)
+        stopNetwork()
+        stopExtras()
         try {
             lm?.removeUpdates(listener)
             lm?.unregisterGnssStatusCallback(gnssCallback)
@@ -171,7 +341,7 @@ class SpeedTracker(
         onStopped?.invoke(lastFix)
     }
 
-    private fun handleFix(location: Location) {
+    private fun handleFix(location: Location, source: LocationSource = LocationSource.Gps) {
         val prev = lastFix
         val raw: Float? = when {
             location.hasSpeed() -> location.speed * MS_TO_KMH
@@ -183,13 +353,26 @@ class SpeedTracker(
         }
         lastFix = location
         lastFixAt = SystemClock.elapsedRealtime()
+        if (!gpsFixSinceStart && source != LocationSource.Fused) {
+            gpsFixSinceStart = true
+            main.removeCallbacks(noFixCheck)
+            stopNetwork()
+        }
 
         val smoothed = raw?.let { smooth(it) }
+        if (smoothed != null) trip.onSpeed(lastFixAt, smoothed)
+        val avg = trip.averageKmh
         _state.update {
             it.copy(
                 location = location,
                 speedKmh = smoothed ?: it.speedKmh,
                 providerEnabled = true,
+                source = source,
+                noFixLong = false,
+                avgKmh = avg,
+                lastFixElapsedMs = lastFixAt,
+                lastFixProvider = location.provider,
+                lastFixHasSpeed = location.hasSpeed(),
             )
         }
         if (smoothed != null) {
@@ -212,5 +395,9 @@ class SpeedTracker(
         const val STALE_MS = 5000L
         const val STALE_CHECK_MS = 2000L
         const val STANDSTILL_KMH = 2f
+        const val NO_FIX_FALLBACK_MS = 120_000L
+        /** LocationManager.FUSED_PROVIDER is API 31, but many older ROMs list a "fused" provider too. */
+        const val FUSED = "fused"
+        const val NETWORK_INTERVAL_MS = 10_000L
     }
 }

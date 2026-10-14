@@ -38,4 +38,18 @@ object ThemeAccess {
         val fallback = if (choice.auto && !night) DrivePrefs.DEFAULT_DAY else DrivePrefs.DEFAULT_NIGHT
         return if (id !in known || (!isFree(id) && !isPro)) fallback else id
     }
+
+    /**
+     * The choice after the driver taps theme [id] in the picker.
+     *
+     * Fixed mode: [id] always shows. Auto mode: [id] goes into the slot the picker's Day/Night chip
+     * points at ([forNight]). The picker points the chip at the slot showing *now*, so a tap changes
+     * the screen straight away; before this, the chip could stay on "Day" after dark, the tap
+     * only changed the day theme, and nothing on screen changed (head-unit report, build 21).
+     */
+    fun select(choice: ThemeChoice, id: String, forNight: Boolean): ThemeChoice = when {
+        !choice.auto -> choice.copy(fixedId = id)
+        forNight -> choice.copy(nightId = id)
+        else -> choice.copy(dayId = id)
+    }
 }

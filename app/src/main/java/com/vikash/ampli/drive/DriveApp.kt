@@ -17,6 +17,7 @@ import com.vikash.ampli.drive.media.MediaHub
 import com.vikash.ampli.drive.obd.ObdClient
 import com.vikash.ampli.drive.prefs.DrivePrefs
 import com.vikash.ampli.drive.tpms.TpmsMonitor
+import com.vikash.ampli.drive.voice.DesiVoice
 import com.vikash.ampli.drive.voice.Speaker
 import com.vikash.ampli.drive.voice.VoiceAssistant
 import com.vikash.ampli.drive.voice.WakeModel
@@ -31,6 +32,9 @@ class DriveApp : Application() {
 
     /** One text-to-speech engine for the assistant and the camera alerts. */
     val speaker: Speaker by lazy { Speaker(this) }
+
+    /** Settings › Voice style "Haryanvi desi": playful lines for greetings, alerts and replies. */
+    val desi: DesiVoice by lazy { DesiVoice(this) }
 
     val speedTracker: SpeedTracker by lazy { SpeedTracker(this, cameraAlerts) }
     val mediaHub: MediaHub by lazy { MediaHub(this) }

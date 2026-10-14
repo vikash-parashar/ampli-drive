@@ -60,6 +60,10 @@ import com.vikash.ampli.drive.bluetooth.BluetoothUiState
 import com.vikash.ampli.drive.location.GpsState
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.AppChooser
+import com.vikash.ampli.drive.system.AppRole
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import com.vikash.ampli.drive.ui.theme.CardStyle
 import com.vikash.ampli.drive.ui.theme.HomeLayout
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
@@ -68,6 +72,9 @@ import com.vikash.ampli.drive.ui.theme.ThemeFamily
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+/** The map surface type was switched once this run after drawing nothing; don't flip back and forth. */
+private var mapModeFlipped = false
 
 /** Status row, the three panes (arranged per theme), then the dock. */
 @Composable
@@ -152,7 +159,16 @@ fun HomeScreen(
             val map = @Composable { m: Modifier, showTurn: Boolean ->
                 Box(m) {
                     val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
+                    val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
                     MapPane(
+                        textureMode = textureMode,
+                        onNoFrames = {
+                            // Nothing drawn: try the other surface type once per app run.
+                            if (!mapModeFlipped) {
+                                mapModeFlipped = true
+                                app.prefs.setMapTextureMode(!textureMode)
+                            }
+                        },
                         parked = parkedSpot?.let { it.lat to it.lon },
                         gps = gps,
                         onOpenNavigation = openNav,
@@ -168,7 +184,15 @@ fun HomeScreen(
                     )
                 }
             }
-            val speed = @Composable { m: Modifier -> SpeedPane(gps = gps, cameraAlerts = app.cameraAlerts, modifier = m) }
+            val obd by app.obd.state.collectAsStateWithLifecycle()
+            val speed = @Composable { m: Modifier ->
+                SpeedPane(
+                    gps = gps,
+                    cameraAlerts = app.cameraAlerts,
+                    rpm = obd.rpm.takeIf { obd.phase == com.vikash.ampli.drive.obd.ObdState.Phase.Connected },
+                    modifier = m,
+                )
+            }
             val music = @Composable { m: Modifier -> MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) }
 
             when (theme.layout) {
@@ -239,6 +263,9 @@ fun HomeScreen(
             onVoice = { app.voice.start() },
             onMusic = { Launchers.openMusic(context, app.mediaHub.currentPackage()) },
             onPhone = { Launchers.openDialer(context) },
+            // Long-press Music / Phone: pick which app the button opens.
+            onMusicLong = { AppChooser.ask(AppRole.Music) },
+            onPhoneLong = { AppChooser.ask(AppRole.Phone) },
             onAuto = {
                 if (!Launchers.openPhoneLink(context, autoPackage)) {
                     Toast.makeText(context, autoHint, Toast.LENGTH_LONG).show()
@@ -358,10 +385,12 @@ private fun GpsPill(gps: GpsState, onClick: () -> Unit) {
             tint = theme.accentSoft
         }
         else -> {
-            text = if (gps.satellitesInView > 0) {
-                stringResource(R.string.gps_searching_count, gps.satellitesUsed, gps.satellitesInView)
-            } else {
-                stringResource(R.string.gps_searching)
+            // Satellites in view but none used means no fix yet: say so plainly (indoors, garage,
+            // or a weak antenna) instead of a bare "Searching 0/16".
+            text = when {
+                gps.satellitesInView > 0 -> stringResource(R.string.gps_no_fix_count, gps.satellitesUsed, gps.satellitesInView)
+                gps.noFixLong -> stringResource(R.string.gps_no_fix)
+                else -> stringResource(R.string.gps_searching)
             }
             icon = Icons.Filled.GpsNotFixed
             tint = theme.muted
@@ -377,6 +406,8 @@ private fun Dock(
     onVoice: () -> Unit,
     onMusic: () -> Unit,
     onPhone: () -> Unit,
+    onMusicLong: () -> Unit,
+    onPhoneLong: () -> Unit,
     onAuto: () -> Unit,
     onCar: () -> Unit,
     carAlert: Boolean,
@@ -393,8 +424,8 @@ private fun Dock(
         DockButton(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, onNavigate, item, highlight = true)
         // Same flow as the wake word; works without "Always listen" and without the model.
         DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item)
-        DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item)
-        DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item)
+        DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item, onLongClick = onMusicLong)
+        DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item, onLongClick = onPhoneLong)
         DockButton(
             if (dims.compact) stringResource(R.string.dock_auto) else stringResource(R.string.dock_android_auto),
             Icons.Filled.DirectionsCar,
@@ -411,6 +442,7 @@ private fun Dock(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DockButton(
     label: String,
@@ -419,6 +451,7 @@ private fun DockButton(
     modifier: Modifier,
     highlight: Boolean = false,
     badge: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -452,7 +485,7 @@ private fun DockButton(
                     Modifier
                 },
             )
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

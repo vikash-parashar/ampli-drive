@@ -25,6 +25,9 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.location.SunTimes
+import com.vikash.ampli.drive.system.AppChooser
+import com.vikash.ampli.drive.system.AppResolver
+import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.ui.theme.AmpliDriveTheme
 import com.vikash.ampli.drive.ui.theme.DriveThemes
 import dev.chrisbanes.haze.HazeState
@@ -44,6 +47,9 @@ enum class Screen {
 
     /** Settings › Help & feedback (also "Hey Ampli, report a problem"). */
     Feedback,
+
+    /** Settings › Voice › Check voice, and Settings › About › Diagnostics. */
+    VoiceCheck, Diagnostics,
 }
 
 @Composable
@@ -166,6 +172,8 @@ fun DriveRoot(
                                     onNavigate(Screen.Emergency)
                                 },
                                 onOpenFeedback = { onNavigate(Screen.Feedback) },
+                                onOpenVoiceCheck = { onNavigate(Screen.VoiceCheck) },
+                                onOpenDiagnostics = { onNavigate(Screen.Diagnostics) },
                             )
                         }
                         Screen.Help, Screen.Sos, Screen.Crash -> {
@@ -231,12 +239,42 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }
                             FeedbackScreen(app = app, onBack = { onNavigate(Screen.Settings) })
                         }
+                        Screen.VoiceCheck -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Settings) }
+                            VoiceCheckScreen(app = app, onBack = { onNavigate(Screen.Settings) })
+                        }
+                        Screen.Diagnostics -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Settings) }
+                            DiagnosticsScreen(app = app, onBack = { onNavigate(Screen.Settings) })
+                        }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
                     if (showPro) ProUnlockSheet(app = app, onDismiss = { showPro = false })
+                    // "Which app is your music / phone app?" asked by the dock, Help panel or voice.
+                    val chooser by AppChooser.request.collectAsStateWithLifecycle()
+                    chooser?.let { req ->
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        AppChooserDialog(
+                            role = req.role,
+                            onPick = { entry ->
+                                AppChooser.done()
+                                when (req.role) {
+                                    AppRole.Music -> app.prefs.setMusicPackage(entry?.packageName)
+                                    AppRole.Phone -> app.prefs.setPhonePackage(entry?.packageName)
+                                    AppRole.Mirror -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    AppRole.Nav -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(navPackage = entry?.packageName))
+                                }
+                                // Dock / Help panel: open the app right away. Settings choices just save.
+                                if (entry != null && (req.role == AppRole.Music || req.role == AppRole.Phone) && !req.settingOnly) {
+                                    AppResolver.openChosen(context, entry, req.number)
+                                }
+                            },
+                            onDismiss = { AppChooser.done() },
+                        )
+                    }
                     BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
                     // Settings opened from the Home dock returns to Home.
                     LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
