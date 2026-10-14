@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.vikash.ampli.drive.car.CarMonitorService
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
@@ -47,6 +48,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // Re-checks Play for the Pro purchase (refunds, purchases on another device).
         app.billing.start()
+        // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
+        app.car
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -81,6 +84,9 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         startSensors()
+        app.car.onForeground()
+        // Keeps the drive monitored while Google Maps or another app is in front.
+        if (app.car.store.settings.value.backgroundMonitor) CarMonitorService.start(this)
     }
 
     override fun onResume() {
@@ -94,8 +100,10 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        // Nothing runs while the launcher is hidden: keeps 2 GB units responsive.
-        app.speedTracker.stop()
+        // Only GPS and the motion sensor keep running while the launcher is hidden, and only
+        // when the drive monitor service is on: keeps 2 GB units responsive.
+        if (!CarMonitorService.running) app.speedTracker.stop()
+        app.car.onBackground()
         app.mediaHub.stop()
         app.bluetooth.stop()
         super.onStop()
@@ -112,6 +120,7 @@ class MainActivity : ComponentActivity() {
     private fun handleVoiceIntent(intent: Intent?) {
         when (intent?.getStringExtra(EXTRA_VOICE_ACTION)) {
             VOICE_OPEN_HELP -> screen.value = Screen.Help
+            VOICE_CRASH -> screen.value = Screen.Crash
             null -> Unit
             else -> screen.value = Screen.Home
         }
@@ -145,5 +154,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
         const val VOICE_OPEN_HELP = "help"
+        const val VOICE_CRASH = "crash"
     }
 }

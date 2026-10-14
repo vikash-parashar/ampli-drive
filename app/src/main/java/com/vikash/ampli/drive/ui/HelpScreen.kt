@@ -76,6 +76,9 @@ private const val HOLD_MS = 3000
 /** Seconds before the SOS composer opens, so a mistaken press can be cancelled. */
 private const val COUNTDOWN_S = 5
 
+/** After a detected crash the driver gets longer to answer "Are you okay?". */
+private const val CRASH_COUNTDOWN_S = com.vikash.ampli.drive.car.CarMonitor.CRASH_COUNTDOWN_S
+
 /**
  * The red Help button in the dock. Tap opens the Help panel; holding it for 3 seconds
  * (a ring fills around the icon) starts the SOS countdown.
@@ -151,9 +154,11 @@ private enum class SosPhase { Idle, Countdown, Ready }
 /**
  * Full-screen Help panel: helpline numbers, the driver's own emergency contacts, SOS and the
  * responder card. [startSos] opens straight into the SOS countdown (Help button held 3 s).
+ * [crash]: opened by crash detection; the countdown is 30 s and Ampli keeps asking aloud
+ * "Are you okay?" (CarMonitor) until it is cancelled or runs out.
  */
 @Composable
-fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfile: () -> Unit) {
+fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfile: () -> Unit, crash: Boolean = false) {
     val context = LocalContext.current
     val profile by app.emergency.profile.collectAsStateWithLifecycle()
     var phase by rememberSaveable { mutableStateOf(if (startSos) SosPhase.Countdown else SosPhase.Idle) }
@@ -173,6 +178,7 @@ fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfi
     }
 
     fun sendNow() {
+        if (crash) app.car.clearCrash()
         message = Sos.buildMessage(profile, bestLocation())
         Sos.openSmsComposer(context, profile.contacts.map { it.phone }, message)
         phase = SosPhase.Ready
@@ -180,10 +186,15 @@ fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfi
 
     when (phase) {
         SosPhase.Countdown -> SosCountdown(
-            onCancel = { phase = SosPhase.Idle },
+            onCancel = {
+                if (crash) app.car.clearCrash()
+                phase = SosPhase.Idle
+            },
             onSendNow = { sendNow() },
             onFinished = { sendNow() },
             hasFix = fix != null,
+            seconds = if (crash) CRASH_COUNTDOWN_S else COUNTDOWN_S,
+            crash = crash,
         )
         SosPhase.Ready -> SosReady(
             profile = profile,
@@ -360,10 +371,17 @@ private fun HelplineTile(
 }
 
 @Composable
-private fun SosCountdown(onCancel: () -> Unit, onSendNow: () -> Unit, onFinished: () -> Unit, hasFix: Boolean) {
+private fun SosCountdown(
+    onCancel: () -> Unit,
+    onSendNow: () -> Unit,
+    onFinished: () -> Unit,
+    hasFix: Boolean,
+    seconds: Int = COUNTDOWN_S,
+    crash: Boolean = false,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    var left by remember { mutableIntStateOf(COUNTDOWN_S) }
+    var left by remember { mutableIntStateOf(seconds) }
     val finished by rememberUpdatedState(onFinished)
     LaunchedEffect(Unit) {
         while (left > 0) {
@@ -381,14 +399,27 @@ private fun SosCountdown(onCancel: () -> Unit, onSendNow: () -> Unit, onFinished
         horizontalArrangement = Arrangement.spacedBy(dims.d(4f)),
     ) {
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(stringResource(R.string.sos_countdown_title), color = theme.onDanger, fontSize = dims.t(4.4f, min = 22f), fontWeight = FontWeight.Bold)
-            Text("$left", color = theme.onDanger, fontSize = dims.t(30f, min = 96f), fontWeight = FontWeight.Black)
+            Text(
+                stringResource(if (crash) R.string.crash_title else R.string.sos_countdown_title),
+                color = theme.onDanger, fontSize = dims.t(4.4f, min = 22f), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+            )
+            Text("$left", color = theme.onDanger, fontSize = dims.t(if (crash) 24f else 30f, min = 88f), fontWeight = FontWeight.Black)
             Text(
                 stringResource(if (hasFix) R.string.sos_location_ready else R.string.sos_location_searching),
                 color = theme.onDanger,
                 fontSize = dims.t(2.6f, min = 16f),
                 textAlign = TextAlign.Center,
             )
+            if (crash) {
+                // Until there is a server, nothing is sent without a tap (no SEND_SMS permission).
+                Text(
+                    stringResource(R.string.crash_send_needs_tap),
+                    color = theme.onDanger,
+                    fontSize = dims.t(2.3f, min = 14f),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(3f))) {
             // Cancel is the biggest thing on screen: a mistaken press must be easy to undo.
@@ -403,7 +434,11 @@ private fun SosCountdown(onCancel: () -> Unit, onSendNow: () -> Unit, onFinished
                 horizontalArrangement = Arrangement.spacedBy(dims.d(2f), Alignment.CenterHorizontally),
             ) {
                 Icon(Icons.Filled.Close, contentDescription = null, tint = theme.danger, modifier = Modifier.size(48.dp))
-                Text(stringResource(R.string.sos_cancel), color = theme.danger, fontSize = dims.t(7f, min = 32f), fontWeight = FontWeight.Black)
+                Text(
+                    stringResource(if (crash) R.string.crash_im_ok else R.string.sos_cancel),
+                    color = theme.danger, fontSize = dims.t(7f, min = 32f), fontWeight = FontWeight.Black,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
             }
             Row(
                 modifier = Modifier

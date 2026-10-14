@@ -84,6 +84,7 @@ fun SettingsScreen(
     onRequestPermissions: () -> Unit,
     onOpenFastag: () -> Unit,
     onOpenEmergency: () -> Unit,
+    onOpenCar: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -195,6 +196,7 @@ fun SettingsScreen(
                 action = stringResource(R.string.action_edit),
                 onAction = onOpenEmergency,
             )
+            CarSettingsCard(app = app, onOpenCar = onOpenCar)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
@@ -211,6 +213,7 @@ fun SettingsScreen(
                     if (pro.isPro) stringResource(R.string.pro_active) else null,
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
+                    stringResource(R.string.weather_attribution),
                 ),
             )
         }
@@ -241,7 +244,7 @@ fun SettingsScreen(
 private fun granted(context: Context, permission: String): Boolean =
     context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
+internal tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
@@ -721,7 +724,7 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, onDismiss: () -> Unit) {
+internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, onDismiss: () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     ModalBottomSheet(
@@ -757,7 +760,7 @@ private fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, o
                     ) { ThemeSwatch(t, Modifier.fillMaxSize()) }
                 }
             }
-            for (point in listOf(R.string.pro_point_themes, R.string.pro_point_once)) {
+            for (point in listOf(R.string.pro_point_themes, R.string.pro_point_car, R.string.pro_point_once)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                     Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = theme.ok, modifier = Modifier.size(24.dp))
                     Text(stringResource(point), fontSize = dims.t(2.6f, min = 15f), color = theme.text)

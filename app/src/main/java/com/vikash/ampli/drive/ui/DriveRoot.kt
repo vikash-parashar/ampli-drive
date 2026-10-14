@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +35,9 @@ enum class Screen {
 
     /** Help panel; [Sos] is the same panel opened straight into the SOS countdown. */
     Help, Sos, Fastag, Emergency,
+
+    /** Car hub and its screens; [Crash] is the SOS countdown started by crash detection. */
+    Car, Parked, Papers, Expenses, Obd, Tyres, Crash,
 }
 
 @Composable
@@ -67,6 +72,12 @@ fun DriveRoot(
     val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
     // Where Back goes from the emergency profile (opened from Settings or the Help panel).
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
+    // Where Back goes from Settings (Home, or the Car hub when opened from there).
+    var settingsReturn by remember { mutableStateOf(Screen.Home) }
+    var showPro by remember { mutableStateOf(false) }
+    // A detected crash opens the SOS countdown over whatever is showing.
+    val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
+    LaunchedEffect(crashAt) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
 
     // Dark status-bar icons on the light themes.
     val view = LocalView.current
@@ -107,21 +118,25 @@ fun DriveRoot(
                                 onOpenSettings = { onNavigate(Screen.Settings) },
                                 onOpenHelp = { sos -> onNavigate(if (sos) Screen.Sos else Screen.Help) },
                                 onOpenFastag = { onNavigate(Screen.Fastag) },
+                                onOpenCar = { onNavigate(Screen.Car) },
+                                onOpenParked = { onNavigate(Screen.Parked) },
                                 onRequestPermissions = onRequestPermissions,
                             )
                             TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
+                            CarAlertHost(app = app)
                         }
                         Screen.Apps -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
                             AppsScreen(app = app, onBack = { onNavigate(Screen.Home) })
                         }
                         Screen.Settings -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            BackHandler(enabled = true) { onNavigate(settingsReturn) }
                             SettingsScreen(
                                 app = app,
                                 night = night,
                                 resumeTick = resumeTick,
-                                onBack = { onNavigate(Screen.Home) },
+                                onBack = { onNavigate(settingsReturn) },
+                                onOpenCar = { onNavigate(Screen.Car) },
                                 onRequestPermissions = onRequestPermissions,
                                 onOpenFastag = { onNavigate(Screen.Fastag) },
                                 onOpenEmergency = {
@@ -130,17 +145,60 @@ fun DriveRoot(
                                 },
                             )
                         }
-                        Screen.Help, Screen.Sos -> {
+                        Screen.Help, Screen.Sos, Screen.Crash -> {
+                            BackHandler(enabled = true) {
+                                if (screen == Screen.Crash) app.car.clearCrash()
+                                onNavigate(Screen.Home)
+                            }
+                            // A fresh panel per entry, so a crash always starts at the countdown.
+                            key(screen) {
+                                HelpScreen(
+                                    app = app,
+                                    startSos = screen == Screen.Sos || screen == Screen.Crash,
+                                    crash = screen == Screen.Crash,
+                                    onBack = { onNavigate(Screen.Home) },
+                                    onEditProfile = {
+                                        emergencyReturn = Screen.Help
+                                        onNavigate(Screen.Emergency)
+                                    },
+                                )
+                            }
+                        }
+                        Screen.Car -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
-                            HelpScreen(
-                                app = app,
-                                startSos = screen == Screen.Sos,
-                                onBack = { onNavigate(Screen.Home) },
-                                onEditProfile = {
-                                    emergencyReturn = Screen.Help
-                                    onNavigate(Screen.Emergency)
-                                },
-                            )
+                            CarHubScreen(app = app, onBack = { onNavigate(Screen.Home) }, onOpen = { dest ->
+                                when (dest) {
+                                    CarDest.Parked -> onNavigate(Screen.Parked)
+                                    CarDest.Papers -> onNavigate(Screen.Papers)
+                                    CarDest.Expenses -> onNavigate(Screen.Expenses)
+                                    CarDest.Obd -> onNavigate(Screen.Obd)
+                                    CarDest.Tyres -> onNavigate(Screen.Tyres)
+                                    CarDest.Settings -> {
+                                        settingsReturn = Screen.Car
+                                        onNavigate(Screen.Settings)
+                                    }
+                                }
+                            })
+                        }
+                        Screen.Parked -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            ParkedScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                        }
+                        Screen.Papers -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            PapersScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                        }
+                        Screen.Expenses -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            ExpensesScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                        }
+                        Screen.Obd -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            ObdScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                        }
+                        Screen.Tyres -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            TyresScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Fastag -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
@@ -151,6 +209,9 @@ fun DriveRoot(
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
+                    if (showPro) ProUnlockSheet(app = app, onDismiss = { showPro = false })
+                    // Settings opened from the Home dock returns to Home.
+                    LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
                     // "Hey Ampli" sheet over whichever screen is showing.
                     val voice by app.voice.state.collectAsStateWithLifecycle()
                     if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
