@@ -74,6 +74,6 @@ jobs:
         with:
           tag_name: pr-test-${{ github.run_number }}
           target_commitish: ${{ github.event.pull_request.head.sha }}
-          name: Ampli Car Hub PR #${{ github.event.pull_request.number }} test build ${{ github.run_number }}
+          name: "Ampli Car Hub PR #${{ github.event.pull_request.number }} test build ${{ github.run_number }}"
           prerelease: true
           files: AmpliCarHub-pr-*.apk
