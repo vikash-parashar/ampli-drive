@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Lock
@@ -75,6 +76,9 @@ import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.prefs.ThemeChoice
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.AppChooser
+import com.vikash.ampli.drive.system.AppResolver
+import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.ui.theme.CardStyle
 import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
@@ -82,6 +86,7 @@ import com.vikash.ampli.drive.ui.theme.DriveThemes
 import com.vikash.ampli.drive.ui.theme.HomeLayout
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.ui.theme.ThemeFamily
+import com.vikash.ampli.drive.ui.theme.ThemeAccess
 import com.vikash.ampli.drive.system.BtPermissions
 
 @Composable
@@ -95,6 +100,8 @@ fun SettingsScreen(
     onOpenEmergency: () -> Unit,
     onOpenCar: () -> Unit = {},
     onOpenFeedback: () -> Unit = {},
+    onOpenVoiceCheck: () -> Unit = {},
+    onOpenDiagnostics: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -106,6 +113,8 @@ fun SettingsScreen(
     val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
     val price by app.billing.price.collectAsStateWithLifecycle()
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
+    val musicPkg by app.prefs.musicPackage.collectAsStateWithLifecycle()
+    val phonePkg by app.prefs.phonePackage.collectAsStateWithLifecycle()
     var showProSheet by rememberSaveable { mutableStateOf(false) }
 
     // Re-read every time the launcher comes back from a system settings screen.
@@ -164,6 +173,21 @@ fun SettingsScreen(
                 action = stringResource(if (isHome) R.string.action_change else R.string.home_set_default),
                 onAction = { Launchers.openHomeSettings(context) },
             )
+            // Head units name their apps "Multimedia", "BT phone"…: the driver can pick them here.
+            SettingRow(
+                title = stringResource(R.string.music_app_title),
+                status = musicPkg?.let { AppResolver.label(context, it) } ?: stringResource(R.string.app_choice_automatic),
+                ok = true,
+                action = stringResource(R.string.action_change),
+                onAction = { AppChooser.ask(AppRole.Music, settingOnly = true) },
+            )
+            SettingRow(
+                title = stringResource(R.string.phone_app_title),
+                status = phonePkg?.let { AppResolver.label(context, it) } ?: stringResource(R.string.app_choice_automatic),
+                ok = true,
+                action = stringResource(R.string.action_change),
+                onAction = { AppChooser.ask(AppRole.Phone, settingOnly = true) },
+            )
             SettingRow(
                 title = stringResource(R.string.location_title),
                 status = stringResource(
@@ -217,7 +241,9 @@ fun SettingsScreen(
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
-            VoiceSettingsCard(app = app, resumeTick = resumeTick)
+            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
+            VoiceStyleCard(app = app)
+            CarStartCard(app = app)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             ToggleRow(
                 title = stringResource(R.string.screen_on_title),
@@ -242,6 +268,14 @@ fun SettingsScreen(
                     stringResource(R.string.cameras_attribution),
                     stringResource(R.string.weather_attribution),
                 ),
+            )
+            // Settings › About › Diagnostics: real Android version, map, GPS, network, for support photos.
+            LinkRow(
+                icon = Icons.Filled.Info,
+                title = stringResource(R.string.diag_title),
+                hint = stringResource(R.string.diag_hint),
+                action = stringResource(R.string.action_open),
+                onClick = onOpenDiagnostics,
             )
             // Settings › About › Privacy policy (also required by Play).
             LinkRow(
@@ -438,7 +472,11 @@ private fun ThemePicker(
 ) {
     val dims = LocalDims.current
     val active = LocalDriveTheme.current
-    var slot by rememberSaveable { mutableStateOf(if (night) Slot.Night else Slot.Day) }
+    val context = LocalContext.current
+    // The chip starts on the slot showing now (and follows sunrise/sunset), so a tap changes the
+    // screen at once. It used to be saveable and could sit on "Day" after dark: the tap then only
+    // changed the day theme and nothing visible happened.
+    var slot by remember(night) { mutableStateOf(if (night) Slot.Night else Slot.Day) }
 
     SettingCard {
         Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -511,13 +549,16 @@ private fun ThemePicker(
                                         if (t.isPro && !isPro) {
                                             onLocked()
                                         } else {
-                                            onChange(
-                                                when {
-                                                    !choice.auto -> choice.copy(fixedId = t.id)
-                                                    slot == Slot.Day -> choice.copy(dayId = t.id)
-                                                    else -> choice.copy(nightId = t.id)
-                                                },
-                                            )
+                                            val forNight = slot == Slot.Night
+                                            onChange(ThemeAccess.select(choice, t.id, forNight))
+                                            // Chosen for the other half of the day: say when it will show.
+                                            if (choice.auto && forNight != night) {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(if (forNight) R.string.theme_saved_for_night else R.string.theme_saved_for_day),
+                                                    Toast.LENGTH_LONG,
+                                                ).show()
+                                            }
                                         }
                                     },
                                     modifier = Modifier.weight(1f),

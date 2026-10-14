@@ -50,7 +50,8 @@ class VoiceAssistant(private val app: DriveApp) {
     private val scope = MainScope()
     /** Shared with the speed-camera alerts, so there is one TTS engine. */
     private val speaker get() = app.speaker
-    private val listener = Listener(app)
+    /** System recogniser, else the offline Vosk command model (units without Google speech). */
+    private val listener = Listener(app, VoskCommandListener(app))
     private val cameras: CameraRepository get() = app.cameras
     private var job: Job? = null
 
@@ -85,6 +86,20 @@ class VoiceAssistant(private val app: DriveApp) {
                 _state.value = VoiceUiState()
                 _busy.value = false
             }
+        }
+    }
+
+    /**
+     * Runs [block] with the microphone to itself (Settings › Voice › Check voice "Listen test"):
+     * the wake word lets go of the mic meanwhile, as during a session.
+     */
+    suspend fun <T> withMic(block: suspend () -> T): T {
+        releaseWakeMic?.invoke()
+        _busy.value = true
+        try {
+            return block()
+        } finally {
+            _busy.value = false
         }
     }
 
@@ -130,6 +145,9 @@ class VoiceAssistant(private val app: DriveApp) {
             return
         }
         if (!listener.isAvailable()) {
+            // Neither a system recogniser nor the offline model: start the model download so
+            // the next try works, and point at Settings › Voice › Check voice.
+            app.wakeModel.ensure()
             say(res, lang, R.string.voice_unavailable)
             return
         }
@@ -138,7 +156,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val now = System.currentTimeMillis()
         if (now - app.prefs.lastVoiceGreeting > GREETING_EVERY_MS) {
             app.prefs.lastVoiceGreeting = now
-            say(res, lang, greeting(res))
+            styled(res, lang, HaryanviLines.Event.Greeting, greeting(res))
             expect = Expect.Destination
         }
 
@@ -146,7 +164,12 @@ class VoiceAssistant(private val app: DriveApp) {
         repeat(MAX_TURNS) {
             speaker.earcon()
             _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
-            val result = listener.listen(lang) { partial -> _state.update { it.copy(heard = partial) } }
+            val result = listener.listen(
+                lang,
+                onPartial = { partial -> _state.update { it.copy(heard = partial) } },
+                // Offline fallback: command phrases only, except when a place name is expected.
+                commandsOnly = expect != Expect.Destination,
+            )
             val text = when (result) {
                 Listener.Result.Unavailable -> {
                     say(res, lang, R.string.voice_unavailable)
@@ -156,10 +179,10 @@ class VoiceAssistant(private val app: DriveApp) {
                     misses++
                     if (misses >= 2 || expect == Expect.Nothing) {
                         // Nothing said after the wake word: usually a false wake, so stay quiet.
-                        if (expect != Expect.Nothing) say(res, lang, R.string.voice_cancelled)
+                        if (expect != Expect.Nothing) styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
                         return
                     }
-                    say(res, lang, R.string.voice_didnt_catch)
+                    styled(res, lang, HaryanviLines.Event.DidntCatch, res.getString(R.string.voice_didnt_catch))
                     return@repeat
                 }
                 is Listener.Result.Heard -> result.text
@@ -182,7 +205,8 @@ class VoiceAssistant(private val app: DriveApp) {
         when (intent) {
             is VoiceIntent.Navigate -> {
                 if (intent.destination.isEmpty()) {
-                    say(res, lang, R.string.voice_where_to)
+                    // Haryanvi desi: "Kit chalna sai?"
+                    styled(res, lang, HaryanviLines.Event.AskDestination, res.getString(R.string.voice_where_to))
                     return Expect.Destination
                 }
                 return search(intent.destination, res, lang)
@@ -217,7 +241,7 @@ class VoiceAssistant(private val app: DriveApp) {
                     }
                 }
                 Expect.Nothing -> {
-                    say(res, lang, R.string.voice_not_understood)
+                    styled(res, lang, HaryanviLines.Event.NotUnderstood, res.getString(R.string.voice_not_understood))
                     null
                 }
             }
@@ -270,7 +294,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             VoiceIntent.Greeting -> {
-                say(res, lang, greeting(res))
+                styled(res, lang, HaryanviLines.Event.Greeting, greeting(res))
                 return Expect.Destination
             }
             VoiceIntent.ServiceDue -> {
@@ -290,7 +314,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             VoiceIntent.Cancel -> {
-                say(res, lang, R.string.voice_cancelled)
+                styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
                 return null
             }
         }
@@ -302,7 +326,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val here = app.speedTracker.state.value.location
         // Search while Ampli says "Searching for…".
         val pending = scope.async { runCatching { PlaceSearch.search(destination, here) } }
-        say(res, lang, res.getString(R.string.voice_searching, destination))
+        styled(res, lang, HaryanviLines.Event.Searching, res.getString(R.string.voice_searching, destination), destination)
         val places = pending.await().getOrElse {
             say(res, lang, R.string.voice_search_failed)
             return null
@@ -340,7 +364,7 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private suspend fun navigateTo(place: Place, res: Context, lang: String) {
         _state.update { it.copy(options = emptyList()) }
-        say(res, lang, res.getString(R.string.voice_starting_nav, place.name))
+        styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, place.name), place.name)
         if (!VoiceActions.startNavigation(app, place)) say(res, lang, R.string.voice_nav_failed)
     }
 
@@ -410,6 +434,20 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, res.getString(id))
+
+    /**
+     * The Haryanvi desi line for [event] when that voice style is on, else [standard]. Safety
+     * replies (SOS) never come through here, so they always stay plain and clear.
+     */
+    private suspend fun styled(res: Context, lang: String, event: HaryanviLines.Event, standard: String, vararg args: Any) {
+        val desi = app.desi.line(event, *args)
+        if (desi == null) {
+            say(res, lang, standard)
+            return
+        }
+        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = desi.text) }
+        speaker.say(desi.text, desi.language)
+    }
 
     private suspend fun say(@Suppress("UNUSED_PARAMETER") res: Context, lang: String, text: String) {
         _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = text) }

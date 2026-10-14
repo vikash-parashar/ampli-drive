@@ -1,5 +1,7 @@
 package com.vikash.ampli.drive.car
 
+import com.vikash.ampli.drive.voice.HaryanviLines
+
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -220,7 +222,11 @@ class CarMonitor(private val app: DriveApp) {
                 onIgnitionOff()
                 odometer.reset()
             }
-            IgnitionEvent.On -> Unit
+            IgnitionEvent.On -> {
+                // A new trip for the average speed, then greeting / auto start (CarStart).
+                app.speedTracker.resetTrip()
+                CarStart.signal(app, StartTrigger.Ignition)
+            }
         }
         fatigue.reset()
         _drivingMs.value = 0L
@@ -245,7 +251,16 @@ class CarMonitor(private val app: DriveApp) {
     private fun remindBreak() {
         _breakDue.value = true
         val hours = (_drivingMs.value / 3_600_000.0)
-        speak { res -> res.getString(R.string.break_voice, formatHours(res, hours)) }
+        val old = speech
+        speech = scope.launch {
+            old?.join()
+            if (app.voice.busy.value) return@launch
+            // Haryanvi desi style: "Thak gaya hoga bhai, ek chai ho jaye?"
+            if (app.desi.say(HaryanviLines.Event.BreakReminder, formatHours(app, hours))) return@launch
+            val lang = language()
+            val res = localized(lang)
+            app.speaker.say(res.getString(R.string.break_voice, formatHours(res, hours)), lang)
+        }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_BREAK, app.getString(R.string.break_title), app.getString(R.string.break_body, formatHours(app, hours)))
         }

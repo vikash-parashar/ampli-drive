@@ -17,6 +17,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.vikash.ampli.drive.car.CarMonitorService
+import com.vikash.ampli.drive.car.CarStart
+import com.vikash.ampli.drive.car.StartTrigger
+import com.vikash.ampli.drive.voice.WakeModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
@@ -66,6 +71,29 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Car-start actions (greeting, auto start). They run in lifecycleScope, not tied to
+        // RESUMED, because opening the map or the mirroring app pauses this activity mid-way.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                CarStart.events.collect { trigger -> lifecycleScope.launch { CarStart.run(this@MainActivity, app, trigger) } }
+            }
+        }
+        // The wake word starts as soon as its model has downloaded, wherever the driver is.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                app.wakeModel.state.collect { if (it == WakeModel.State.Ready) VoiceService.start(this@MainActivity) }
+            }
+        }
+        // "When the car starts" can also run when the chosen phone connects over Bluetooth.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                app.bluetooth.state.map { it.connectedName }.distinctUntilChanged().collect { name ->
+                    val wanted = app.prefs.autoStart.value.btDeviceName
+                    if (name != null && wanted != null && name == wanted) CarStart.signal(app, StartTrigger.PhoneConnected)
+                }
+            }
+        }
+
         setContent {
             DriveRoot(
                 app = app,
@@ -100,8 +128,17 @@ class MainActivity : ComponentActivity() {
         app.mediaHub.start()
         resumeTick.intValue++
         // "Hey Ampli" wake word. A microphone service may only start while we are in front,
-        // which as the HOME app includes right after boot (see VoiceService).
+        // which as the HOME app includes right after boot (see VoiceService). A missing model
+        // starts downloading here too, so a failed download is retried on every return home.
         VoiceService.start(this)
+        // Boot (or a start noticed while hidden): greeting and auto start, from the foreground.
+        CarStart.launcherVisible = true
+        CarStart.takePending(this, app)?.let { trigger -> lifecycleScope.launch { CarStart.run(this@MainActivity, app, trigger) } }
+    }
+
+    override fun onPause() {
+        CarStart.launcherVisible = false
+        super.onPause()
     }
 
     override fun onStop() {

@@ -129,8 +129,55 @@ class WakeModel(context: Context) {
     /** Frees the 36 MB, for example when the driver switches the wake word off for good. */
     fun delete() {
         job?.cancel()
+        synchronized(this) {
+            loaded?.close()
+            loaded = null
+        }
         root.deleteRecursively()
         _state.value = State.Missing
+    }
+
+    @Volatile private var loaded: org.vosk.Model? = null
+    private val loadLock = kotlinx.coroutines.sync.Mutex()
+
+    /** Why the last [loadModel] failed (shown on Settings › Voice › Check voice), or null. */
+    @Volatile var loadError: String? = null
+        private set
+
+    /**
+     * The loaded model, shared by the wake word and the offline command fallback (one copy in
+     * memory). Loaded once on first use; never closed while the app runs, except by [delete].
+     * A model that fails to load is deleted so the next [ensure] downloads it again.
+     */
+    suspend fun loadModel(): org.vosk.Model? {
+        loaded?.let { return it }
+        if (!isInstalled()) return null
+        return loadLock.withLockCompat {
+            loaded ?: kotlinx.coroutines.withContext(Dispatchers.IO) {
+                try {
+                    org.vosk.LibVosk.setLogLevel(org.vosk.LogLevel.WARNINGS)
+                    org.vosk.Model(modelDir.absolutePath).also {
+                        loaded = it
+                        loadError = null
+                    }
+                } catch (t: Throwable) {
+                    loadError = t.message ?: t.javaClass.simpleName
+                    // A broken unpack: remove it so the next ensure() fetches a fresh copy.
+                    File(modelDir, READY_MARKER).delete()
+                    _state.value = State.Failed(loadError ?: "load failed")
+                    null
+                }
+            }
+        }
+    }
+
+    private suspend fun <T> kotlinx.coroutines.sync.Mutex.withLockCompat(block: suspend () -> T): T {
+        lock()
+        try {
+            return block()
+        } finally {
+            unlock()
+        }
     }
 
     companion object {

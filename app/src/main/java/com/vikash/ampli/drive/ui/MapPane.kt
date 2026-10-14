@@ -38,6 +38,8 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.location.GpsState
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.map.GlanceMap
+import com.vikash.ampli.drive.map.MapDiagnostics
+import com.vikash.ampli.drive.map.BASIC_ATTRIBUTION
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
 import com.vikash.ampli.drive.ui.theme.CardStyle
@@ -53,6 +55,8 @@ fun MapPane(
     showTurn: Boolean = true,
     /** Parked car (lat, lon), pinned on the map. */
     parked: Pair<Double, Double>? = null,
+    textureMode: Boolean = true,
+    onNoFrames: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -87,14 +91,17 @@ fun MapPane(
                         styleUrl = theme.map.url,
                         puckColor = theme.mapPuck.toArgb(),
                         parked = parked,
+                        textureMode = textureMode,
+                        onNoFrames = onNoFrames,
                         modifier = Modifier.fillMaxSize(),
                     )
                     // Tint so the tiles sit in the theme's colour world (green HUD, magenta synthwave…).
                     if (theme.mapTint.alpha > 0f) Box(Modifier.fillMaxSize().background(theme.mapTint))
                     // Taps anywhere on the glance map hand off to Google Maps.
                     Box(Modifier.fillMaxSize().clickable(onClick = onOpenNavigation))
+                    val mapStatus by MapDiagnostics.status.collectAsStateWithLifecycle()
                     Text(
-                        GLANCE_ATTRIBUTION,
+                        if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · " + BASIC_ATTRIBUTION else GLANCE_ATTRIBUTION,
                         fontSize = dims.t(1.6f, min = 10f),
                         color = Color(0xFF3F3A44),
                         maxLines = 1,

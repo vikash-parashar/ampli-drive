@@ -64,7 +64,7 @@ private const val ARC_SWEEP = 270f
 
 /** Speed, speed limit and camera alerts, drawn in the active theme's speed style. */
 @Composable
-fun SpeedPane(gps: GpsState, cameraAlerts: CameraAlerts, modifier: Modifier = Modifier) {
+fun SpeedPane(gps: GpsState, cameraAlerts: CameraAlerts, modifier: Modifier = Modifier, rpm: Double? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val limit by cameraAlerts.speedLimitKmh.collectAsStateWithLifecycle()
@@ -72,15 +72,28 @@ fun SpeedPane(gps: GpsState, cameraAlerts: CameraAlerts, modifier: Modifier = Mo
     val speed = gps.speedKmh
 
     Pane(modifier, fill = theme.speedSurface) {
-        BoxWithConstraints(Modifier.fillMaxSize().padding(dims.d(2f))) {
-            when (theme.speedStyle) {
-                SpeedStyle.Arc -> ArcSpeed(speed, limit, maxWidth, maxHeight)
-                SpeedStyle.Number -> NumberSpeed(speed, limit, maxHeight)
-                SpeedStyle.Tach -> TachSpeed(speed, limit, maxWidth, maxHeight)
-                SpeedStyle.Tape -> TapeSpeed(speed, limit, maxHeight)
-                SpeedStyle.Giant -> GiantSpeed(speed, limit, maxHeight)
+        Column(Modifier.fillMaxSize().padding(dims.d(2f))) {
+            BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
+                when (theme.speedStyle) {
+                    SpeedStyle.Arc -> ArcSpeed(speed, limit, maxWidth, maxHeight)
+                    SpeedStyle.Number -> NumberSpeed(speed, limit, maxHeight)
+                    SpeedStyle.Tach -> TachSpeed(speed, limit, maxWidth, maxHeight)
+                    SpeedStyle.Tape -> TapeSpeed(speed, limit, maxHeight)
+                    SpeedStyle.Giant -> GiantSpeed(speed, limit, maxHeight)
+                }
+                alert?.let { CameraBanner(it, Modifier.align(Alignment.TopCenter).fillMaxWidth()) }
             }
-            alert?.let { CameraBanner(it, Modifier.align(Alignment.TopCenter).fillMaxWidth()) }
+            // Trip average and engine RPM; RPM needs the OBD-II dongle, so say so instead of a blank.
+            Text(
+                stringResource(R.string.speed_avg, gps.avgKmh?.roundToInt()?.toString() ?: "--") + "  ·  " +
+                    (rpm?.let { stringResource(R.string.speed_rpm, it.roundToInt()) } ?: stringResource(R.string.speed_rpm_connect)),
+                style = theme.labelStyle(theme.paneMuted),
+                fontSize = dims.t(2.1f, min = 12f),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

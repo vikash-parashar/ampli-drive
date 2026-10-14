@@ -23,15 +23,11 @@ import androidx.core.content.ContextCompat
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import org.vosk.LibVosk
-import org.vosk.LogLevel
 import org.vosk.Model
 import org.vosk.Recognizer
 import org.vosk.android.RecognitionListener
@@ -102,17 +98,20 @@ class VoiceService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            setStatus(Status.Failed("no microphone permission"))
             stopSelf()
             return START_NOT_STICKY
         }
         try {
             // The type is only passed on Android 10+; older versions have no service types.
             ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Android refused (for example started from the background on 14+).
+            setStatus(Status.Failed("foreground start refused: ${e.javaClass.simpleName}"))
             stopSelf()
             return START_NOT_STICKY
         }
+        if (!initialised) setStatus(Status.Starting)
         if (!initialised) {
             initialised = true
             init()
@@ -152,15 +151,10 @@ class VoiceService : Service() {
             }
         }
         scope.launch {
-            val loaded = withContext(Dispatchers.IO) {
-                try {
-                    LibVosk.setLogLevel(LogLevel.WARNINGS)
-                    Model(app.wakeModel.modelDir.absolutePath)
-                } catch (_: Throwable) {
-                    null
-                }
-            }
+            // Shared with the offline command fallback, so only one copy sits in memory.
+            val loaded = app.wakeModel.loadModel()
             if (loaded == null) {
+                setStatus(Status.Failed("model: " + (app.wakeModel.loadError ?: "missing")))
                 stopSelf()
                 return@launch
             }
@@ -172,6 +166,17 @@ class VoiceService : Service() {
     private fun evaluate() {
         val listen = model != null && enabled && !assistantBusy && !inCall && !promptPlaying
         if (listen && speech == null) startMic() else if (!listen && speech != null) stopMic()
+        if (model != null) {
+            setStatus(
+                when {
+                    speech != null -> Status.Listening
+                    inCall -> Status.Paused("call")
+                    promptPlaying -> Status.Paused("navigation prompt")
+                    assistantBusy -> Status.Paused("assistant")
+                    else -> Status.Paused("retrying mic")
+                },
+            )
+        }
     }
 
     private fun startMic() {
@@ -185,8 +190,9 @@ class VoiceService : Service() {
             recognizer = r
             speech = s
             s.startListening(wakeListener)
-        } catch (_: IOException) {
+        } catch (e: IOException) {
             // Mic held by another app (a call, Google Assistant). Try again shortly.
+            setStatus(Status.Failed("mic busy: ${e.message}"))
             stopMic()
             main.postDelayed(rearm, RETRY_MS)
         }
@@ -254,8 +260,9 @@ class VoiceService : Service() {
         }
         if (app.voice.releaseWakeMic != null) app.voice.releaseWakeMic = null
         scope.cancel()
-        model?.close()
+        // The model belongs to WakeModel (shared); it stays loaded.
         model = null
+        if (status.value !is Status.Failed) setStatus(Status.Stopped)
         super.onDestroy()
     }
 
@@ -281,7 +288,24 @@ class VoiceService : Service() {
         return builder.build()
     }
 
+    /** What the wake word is doing, for Settings › Voice › Check voice. */
+    sealed interface Status {
+        data object Off : Status
+        data object Starting : Status
+        data object Listening : Status
+        data class Paused(val why: String) : Status
+        data object Stopped : Status
+        data class Failed(val why: String) : Status
+    }
+
     companion object {
+        private val _status = kotlinx.coroutines.flow.MutableStateFlow<Status>(Status.Off)
+        val status: kotlinx.coroutines.flow.StateFlow<Status> = _status
+
+        private fun setStatus(s: Status) {
+            _status.value = s
+        }
+
         private const val NOTIFICATION_ID = 4107
         private const val CHANNEL_ID = "hey_ampli"
         private const val SAMPLE_RATE = 16000f
@@ -290,12 +314,26 @@ class VoiceService : Service() {
 
         fun start(context: Context): Boolean {
             val app = context.applicationContext as DriveApp
-            if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return false
-            if (!app.prefs.voiceAlways.value || !app.wakeModel.isInstalled()) return false
+            if (!app.prefs.voiceAlways.value) {
+                setStatus(Status.Off)
+                return false
+            }
+            if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                setStatus(Status.Failed("no microphone permission"))
+                return false
+            }
+            if (!app.wakeModel.isInstalled()) {
+                // A download that failed (or never ran) is retried here, so the wake word comes
+                // up by itself after boot instead of waiting for Settings to be opened.
+                app.wakeModel.ensure()
+                setStatus(Status.Failed("model not downloaded yet"))
+                return false
+            }
             return try {
                 context.startForegroundService(Intent(context, VoiceService::class.java))
                 true
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                setStatus(Status.Failed("start refused: ${e.javaClass.simpleName}"))
                 false
             }
         }

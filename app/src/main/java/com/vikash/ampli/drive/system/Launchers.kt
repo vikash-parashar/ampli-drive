@@ -11,7 +11,6 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.StringRes
 import com.vikash.ampli.drive.R
-import com.vikash.ampli.drive.media.MediaHub
 import com.vikash.ampli.drive.service.DriveNotificationListener
 
 /** Every intent the launcher fires, in one place. All return true when something opened. */
@@ -23,9 +22,6 @@ object Launchers {
         "com.zjinnova.zlink",
         "com.google.android.projection.gearhead",
     )
-
-    /** FYT head units keep the dialer inside their Bluetooth app. */
-    private const val FYT_BT_PACKAGE = "com.syu.bt"
 
     fun openNavigation(context: Context, location: Location?): Boolean {
         if (openPackage(context, GOOGLE_MAPS, quiet = true)) return true
@@ -55,20 +51,11 @@ object Launchers {
         return start(context, intent, R.string.error_cannot_open_app)
     }
 
-    fun openDialer(context: Context): Boolean {
-        if (start(context, Intent(Intent.ACTION_DIAL), null)) return true
-        if (openPackage(context, FYT_BT_PACKAGE, quiet = true)) return true
-        toast(context, R.string.error_no_phone_app)
-        return false
-    }
+    /** Phone button: see [AppResolver.openPhone] (dialer, BT phone app, or the app picker). */
+    fun openDialer(context: Context): Boolean = AppResolver.openPhone(context)
 
-    /** The app behind the music card, else Ampli. */
-    fun openMusic(context: Context, currentPackage: String?): Boolean {
-        if (currentPackage != null && openPackage(context, currentPackage, quiet = true)) return true
-        if (openPackage(context, MediaHub.AMPLI_PACKAGE, quiet = true)) return true
-        toast(context, R.string.error_no_music_app)
-        return false
-    }
+    /** Music button: see [AppResolver.openMusic] (the driver's pick, the playing app, Multimedia…). */
+    fun openMusic(context: Context, currentPackage: String?): Boolean = AppResolver.openMusic(context, currentPackage)
 
     /** Returns false when nothing is set up, so the caller can show the app picker. */
     fun openPhoneLink(context: Context, pinnedPackage: String?): Boolean {

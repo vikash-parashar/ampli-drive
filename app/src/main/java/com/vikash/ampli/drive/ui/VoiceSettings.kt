@@ -41,10 +41,11 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.VoiceActions
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.WakeModel
+import com.vikash.ampli.drive.prefs.VoiceStyle
 
 /** Settings › Voice: the wake-word switch, its model download, and the permissions voice needs. */
 @Composable
-internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
+internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck: () -> Unit = {}) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
@@ -180,6 +181,13 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int) {
                 secondary = if (hasMic) null else stringResource(R.string.action_app_settings),
                 onSecondary = { Launchers.openAppDetails(context) },
             )
+            // Settings › Voice › Check voice: mic, model, recogniser and TTS in one photo-able screen.
+            StatusLine(
+                text = stringResource(R.string.vcheck_entry),
+                ok = true,
+                action = stringResource(R.string.vcheck_open),
+                onAction = onOpenVoiceCheck,
+            )
             StatusLine(
                 text = stringResource(R.string.voice_media_title) + " · " +
                     stringResource(if (hasMusic) R.string.voice_media_ok else R.string.voice_media_needed),
@@ -222,5 +230,21 @@ private fun StatusLine(
         Text(text, color = theme.text, fontSize = dims.t(2.5f, min = 15f), modifier = Modifier.weight(1f))
         if (secondary != null) BigButton(text = secondary, onClick = onSecondary, primary = false)
         if (action != null) BigButton(text = action, onClick = onAction, primary = !ok)
+    }
+}
+
+/** Settings › Voice style: Standard, or the playful Haryanvi desi pack (free, off by default). */
+@Composable
+internal fun VoiceStyleCard(app: DriveApp) {
+    val dims = LocalDims.current
+    val style by app.prefs.voiceStyle.collectAsStateWithLifecycle()
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+            CardTitle(stringResource(R.string.voice_style_title), stringResource(R.string.voice_style_hint))
+            Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+                Chip(stringResource(R.string.voice_style_standard), style == VoiceStyle.Standard, { app.prefs.setVoiceStyle(VoiceStyle.Standard) })
+                Chip(stringResource(R.string.voice_style_haryanvi), style == VoiceStyle.Haryanvi, { app.prefs.setVoiceStyle(VoiceStyle.Haryanvi) })
+            }
+        }
     }
 }

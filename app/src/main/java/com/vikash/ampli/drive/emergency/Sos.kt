@@ -47,7 +47,8 @@ object Sos {
 
     /** Opens the dialer with [number] filled in. */
     fun dial(context: Context, number: String): Boolean =
-        start(context, Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", number, null)))
+        // Falls back to the head unit's BT phone app (number copied and shown) or the app picker.
+        com.vikash.ampli.drive.system.AppResolver.dial(context, number)
 
     /** Opens the SMS app with all [numbers] as recipients and [body] typed in. */
     fun openSmsComposer(context: Context, numbers: List<String>, body: String): Boolean {

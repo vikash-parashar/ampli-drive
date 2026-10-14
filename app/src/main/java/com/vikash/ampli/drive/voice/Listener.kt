@@ -19,7 +19,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * on-device one is missing or lacks the language. The wake-word engine has already released
  * the microphone by the time this runs. All calls from the main thread.
  */
-class Listener(context: Context) {
+class Listener(context: Context, private val offline: VoskCommandListener? = null) {
     private val appContext = context.applicationContext
     private val audio = appContext.getSystemService(AudioManager::class.java)
     private var current: SpeechRecognizer? = null
@@ -35,19 +35,27 @@ class Listener(context: Context) {
         .build()
 
     sealed interface Result {
-        data class Heard(val text: String) : Result
+        /** [offline]: heard by the Vosk fallback (English command phrases). */
+        data class Heard(val text: String, val offline: Boolean = false) : Result
         data object Silence : Result
         data object Unavailable : Result
     }
 
-    fun isAvailable(): Boolean = SpeechRecognizer.isRecognitionAvailable(appContext) || onDeviceAvailable()
+    fun isAvailable(): Boolean = systemAvailable() || offline?.isReady() == true
+
+    /** Android's own recogniser (Google or the vendor's), without the offline fallback. */
+    fun systemAvailable(): Boolean = SpeechRecognizer.isRecognitionAvailable(appContext) || onDeviceAvailable()
 
     /** On-device recognition is an Android 12+ API; older units use the recognition service only. */
     private fun onDeviceAvailable(): Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
 
-    /** Listens once. [onPartial] gets the live transcript for the overlay. */
-    suspend fun listen(appLanguage: String, onPartial: (String) -> Unit): Result {
+    /**
+     * Listens once. [onPartial] gets the live transcript for the overlay. Without a system
+     * recogniser (or when it fails), the offline Vosk model listens instead: with [commandsOnly]
+     * it hears just the command phrases, else it transcribes freely (for "where to?").
+     */
+    suspend fun listen(appLanguage: String, onPartial: (String) -> Unit, commandsOnly: Boolean = true): Result {
         audio?.requestAudioFocus(listenFocus)
         try {
             val tags = VoiceLocales.recognition(appLanguage)
@@ -60,13 +68,15 @@ class Listener(context: Context) {
                     if (service) add(false to tag)
                 }
             }
-            if (attempts.isEmpty()) return Result.Unavailable
             for ((device, tag) in attempts) {
                 when (val r = once(device, tag, onPartial)) {
                     Attempt.LanguageMissing, Attempt.EngineFailed -> continue
                     is Attempt.Done -> return r.result
                 }
             }
+            // No recogniser, or every attempt failed (no Google app, no network): offline Vosk.
+            val vosk = offline
+            if (vosk != null && vosk.isReady()) return vosk.listen(commandsOnly, onPartial)
             return Result.Unavailable
         } finally {
             audio?.abandonAudioFocusRequest(listenFocus)
@@ -74,6 +84,7 @@ class Listener(context: Context) {
     }
 
     fun cancel() {
+        offline?.cancel()
         current?.let {
             try {
                 it.cancel()

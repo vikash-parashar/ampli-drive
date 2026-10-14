@@ -39,7 +39,9 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <!-- No RECEIVE_BOOT_COMPLETED: a microphone service can't start from boot (see VoiceService). -->
+    <!-- Boot only marks "the car started" (greeting, Settings › When the car starts); the actions run
+         when the launcher shows. The wake-word microphone service is still never started from boot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- The head unit has GPS but may lack some of these; none are required to install. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -60,6 +62,18 @@
         <!-- Phone button. -->
         <intent>
             <action android:name="android.intent.action.DIAL" />
+        </intent>
+        <!-- Music button: the default music app, and apps that play audio files. (The MAIN/LAUNCHER
+             query above already makes every launchable app visible, so the head unit's own
+             "Multimedia", "BT music" and "BT phone" apps can be matched by label. No
+             QUERY_ALL_PACKAGES needed.) -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.APP_MUSIC" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="content" android:mimeType="audio/*" />
         </intent>
         <!-- Navigate fallback when Google Maps is missing. -->
         <intent>
@@ -189,6 +203,16 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <!-- Boot: marks the car start as pending (see car/CarStart.kt). -->
+        <receiver
+            android:name=".car.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <!-- "Hey Ampli" wake word (Vosk, offline). Started only from the visible launcher. -->
         <service

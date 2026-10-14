@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.core.app.NotificationManagerCompat
+import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.service.DriveNotificationListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -154,6 +155,35 @@ class MediaHub(context: Context) {
     /** Package of the session shown in the music card, if any. */
     fun currentPackage(): String? = selected?.packageName
 
+    /** Presses play on [pkg]'s media session, if it has one. Works while the launcher is hidden. */
+    fun play(pkg: String): Boolean {
+        if (!hasAccess() || msm == null) return false
+        return try {
+            val c = msm.getActiveSessions(listenerComponent).firstOrNull { it.packageName == pkg } ?: return false
+            c.transportControls.play()
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Apps with a media session right now, playing ones first. Works while the home screen is
+     * hidden too (it asks MediaSessionManager directly). Empty without notification access.
+     */
+    fun activePackages(): List<String> {
+        if (!hasAccess() || msm == null) return emptyList()
+        return try {
+            msm.getActiveSessions(listenerComponent)
+                .sortedByDescending { isPlaying(it) }
+                .map { it.packageName }
+                .filter { it != appContext.packageName }
+                .distinct()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     private fun onSessions(list: List<MediaController>) {
         unregisterAll()
         controllers = list
@@ -188,6 +218,10 @@ class MediaHub(context: Context) {
             ?: list.firstOrNull { isPlaying(it) }
             ?: list.firstOrNull()
         selected = chosen
+        // Remembered for the Music button, so it reopens the last player after a restart.
+        chosen?.packageName?.takeIf { it != appContext.packageName }?.let { pkg ->
+            (appContext as? DriveApp)?.prefs?.lastMediaPackage = pkg
+        }
         val sources = list.map { it.packageName }.distinct().map { MediaSource(it, labelFor(it)) }
         _state.value = MediaUiState(
             accessGranted = true,
