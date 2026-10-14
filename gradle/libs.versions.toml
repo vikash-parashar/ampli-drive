@@ -11,6 +11,8 @@ maplibre = "11.8.8"
 # Google Play Billing for the one-time Ampli Drive Pro unlock (same version as the Ampli music app).
 billing = "7.1.1"
 junit = "4.13.2"
+# Backdrop blur for the Glass themes (Apache-2.0). 1.2.2 is built on Compose 1.7.6 and Kotlin 2.1.0, like this app.
+haze = "1.2.2"
 # Offline "Hey Ampli" wake-word spotting (Apache-2.0). Needs JNA as an AAR (see app/build.gradle.kts).
 vosk = "0.3.47"
 
@@ -27,6 +29,7 @@ androidx-compose-material-icons-extended = { group = "androidx.compose.material"
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibre" }
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 

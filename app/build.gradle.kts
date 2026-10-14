@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.maplibre.android)
     implementation(libs.billing.ktx)
+    implementation(libs.haze)
 
     // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
     implementation(libs.vosk.android)

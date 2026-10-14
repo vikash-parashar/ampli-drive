@@ -1,5 +1,6 @@
 package com.vikash.ampli.drive.ui.theme
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
@@ -8,6 +9,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.prefs.DrivePrefs
 import com.vikash.ampli.drive.prefs.ThemeChoice
 
@@ -15,13 +17,18 @@ import com.vikash.ampli.drive.prefs.ThemeChoice
 enum class CardStyle { Glass, Solid, Outline, Neumorphic, NeonGlow, Skewed, Pop }
 
 /** Full-screen pattern drawn behind (or, for scanlines, over) the home screen. */
-enum class Decoration { None, Vignette, Carbon, Synthwave, Jaali, Scanlines, Stripes, Holi }
+enum class Decoration {
+    None, Vignette, Carbon, Synthwave, Jaali, Scanlines, Stripes, Holi,
+
+    /** Colourful gradient with soft blobs, for glass panels to blur ([DriveTheme.glass]). */
+    Glass,
+}
 
 /** Order and size of the three home panes. */
 enum class HomeLayout { MapSpeedMusic, SpeedMapMusic, MusicSpeedMap, MapStacked, MapTopRow, GiantSpeed }
 
 /** Picker groups. */
-enum class ThemeFamily { Classic, Saffron, Soft }
+enum class ThemeFamily { Classic, Glass, Saffron, Soft }
 
 /** How the speed pane draws the speed. */
 enum class SpeedStyle { Arc, Number, Tach, Tape, Giant }
@@ -53,7 +60,6 @@ data class DriveTheme(
     val id: String,
     val number: Int,
     val name: String,
-    val isPro: Boolean,
     val isLight: Boolean,
 
     // Surfaces and text
@@ -141,7 +147,24 @@ data class DriveTheme(
     // drivers and responders should recognise it at a glance.
     val danger: Color = Color(0xFFD7263D),
     val onDanger: Color = Color.White,
+
+    /** Frosted-glass colours for the Glass family, or null. Panels then blur the backdrop. */
+    val glass: GlassPalette? = null,
+    /** Translated name, where there is one; otherwise [name] is shown. */
+    @StringRes val nameRes: Int? = null,
 ) {
+    /** Pro themes need the one-time purchase. The free set lives in [ThemeAccess.FREE_IDS]. */
+    val isPro: Boolean get() = !ThemeAccess.isFree(id)
+
+    /**
+     * The same glass theme without blur ("Reduce glass effects", or no blur on this device):
+     * panels get a stronger tint so text keeps its contrast. Other themes are returned as they are.
+     */
+    fun withoutBlur(): DriveTheme {
+        val g = glass ?: return this
+        return copy(surface = Color(g.reducedPanel))
+    }
+
     /** The theme as seen inside the music card (paper colours where the theme has them). */
     fun forMusicCard(): DriveTheme = if (musicSurface == null) {
         this
@@ -159,7 +182,7 @@ private fun solid(color: Color): Brush = Brush.linearGradient(listOf(color, colo
 object DriveThemes {
 
     val MidnightGlass = DriveTheme(
-        id = "midnight_glass", number = 1, name = "Midnight Glass", isPro = true, isLight = false,
+        id = "midnight_glass", number = 1, name = "Midnight Glass", isLight = false,
         background = c(0xFF070B14), surface = c(0x940A1222), surfaceHigh = c(0x14FFFFFF),
         border = c(0x29A0DCFF), borderWidth = 1.dp, text = c(0xFFE6F1FF), muted = c(0xFF9CB3D4),
         accent = c(0xFF22D3EE), onAccent = c(0xFF04131A), accentSoft = c(0xFFBFE9F5), accent2 = c(0xFF22D3EE),
@@ -177,7 +200,7 @@ object DriveThemes {
     )
 
     val AmpliRose = DriveTheme(
-        id = DrivePrefs.DEFAULT_NIGHT, number = 2, name = "Ampli Rose", isPro = false, isLight = false,
+        id = DrivePrefs.DEFAULT_NIGHT, number = 2, name = "Ampli Rose", isLight = false,
         background = c(0xFF0F0D14), surface = c(0xFF1C1820), surfaceHigh = c(0xFF2A2530),
         border = c(0xFF2A2530), borderWidth = 1.dp, text = c(0xFFF5F3F7), muted = c(0xFFA39FAB),
         accent = c(0xFFE11D48), onAccent = Color.White, accentSoft = c(0xFFFDA4AF), accent2 = c(0xFFFB7185),
@@ -195,7 +218,7 @@ object DriveThemes {
     )
 
     val DaylightClean = DriveTheme(
-        id = DrivePrefs.DEFAULT_DAY, number = 3, name = "Daylight Clean", isPro = false, isLight = true,
+        id = DrivePrefs.DEFAULT_DAY, number = 3, name = "Daylight Clean", isLight = true,
         background = c(0xFFEEF1F5), surface = Color.White, surfaceHigh = c(0xFFEEF1F5),
         border = c(0xFFCDD3DE), borderWidth = 1.5.dp, text = c(0xFF0B1220), muted = c(0xFF4A5568),
         accent = c(0xFF1D4ED8), onAccent = Color.White, accentSoft = c(0xFF1D4ED8), accent2 = c(0xFF1D4ED8),
@@ -212,7 +235,7 @@ object DriveThemes {
     )
 
     val SportRed = DriveTheme(
-        id = "sport_red", number = 4, name = "Sport Red", isPro = true, isLight = false,
+        id = "sport_red", number = 4, name = "Sport Red", isLight = false,
         background = c(0xFF101012), surface = c(0xEB141417), surfaceHigh = c(0xFF1F1F23),
         border = c(0xFF2C2C31), borderWidth = 1.dp, text = c(0xFFF4F4F5), muted = c(0xFFA1A1AA),
         accent = c(0xFFE10600), onAccent = Color.White, accentSoft = c(0xFFFF6A63), accent2 = c(0xFFFF1E1E),
@@ -229,7 +252,7 @@ object DriveThemes {
     )
 
     val Synthwave = DriveTheme(
-        id = "retro_synthwave", number = 5, name = "Retro Synthwave", isPro = true, isLight = false,
+        id = "retro_synthwave", number = 5, name = "Retro Synthwave", isLight = false,
         background = c(0xFF12002A), surface = c(0xCC12002A), surfaceHigh = c(0x1F00F0FF),
         border = c(0xFFFF2E97), borderWidth = 2.dp, text = c(0xFFF7E8FF), muted = c(0xFFE0B3FF),
         accent = c(0xFFFF2E97), onAccent = c(0xFF12002A), accentSoft = c(0xFFFFB3DC), accent2 = c(0xFF00F0FF),
@@ -246,7 +269,7 @@ object DriveThemes {
     )
 
     val MinimalMono = DriveTheme(
-        id = "minimal_mono", number = 6, name = "Minimal Mono", isPro = true, isLight = false,
+        id = "minimal_mono", number = 6, name = "Minimal Mono", isLight = false,
         background = c(0xFF0A0A0A), surface = c(0xFF0A0A0A), surfaceHigh = c(0xFF1A1A1A),
         border = c(0xFF2A2A2A), borderWidth = 1.dp, text = c(0xFFFAFAFA), muted = c(0xFFA3A3A3),
         accent = c(0xFFFAFAFA), onAccent = c(0xFF0A0A0A), accentSoft = c(0xFFFAFAFA), accent2 = c(0xFFFFE600),
@@ -281,7 +304,7 @@ object DriveThemes {
     )
 
     val HudGreen = DriveTheme(
-        id = "hud_green", number = 9, name = "HUD Green", isPro = true, isLight = false,
+        id = "hud_green", number = 9, name = "HUD Green", isLight = false,
         background = c(0xFF020A06), surface = c(0xC7020A06), surfaceHigh = c(0x1F39FF88),
         border = c(0xFF1F7A4A), borderWidth = 2.dp, text = c(0xFF39FF88), muted = c(0xFF2FBF6C),
         accent = c(0xFF39FF88), onAccent = c(0xFF020A06), accentSoft = c(0xFF39FF88), accent2 = c(0xFF39FF88),
@@ -393,9 +416,45 @@ object DriveThemes {
         )
     }
 
-    /** Picker order: Classic (01–06, 09), Saffron family, Soft family. Luxury Gold (design 10) is not shipped. */
+    // ------------------------------------------------ Glass family (iOS-style frosted and tinted glass)
+
+    val FrostedGlass = glass(
+        id = ThemeAccess.FROSTED_GLASS, code = "G1", name = "Frosted Glass", nameRes = R.string.theme_frosted_glass,
+        p = GlassPalettes.Frosted, layout = HomeLayout.MapSpeedMusic, map = MapLook.Positron,
+    )
+
+    val MidnightFrost = glass(
+        id = ThemeAccess.MIDNIGHT_FROST, code = "G2", name = "Midnight Frost", nameRes = R.string.theme_midnight_frost,
+        p = GlassPalettes.MidnightFrost, layout = HomeLayout.MapSpeedMusic, map = MapLook.Dark,
+    )
+
+    val RoseGlass = glass(
+        id = "rose_glass", code = "G3", name = "Ampli Rose Glass", nameRes = R.string.theme_rose_glass,
+        p = GlassPalettes.Rose, layout = HomeLayout.SpeedMapMusic, map = MapLook.Dark,
+    )
+
+    val CyanGlass = glass(
+        id = "cyan_glass", code = "G4", name = "Cyan Glass", nameRes = R.string.theme_cyan_glass,
+        p = GlassPalettes.Cyan, layout = HomeLayout.MapStacked, map = MapLook.Positron,
+    )
+
+    val VioletGlass = glass(
+        id = "violet_glass", code = "G5", name = "Violet Glass", nameRes = R.string.theme_violet_glass,
+        p = GlassPalettes.Violet, layout = HomeLayout.MapSpeedMusic, map = MapLook.Fiord,
+    )
+
+    val SunsetGlass = glass(
+        id = "sunset_glass", code = "G6", name = "Sunset Glass", nameRes = R.string.theme_sunset_glass,
+        p = GlassPalettes.Sunset, layout = HomeLayout.MusicSpeedMap, map = MapLook.Liberty,
+    )
+
+    /**
+     * Picker order: Classic (01–06, 09), Glass family, Saffron family, Soft family.
+     * Luxury Gold (design 10) is not shipped.
+     */
     val all: List<DriveTheme> = listOf(
         MidnightGlass, AmpliRose, DaylightClean, SportRed, Synthwave, MinimalMono, HudGreen,
+        FrostedGlass, MidnightFrost, RoseGlass, CyanGlass, VioletGlass, SunsetGlass,
         DesiSaffron, SaffronDay, RajasthaniPink, KeralaGreen, BanarasiRoyal, HoliPop,
         Neumorphic, SoftNight, SoftMint, SoftPeach, SoftLavender, SoftGlass,
     )
@@ -406,16 +465,38 @@ object DriveThemes {
      * The theme to show now. A Pro theme without Pro (refund, test switch turned off) falls
      * back to the free theme for that time of day.
      */
-    fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme {
-        val id = when {
-            !choice.auto -> choice.fixedId
-            night -> choice.nightId
-            else -> choice.dayId
-        }
-        val wanted = byId(id)
-        val fallback = if (choice.auto && !night) DaylightClean else AmpliRose
-        return if (wanted == null || (wanted.isPro && !isPro)) fallback else wanted
-    }
+    fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme =
+        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: AmpliRose
+
+    private val ids: Set<String> = all.mapTo(HashSet()) { it.id }
+}
+
+/** Glass family: translucent tinted panels that blur a colourful backdrop, thin bright edges. */
+private fun glass(
+    id: String, code: String, name: String, @StringRes nameRes: Int, p: GlassPalette,
+    layout: HomeLayout, map: MapLook,
+): DriveTheme {
+    val text = c(p.text)
+    val accent = c(p.accent)
+    return DriveTheme(
+        id = id, number = 0, name = name, isLight = p.light,
+        background = c(p.top), surface = c(p.panel), surfaceHigh = if (p.light) c(0x73FFFFFF) else c(0x1FFFFFFF),
+        border = c(p.edgeTop), borderWidth = 1.dp, text = text, muted = c(p.muted),
+        accent = accent, onAccent = c(p.onAccent), accentSoft = accent, accent2 = c(p.gauge2),
+        warning = if (p.light) c(0xFFB45309) else c(0xFFFBBF24), ok = if (p.light) c(0xFF15803D) else c(0xFF4ADE80),
+        track = if (p.light) c(0x1F0B1220) else c(0x26FFFFFF), gauge = listOf(accent, c(p.gauge2)), glow = null,
+        turnBackground = solid(c(p.overMap)), turnText = text, turnMuted = c(p.muted),
+        turnTile = Brush.linearGradient(listOf(accent, c(p.gauge2))), turnTileText = c(p.onAccent),
+        turnBorder = c(p.edgeTop),
+        speedSurface = null, speedText = null,
+        dockActive = accent, onDockActive = c(p.onAccent), limitRing = Color(0xFFE21B1B),
+        radius = 5f, cardStyle = CardStyle.Glass, font = FontChoice.Sans, numberWeight = FontWeight.SemiBold,
+        italicNumbers = false, labelSpacing = 0.02f, upperLabels = false,
+        decoration = Decoration.Glass, layout = layout, speedStyle = SpeedStyle.Arc,
+        map = map, mapTint = Color.Transparent, mapPuck = accent,
+        family = ThemeFamily.Glass, code = code,
+        glass = p, nameRes = nameRes,
+    )
 }
 
 /** Saffron family: a saffron speed card, a deep turn card, cream "paper" music card, script greeting. */
@@ -430,7 +511,7 @@ private fun saffron(
     border: Long = appline, cardStyle: CardStyle = CardStyle.Solid,
     speedFill: Long = acc, speedInk: Long = onacc,
 ): DriveTheme = DriveTheme(
-    id = id, number = 0, name = name, isPro = true, isLight = light,
+    id = id, number = 0, name = name, isLight = light,
     background = c(bg), surface = c(deep), surfaceHigh = c(appbg),
     border = c(border), borderWidth = if (cardStyle == CardStyle.Pop) 3.dp else 2.dp, text = c(fg), muted = c(fg2),
     accent = c(acc), onAccent = c(onacc), accentSoft = c(acc2), accent2 = c(acc),
@@ -456,7 +537,7 @@ private fun soft(
     acc: Long, onacc: Long, warn: Long, trk: Long,
     layout: HomeLayout, map: MapLook, mapTint: Long = 0x00000000,
 ): DriveTheme = DriveTheme(
-    id = id, number = 0, name = name, isPro = true, isLight = light,
+    id = id, number = 0, name = name, isLight = light,
     background = c(nb), surface = c(nb), surfaceHigh = c(nb),
     border = Color.Transparent, borderWidth = 0.dp, text = c(fg), muted = c(mut),
     accent = c(acc), onAccent = c(onacc), accentSoft = c(acc), accent2 = c(acc),

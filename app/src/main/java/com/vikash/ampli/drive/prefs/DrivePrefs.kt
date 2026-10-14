@@ -55,6 +55,16 @@ class DrivePrefs(context: Context) {
     private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
     val voiceAlways: StateFlow<Boolean> = _voiceAlways.asStateFlow()
 
+    /**
+     * "Reduce glass effects": glass themes use a tinted panel with no backdrop blur. Until the
+     * driver changes it, it follows the device: on for low-RAM units (2 GB or less).
+     */
+    val reduceGlassByDevice: Boolean = DeviceClass.isLowEnd(context)
+    private val _reduceGlass = MutableStateFlow(
+        if (sp.contains(KEY_REDUCE_GLASS)) sp.getBoolean(KEY_REDUCE_GLASS, false) else reduceGlassByDevice,
+    )
+    val reduceGlass: StateFlow<Boolean> = _reduceGlass.asStateFlow()
+
     /** Speed-camera alerts: on/off, spoken alerts (Pro), alert distance in metres, quiet unless over the limit. */
     private val _cameraAlerts = MutableStateFlow(sp.getBoolean(KEY_CAM_ON, true))
     val cameraAlerts: StateFlow<Boolean> = _cameraAlerts.asStateFlow()
@@ -103,6 +113,11 @@ class DrivePrefs(context: Context) {
         if (!BuildConfig.DEBUG) return
         sp.edit().putBoolean(KEY_PRO_TEST, value).apply()
         _pro.value = _pro.value.copy(testUnlock = value)
+    }
+
+    fun setReduceGlass(value: Boolean) {
+        sp.edit().putBoolean(KEY_REDUCE_GLASS, value).apply()
+        _reduceGlass.value = value
     }
 
     fun setLanguage(tag: String) {
@@ -154,7 +169,7 @@ class DrivePrefs(context: Context) {
     }
 
     companion object {
-        /** The two free themes. Keep in sync with DriveThemes. */
+        /** Free defaults for day and night. The full free set is ThemeAccess.FREE_IDS. */
         const val DEFAULT_DAY = "daylight_clean"
         const val DEFAULT_NIGHT = "ampli_rose"
 
@@ -176,6 +191,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_CAM_VOICE = "camera_voice"
         private const val KEY_CAM_DISTANCE = "camera_distance"
         private const val KEY_CAM_OVER_ONLY = "camera_over_only"
+        private const val KEY_REDUCE_GLASS = "reduce_glass"
 
         /** Choices for the camera alert distance, in metres. */
         val CAMERA_DISTANCES = listOf(300, 500, 800)

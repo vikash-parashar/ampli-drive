@@ -81,6 +81,7 @@ fun DriveTheme.labelStyle(color: Color = muted): TextStyle = TextStyle(
 fun Pane(
     modifier: Modifier = Modifier,
     fill: Color? = null,
+    blur: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val dims = LocalDims.current
@@ -88,7 +89,7 @@ fun Pane(
     val shape = theme.cardShape(dims)
     val color = fill ?: theme.surface
     Box(
-        modifier = modifier.themedCard(theme, shape, fill = Brush.linearGradient(listOf(color, color))),
+        modifier = modifier.themedCard(theme, shape, fill = Brush.linearGradient(listOf(color, color)), blur = blur),
     ) { content() }
 }
 
@@ -110,7 +111,13 @@ fun Pill(
     Row(
         modifier = modifier
             .clip(shape)
-            .background(background ?: theme.surface)
+            // Pills don't blur (they often sit on the map), so glass themes use the stronger tint.
+            .background(
+                (background ?: theme.surface).let { bg ->
+                    val glass = theme.glass
+                    if (glass != null && bg == theme.surface) Color(glass.reducedPanel) else bg
+                },
+            )
             .border(1.dp, theme.border, shape)
             .then(clickMod)
             .padding(horizontal = dims.d(1.8f), vertical = dims.d(0.9f)),

@@ -97,7 +97,7 @@ fun HelpDockButton(onTap: () -> Unit, onHold: () -> Unit, modifier: Modifier = M
 
     Column(
         modifier = modifier
-            .themedCard(theme, shape, fill = Brush.linearGradient(listOf(theme.danger, theme.danger)), border = theme.danger)
+            .themedCard(theme, shape, fill = Brush.linearGradient(listOf(theme.danger, theme.danger)), border = theme.danger, blur = false)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -290,7 +290,7 @@ private fun HelpPanel(
                         .fillMaxWidth()
                         .weight(1f)
                         .heightIn(min = 120.dp)
-                        .themedCard(theme, theme.cardShape(dims), fill = Brush.linearGradient(listOf(theme.danger, theme.danger)), border = theme.danger)
+                        .themedCard(theme, theme.cardShape(dims), fill = Brush.linearGradient(listOf(theme.danger, theme.danger)), border = theme.danger, blur = false)
                         .clickable(onClick = onSos)
                         .padding(dims.d(2f)),
                     horizontalAlignment = Alignment.CenterHorizontally,

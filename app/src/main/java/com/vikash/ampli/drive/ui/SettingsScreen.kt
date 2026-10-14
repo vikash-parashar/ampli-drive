@@ -7,6 +7,7 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -55,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,6 +95,7 @@ fun SettingsScreen(
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
     val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
+    val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
     val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
     val price by app.billing.price.collectAsStateWithLifecycle()
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
@@ -122,6 +126,14 @@ fun SettingsScreen(
                 isPro = pro.isPro,
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
+            )
+            ToggleRow(
+                title = stringResource(R.string.glass_reduce_title),
+                status = stringResource(
+                    if (app.prefs.reduceGlassByDevice) R.string.glass_reduce_hint_auto else R.string.glass_reduce_hint,
+                ),
+                checked = reduceGlass,
+                onChange = app.prefs::setReduceGlass,
             )
             if (BuildConfig.DEBUG) {
                 ToggleRow(
@@ -207,6 +219,7 @@ fun SettingsScreen(
                 onChange = app.prefs::setKeepScreenOn,
             )
             InfoCard(
+                logo = true,
                 title = stringResource(R.string.about_title),
                 lines = listOfNotNull(
                     "Ampli Car Hub ${BuildConfig.VERSION_NAME}",
@@ -426,6 +439,7 @@ private fun ThemePicker(
                         stringResource(
                             when (family) {
                                 ThemeFamily.Classic -> R.string.theme_family_classic
+                                ThemeFamily.Glass -> R.string.theme_family_glass
                                 ThemeFamily.Saffron -> R.string.theme_family_saffron
                                 ThemeFamily.Soft -> R.string.theme_family_soft
                             },
@@ -550,7 +564,7 @@ private fun ThemeCard(
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
             )
             Text(
-                theme.name,
+                theme.nameRes?.let { stringResource(it) } ?: theme.name,
                 fontSize = dims.t(2.4f, min = 14f),
                 fontWeight = FontWeight.SemiBold,
                 color = ui.text,
@@ -600,6 +614,8 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
                 ),
             )
             drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
+        } else if (t.decoration == Decoration.Glass && t.glass != null) {
+            drawGlassBackdrop(t.glass)
         } else {
             drawRect(t.background)
         }
@@ -750,7 +766,7 @@ internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, 
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
                 for (t in listOf(
                     DriveThemes.MidnightGlass, DriveThemes.SportRed, DriveThemes.Synthwave,
-                    DriveThemes.DesiSaffron, DriveThemes.HoliPop, DriveThemes.SoftNight,
+                    DriveThemes.RoseGlass, DriveThemes.HoliPop, DriveThemes.SoftNight,
                 )) {
                     Box(
                         Modifier
@@ -810,11 +826,19 @@ private fun LanguagePicker(selected: String, onSelect: (String) -> Unit) {
 }
 
 @Composable
-private fun InfoCard(title: String, lines: List<String>) {
+private fun InfoCard(title: String, lines: List<String>, logo: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     SettingCard {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (logo) {
+                // "dark" lockup is the one made for dark backgrounds.
+                Image(
+                    painterResource(if (theme.isLight) R.drawable.logo_carhub_horizontal_light else R.drawable.logo_carhub_horizontal_dark),
+                    contentDescription = stringResource(R.string.app_name),
+                    modifier = Modifier.padding(bottom = dims.d(1f)).height(maxOf(dims.d(8f), 48.dp)),
+                )
+            }
             Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = theme.text)
             for (line in lines) {
                 Text(line, fontSize = dims.t(2.3f), color = theme.muted)
