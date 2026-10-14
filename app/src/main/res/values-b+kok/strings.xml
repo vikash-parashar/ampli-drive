@@ -78,7 +78,6 @@
     <string name="screen_on_hint">होम स्क्रीन दिसता तोमेरेन</string>
     <string name="about_title">माहिती</string>
     <string name="about_map">नकासो: %1$s</string>
-    <string name="about_limits">वेग मर्यादा आनी स्पीड कॅमेरा डेटा अजून उपलब्ध ना.</string>
     <string name="theme_title">होम स्क्रीन थीम</string>
     <string name="theme_auto">ऑटो दीस/रात</string>
     <string name="theme_auto_hint">GPS वयल्यान काडिल्ल्या सुर्योदय आनी सुर्यास्ताक बदलता</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">नंबर सांगात, जशें “दुसरी”.</string>
     <string name="voice_starting_nav">%1$s खातीर नेव्हिगेशन सुरू करता.</string>
     <string name="voice_nav_failed">नेव्हिगेशन उगडूंक जालें ना.</string>
-    <string name="voice_camera_none">तुमच्या वाटेर खंयचोच स्पीड कॅमेरा खबर ना.</string>
-    <string name="voice_camera_next">फुडलो स्पीड कॅमेरा %1$s किलोमीटरांचेर, %2$s चेर, मर्यादा %3$d.</string>
-    <string name="voice_camera_next_nolimit">फुडलो स्पीड कॅमेरा %1$s किलोमीटरांचेर, %2$s चेर.</string>
-    <string name="voice_road_ahead">मुखार रस्तो</string>
     <string name="voice_no_location">अजून GPS सुवात मेळूंक ना.</string>
     <string name="voice_playing">%1$s वाजयता.</string>
     <string name="voice_song_not_found">ह्या युनिटाचेर %1$s मेळ्ळें ना.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">फोन उगडटा. %1$s वेंचात.</string>
     <string name="voice_call_any">फोन उगडटा.</string>
     <string name="voice_cancelled">बरें, रद्द केलें.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">कॅमेरा</string>
+    <string name="camera_chip_idle">मुखार कॅमेरा ना</string>
+    <string name="camera_reported_by_you">तुमी कळयल्लो</string>
+    <string name="camera_report_here">हांगा कॅमेरा कळयात</string>
+    <string name="camera_report_saved">कॅमेरा सेव्ह जालो. फुडल्या फावट हांगा अलर्ट मेळटलो.</string>
+    <string name="camera_report_no_fix">अजून GPS सुवात मेळूंक ना. थोड्या वेळान परतून यत्न करात.</string>
+    <string name="camera_voice_ahead">%1$d मीटरांचेर स्पीड कॅमेरा, मर्यादा %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d मीटरांचेर स्पीड कॅमेरा.</string>
+    <string name="camera_voice_slow_down">वेग उणो करात.</string>
+    <string name="voice_camera_next_ahead">फुडलो स्पीड कॅमेरा %1$s किलोमीटरांचेर, मर्यादा %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">फुडलो स्पीड कॅमेरा %1$s किलोमीटरांचेर.</string>
+    <string name="voice_camera_none_ahead">मुखार 20 किलोमीटरां भितर खंयचोच स्पीड कॅमेरा ना.</string>
+    <string name="cameras_title">स्पीड कॅमेरे</string>
+    <string name="cameras_hint">मुखावेल्या रस्त्यार स्पीड कॅमेऱ्यांची शिटकावणी दिता. इंटरनॅट बगर चलता.</string>
+    <string name="cameras_alerts_title">कॅमेरा अलर्ट</string>
+    <string name="cameras_voice_title">आवाजांतले अलर्ट</string>
+    <string name="cameras_voice_hint">अंतर आनी मर्यादा सांगता, आनी मर्यादे परस वेग चड जाल्यार बीप करता. ते वेळार संगीत मंद जाता.</string>
+    <string name="cameras_voice_pro">आवाजांतले अलर्ट Pro चो भाग. फुकट आवृत्तींत स्क्रीनार अलर्ट दिसता.</string>
+    <string name="cameras_over_only_title">फकत मर्यादा उतरल्यार अलर्ट</string>
+    <string name="cameras_over_only_hint">मर्यादे भितर आसतना ओगी उरता.</string>
+    <string name="cameras_distance_title">अलर्टाचें अंतर</string>
+    <string name="cameras_stats">%1$d कॅमेरे लोड जाले · %2$d तुमी कळयल्ले</string>
+    <string name="cameras_data_date">कॅमेरा डेटा %1$s चो</string>
+    <string name="cameras_data_unknown">कॅमेरा डेटाची तारीख खबर ना</string>
+    <string name="cameras_report_hint">कॅमेरा जोडपाक होम स्क्रीनार कॅमेरा चिप दाबून धरात.</string>
+    <string name="cameras_disclaimer">कॅमेरा अलर्ट सुरक्षेच्या जाणविकायेखातीर आसात. सदांच लायिल्ल्या वेग मर्यादेचें पालन करात. डेटा अपुरो आसूं येता.</string>
 </resources>

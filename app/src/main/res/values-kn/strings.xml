@@ -78,7 +78,6 @@
     <string name="screen_on_hint">ಹೋಮ್ ಸ್ಕ್ರೀನ್ ಕಾಣುತ್ತಿರುವವರೆಗೆ</string>
     <string name="about_title">ಮಾಹಿತಿ</string>
     <string name="about_map">ನಕ್ಷೆ: %1$s</string>
-    <string name="about_limits">ವೇಗ ಮಿತಿ ಮತ್ತು ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ ಮಾಹಿತಿ ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="theme_title">ಹೋಮ್ ಸ್ಕ್ರೀನ್ ಥೀಮ್</string>
     <string name="theme_auto">ಆಟೋ ಹಗಲು/ರಾತ್ರಿ</string>
     <string name="theme_auto_hint">GPS ನಿಂದ ಲೆಕ್ಕಿಸಿದ ಸೂರ್ಯೋದಯ ಮತ್ತು ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ ಬದಲಾಗುತ್ತದೆ</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">ಒಂದು ಸಂಖ್ಯೆ ಹೇಳಿ, ಉದಾ. “ಎರಡನೇದು”.</string>
     <string name="voice_starting_nav">%1$s ಗೆ ನ್ಯಾವಿಗೇಶನ್ ಆರಂಭಿಸುತ್ತಿದ್ದೇನೆ.</string>
     <string name="voice_nav_failed">ನ್ಯಾವಿಗೇಶನ್ ತೆರೆಯಲಾಗಲಿಲ್ಲ.</string>
-    <string name="voice_camera_none">ನಿಮ್ಮ ಮಾರ್ಗದಲ್ಲಿ ಯಾವುದೇ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ ತಿಳಿದಿಲ್ಲ.</string>
-    <string name="voice_camera_next">ಮುಂದಿನ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ %1$s ಕಿಲೋಮೀಟರ್‌ನಲ್ಲಿ, %2$s ನಲ್ಲಿ, ಮಿತಿ %3$d.</string>
-    <string name="voice_camera_next_nolimit">ಮುಂದಿನ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ %1$s ಕಿಲೋಮೀಟರ್‌ನಲ್ಲಿ, %2$s ನಲ್ಲಿ.</string>
-    <string name="voice_road_ahead">ಮುಂದಿನ ರಸ್ತೆ</string>
     <string name="voice_no_location">ಇನ್ನೂ GPS ಸ್ಥಳ ಸಿಕ್ಕಿಲ್ಲ.</string>
     <string name="voice_playing">%1$s ಪ್ಲೇ ಮಾಡುತ್ತಿದ್ದೇನೆ.</string>
     <string name="voice_song_not_found">ಈ ಯೂನಿಟ್‌ನಲ್ಲಿ %1$s ಸಿಗಲಿಲ್ಲ.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ಫೋನ್ ತೆರೆಯುತ್ತಿದ್ದೇನೆ. %1$s ಆಯ್ಕೆಮಾಡಿ.</string>
     <string name="voice_call_any">ಫೋನ್ ತೆರೆಯುತ್ತಿದ್ದೇನೆ.</string>
     <string name="voice_cancelled">ಸರಿ, ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">ಕ್ಯಾಮೆರಾ</string>
+    <string name="camera_chip_idle">ಮುಂದೆ ಕ್ಯಾಮೆರಾ ಇಲ್ಲ</string>
+    <string name="camera_reported_by_you">ನೀವು ವರದಿ ಮಾಡಿದ್ದು</string>
+    <string name="camera_report_here">ಇಲ್ಲಿ ಕ್ಯಾಮೆರಾ ವರದಿ ಮಾಡಿ</string>
+    <string name="camera_report_saved">ಕ್ಯಾಮೆರಾ ಉಳಿಸಲಾಗಿದೆ. ಮುಂದಿನ ಬಾರಿ ಇಲ್ಲಿ ಎಚ್ಚರಿಕೆ ಬರುತ್ತದೆ.</string>
+    <string name="camera_report_no_fix">ಇನ್ನೂ GPS ಸ್ಥಳ ಸಿಕ್ಕಿಲ್ಲ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="camera_voice_ahead">%1$d ಮೀಟರ್‌ನಲ್ಲಿ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ, ಮಿತಿ %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d ಮೀಟರ್‌ನಲ್ಲಿ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ.</string>
+    <string name="camera_voice_slow_down">ವೇಗ ಕಡಿಮೆ ಮಾಡಿ.</string>
+    <string name="voice_camera_next_ahead">ಮುಂದಿನ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ %1$s ಕಿಲೋಮೀಟರ್‌ನಲ್ಲಿ, ಮಿತಿ %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">ಮುಂದಿನ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ %1$s ಕಿಲೋಮೀಟರ್‌ನಲ್ಲಿ.</string>
+    <string name="voice_camera_none_ahead">ಮುಂದೆ 20 ಕಿಲೋಮೀಟರ್ ಒಳಗೆ ಯಾವುದೇ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾ ಇಲ್ಲ.</string>
+    <string name="cameras_title">ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾಗಳು</string>
+    <string name="cameras_hint">ಮುಂದಿನ ರಸ್ತೆಯ ಸ್ಪೀಡ್ ಕ್ಯಾಮೆರಾಗಳ ಬಗ್ಗೆ ಎಚ್ಚರಿಸುತ್ತದೆ. ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ.</string>
+    <string name="cameras_alerts_title">ಕ್ಯಾಮೆರಾ ಎಚ್ಚರಿಕೆಗಳು</string>
+    <string name="cameras_voice_title">ಧ್ವನಿ ಎಚ್ಚರಿಕೆಗಳು</string>
+    <string name="cameras_voice_hint">ದೂರ ಮತ್ತು ಮಿತಿಯನ್ನು ಹೇಳುತ್ತದೆ; ಮಿತಿ ಮೀರಿದರೆ ಬೀಪ್ ಮಾಡುತ್ತದೆ. ಆ ಸಮಯದಲ್ಲಿ ಸಂಗೀತ ಕಡಿಮೆಯಾಗುತ್ತದೆ.</string>
+    <string name="cameras_voice_pro">ಧ್ವನಿ ಎಚ್ಚರಿಕೆಗಳು Pro ನ ಭಾಗ. ಉಚಿತದಲ್ಲಿ ಪರದೆಯ ಮೇಲೆ ಎಚ್ಚರಿಕೆ ಕಾಣುತ್ತದೆ.</string>
+    <string name="cameras_over_only_title">ಮಿತಿ ಮೀರಿದಾಗ ಮಾತ್ರ ಎಚ್ಚರಿಸಿ</string>
+    <string name="cameras_over_only_hint">ಮಿತಿಯೊಳಗೆ ಇರುವಾಗ ಸುಮ್ಮನಿರುತ್ತದೆ.</string>
+    <string name="cameras_distance_title">ಎಚ್ಚರಿಕೆ ದೂರ</string>
+    <string name="cameras_stats">%1$d ಕ್ಯಾಮೆರಾಗಳು ಲೋಡ್ ಆಗಿವೆ · %2$d ನೀವು ವರದಿ ಮಾಡಿದವು</string>
+    <string name="cameras_data_date">ಕ್ಯಾಮೆರಾ ಡೇಟಾ %1$s ರದ್ದು</string>
+    <string name="cameras_data_unknown">ಕ್ಯಾಮೆರಾ ಡೇಟಾದ ದಿನಾಂಕ ತಿಳಿದಿಲ್ಲ</string>
+    <string name="cameras_report_hint">ಕ್ಯಾಮೆರಾ ಸೇರಿಸಲು ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಕ್ಯಾಮೆರಾ ಚಿಪ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ.</string>
+    <string name="cameras_disclaimer">ಕ್ಯಾಮೆರಾ ಎಚ್ಚರಿಕೆಗಳು ಸುರಕ್ಷತಾ ಅರಿವಿಗಾಗಿ ಮಾತ್ರ. ಯಾವಾಗಲೂ ಸೂಚಿಸಿದ ವೇಗ ಮಿತಿಯನ್ನು ಪಾಲಿಸಿ. ಡೇಟಾ ಅಪೂರ್ಣವಾಗಿರಬಹುದು.</string>
 </resources>

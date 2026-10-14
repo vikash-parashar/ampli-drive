@@ -13,8 +13,12 @@ data class CameraAlert(
     val distanceMeters: Int,
     /** Enforced limit at the camera, in km/h, when known. */
     val limitKmh: Int?,
-    /** Short human description, for example the road name. */
+    /** Short human description, for example the road name; may be empty. */
     val description: String,
+    /** The car is faster than [limitKmh]: the chip and speedometer turn red. */
+    val overLimit: Boolean = false,
+    /** Added by the driver with "Report camera here". */
+    val userReported: Boolean = false,
 ) {
     enum class Kind { FixedCamera, AverageSpeedStart, AverageSpeedZone }
 }
@@ -40,8 +44,8 @@ interface CameraAlerts {
 }
 
 /**
- * The engine used until a camera database ships: it has no data, so it never raises
- * an alert and never claims a speed limit.
+ * An engine with no data: it never raises an alert and never claims a speed limit.
+ * The app uses [LiveCameraAlerts].
  */
 object NoCameraAlerts : CameraAlerts {
     private val none = MutableStateFlow<CameraAlert?>(null)

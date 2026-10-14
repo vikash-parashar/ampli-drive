@@ -78,7 +78,6 @@
     <string name="screen_on_hint">హోమ్ స్క్రీన్ కనిపిస్తున్నంత వరకు</string>
     <string name="about_title">గురించి</string>
     <string name="about_map">మ్యాప్: %1$s</string>
-    <string name="about_limits">వేగ పరిమితి, స్పీడ్ కెమెరా సమాచారం ఇంకా అందుబాటులో లేదు.</string>
     <string name="theme_title">హోమ్ స్క్రీన్ థీమ్</string>
     <string name="theme_auto">ఆటో పగలు/రాత్రి</string>
     <string name="theme_auto_hint">GPS ద్వారా లెక్కించిన సూర్యోదయం, సూర్యాస్తమయం వద్ద మారుతుంది</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">ఒక నంబర్ చెప్పండి, ఉదా. “రెండవది”.</string>
     <string name="voice_starting_nav">%1$s కి నావిగేషన్ మొదలుపెడుతున్నాను.</string>
     <string name="voice_nav_failed">నావిగేషన్ తెరవలేకపోయాను.</string>
-    <string name="voice_camera_none">మీ దారిలో ఏ స్పీడ్ కెమెరా తెలియదు.</string>
-    <string name="voice_camera_next">తదుపరి స్పీడ్ కెమెరా %1$s కిలోమీటర్లలో, %2$s పై, పరిమితి %3$d.</string>
-    <string name="voice_camera_next_nolimit">తదుపరి స్పీడ్ కెమెరా %1$s కిలోమీటర్లలో, %2$s పై.</string>
-    <string name="voice_road_ahead">ముందున్న రోడ్డు</string>
     <string name="voice_no_location">ఇంకా GPS స్థానం దొరకలేదు.</string>
     <string name="voice_playing">%1$s ప్లే చేస్తున్నాను.</string>
     <string name="voice_song_not_found">ఈ యూనిట్‌లో %1$s దొరకలేదు.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ఫోన్ తెరుస్తున్నాను. %1$s ని ఎంచుకోండి.</string>
     <string name="voice_call_any">ఫోన్ తెరుస్తున్నాను.</string>
     <string name="voice_cancelled">సరే, రద్దు చేశాను.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">కెమెరా</string>
+    <string name="camera_chip_idle">ముందు కెమెరా లేదు</string>
+    <string name="camera_reported_by_you">మీరు నివేదించినది</string>
+    <string name="camera_report_here">ఇక్కడ కెమెరాను నివేదించండి</string>
+    <string name="camera_report_saved">కెమెరా సేవ్ అయింది. తదుపరిసారి ఇక్కడ అలర్ట్ వస్తుంది.</string>
+    <string name="camera_report_no_fix">ఇంకా GPS స్థానం దొరకలేదు. కాసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.</string>
+    <string name="camera_voice_ahead">%1$d మీటర్లలో స్పీడ్ కెమెరా, పరిమితి %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d మీటర్లలో స్పీడ్ కెమెరా.</string>
+    <string name="camera_voice_slow_down">వేగం తగ్గించండి.</string>
+    <string name="voice_camera_next_ahead">తదుపరి స్పీడ్ కెమెరా %1$s కిలోమీటర్లలో, పరిమితి %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">తదుపరి స్పీడ్ కెమెరా %1$s కిలోమీటర్లలో.</string>
+    <string name="voice_camera_none_ahead">ముందు 20 కిలోమీటర్లలో ఏ స్పీడ్ కెమెరా లేదు.</string>
+    <string name="cameras_title">స్పీడ్ కెమెరాలు</string>
+    <string name="cameras_hint">ముందున్న రోడ్డుపై స్పీడ్ కెమెరాల గురించి హెచ్చరిస్తుంది. ఇంటర్నెట్ లేకుండా పనిచేస్తుంది.</string>
+    <string name="cameras_alerts_title">కెమెరా అలర్ట్‌లు</string>
+    <string name="cameras_voice_title">వాయిస్ అలర్ట్‌లు</string>
+    <string name="cameras_voice_hint">దూరం, పరిమితి చెబుతుంది; పరిమితి దాటితే బీప్ చేస్తుంది. ఆ సమయంలో సంగీతం తగ్గుతుంది.</string>
+    <string name="cameras_voice_pro">వాయిస్ అలర్ట్‌లు Pro లో భాగం. ఉచిత వెర్షన్‌లో స్క్రీన్‌పై అలర్ట్ కనిపిస్తుంది.</string>
+    <string name="cameras_over_only_title">పరిమితి దాటినప్పుడే అలర్ట్</string>
+    <string name="cameras_over_only_hint">పరిమితిలో ఉన్నప్పుడు నిశ్శబ్దంగా ఉంటుంది.</string>
+    <string name="cameras_distance_title">అలర్ట్ దూరం</string>
+    <string name="cameras_stats">%1$d కెమెరాలు లోడ్ అయ్యాయి · %2$d మీరు నివేదించినవి</string>
+    <string name="cameras_data_date">కెమెరా డేటా %1$s నాటిది</string>
+    <string name="cameras_data_unknown">కెమెరా డేటా తేదీ తెలియదు</string>
+    <string name="cameras_report_hint">కెమెరాను జోడించడానికి హోమ్ స్క్రీన్‌పై కెమెరా చిప్‌ను నొక్కి పట్టుకోండి.</string>
+    <string name="cameras_disclaimer">కెమెరా అలర్ట్‌లు భద్రతా అవగాహన కోసం మాత్రమే. ఎల్లప్పుడూ సూచించిన వేగ పరిమితిని పాటించండి. డేటా అసంపూర్ణంగా ఉండవచ్చు.</string>
 </resources>

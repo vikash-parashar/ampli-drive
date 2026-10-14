@@ -78,7 +78,6 @@
     <string name="screen_on_hint">முகப்புத் திரை தெரியும் வரை</string>
     <string name="about_title">பற்றி</string>
     <string name="about_map">வரைபடம்: %1$s</string>
-    <string name="about_limits">வேக வரம்பு, வேகக் கேமரா தகவல் இன்னும் கிடைக்கவில்லை.</string>
     <string name="theme_title">முகப்புத் திரை தீம்</string>
     <string name="theme_auto">தானியங்கி பகல்/இரவு</string>
     <string name="theme_auto_hint">GPS மூலம் கணக்கிட்ட சூரிய உதயம், அஸ்தமனத்தில் மாறும்</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">ஒரு எண் சொல்லுங்கள், உதாரணம் “இரண்டாவது”.</string>
     <string name="voice_starting_nav">%1$s க்கு வழிகாட்டல் தொடங்குகிறது.</string>
     <string name="voice_nav_failed">வழிகாட்டலைத் திறக்க முடியவில்லை.</string>
-    <string name="voice_camera_none">உங்கள் வழியில் ஸ்பீட் கேமரா எதுவும் தெரியவில்லை.</string>
-    <string name="voice_camera_next">அடுத்த ஸ்பீட் கேமரா %1$s கிலோமீட்டரில், %2$s இல், வரம்பு %3$d.</string>
-    <string name="voice_camera_next_nolimit">அடுத்த ஸ்பீட் கேமரா %1$s கிலோமீட்டரில், %2$s இல்.</string>
-    <string name="voice_road_ahead">முன்னால் உள்ள சாலை</string>
     <string name="voice_no_location">இன்னும் GPS இடம் கிடைக்கவில்லை.</string>
     <string name="voice_playing">%1$s இயக்குகிறேன்.</string>
     <string name="voice_song_not_found">இந்த யூனிட்டில் %1$s கிடைக்கவில்லை.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">போனைத் திறக்கிறேன். %1$s ஐத் தேர்ந்தெடுங்கள்.</string>
     <string name="voice_call_any">போனைத் திறக்கிறேன்.</string>
     <string name="voice_cancelled">சரி, ரத்து செய்யப்பட்டது.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">கேமரா</string>
+    <string name="camera_chip_idle">முன்னால் கேமரா இல்லை</string>
+    <string name="camera_reported_by_you">நீங்கள் புகாரளித்தது</string>
+    <string name="camera_report_here">இங்கே கேமராவைப் புகாரளி</string>
+    <string name="camera_report_saved">கேமரா சேமிக்கப்பட்டது. அடுத்த முறை இங்கே எச்சரிக்கை வரும்.</string>
+    <string name="camera_report_no_fix">இன்னும் GPS இருப்பிடம் கிடைக்கவில்லை. சிறிது நேரத்தில் மீண்டும் முயலுங்கள்.</string>
+    <string name="camera_voice_ahead">%1$d மீட்டரில் வேகக் கேமரா, வரம்பு %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d மீட்டரில் வேகக் கேமரா.</string>
+    <string name="camera_voice_slow_down">வேகத்தைக் குறையுங்கள்.</string>
+    <string name="voice_camera_next_ahead">அடுத்த வேகக் கேமரா %1$s கிலோமீட்டரில், வரம்பு %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">அடுத்த வேகக் கேமரா %1$s கிலோமீட்டரில்.</string>
+    <string name="voice_camera_none_ahead">முன்னால் 20 கிலோமீட்டருக்குள் வேகக் கேமரா இல்லை.</string>
+    <string name="cameras_title">வேகக் கேமராக்கள்</string>
+    <string name="cameras_hint">முன்னால் உள்ள சாலையின் வேகக் கேமராக்களைப் பற்றி எச்சரிக்கும். இணையம் இல்லாமல் இயங்கும்.</string>
+    <string name="cameras_alerts_title">கேமரா எச்சரிக்கைகள்</string>
+    <string name="cameras_voice_title">குரல் எச்சரிக்கைகள்</string>
+    <string name="cameras_voice_hint">தூரத்தையும் வரம்பையும் சொல்லும்; வரம்பை மீறினால் பீப் ஒலிக்கும். அப்போது இசை குறைக்கப்படும்.</string>
+    <string name="cameras_voice_pro">குரல் எச்சரிக்கைகள் Pro-வில் மட்டும். இலவசப் பதிப்பில் திரையில் எச்சரிக்கை தெரியும்.</string>
+    <string name="cameras_over_only_title">வரம்பை மீறும்போது மட்டும் எச்சரி</string>
+    <string name="cameras_over_only_hint">வரம்புக்குள் இருக்கும்போது அமைதியாக இருக்கும்.</string>
+    <string name="cameras_distance_title">எச்சரிக்கை தூரம்</string>
+    <string name="cameras_stats">%1$d கேமராக்கள் ஏற்றப்பட்டன · %2$d நீங்கள் புகாரளித்தவை</string>
+    <string name="cameras_data_date">கேமரா தரவு %1$s தேதியது</string>
+    <string name="cameras_data_unknown">கேமரா தரவின் தேதி தெரியவில்லை</string>
+    <string name="cameras_report_hint">கேமராவைச் சேர்க்க, முகப்புத் திரையில் கேமரா சிப்பை அழுத்திப் பிடியுங்கள்.</string>
+    <string name="cameras_disclaimer">கேமரா எச்சரிக்கைகள் பாதுகாப்பு விழிப்புணர்வுக்காக மட்டுமே. எப்போதும் அறிவிக்கப்பட்ட வேக வரம்பைப் பின்பற்றுங்கள். தரவு முழுமையில்லாமல் இருக்கலாம்.</string>
 </resources>

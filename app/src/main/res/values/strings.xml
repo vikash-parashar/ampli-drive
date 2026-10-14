@@ -82,7 +82,6 @@
     <string name="screen_on_hint">While the home screen is showing</string>
     <string name="about_title">About</string>
     <string name="about_map">Map: %1$s</string>
-    <string name="about_limits">Speed-limit and speed-camera data are not available yet.</string>
     <string name="theme_title">Home screen theme</string>
     <string name="theme_auto">Auto day/night</string>
     <string name="theme_auto_hint">Switches at local sunrise and sunset, worked out from GPS</string>
@@ -234,10 +233,6 @@
     <string name="voice_say_number">Please say a number, like “the second one”.</string>
     <string name="voice_starting_nav">Starting navigation to %1$s.</string>
     <string name="voice_nav_failed">I couldn\'t open navigation.</string>
-    <string name="voice_camera_none">No speed cameras are known on your route.</string>
-    <string name="voice_camera_next">Next speed camera in %1$s kilometres on %2$s, limit %3$d.</string>
-    <string name="voice_camera_next_nolimit">Next speed camera in %1$s kilometres on %2$s.</string>
-    <string name="voice_road_ahead">the road ahead</string>
     <string name="voice_no_location">I don\'t have a GPS position yet.</string>
     <string name="voice_playing">Playing %1$s.</string>
     <string name="voice_song_not_found">I couldn\'t find %1$s on this unit.</string>
@@ -250,4 +245,33 @@
     <string name="voice_call">Opening the phone. Please choose %1$s.</string>
     <string name="voice_call_any">Opening the phone.</string>
     <string name="voice_cancelled">Okay, cancelled.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">Camera</string>
+    <string name="camera_chip_idle">No camera ahead</string>
+    <string name="camera_reported_by_you">Reported by you</string>
+    <string name="camera_report_here">Report camera here</string>
+    <string name="camera_report_saved">Camera saved. You will be alerted here next time.</string>
+    <string name="camera_report_no_fix">No GPS position yet. Try again in a moment.</string>
+    <string name="camera_voice_ahead">Speed camera in %1$d metres, limit %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">Speed camera in %1$d metres.</string>
+    <string name="camera_voice_slow_down">Slow down.</string>
+    <string name="voice_camera_next_ahead">Next speed camera in %1$s kilometres, limit %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">Next speed camera in %1$s kilometres.</string>
+    <string name="voice_camera_none_ahead">No speed camera within 20 kilometres ahead.</string>
+    <string name="cameras_title">Speed cameras</string>
+    <string name="cameras_hint">Warns about speed cameras on the road ahead. Works offline.</string>
+    <string name="cameras_alerts_title">Camera alerts</string>
+    <string name="cameras_voice_title">Voice alerts</string>
+    <string name="cameras_voice_hint">Speaks the distance and limit, and beeps if you are over it. Music is lowered meanwhile.</string>
+    <string name="cameras_voice_pro">Voice alerts are part of Pro. Free shows the on-screen alert.</string>
+    <string name="cameras_over_only_title">Only alert when over the limit</string>
+    <string name="cameras_over_only_hint">Stays quiet while you are within the limit.</string>
+    <string name="cameras_distance_title">Alert distance</string>
+    <string name="cameras_stats">%1$d cameras loaded · %2$d reported by you</string>
+    <string name="cameras_data_date">Camera data from %1$s</string>
+    <string name="cameras_data_unknown">Camera data date unknown</string>
+    <string name="cameras_report_hint">To add a camera, long-press the camera chip on the home screen.</string>
+    <string name="cameras_disclaimer">Camera alerts are for safety awareness. Always follow posted speed limits. Data may be incomplete.</string>
+    <string name="cameras_attribution" translatable="false">Speed camera data © OpenStreetMap contributors (ODbL)</string>
 </resources>

@@ -473,7 +473,7 @@ private fun TapeSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
 
 // ---------------------------------------------------------------- Shared
 
-/** Round road-sign badge. Shows "--" until a real limit source exists. */
+/** Round road-sign badge: the limit at an approaching speed camera, otherwise "--". */
 @Composable
 private fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier) {
     val dims = LocalDims.current
@@ -524,11 +524,13 @@ private fun CameraBanner(alert: CameraAlert, modifier: Modifier = Modifier) {
             append(stringResource(R.string.camera_limit, it))
         }
     }
-    val ink = Color(0xFF111111)
+    // Amber while approaching; red when the car is over the camera's limit.
+    val ink = if (alert.overLimit) theme.onDanger else Color(0xFF111111)
+    val detail = if (alert.userReported) stringResource(R.string.camera_reported_by_you) else alert.description
     Row(
         modifier = modifier
             .clip(theme.buttonShape(dims))
-            .background(theme.warning)
+            .background(if (alert.overLimit) theme.danger else theme.warning)
             .padding(dims.d(1.6f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
@@ -536,7 +538,9 @@ private fun CameraBanner(alert: CameraAlert, modifier: Modifier = Modifier) {
         Icon(Icons.Filled.Warning, contentDescription = null, tint = ink, modifier = Modifier.size(28.dp))
         Column(Modifier.weight(1f)) {
             Text(title, color = ink, fontWeight = FontWeight.Bold, fontSize = dims.t(2.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(alert.description, color = ink.copy(alpha = 0.85f), fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (detail.isNotBlank()) {
+                Text(detail, color = ink.copy(alpha = 0.85f), fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }

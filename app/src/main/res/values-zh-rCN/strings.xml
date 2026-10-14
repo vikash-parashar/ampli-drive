@@ -78,7 +78,6 @@
     <string name="screen_on_hint">显示主屏幕期间</string>
     <string name="about_title">关于</string>
     <string name="about_map">地图：%1$s</string>
-    <string name="about_limits">限速和测速摄像头数据暂不可用。</string>
     <string name="theme_title">主屏幕主题</string>
     <string name="theme_auto">自动日夜切换</string>
     <string name="theme_auto_hint">根据 GPS 计算的日出日落时间自动切换</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">请说一个序号，比如“第二个”。</string>
     <string name="voice_starting_nav">开始导航到%1$s。</string>
     <string name="voice_nav_failed">无法打开导航。</string>
-    <string name="voice_camera_none">您的路线上没有已知的测速摄像头。</string>
-    <string name="voice_camera_next">下一个测速摄像头在%1$s公里外，%2$s，限速%3$d。</string>
-    <string name="voice_camera_next_nolimit">下一个测速摄像头在%1$s公里外，%2$s。</string>
-    <string name="voice_road_ahead">前方道路</string>
     <string name="voice_no_location">还没有 GPS 定位。</string>
     <string name="voice_playing">正在播放%1$s。</string>
     <string name="voice_song_not_found">本机上没有找到%1$s。</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">正在打开电话。请选择%1$s。</string>
     <string name="voice_call_any">正在打开电话。</string>
     <string name="voice_cancelled">好的，已取消。</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">摄像头</string>
+    <string name="camera_chip_idle">前方无摄像头</string>
+    <string name="camera_reported_by_you">您报告的</string>
+    <string name="camera_report_here">在此报告摄像头</string>
+    <string name="camera_report_saved">摄像头已保存。下次经过这里时会提醒您。</string>
+    <string name="camera_report_no_fix">尚未获得 GPS 位置。请稍后再试。</string>
+    <string name="camera_voice_ahead">前方%1$d米有测速摄像头，限速%2$d。</string>
+    <string name="camera_voice_ahead_nolimit">前方%1$d米有测速摄像头。</string>
+    <string name="camera_voice_slow_down">请减速。</string>
+    <string name="voice_camera_next_ahead">下一个测速摄像头在%1$s公里外，限速%2$d。</string>
+    <string name="voice_camera_next_ahead_nolimit">下一个测速摄像头在%1$s公里外。</string>
+    <string name="voice_camera_none_ahead">前方20公里内没有测速摄像头。</string>
+    <string name="cameras_title">测速摄像头</string>
+    <string name="cameras_hint">提醒前方道路上的测速摄像头。离线可用。</string>
+    <string name="cameras_alerts_title">摄像头提醒</string>
+    <string name="cameras_voice_title">语音提醒</string>
+    <string name="cameras_voice_hint">播报距离和限速，超速时发出提示音。播报时音乐音量会降低。</string>
+    <string name="cameras_voice_pro">语音提醒属于 Pro 功能。免费版在屏幕上显示提醒。</string>
+    <string name="cameras_over_only_title">仅在超速时提醒</string>
+    <string name="cameras_over_only_hint">未超速时保持安静。</string>
+    <string name="cameras_distance_title">提醒距离</string>
+    <string name="cameras_stats">已加载 %1$d 个摄像头 · 您报告了 %2$d 个</string>
+    <string name="cameras_data_date">摄像头数据日期：%1$s</string>
+    <string name="cameras_data_unknown">摄像头数据日期未知</string>
+    <string name="cameras_report_hint">如需添加摄像头，请在主屏幕上长按摄像头标签。</string>
+    <string name="cameras_disclaimer">摄像头提醒仅用于安全提示。请始终遵守道路限速标志。数据可能不完整。</string>
 </resources>

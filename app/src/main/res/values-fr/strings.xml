@@ -78,7 +78,6 @@
     <string name="screen_on_hint">Tant que l\'écran d\'accueil est affiché</string>
     <string name="about_title">À propos</string>
     <string name="about_map">Carte : %1$s</string>
-    <string name="about_limits">Les limitations de vitesse et les radars ne sont pas encore disponibles.</string>
     <string name="theme_title">Thème de l\'écran d\'accueil</string>
     <string name="theme_auto">Jour/nuit automatique</string>
     <string name="theme_auto_hint">Change au lever et au coucher du soleil, calculés à partir du GPS</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">Dites un numéro, par exemple « le deuxième ».</string>
     <string name="voice_starting_nav">Navigation vers %1$s lancée.</string>
     <string name="voice_nav_failed">Impossible d\'ouvrir la navigation.</string>
-    <string name="voice_camera_none">Aucun radar connu sur votre trajet.</string>
-    <string name="voice_camera_next">Prochain radar dans %1$s kilomètres sur %2$s, limite %3$d.</string>
-    <string name="voice_camera_next_nolimit">Prochain radar dans %1$s kilomètres sur %2$s.</string>
-    <string name="voice_road_ahead">la route devant vous</string>
     <string name="voice_no_location">Je n\'ai pas encore de position GPS.</string>
     <string name="voice_playing">Je lance %1$s.</string>
     <string name="voice_song_not_found">Je n\'ai pas trouvé %1$s sur cet appareil.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">J\'ouvre le téléphone. Choisissez %1$s.</string>
     <string name="voice_call_any">J\'ouvre le téléphone.</string>
     <string name="voice_cancelled">D\'accord, annulé.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">Radar</string>
+    <string name="camera_chip_idle">Aucun radar devant</string>
+    <string name="camera_reported_by_you">Signalé par vous</string>
+    <string name="camera_report_here">Signaler un radar ici</string>
+    <string name="camera_report_saved">Radar enregistré. Vous serez averti ici la prochaine fois.</string>
+    <string name="camera_report_no_fix">Pas encore de position GPS. Réessayez dans un instant.</string>
+    <string name="camera_voice_ahead">Radar dans %1$d mètres, limite %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">Radar dans %1$d mètres.</string>
+    <string name="camera_voice_slow_down">Ralentissez.</string>
+    <string name="voice_camera_next_ahead">Prochain radar dans %1$s kilomètres, limite %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">Prochain radar dans %1$s kilomètres.</string>
+    <string name="voice_camera_none_ahead">Aucun radar dans les 20 prochains kilomètres.</string>
+    <string name="cameras_title">Radars</string>
+    <string name="cameras_hint">Avertit des radars sur la route devant vous. Fonctionne hors ligne.</string>
+    <string name="cameras_alerts_title">Alertes radar</string>
+    <string name="cameras_voice_title">Alertes vocales</string>
+    <string name="cameras_voice_hint">Annonce la distance et la limite, et émet un bip si vous la dépassez. La musique est baissée pendant ce temps.</string>
+    <string name="cameras_voice_pro">Les alertes vocales font partie de Pro. La version gratuite affiche l\'alerte à l\'écran.</string>
+    <string name="cameras_over_only_title">Alerter seulement au-dessus de la limite</string>
+    <string name="cameras_over_only_hint">Reste silencieux tant que vous respectez la limite.</string>
+    <string name="cameras_distance_title">Distance d\'alerte</string>
+    <string name="cameras_stats">%1$d radars chargés · %2$d signalés par vous</string>
+    <string name="cameras_data_date">Données radar du %1$s</string>
+    <string name="cameras_data_unknown">Date des données radar inconnue</string>
+    <string name="cameras_report_hint">Pour ajouter un radar, appuyez longuement sur la puce radar de l\'écran d\'accueil.</string>
+    <string name="cameras_disclaimer">Les alertes radar servent à la sécurité routière. Respectez toujours les limitations affichées. Les données peuvent être incomplètes.</string>
 </resources>

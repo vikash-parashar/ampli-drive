@@ -78,7 +78,6 @@
     <string name="screen_on_hint">ഹോം സ്ക്രീൻ കാണുന്നിടത്തോളം</string>
     <string name="about_title">വിവരം</string>
     <string name="about_map">മാപ്പ്: %1$s</string>
-    <string name="about_limits">വേഗപരിധിയും സ്പീഡ് ക്യാമറ വിവരങ്ങളും ഇതുവരെ ലഭ്യമല്ല.</string>
     <string name="theme_title">ഹോം സ്ക്രീൻ തീം</string>
     <string name="theme_auto">ഓട്ടോ പകൽ/രാത്രി</string>
     <string name="theme_auto_hint">GPS വഴി കണക്കാക്കിയ സൂര്യോദയത്തിലും അസ്തമയത്തിലും മാറും</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">ഒരു നമ്പർ പറയൂ, ഉദാ. “രണ്ടാമത്തേത്”.</string>
     <string name="voice_starting_nav">%1$s ലേക്ക് നാവിഗേഷൻ ആരംഭിക്കുന്നു.</string>
     <string name="voice_nav_failed">നാവിഗേഷൻ തുറക്കാനായില്ല.</string>
-    <string name="voice_camera_none">നിങ്ങളുടെ വഴിയിൽ സ്പീഡ് ക്യാമറകളൊന്നും അറിയില്ല.</string>
-    <string name="voice_camera_next">അടുത്ത സ്പീഡ് ക്യാമറ %1$s കിലോമീറ്ററിൽ, %2$s ൽ, പരിധി %3$d.</string>
-    <string name="voice_camera_next_nolimit">അടുത്ത സ്പീഡ് ക്യാമറ %1$s കിലോമീറ്ററിൽ, %2$s ൽ.</string>
-    <string name="voice_road_ahead">മുന്നിലെ റോഡ്</string>
     <string name="voice_no_location">ഇതുവരെ GPS സ്ഥാനം ലഭിച്ചിട്ടില്ല.</string>
     <string name="voice_playing">%1$s പ്ലേ ചെയ്യുന്നു.</string>
     <string name="voice_song_not_found">ഈ യൂണിറ്റിൽ %1$s കണ്ടെത്തിയില്ല.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ഫോൺ തുറക്കുന്നു. %1$s തിരഞ്ഞെടുക്കൂ.</string>
     <string name="voice_call_any">ഫോൺ തുറക്കുന്നു.</string>
     <string name="voice_cancelled">ശരി, റദ്ദാക്കി.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">ക്യാമറ</string>
+    <string name="camera_chip_idle">മുന്നിൽ ക്യാമറയില്ല</string>
+    <string name="camera_reported_by_you">നിങ്ങൾ റിപ്പോർട്ട് ചെയ്തത്</string>
+    <string name="camera_report_here">ഇവിടെ ക്യാമറ റിപ്പോർട്ട് ചെയ്യുക</string>
+    <string name="camera_report_saved">ക്യാമറ സേവ് ചെയ്തു. അടുത്ത തവണ ഇവിടെ മുന്നറിയിപ്പ് ലഭിക്കും.</string>
+    <string name="camera_report_no_fix">ഇതുവരെ GPS സ്ഥാനം കിട്ടിയില്ല. അൽപ്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="camera_voice_ahead">%1$d മീറ്ററിൽ സ്പീഡ് ക്യാമറ, പരിധി %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d മീറ്ററിൽ സ്പീഡ് ക്യാമറ.</string>
+    <string name="camera_voice_slow_down">വേഗം കുറയ്ക്കൂ.</string>
+    <string name="voice_camera_next_ahead">അടുത്ത സ്പീഡ് ക്യാമറ %1$s കിലോമീറ്ററിൽ, പരിധി %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">അടുത്ത സ്പീഡ് ക്യാമറ %1$s കിലോമീറ്ററിൽ.</string>
+    <string name="voice_camera_none_ahead">മുന്നിൽ 20 കിലോമീറ്ററിനുള്ളിൽ സ്പീഡ് ക്യാമറയില്ല.</string>
+    <string name="cameras_title">സ്പീഡ് ക്യാമറകൾ</string>
+    <string name="cameras_hint">മുന്നിലെ റോഡിലെ സ്പീഡ് ക്യാമറകളെക്കുറിച്ച് മുന്നറിയിപ്പ് നൽകുന്നു. ഇന്റർനെറ്റ് ഇല്ലാതെ പ്രവർത്തിക്കും.</string>
+    <string name="cameras_alerts_title">ക്യാമറ മുന്നറിയിപ്പുകൾ</string>
+    <string name="cameras_voice_title">ശബ്ദ മുന്നറിയിപ്പുകൾ</string>
+    <string name="cameras_voice_hint">ദൂരവും പരിധിയും പറയും; പരിധി കടന്നാൽ ബീപ് ചെയ്യും. ആ സമയം സംഗീതം കുറയും.</string>
+    <string name="cameras_voice_pro">ശബ്ദ മുന്നറിയിപ്പുകൾ Pro യിൽ മാത്രം. സൗജന്യ പതിപ്പിൽ സ്ക്രീനിൽ മുന്നറിയിപ്പ് കാണാം.</string>
+    <string name="cameras_over_only_title">പരിധി കടക്കുമ്പോൾ മാത്രം മുന്നറിയിപ്പ്</string>
+    <string name="cameras_over_only_hint">പരിധിക്കുള്ളിലായിരിക്കുമ്പോൾ നിശ്ശബ്ദമായിരിക്കും.</string>
+    <string name="cameras_distance_title">മുന്നറിയിപ്പ് ദൂരം</string>
+    <string name="cameras_stats">%1$d ക്യാമറകൾ ലോഡ് ചെയ്തു · %2$d നിങ്ങൾ റിപ്പോർട്ട് ചെയ്തവ</string>
+    <string name="cameras_data_date">ക്യാമറ ഡാറ്റ %1$s ലേത്</string>
+    <string name="cameras_data_unknown">ക്യാമറ ഡാറ്റയുടെ തീയതി അറിയില്ല</string>
+    <string name="cameras_report_hint">ക്യാമറ ചേർക്കാൻ ഹോം സ്ക്രീനിലെ ക്യാമറ ചിപ്പ് അമർത്തിപ്പിടിക്കുക.</string>
+    <string name="cameras_disclaimer">ക്യാമറ മുന്നറിയിപ്പുകൾ സുരക്ഷാ അവബോധത്തിനാണ്. എപ്പോഴും നിശ്ചയിച്ച വേഗപരിധി പാലിക്കുക. ഡാറ്റ അപൂർണ്ണമായിരിക്കാം.</string>
 </resources>

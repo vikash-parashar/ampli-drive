@@ -78,7 +78,6 @@
     <string name="screen_on_hint">जद ताईं होम स्क्रीन दिखै सै</string>
     <string name="about_title">जाणकारी</string>
     <string name="about_map">नक्शा: %1$s</string>
-    <string name="about_limits">स्पीड सीमा अर स्पीड कैमरे का डेटा इब्बे कोनी।</string>
     <string name="theme_title">होम स्क्रीन थीम</string>
     <string name="theme_auto">ऑटो दिन/रात</string>
     <string name="theme_auto_hint">GPS तै काढ्डे सूरज छिपण अर लिकड़ण पै बदलै सै</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">नंबर बोलो, जियां “दूसरी आळी”।</string>
     <string name="voice_starting_nav">%1$s खातर नेविगेसन सुरू कर रही सूं।</string>
     <string name="voice_nav_failed">नेविगेसन कोनी खुल्या।</string>
-    <string name="voice_camera_none">थारे रस्ते पै कोए स्पीड कैमरा का बेरा कोनी।</string>
-    <string name="voice_camera_next">अगला स्पीड कैमरा %1$s किलोमीटर पै, %2$s पै, लिमिट %3$d।</string>
-    <string name="voice_camera_next_nolimit">अगला स्पीड कैमरा %1$s किलोमीटर पै, %2$s पै।</string>
-    <string name="voice_road_ahead">आग्गै की सड़क</string>
     <string name="voice_no_location">इब्बै GPS लोकेसन कोनी मिली।</string>
     <string name="voice_playing">%1$s बजा रही सूं।</string>
     <string name="voice_song_not_found">इस यूनिट पै %1$s कोनी मिल्या।</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">फोन खोल रही सूं। %1$s चुणो।</string>
     <string name="voice_call_any">फोन खोल रही सूं।</string>
     <string name="voice_cancelled">ठीक सै, रद्द कर दिया।</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">कैमरा</string>
+    <string name="camera_chip_idle">आगै कोए कैमरा कोनी</string>
+    <string name="camera_reported_by_you">थमनै रिपोर्ट करया</string>
+    <string name="camera_report_here">आड़ै कैमरा रिपोर्ट करो</string>
+    <string name="camera_report_saved">कैमरा सेव हो ग्या। अगली बार आड़ै अलर्ट मिलैगा।</string>
+    <string name="camera_report_no_fix">इब ताईं GPS लोकेशन कोनी मिली। थोड़ी वार म्हं फेर कोसिस करो।</string>
+    <string name="camera_voice_ahead">%1$d मीटर पै स्पीड कैमरा, लिमिट %2$d।</string>
+    <string name="camera_voice_ahead_nolimit">%1$d मीटर पै स्पीड कैमरा।</string>
+    <string name="camera_voice_slow_down">धीरे चलाओ।</string>
+    <string name="voice_camera_next_ahead">अगला स्पीड कैमरा %1$s किलोमीटर पै, लिमिट %2$d।</string>
+    <string name="voice_camera_next_ahead_nolimit">अगला स्पीड कैमरा %1$s किलोमीटर पै।</string>
+    <string name="voice_camera_none_ahead">आगै 20 किलोमीटर ताईं कोए स्पीड कैमरा कोनी।</string>
+    <string name="cameras_title">स्पीड कैमरे</string>
+    <string name="cameras_hint">आगै की सड़क पै स्पीड कैमरयां की चेतावनी देवै सै। बिना इंटरनेट चालै सै।</string>
+    <string name="cameras_alerts_title">कैमरा अलर्ट</string>
+    <string name="cameras_voice_title">बोल कै अलर्ट</string>
+    <string name="cameras_voice_hint">दूरी अर लिमिट बोलै सै, अर लिमिट तै तेज होण पै बीप करै सै। उस बखत गाणा धीमा हो ज्या सै।</string>
+    <string name="cameras_voice_pro">बोल कै अलर्ट Pro म्हं सैं। फ्री म्हं स्क्रीन पै अलर्ट दिखै सै।</string>
+    <string name="cameras_over_only_title">बस लिमिट तै तेज होण पै अलर्ट</string>
+    <string name="cameras_over_only_hint">लिमिट के भीतर रहण पै चुप रहवै सै।</string>
+    <string name="cameras_distance_title">अलर्ट की दूरी</string>
+    <string name="cameras_stats">%1$d कैमरे लोड होए · %2$d थमनै रिपोर्ट करे</string>
+    <string name="cameras_data_date">कैमरा डेटा %1$s का</string>
+    <string name="cameras_data_unknown">कैमरा डेटा की तारीख का बेरा कोनी</string>
+    <string name="cameras_report_hint">कैमरा जोड़ण खात्तर होम स्क्रीन पै कैमरा चिप नै दबा कै राखो।</string>
+    <string name="cameras_disclaimer">कैमरा अलर्ट सुरक्षा खात्तर सैं। सदा लाग्गी होई स्पीड लिमिट मानो। डेटा अधूरा हो सकै सै।</string>
 </resources>

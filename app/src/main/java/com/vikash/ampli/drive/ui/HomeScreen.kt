@@ -84,9 +84,14 @@ fun HomeScreen(
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val autoHint = stringResource(R.string.auto_button_hint)
     val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
+    val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
 
     val fastagChip: @Composable () -> Unit = {
         FastagChip(app = app, onClick = onOpenFastag, modifier = Modifier.fillMaxHeight())
+    }
+
+    val cameraChip: @Composable () -> Unit = {
+        CameraChip(app = app, modifier = Modifier.fillMaxHeight())
     }
 
     val openNav = { Launchers.openNavigation(context, gps.location); Unit }
@@ -102,6 +107,7 @@ fun HomeScreen(
             gps = gps,
             bt = bt,
             fastag = if (fastagOn) fastagChip else null,
+            camera = if (camerasOn) cameraChip else null,
             onGpsClick = {
                 when {
                     !gps.hasPermission -> onRequestPermissions()
@@ -228,6 +234,7 @@ private fun StatusRow(
     gps: GpsState,
     bt: BluetoothUiState,
     fastag: (@Composable () -> Unit)?,
+    camera: (@Composable () -> Unit)?,
     onGpsClick: () -> Unit,
     onBtClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -275,6 +282,7 @@ private fun StatusRow(
             )
         }
         Spacer(Modifier.weight(1f))
+        camera?.invoke()
         fastag?.invoke()
         if (bt.supported) {
             val text: String

@@ -197,6 +197,7 @@ fun SettingsScreen(
             )
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick)
+            CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             ToggleRow(
                 title = stringResource(R.string.screen_on_title),
                 status = stringResource(R.string.screen_on_hint),
@@ -209,7 +210,7 @@ fun SettingsScreen(
                     "Ampli Car Hub ${BuildConfig.VERSION_NAME}",
                     if (pro.isPro) stringResource(R.string.pro_active) else null,
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
-                    stringResource(R.string.about_limits),
+                    stringResource(R.string.cameras_attribution),
                 ),
             )
         }

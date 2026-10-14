@@ -78,7 +78,6 @@
     <string name="screen_on_hint">Solange der Startbildschirm angezeigt wird</string>
     <string name="about_title">Info</string>
     <string name="about_map">Karte: %1$s</string>
-    <string name="about_limits">Tempolimit- und Blitzerdaten sind noch nicht verfügbar.</string>
     <string name="theme_title">Design des Startbildschirms</string>
     <string name="theme_auto">Automatisch Tag/Nacht</string>
     <string name="theme_auto_hint">Wechselt bei Sonnenauf- und -untergang, berechnet aus dem GPS</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">Bitte sagen Sie eine Nummer, zum Beispiel „der zweite“.</string>
     <string name="voice_starting_nav">Navigation zu %1$s startet.</string>
     <string name="voice_nav_failed">Navigation konnte nicht geöffnet werden.</string>
-    <string name="voice_camera_none">Auf Ihrer Strecke sind keine Blitzer bekannt.</string>
-    <string name="voice_camera_next">Nächster Blitzer in %1$s Kilometern auf %2$s, Limit %3$d.</string>
-    <string name="voice_camera_next_nolimit">Nächster Blitzer in %1$s Kilometern auf %2$s.</string>
-    <string name="voice_road_ahead">der Straße vor Ihnen</string>
     <string name="voice_no_location">Ich habe noch keine GPS-Position.</string>
     <string name="voice_playing">Ich spiele %1$s.</string>
     <string name="voice_song_not_found">%1$s ist auf diesem Gerät nicht zu finden.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">Ich öffne das Telefon. Bitte wählen Sie %1$s.</string>
     <string name="voice_call_any">Ich öffne das Telefon.</string>
     <string name="voice_cancelled">Okay, abgebrochen.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">Blitzer</string>
+    <string name="camera_chip_idle">Kein Blitzer voraus</string>
+    <string name="camera_reported_by_you">Von Ihnen gemeldet</string>
+    <string name="camera_report_here">Blitzer hier melden</string>
+    <string name="camera_report_saved">Blitzer gespeichert. Beim nächsten Mal werden Sie hier gewarnt.</string>
+    <string name="camera_report_no_fix">Noch keine GPS-Position. Bitte gleich noch einmal versuchen.</string>
+    <string name="camera_voice_ahead">Blitzer in %1$d Metern, Limit %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">Blitzer in %1$d Metern.</string>
+    <string name="camera_voice_slow_down">Bitte langsamer fahren.</string>
+    <string name="voice_camera_next_ahead">Nächster Blitzer in %1$s Kilometern, Limit %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">Nächster Blitzer in %1$s Kilometern.</string>
+    <string name="voice_camera_none_ahead">Kein Blitzer in den nächsten 20 Kilometern.</string>
+    <string name="cameras_title">Blitzer</string>
+    <string name="cameras_hint">Warnt vor Blitzern auf der Strecke vor Ihnen. Funktioniert offline.</string>
+    <string name="cameras_alerts_title">Blitzerwarnungen</string>
+    <string name="cameras_voice_title">Sprachwarnungen</string>
+    <string name="cameras_voice_hint">Nennt Entfernung und Limit und piept, wenn Sie zu schnell sind. Die Musik wird dabei leiser.</string>
+    <string name="cameras_voice_pro">Sprachwarnungen gehören zu Pro. Kostenlos gibt es die Warnung auf dem Bildschirm.</string>
+    <string name="cameras_over_only_title">Nur warnen, wenn zu schnell</string>
+    <string name="cameras_over_only_hint">Bleibt still, solange Sie das Limit einhalten.</string>
+    <string name="cameras_distance_title">Warnabstand</string>
+    <string name="cameras_stats">%1$d Blitzer geladen · %2$d von Ihnen gemeldet</string>
+    <string name="cameras_data_date">Blitzerdaten vom %1$s</string>
+    <string name="cameras_data_unknown">Datum der Blitzerdaten unbekannt</string>
+    <string name="cameras_report_hint">Um einen Blitzer hinzuzufügen, den Blitzer-Chip auf dem Startbildschirm lange drücken.</string>
+    <string name="cameras_disclaimer">Blitzerwarnungen dienen der Verkehrssicherheit. Halten Sie sich immer an die ausgeschilderten Tempolimits. Die Daten können unvollständig sein.</string>
 </resources>

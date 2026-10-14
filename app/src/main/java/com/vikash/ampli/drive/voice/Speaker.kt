@@ -104,6 +104,21 @@ class Speaker(context: Context) {
         }
     }
 
+    /** Short warning beep for speed-camera alerts, with music ducked meanwhile. */
+    suspend fun alertBeep() {
+        audio?.requestAudioFocus(duckFocus)
+        try {
+            val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 90)
+            tone.startTone(ToneGenerator.TONE_PROP_BEEP2, 300)
+            delay(380)
+            tone.release()
+        } catch (_: RuntimeException) {
+            // No ToneGenerator on this unit: the red chip is the cue then.
+        } finally {
+            audio?.abandonAudioFocusRequest(duckFocus)
+        }
+    }
+
     fun stop() {
         tts?.stop()
         synchronized(pending) {

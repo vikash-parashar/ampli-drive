@@ -5,13 +5,15 @@ import android.content.Context
 import com.vikash.ampli.drive.billing.ProBilling
 import com.vikash.ampli.drive.bluetooth.BluetoothStatus
 import com.vikash.ampli.drive.cameras.CameraAlerts
-import com.vikash.ampli.drive.cameras.NoCameraAlerts
+import com.vikash.ampli.drive.cameras.CameraRepository
+import com.vikash.ampli.drive.cameras.LiveCameraAlerts
 import com.vikash.ampli.drive.emergency.EmergencyStore
 import com.vikash.ampli.drive.fastag.FastagStore
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.location.SpeedTracker
 import com.vikash.ampli.drive.media.MediaHub
 import com.vikash.ampli.drive.prefs.DrivePrefs
+import com.vikash.ampli.drive.voice.Speaker
 import com.vikash.ampli.drive.voice.VoiceAssistant
 import com.vikash.ampli.drive.voice.WakeModel
 
@@ -19,8 +21,12 @@ import com.vikash.ampli.drive.voice.WakeModel
 class DriveApp : Application() {
     val prefs: DrivePrefs by lazy { DrivePrefs(this) }
 
-    /** Swap for the real engine when the camera database ships. */
-    val cameraAlerts: CameraAlerts = NoCameraAlerts
+    /** Offline speed cameras (OpenStreetMap, ODbL, plus the driver's reports); loads on first use. */
+    val cameras: CameraRepository by lazy { CameraRepository(this) }
+    val cameraAlerts: CameraAlerts by lazy { LiveCameraAlerts(this) }
+
+    /** One text-to-speech engine for the assistant and the camera alerts. */
+    val speaker: Speaker by lazy { Speaker(this) }
 
     val speedTracker: SpeedTracker by lazy { SpeedTracker(this, cameraAlerts) }
     val mediaHub: MediaHub by lazy { MediaHub(this) }

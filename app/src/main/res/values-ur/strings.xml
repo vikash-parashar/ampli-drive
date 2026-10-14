@@ -78,7 +78,6 @@
     <string name="screen_on_hint">جب تک ہوم اسکرین دکھ رہی ہے</string>
     <string name="about_title">معلومات</string>
     <string name="about_map">نقشہ: %1$s</string>
-    <string name="about_limits">رفتار کی حد اور اسپیڈ کیمرا کا ڈیٹا ابھی دستیاب نہیں۔</string>
     <string name="theme_title">ہوم اسکرین تھیم</string>
     <string name="theme_auto">آٹو دن/رات</string>
     <string name="theme_auto_hint">GPS سے نکالے گئے طلوع اور غروبِ آفتاب پر بدلتی ہے</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">کوئی نمبر بولیں، جیسے “دوسری والی”۔</string>
     <string name="voice_starting_nav">%1$s کے لیے نیویگیشن شروع کر رہی ہوں۔</string>
     <string name="voice_nav_failed">نیویگیشن نہیں کھل سکی۔</string>
-    <string name="voice_camera_none">آپ کے راستے پر کوئی اسپیڈ کیمرہ معلوم نہیں۔</string>
-    <string name="voice_camera_next">اگلا اسپیڈ کیمرہ %1$s کلومیٹر پر، %2$s پر، حد %3$d۔</string>
-    <string name="voice_camera_next_nolimit">اگلا اسپیڈ کیمرہ %1$s کلومیٹر پر، %2$s پر۔</string>
-    <string name="voice_road_ahead">آگے کی سڑک</string>
     <string name="voice_no_location">ابھی GPS مقام نہیں ملا۔</string>
     <string name="voice_playing">%1$s چلا رہی ہوں۔</string>
     <string name="voice_song_not_found">اس یونٹ پر %1$s نہیں ملا۔</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">فون کھول رہی ہوں۔ %1$s منتخب کریں۔</string>
     <string name="voice_call_any">فون کھول رہی ہوں۔</string>
     <string name="voice_cancelled">ٹھیک ہے، منسوخ کر دیا۔</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">کیمرہ</string>
+    <string name="camera_chip_idle">آگے کوئی کیمرہ نہیں</string>
+    <string name="camera_reported_by_you">آپ کی رپورٹ</string>
+    <string name="camera_report_here">یہاں کیمرہ رپورٹ کریں</string>
+    <string name="camera_report_saved">کیمرہ محفوظ ہو گیا۔ اگلی بار یہاں الرٹ ملے گا۔</string>
+    <string name="camera_report_no_fix">ابھی GPS مقام نہیں ملا۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
+    <string name="camera_voice_ahead">%1$d میٹر پر اسپیڈ کیمرہ، حد %2$d۔</string>
+    <string name="camera_voice_ahead_nolimit">%1$d میٹر پر اسپیڈ کیمرہ۔</string>
+    <string name="camera_voice_slow_down">رفتار کم کریں۔</string>
+    <string name="voice_camera_next_ahead">اگلا اسپیڈ کیمرہ %1$s کلومیٹر پر، حد %2$d۔</string>
+    <string name="voice_camera_next_ahead_nolimit">اگلا اسپیڈ کیمرہ %1$s کلومیٹر پر۔</string>
+    <string name="voice_camera_none_ahead">آگے 20 کلومیٹر تک کوئی اسپیڈ کیمرہ نہیں۔</string>
+    <string name="cameras_title">اسپیڈ کیمرے</string>
+    <string name="cameras_hint">آگے کی سڑک پر اسپیڈ کیمروں سے خبردار کرتا ہے۔ انٹرنیٹ کے بغیر چلتا ہے۔</string>
+    <string name="cameras_alerts_title">کیمرہ الرٹ</string>
+    <string name="cameras_voice_title">آواز میں الرٹ</string>
+    <string name="cameras_voice_hint">فاصلہ اور حد بتاتا ہے، اور حد سے تیز ہونے پر بیپ کرتا ہے۔ اس دوران موسیقی دھیمی ہو جاتی ہے۔</string>
+    <string name="cameras_voice_pro">آواز میں الرٹ Pro کا حصہ ہیں۔ مفت میں اسکرین پر الرٹ دکھتا ہے۔</string>
+    <string name="cameras_over_only_title">صرف حد سے تیز ہونے پر الرٹ</string>
+    <string name="cameras_over_only_hint">حد کے اندر رہنے پر خاموش رہتا ہے۔</string>
+    <string name="cameras_distance_title">الرٹ کا فاصلہ</string>
+    <string name="cameras_stats">%1$d کیمرے لوڈ ہوئے · %2$d آپ نے رپورٹ کیے</string>
+    <string name="cameras_data_date">کیمرہ ڈیٹا %1$s کا</string>
+    <string name="cameras_data_unknown">کیمرہ ڈیٹا کی تاریخ معلوم نہیں</string>
+    <string name="cameras_report_hint">کیمرہ شامل کرنے کے لیے ہوم اسکرین پر کیمرہ چِپ کو دبا کر رکھیں۔</string>
+    <string name="cameras_disclaimer">کیمرہ الرٹ حفاظتی آگاہی کے لیے ہیں۔ ہمیشہ مقررہ رفتار کی حد پر عمل کریں۔ ڈیٹا نامکمل ہو سکتا ہے۔</string>
 </resources>

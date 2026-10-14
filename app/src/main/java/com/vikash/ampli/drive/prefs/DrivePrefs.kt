@@ -55,6 +55,19 @@ class DrivePrefs(context: Context) {
     private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
     val voiceAlways: StateFlow<Boolean> = _voiceAlways.asStateFlow()
 
+    /** Speed-camera alerts: on/off, spoken alerts (Pro), alert distance in metres, quiet unless over the limit. */
+    private val _cameraAlerts = MutableStateFlow(sp.getBoolean(KEY_CAM_ON, true))
+    val cameraAlerts: StateFlow<Boolean> = _cameraAlerts.asStateFlow()
+
+    private val _cameraVoice = MutableStateFlow(sp.getBoolean(KEY_CAM_VOICE, true))
+    val cameraVoice: StateFlow<Boolean> = _cameraVoice.asStateFlow()
+
+    private val _cameraDistance = MutableStateFlow(sp.getInt(KEY_CAM_DISTANCE, 500))
+    val cameraDistance: StateFlow<Int> = _cameraDistance.asStateFlow()
+
+    private val _cameraOverOnly = MutableStateFlow(sp.getBoolean(KEY_CAM_OVER_ONLY, false))
+    val cameraOverOnly: StateFlow<Boolean> = _cameraOverOnly.asStateFlow()
+
     /** When the assistant last said the full greeting (wall-clock ms), so it isn't repeated every time. */
     var lastVoiceGreeting: Long
         get() = sp.getLong(KEY_VOICE_GREETED, 0L)
@@ -108,6 +121,26 @@ class DrivePrefs(context: Context) {
         _voiceAlways.value = value
     }
 
+    fun setCameraAlerts(value: Boolean) {
+        sp.edit().putBoolean(KEY_CAM_ON, value).apply()
+        _cameraAlerts.value = value
+    }
+
+    fun setCameraVoice(value: Boolean) {
+        sp.edit().putBoolean(KEY_CAM_VOICE, value).apply()
+        _cameraVoice.value = value
+    }
+
+    fun setCameraDistance(meters: Int) {
+        sp.edit().putInt(KEY_CAM_DISTANCE, meters).apply()
+        _cameraDistance.value = meters
+    }
+
+    fun setCameraOverOnly(value: Boolean) {
+        sp.edit().putBoolean(KEY_CAM_OVER_ONLY, value).apply()
+        _cameraOverOnly.value = value
+    }
+
     private fun readThemeChoice(): ThemeChoice {
         // Earlier builds stored only "Auto" / "Day" / "Night".
         val legacy = sp.getString(KEY_THEME_LEGACY, "Auto")
@@ -139,6 +172,13 @@ class DrivePrefs(context: Context) {
         private const val KEY_ASKED = "asked_permissions"
         private const val KEY_VOICE_ALWAYS = "voice_always_listen"
         private const val KEY_VOICE_GREETED = "voice_last_greeting"
+        private const val KEY_CAM_ON = "camera_alerts"
+        private const val KEY_CAM_VOICE = "camera_voice"
+        private const val KEY_CAM_DISTANCE = "camera_distance"
+        private const val KEY_CAM_OVER_ONLY = "camera_over_only"
+
+        /** Choices for the camera alert distance, in metres. */
+        val CAMERA_DISTANCES = listOf(300, 500, 800)
 
         /** Read before the app object exists (attachBaseContext on Android 12). */
         fun readLanguage(context: Context): String =

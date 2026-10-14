@@ -78,7 +78,6 @@
     <string name="screen_on_hint">হ\'ম স্ক্ৰীন দেখুৱাই থকালৈকে</string>
     <string name="about_title">বিষয়ে</string>
     <string name="about_map">মেপ: %1$s</string>
-    <string name="about_limits">বেগৰ সীমা আৰু স্পীড কেমেৰাৰ তথ্য এতিয়াও উপলব্ধ নহয়।</string>
     <string name="theme_title">হ\'ম স্ক্ৰীনৰ থীম</string>
     <string name="theme_auto">অটো দিন/ৰাতি</string>
     <string name="theme_auto_hint">GPSৰ পৰা হিচাপ কৰা সূৰ্যোদয় আৰু সূৰ্যাস্তত সলনি হয়</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">এটা নম্বৰ কওক, যেনে “দ্বিতীয়টো”।</string>
     <string name="voice_starting_nav">%1$sলৈ নেভিগেশ্বন আৰম্ভ কৰিছো।</string>
     <string name="voice_nav_failed">নেভিগেশ্বন খুলিব নোৱাৰিলো।</string>
-    <string name="voice_camera_none">আপোনাৰ পথত কোনো স্পীড কেমেৰাৰ খবৰ নাই।</string>
-    <string name="voice_camera_next">পিছৰ স্পীড কেমেৰা %1$s কিলোমিটাৰ দূৰত, %2$sত, সীমা %3$d।</string>
-    <string name="voice_camera_next_nolimit">পিছৰ স্পীড কেমেৰা %1$s কিলোমিটাৰ দূৰত, %2$sত।</string>
-    <string name="voice_road_ahead">সন্মুখৰ পথ</string>
     <string name="voice_no_location">এতিয়াও GPS অৱস্থান পোৱা নাই।</string>
     <string name="voice_playing">%1$s বজাইছো।</string>
     <string name="voice_song_not_found">এই ইউনিটত %1$s পোৱা নগ\'ল।</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ফোন খুলিছো। %1$s বাছক।</string>
     <string name="voice_call_any">ফোন খুলিছো।</string>
     <string name="voice_cancelled">ঠিক আছে, বাতিল কৰা হ\'ল।</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">কেমেৰা</string>
+    <string name="camera_chip_idle">আগত কোনো কেমেৰা নাই</string>
+    <string name="camera_reported_by_you">আপুনি ৰিপ\'ৰ্ট কৰা</string>
+    <string name="camera_report_here">ইয়াত কেমেৰা ৰিপ\'ৰ্ট কৰক</string>
+    <string name="camera_report_saved">কেমেৰা ছেভ হ\'ল। পিছৰবাৰ ইয়াত সতৰ্ক কৰা হ\'ব।</string>
+    <string name="camera_report_no_fix">এতিয়াও GPS অৱস্থান পোৱা নাই। অলপ পিছত আকৌ চেষ্টা কৰক।</string>
+    <string name="camera_voice_ahead">%1$d মিটাৰ দূৰত স্পীড কেমেৰা, সীমা %2$d।</string>
+    <string name="camera_voice_ahead_nolimit">%1$d মিটাৰ দূৰত স্পীড কেমেৰা।</string>
+    <string name="camera_voice_slow_down">লাহে চলাওক।</string>
+    <string name="voice_camera_next_ahead">পিছৰ স্পীড কেমেৰা %1$s কিলোমিটাৰ দূৰত, সীমা %2$d।</string>
+    <string name="voice_camera_next_ahead_nolimit">পিছৰ স্পীড কেমেৰা %1$s কিলোমিটাৰ দূৰত।</string>
+    <string name="voice_camera_none_ahead">আগৰ 20 কিলোমিটাৰৰ ভিতৰত কোনো স্পীড কেমেৰা নাই।</string>
+    <string name="cameras_title">স্পীড কেমেৰা</string>
+    <string name="cameras_hint">আগৰ পথৰ স্পীড কেমেৰাৰ বিষয়ে সতৰ্ক কৰে। ইণ্টাৰনেট নোহোৱাকৈ চলে।</string>
+    <string name="cameras_alerts_title">কেমেৰা সতৰ্কবাণী</string>
+    <string name="cameras_voice_title">মাতেৰে সতৰ্কবাণী</string>
+    <string name="cameras_voice_hint">দূৰত্ব আৰু সীমা কয়, আৰু সীমাতকৈ বেগ বেছি হ\'লে বীপ কৰে। সেই সময়ত গান লাহে হয়।</string>
+    <string name="cameras_voice_pro">মাতেৰে সতৰ্কবাণী Pro-ৰ অংশ। বিনামূলীয়াত স্ক্ৰীনত সতৰ্কবাণী দেখুৱায়।</string>
+    <string name="cameras_over_only_title">কেৱল সীমা পাৰ হ\'লেহে সতৰ্ক কৰক</string>
+    <string name="cameras_over_only_hint">সীমাৰ ভিতৰত থাকিলে মনে মনে থাকে।</string>
+    <string name="cameras_distance_title">সতৰ্কবাণীৰ দূৰত্ব</string>
+    <string name="cameras_stats">%1$dটা কেমেৰা লোড হ\'ল · %2$dটা আপুনি ৰিপ\'ৰ্ট কৰা</string>
+    <string name="cameras_data_date">কেমেৰা ডেটা %1$s তাৰিখৰ</string>
+    <string name="cameras_data_unknown">কেমেৰা ডেটাৰ তাৰিখ অজ্ঞাত</string>
+    <string name="cameras_report_hint">কেমেৰা যোগ কৰিবলৈ হ\'ম স্ক্ৰীনৰ কেমেৰা চিপটো হেঁচি ধৰি ৰাখক।</string>
+    <string name="cameras_disclaimer">কেমেৰা সতৰ্কবাণী সুৰক্ষা সজাগতাৰ বাবে। সদায় নিৰ্ধাৰিত বেগৰ সীমা মানি চলক। ডেটা অসম্পূৰ্ণ হ\'ব পাৰে।</string>
 </resources>

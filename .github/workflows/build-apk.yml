@@ -25,6 +25,18 @@ jobs:
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+      # Speed cameras from OpenStreetMap (ODbL). Best effort: if Overpass is down, the
+      # committed assets/cameras.json is bundled instead and the build carries on.
+      - name: Fetch speed-camera data
+        continue-on-error: true
+        timeout-minutes: 8
+        run: python3 scripts/fetch_cameras.py
+
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testDebugUnitTest
+
       - name: Build debug APK
         run: |
           chmod +x gradlew

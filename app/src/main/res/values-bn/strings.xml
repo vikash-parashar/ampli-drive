@@ -78,7 +78,6 @@
     <string name="screen_on_hint">যতক্ষণ হোম স্ক্রিন দেখা যাচ্ছে</string>
     <string name="about_title">সম্পর্কে</string>
     <string name="about_map">ম্যাপ: %1$s</string>
-    <string name="about_limits">গতিসীমা ও স্পিড ক্যামেরার তথ্য এখনও নেই।</string>
     <string name="theme_title">হোম স্ক্রিন থিম</string>
     <string name="theme_auto">অটো দিন/রাত</string>
     <string name="theme_auto_hint">GPS থেকে হিসেব করা সূর্যোদয় ও সূর্যাস্তে বদলায়</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">একটা নম্বর বলুন, যেমন “দ্বিতীয়টা”।</string>
     <string name="voice_starting_nav">%1$s-এ নেভিগেশন শুরু করছি।</string>
     <string name="voice_nav_failed">নেভিগেশন খুলতে পারিনি।</string>
-    <string name="voice_camera_none">আপনার রাস্তায় কোনো স্পিড ক্যামেরার খবর নেই।</string>
-    <string name="voice_camera_next">পরের স্পিড ক্যামেরা %1$s কিলোমিটার দূরে, %2$s-এ, সীমা %3$d।</string>
-    <string name="voice_camera_next_nolimit">পরের স্পিড ক্যামেরা %1$s কিলোমিটার দূরে, %2$s-এ।</string>
-    <string name="voice_road_ahead">সামনের রাস্তা</string>
     <string name="voice_no_location">এখনও GPS অবস্থান পাইনি।</string>
     <string name="voice_playing">%1$s বাজাচ্ছি।</string>
     <string name="voice_song_not_found">এই ইউনিটে %1$s পাইনি।</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ফোন খুলছি। %1$s বেছে নিন।</string>
     <string name="voice_call_any">ফোন খুলছি।</string>
     <string name="voice_cancelled">ঠিক আছে, বাতিল।</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">ক্যামেরা</string>
+    <string name="camera_chip_idle">সামনে কোনো ক্যামেরা নেই</string>
+    <string name="camera_reported_by_you">আপনার রিপোর্ট করা</string>
+    <string name="camera_report_here">এখানে ক্যামেরা রিপোর্ট করুন</string>
+    <string name="camera_report_saved">ক্যামেরা সেভ হয়েছে। পরের বার এখানে সতর্ক করা হবে।</string>
+    <string name="camera_report_no_fix">এখনও GPS অবস্থান পাওয়া যায়নি। একটু পরে আবার চেষ্টা করুন।</string>
+    <string name="camera_voice_ahead">%1$d মিটার দূরে স্পিড ক্যামেরা, সীমা %2$d।</string>
+    <string name="camera_voice_ahead_nolimit">%1$d মিটার দূরে স্পিড ক্যামেরা।</string>
+    <string name="camera_voice_slow_down">গতি কমান।</string>
+    <string name="voice_camera_next_ahead">পরের স্পিড ক্যামেরা %1$s কিলোমিটার দূরে, সীমা %2$d।</string>
+    <string name="voice_camera_next_ahead_nolimit">পরের স্পিড ক্যামেরা %1$s কিলোমিটার দূরে।</string>
+    <string name="voice_camera_none_ahead">সামনে 20 কিলোমিটারের মধ্যে কোনো স্পিড ক্যামেরা নেই।</string>
+    <string name="cameras_title">স্পিড ক্যামেরা</string>
+    <string name="cameras_hint">সামনের রাস্তার স্পিড ক্যামেরা সম্পর্কে সতর্ক করে। ইন্টারনেট ছাড়াই চলে।</string>
+    <string name="cameras_alerts_title">ক্যামেরা সতর্কতা</string>
+    <string name="cameras_voice_title">ভয়েস সতর্কতা</string>
+    <string name="cameras_voice_hint">দূরত্ব ও সীমা বলে, আর সীমার বেশি গতিতে বিপ করে। তখন গান আস্তে হয়ে যায়।</string>
+    <string name="cameras_voice_pro">ভয়েস সতর্কতা Pro-র অংশ। ফ্রি সংস্করণে স্ক্রিনে সতর্কতা দেখায়।</string>
+    <string name="cameras_over_only_title">শুধু সীমা ছাড়ালে সতর্ক করুন</string>
+    <string name="cameras_over_only_hint">সীমার মধ্যে থাকলে চুপ থাকে।</string>
+    <string name="cameras_distance_title">সতর্কতার দূরত্ব</string>
+    <string name="cameras_stats">%1$dটি ক্যামেরা লোড হয়েছে · %2$dটি আপনার রিপোর্ট করা</string>
+    <string name="cameras_data_date">ক্যামেরা ডেটা %1$s তারিখের</string>
+    <string name="cameras_data_unknown">ক্যামেরা ডেটার তারিখ অজানা</string>
+    <string name="cameras_report_hint">ক্যামেরা যোগ করতে হোম স্ক্রিনে ক্যামেরা চিপ চেপে ধরে রাখুন।</string>
+    <string name="cameras_disclaimer">ক্যামেরা সতর্কতা নিরাপত্তা সচেতনতার জন্য। সবসময় নির্ধারিত গতিসীমা মেনে চলুন। ডেটা অসম্পূর্ণ হতে পারে।</string>
 </resources>

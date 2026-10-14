@@ -1,0 +1,7 @@
+{
+  "generated": null,
+  "count": 0,
+  "source": "OpenStreetMap (Overpass API): highway=speed_camera, enforcement=maxspeed nodes and type=enforcement relations in India",
+  "license": "ODbL 1.0. Speed camera data © OpenStreetMap contributors",
+  "note": "Committed fallback. CI regenerates cameras.json and this file with scripts/fetch_cameras.py before each build."
+}

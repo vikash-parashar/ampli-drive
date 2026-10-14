@@ -78,7 +78,6 @@
     <string name="screen_on_hint">હોમ સ્ક્રીન દેખાય ત્યાં સુધી</string>
     <string name="about_title">માહિતી</string>
     <string name="about_map">નકશો: %1$s</string>
-    <string name="about_limits">ઝડપ મર્યાદા અને સ્પીડ કૅમેરા ડેટા હજી ઉપલબ્ધ નથી.</string>
     <string name="theme_title">હોમ સ્ક્રીન થીમ</string>
     <string name="theme_auto">ઑટો દિવસ/રાત</string>
     <string name="theme_auto_hint">GPS પરથી ગણેલા સૂર્યોદય અને સૂર્યાસ્તે બદલાય છે</string>
@@ -226,10 +225,6 @@
     <string name="voice_say_number">એક નંબર બોલો, જેમ કે “બીજી”.</string>
     <string name="voice_starting_nav">%1$s માટે નેવિગેશન શરૂ કરું છું.</string>
     <string name="voice_nav_failed">નેવિગેશન ખોલી શકાયું નહીં.</string>
-    <string name="voice_camera_none">તમારા રસ્તે કોઈ સ્પીડ કેમેરાની જાણ નથી.</string>
-    <string name="voice_camera_next">આગલો સ્પીડ કેમેરા %1$s કિલોમીટરે, %2$s પર, મર્યાદા %3$d.</string>
-    <string name="voice_camera_next_nolimit">આગલો સ્પીડ કેમેરા %1$s કિલોમીટરે, %2$s પર.</string>
-    <string name="voice_road_ahead">આગળનો રસ્તો</string>
     <string name="voice_no_location">હજી GPS સ્થાન મળ્યું નથી.</string>
     <string name="voice_playing">%1$s વગાડું છું.</string>
     <string name="voice_song_not_found">આ યુનિટ પર %1$s મળ્યું નહીં.</string>
@@ -242,4 +237,32 @@
     <string name="voice_call">ફોન ખોલું છું. %1$s પસંદ કરો.</string>
     <string name="voice_call_any">ફોન ખોલું છું.</string>
     <string name="voice_cancelled">ઠીક છે, રદ કર્યું.</string>
+
+    <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
+    <string name="camera_chip_label">કૅમેરા</string>
+    <string name="camera_chip_idle">આગળ કોઈ કૅમેરા નથી</string>
+    <string name="camera_reported_by_you">તમે જાણ કરી</string>
+    <string name="camera_report_here">અહીં કૅમેરાની જાણ કરો</string>
+    <string name="camera_report_saved">કૅમેરા સેવ થયો. આગલી વખતે અહીં અલર્ટ મળશે.</string>
+    <string name="camera_report_no_fix">હજી GPS સ્થાન મળ્યું નથી. થોડી વારમાં ફરી પ્રયાસ કરો.</string>
+    <string name="camera_voice_ahead">%1$d મીટરે સ્પીડ કૅમેરા, મર્યાદા %2$d.</string>
+    <string name="camera_voice_ahead_nolimit">%1$d મીટરે સ્પીડ કૅમેરા.</string>
+    <string name="camera_voice_slow_down">ધીમે ચલાવો.</string>
+    <string name="voice_camera_next_ahead">આગલો સ્પીડ કૅમેરા %1$s કિલોમીટરે, મર્યાદા %2$d.</string>
+    <string name="voice_camera_next_ahead_nolimit">આગલો સ્પીડ કૅમેરા %1$s કિલોમીટરે.</string>
+    <string name="voice_camera_none_ahead">આગળ 20 કિલોમીટર સુધી કોઈ સ્પીડ કૅમેરા નથી.</string>
+    <string name="cameras_title">સ્પીડ કૅમેરા</string>
+    <string name="cameras_hint">આગળના રસ્તા પરના સ્પીડ કૅમેરાની ચેતવણી આપે છે. ઇન્ટરનેટ વિના ચાલે છે.</string>
+    <string name="cameras_alerts_title">કૅમેરા અલર્ટ</string>
+    <string name="cameras_voice_title">અવાજમાં અલર્ટ</string>
+    <string name="cameras_voice_hint">અંતર અને મર્યાદા બોલે છે, અને મર્યાદાથી વધુ ઝડપે બીપ કરે છે. એ દરમિયાન સંગીત ધીમું થાય છે.</string>
+    <string name="cameras_voice_pro">અવાજમાં અલર્ટ Pro નો ભાગ છે. ફ્રીમાં સ્ક્રીન પર અલર્ટ દેખાય છે.</string>
+    <string name="cameras_over_only_title">ફક્ત મર્યાદાથી વધુ ઝડપે અલર્ટ</string>
+    <string name="cameras_over_only_hint">મર્યાદામાં હો ત્યારે શાંત રહે છે.</string>
+    <string name="cameras_distance_title">અલર્ટનું અંતર</string>
+    <string name="cameras_stats">%1$d કૅમેરા લોડ થયા · %2$d તમે જાણ કરેલા</string>
+    <string name="cameras_data_date">કૅમેરા ડેટા %1$s નો</string>
+    <string name="cameras_data_unknown">કૅમેરા ડેટાની તારીખ અજાણી</string>
+    <string name="cameras_report_hint">કૅમેરા ઉમેરવા માટે હોમ સ્ક્રીન પર કૅમેરા ચિપ દબાવી રાખો.</string>
+    <string name="cameras_disclaimer">કૅમેરા અલર્ટ સલામતીની જાગૃતિ માટે છે. હંમેશાં લગાવેલી ઝડપ મર્યાદાનું પાલન કરો. ડેટા અધૂરો હોઈ શકે છે.</string>
 </resources>

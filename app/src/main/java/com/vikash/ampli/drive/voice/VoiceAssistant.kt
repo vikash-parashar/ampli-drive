@@ -48,9 +48,10 @@ data class VoiceUiState(
  */
 class VoiceAssistant(private val app: DriveApp) {
     private val scope = MainScope()
-    private val speaker = Speaker(app)
+    /** Shared with the speed-camera alerts, so there is one TTS engine. */
+    private val speaker get() = app.speaker
     private val listener = Listener(app)
-    private val cameras = CameraRepository(app)
+    private val cameras: CameraRepository get() = app.cameras
     private var job: Job? = null
 
     private val _state = MutableStateFlow(VoiceUiState())
@@ -324,42 +325,33 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private suspend fun nextCamera(res: Context, lang: String) {
         val locale = res.resources.configuration.locales[0]
-        val road = res.getString(R.string.voice_road_ahead)
-        // The live alert engine first (empty until the camera dataset ships), then cameras.json.
+        fun answer(meters: Double, limit: Int?): String {
+            val km = String.format(locale, "%.1f", meters / 1000.0)
+            return if (limit != null) {
+                res.getString(R.string.voice_camera_next_ahead, km, limit)
+            } else {
+                res.getString(R.string.voice_camera_next_ahead_nolimit, km)
+            }
+        }
+        // A live alert on screen is the best answer; otherwise search 20 km ahead in the database.
         app.cameraAlerts.current.value?.let { alert ->
-            val km = String.format(locale, "%.1f", alert.distanceMeters / 1000f)
-            val where = alert.description.ifBlank { road }
-            say(
-                res, lang,
-                if (alert.limitKmh != null) {
-                    res.getString(R.string.voice_camera_next, km, where, alert.limitKmh)
-                } else {
-                    res.getString(R.string.voice_camera_next_nolimit, km, where)
-                },
-            )
+            say(res, lang, answer(alert.distanceMeters.toDouble(), alert.limitKmh))
             return
         }
-        val here = app.speedTracker.state.value.location
+        val gps = app.speedTracker.state.value
+        val here = gps.location
         if (here == null) {
             say(res, lang, R.string.voice_no_location)
             return
         }
-        val ahead = cameras.nextAhead(here)
+        cameras.ensureLoaded()
+        val moving = here.hasBearing() && (gps.speedKmh ?: 0f) >= 10f
+        val ahead = cameras.nextCamera(here, if (moving) here.bearing else null)
         if (ahead == null) {
-            say(res, lang, R.string.voice_camera_none)
+            say(res, lang, R.string.voice_camera_none_ahead)
             return
         }
-        val km = String.format(locale, "%.1f", ahead.distanceMeters / 1000f)
-        val where = ahead.camera.road ?: road
-        val limit = ahead.camera.limitKmh
-        say(
-            res, lang,
-            if (limit != null) {
-                res.getString(R.string.voice_camera_next, km, where, limit)
-            } else {
-                res.getString(R.string.voice_camera_next_nolimit, km, where)
-            },
-        )
+        say(res, lang, answer(ahead.distanceMeters, ahead.camera.maxspeed))
     }
 
     private suspend fun playLocal(query: String, res: Context, lang: String) {
