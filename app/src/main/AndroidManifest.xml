@@ -10,6 +10,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Connected phone name in the status row; OBD-II dongle (Bluetooth SPP). -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Android 8 to 11 (many head units): legacy install-time Bluetooth permissions. There, a BLE
+         tyre-sensor scan also needs ACCESS_FINE_LOCATION (above). See system/BtPermissions.kt. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
     <!-- BLE tyre-pressure sensors. Asked for only when Tyres is first opened. Never used for location. -->
     <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN"

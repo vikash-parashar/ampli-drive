@@ -43,6 +43,12 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon testDebugUnitTest
 
+      # Fails on any API call newer than minSdk (26) that has no version check.
+      - name: Lint (NewApi)
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon lintDebug || { cat app/build/reports/lint-results-debug.txt; exit 1; }
+
       - name: Build debug APK
         run: |
           chmod +x gradlew

@@ -67,7 +67,11 @@ object VoiceActions {
     }
 
     private fun querySong(context: Context, q: String): Song? {
-        val collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
         val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE)
         val (selection, args) = if (q.isEmpty()) {
             "${MediaStore.Audio.Media.IS_MUSIC} != 0" to null

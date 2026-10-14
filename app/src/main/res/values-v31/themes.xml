@@ -1,0 +1,12 @@
+<resources>
+    <!-- Android 12+ always flashes its system splash: the Car Hub icon (adaptive launcher icon)
+         on the night colour, with no extra delay. Same as values/themes.xml plus the splash. -->
+    <style name="Theme.AmpliDrive" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/ampli_night</item>
+        <item name="android:windowBackground">@color/ampli_night</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowSplashScreenBackground">@color/ampli_night</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    </style>
+</resources>

@@ -15,7 +15,7 @@ data class AppLanguage(val tag: String, val nativeName: String)
  * In-app language switching without AppCompat.
  * - Android 13+: the system's per-app language (LocaleManager), which also shows in
  *   Settings › Apps › Ampli Car Hub › Language thanks to res/xml/locales_config.xml.
- * - Android 12: the choice is saved in DrivePrefs and applied by wrapping the base context
+ * - Android 8 to 12: the choice is saved in DrivePrefs and applied by wrapping the base context
  *   (see [wrap]) in DriveApp and MainActivity; the activity is recreated to pick it up.
  *
  * Keep this list in sync with res/xml/locales_config.xml and the values-* folders.
@@ -47,7 +47,7 @@ object AppLanguages {
 
     /**
      * Switches the app language; [tag] "" means the system language.
-     * Returns true when the caller must recreate the activity (Android 12 only).
+     * Returns true when the caller must recreate the activity (Android 12 and older).
      */
     fun apply(context: Context, tag: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -76,7 +76,7 @@ object AppLanguages {
         return all.firstOrNull { Locale.forLanguageTag(it.tag).language == lang }?.tag ?: tag
     }
 
-    /** Android 12: a context whose resources use the saved language. No-op on 13+. */
+    /** Android 8 to 12: a context whose resources use the saved language. No-op on 13+. */
     fun wrap(base: Context): Context {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return base
         val tag = DrivePrefs.readLanguage(base)

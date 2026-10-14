@@ -13,9 +13,13 @@ import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioPlaybackConfiguration
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import androidx.annotation.RequiresApi
+import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
@@ -33,6 +37,7 @@ import org.vosk.Recognizer
 import org.vosk.android.RecognitionListener
 import org.vosk.android.SpeechService
 import java.io.IOException
+import java.util.concurrent.Executor
 
 /**
  * Always-on "Hey Ampli" wake word: a microphone foreground service running Vosk offline with a
@@ -67,7 +72,11 @@ class VoiceService : Service() {
     private var inCall = false
     private var promptPlaying = false
 
-    private val modeListener = AudioManager.OnModeChangedListener { mode ->
+    // Android 12+ tells us when a call starts. Older versions have no mode listener, so the
+    // mode is read again whenever the audio playback set changes (a ringtone or call starts).
+    private var modeWatcher: ModeWatcher? = null
+
+    private fun onAudioMode(mode: Int) {
         inCall = mode == AudioManager.MODE_IN_CALL || mode == AudioManager.MODE_IN_COMMUNICATION ||
             mode == AudioManager.MODE_RINGTONE || mode == AudioManager.MODE_CALL_SCREENING
         evaluate()
@@ -79,6 +88,9 @@ class VoiceService : Service() {
                 val usage = it.audioAttributes.usage
                 usage == AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE ||
                     usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                audio?.let { a -> onAudioMode(a.mode) }
             }
             evaluate()
         }
@@ -94,7 +106,8 @@ class VoiceService : Service() {
             return START_NOT_STICKY
         }
         try {
-            startForeground(NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+            // The type is only passed on Android 10+; older versions have no service types.
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
         } catch (_: Exception) {
             // Android refused (for example started from the background on 14+).
             stopSelf()
@@ -110,9 +123,11 @@ class VoiceService : Service() {
     private fun init() {
         app.voice.releaseWakeMic = { stopMic() }
         audio?.let {
-            it.addOnModeChangedListener(mainExecutor, modeListener)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                modeWatcher = ModeWatcher(it, ContextCompat.getMainExecutor(this), ::onAudioMode)
+            }
             it.registerAudioPlaybackCallback(playbackCallback, main)
-            modeListener.onModeChanged(it.mode)
+            onAudioMode(it.mode)
         }
         scope.launch {
             combine(app.voice.busy, app.prefs.voiceAlways) { busy, on -> busy to on }.collect { (busy, on) ->
@@ -231,7 +246,8 @@ class VoiceService : Service() {
         stopMic()
         audio?.let {
             try {
-                it.removeOnModeChangedListener(modeListener)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) modeWatcher?.close()
+                modeWatcher = null
                 it.unregisterAudioPlaybackCallback(playbackCallback)
             } catch (_: Exception) {
             }
@@ -253,14 +269,16 @@ class VoiceService : Service() {
         val open = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE,
         )
-        return Notification.Builder(this, CHANNEL_ID)
+        val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentTitle(getString(R.string.voice_notification_title))
             .setContentText(getString(R.string.voice_notification_text))
             .setContentIntent(open)
             .setOngoing(true)
-            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        return builder.build()
     }
 
     companion object {
@@ -285,5 +303,19 @@ class VoiceService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, VoiceService::class.java))
         }
+    }
+}
+
+/** AudioManager.OnModeChangedListener exists only on Android 12+. */
+@RequiresApi(Build.VERSION_CODES.S)
+private class ModeWatcher(private val audio: AudioManager, executor: Executor, onMode: (Int) -> Unit) {
+    private val listener = AudioManager.OnModeChangedListener { mode -> onMode(mode) }
+
+    init {
+        audio.addOnModeChangedListener(executor, listener)
+    }
+
+    fun close() {
+        audio.removeOnModeChangedListener(listener)
     }
 }

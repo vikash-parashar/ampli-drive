@@ -19,6 +19,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import androidx.core.app.ServiceCompat
 
 /**
  * Background alerts: keeps GPS, speed-camera alerts, the break timer, the odometer, crash
@@ -57,7 +58,9 @@ class CarMonitorService : Service() {
         super.onCreate()
         running = true
         try {
-            startForeground(CarNotifier.ID_MONITOR, CarNotifier.monitorNotification(this), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+            ServiceCompat.startForeground(
+                this, CarNotifier.ID_MONITOR, CarNotifier.monitorNotification(this), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
+            )
         } catch (_: Exception) {
             // Permission revoked or a background start refused: just don't monitor.
             running = false
