@@ -69,7 +69,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(dims.d(2.4f))
-                .themedCard(theme, theme.cardShape(dims), fill = Brush.linearGradient(listOf(fill, fill)))
+                .themedCard(theme, theme.cardShape(dims), fill = Brush.linearGradient(listOf(fill, fill)), blur = false)
                 .padding(dims.d(2.6f)),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
         ) {

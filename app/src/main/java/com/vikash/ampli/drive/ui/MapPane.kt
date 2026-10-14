@@ -63,7 +63,8 @@ fun MapPane(
         Modifier
     }
 
-    Pane(modifier.then(frame), fill = theme.background) {
+    // The map covers the pane, so there is nothing for glass to blur here.
+    Pane(modifier.then(frame), fill = theme.background, blur = false) {
         Box(Modifier.fillMaxSize()) {
             when {
                 !gps.hasPermission -> MapMessage(
@@ -178,7 +179,8 @@ fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modif
     val scale = if (large) 1.6f else 1f
     Row(
         modifier = modifier
-            .themedCard(theme, shape, fill = theme.turnBackground, border = theme.turnBorder, accentEdge = false)
+            // Sits on the map, which is a SurfaceView and can't be blurred: glass themes use a near-opaque tint.
+            .themedCard(theme, shape, fill = theme.turnBackground, border = theme.turnBorder, accentEdge = false, blur = false)
             .clickable(onClick = onClick)
             .padding(horizontal = dims.d(2f), vertical = dims.d(1.8f)),
         verticalAlignment = Alignment.CenterVertically,

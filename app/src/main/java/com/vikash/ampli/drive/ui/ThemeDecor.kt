@@ -8,7 +8,9 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -38,6 +40,11 @@ import androidx.compose.ui.unit.dp
 import com.vikash.ampli.drive.ui.theme.CardStyle
 import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
+import com.vikash.ampli.drive.ui.theme.GlassPalette
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
 import kotlin.math.max
 
 /*
@@ -73,23 +80,62 @@ fun DriveTheme.buttonShape(dims: Dims): Shape = when {
 /** Small labels: upper-case on themes whose design uses caps. */
 fun DriveTheme.label(text: String): String = if (upperLabels) text.uppercase() else text
 
-/** Paints a card for the active theme: shadow or glow, fill, border and accents. */
+/**
+ * The backdrop that glass panels blur. DriveRoot provides it only while blur is on (a glass theme,
+ * "Reduce glass effects" off, Android 12L or newer); otherwise it is null and panels are tint-only.
+ */
+val LocalGlassHaze = staticCompositionLocalOf<HazeState?> { null }
+
+/**
+ * Paints a card for the active theme: shadow or glow, fill, border and accents.
+ *
+ * On glass themes the card also blurs the backdrop behind it. Pass [blur] = false for cards that
+ * sit over something other than the backdrop (the map, a scrim): they would show the wrong thing.
+ */
 fun Modifier.themedCard(
     theme: DriveTheme,
     shape: Shape,
     fill: Brush = Brush.linearGradient(listOf(theme.surface, theme.surface)),
     border: Color = theme.border,
     accentEdge: Boolean = true,
+    blur: Boolean = true,
 ): Modifier {
     var m = this
+    val glass = theme.glass
     when (theme.cardStyle) {
         CardStyle.Neumorphic -> m = m.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight)
         CardStyle.NeonGlow -> m = m.neonGlow(shape, border)
-        CardStyle.Glass -> m = m.softShadow(shape, Color.Transparent, Color(0x99000000), Color.Transparent, 6.dp, 14.dp)
+        CardStyle.Glass -> m = if (glass != null) {
+            // Soft, wide drop shadow, as on iOS widgets.
+            m.softShadow(shape, Color.Transparent, Color(if (glass.light) 0x33203040L else 0x8C000000L), Color.Transparent, 4.dp, 18.dp)
+        } else {
+            m.softShadow(shape, Color.Transparent, Color(0x99000000), Color.Transparent, 6.dp, 14.dp)
+        }
         CardStyle.Pop -> m = m.hardShadow(shape, theme.accent2)
         else -> Unit
     }
-    m = m.clip(shape).background(fill, shape)
+    m = m.clip(shape)
+    if (glass != null && blur) m = m.backdropBlur(theme, glass)
+    m = m.background(fill, shape)
+    if (glass != null) {
+        // Sheen across the top of the glass, then a bright top edge fading to a faint bottom edge.
+        m = m.background(
+            Brush.verticalGradient(
+                0f to Color.White.copy(alpha = if (glass.light) 0.35f else 0.10f),
+                0.45f to Color.Transparent,
+            ),
+            shape,
+        )
+        if (border.alpha > 0f) {
+            val edge = if (border == theme.border) {
+                Brush.verticalGradient(listOf(Color(glass.edgeTop), Color(glass.edgeBottom)))
+            } else {
+                Brush.linearGradient(listOf(border, border))
+            }
+            m = m.border(theme.borderWidth, edge, shape)
+        }
+        return m
+    }
     if (theme.cardStyle == CardStyle.Glass) {
         // Light catching the top edge of the glass.
         m = m.background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.07f), Color.Transparent)), shape)
@@ -102,6 +148,28 @@ fun Modifier.themedCard(
         }
     }
     return m
+}
+
+/**
+ * Frosted glass: draws the blurred backdrop (from [LocalGlassHaze]) inside the card's clip.
+ * Nothing happens when blur is off; the card's own translucent fill is the tint either way.
+ */
+@OptIn(ExperimentalHazeApi::class)
+private fun Modifier.backdropBlur(theme: DriveTheme, glass: GlassPalette): Modifier = composed {
+    val state = LocalGlassHaze.current
+    if (state == null) {
+        Modifier
+    } else {
+        Modifier.hazeEffect(state) {
+            blurEnabled = true
+            backgroundColor = theme.background
+            tints = emptyList()
+            blurRadius = glass.blurDp.dp
+            noiseFactor = 0.05f
+            // Blur a half-size copy: a quarter of the pixels, and the backdrop is soft anyway.
+            inputScale = HazeInputScale.Fixed(0.5f)
+        }
+    }
 }
 
 /** Neumorphic double shadow: dark below-right, light above-left (CSS `--up`). */
@@ -220,8 +288,25 @@ fun Modifier.themeBackground(theme: DriveTheme): Modifier {
                     drawCircle(Brush.radialGradient(listOf(col, Color.Transparent), center = c, radius = r), radius = r, center = c)
                 }
             }
+            Decoration.Glass -> theme.glass?.let { drawGlassBackdrop(it) }
             Decoration.Scanlines, Decoration.None -> Unit
         }
+    }
+}
+
+/** Glass family backdrop: a vertical gradient and soft colour blobs for the panels to blur. */
+internal fun DrawScope.drawGlassBackdrop(p: GlassPalette) {
+    drawRect(Brush.verticalGradient(listOf(Color(p.top), Color(p.bottom))))
+    val span = max(size.width, size.height)
+    for (b in p.blobs) {
+        val center = Offset(size.width * b.x, size.height * b.y)
+        val r = span * b.radius
+        val col = Color(b.color)
+        drawCircle(
+            Brush.radialGradient(0f to col, 0.55f to col.copy(alpha = col.alpha * 0.6f), 1f to Color.Transparent, center = center, radius = r),
+            radius = r,
+            center = center,
+        )
     }
 }
 

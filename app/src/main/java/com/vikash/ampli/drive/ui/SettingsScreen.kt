@@ -92,6 +92,7 @@ fun SettingsScreen(
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
     val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
+    val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
     val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
     val price by app.billing.price.collectAsStateWithLifecycle()
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
@@ -122,6 +123,14 @@ fun SettingsScreen(
                 isPro = pro.isPro,
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
+            )
+            ToggleRow(
+                title = stringResource(R.string.glass_reduce_title),
+                status = stringResource(
+                    if (app.prefs.reduceGlassByDevice) R.string.glass_reduce_hint_auto else R.string.glass_reduce_hint,
+                ),
+                checked = reduceGlass,
+                onChange = app.prefs::setReduceGlass,
             )
             if (BuildConfig.DEBUG) {
                 ToggleRow(
@@ -426,6 +435,7 @@ private fun ThemePicker(
                         stringResource(
                             when (family) {
                                 ThemeFamily.Classic -> R.string.theme_family_classic
+                                ThemeFamily.Glass -> R.string.theme_family_glass
                                 ThemeFamily.Saffron -> R.string.theme_family_saffron
                                 ThemeFamily.Soft -> R.string.theme_family_soft
                             },
@@ -550,7 +560,7 @@ private fun ThemeCard(
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
             )
             Text(
-                theme.name,
+                theme.nameRes?.let { stringResource(it) } ?: theme.name,
                 fontSize = dims.t(2.4f, min = 14f),
                 fontWeight = FontWeight.SemiBold,
                 color = ui.text,
@@ -600,6 +610,8 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
                 ),
             )
             drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
+        } else if (t.decoration == Decoration.Glass && t.glass != null) {
+            drawGlassBackdrop(t.glass)
         } else {
             drawRect(t.background)
         }
@@ -750,7 +762,7 @@ internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, 
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
                 for (t in listOf(
                     DriveThemes.MidnightGlass, DriveThemes.SportRed, DriveThemes.Synthwave,
-                    DriveThemes.DesiSaffron, DriveThemes.HoliPop, DriveThemes.SoftNight,
+                    DriveThemes.RoseGlass, DriveThemes.HoliPop, DriveThemes.SoftNight,
                 )) {
                     Box(
                         Modifier

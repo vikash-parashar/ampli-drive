@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import android.app.Activity
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,8 @@ import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.location.SunTimes
 import com.vikash.ampli.drive.ui.theme.AmpliDriveTheme
 import com.vikash.ampli.drive.ui.theme.DriveThemes
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -69,7 +72,14 @@ fun DriveRoot(
     // Sun position decides day/night; before the first GPS fix, the clock does.
     val night = coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
         ?: SunTimes.isNightByClock(LocalTime.now())
-    val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
+    val chosen = DriveThemes.resolve(themeChoice, night, pro.isPro)
+    // Glass themes blur the backdrop behind panels, except with "Reduce glass effects" (on by
+    // default on 2 GB units) or on Android 12.0, where RenderNode blur is unreliable. Without
+    // blur they switch to a stronger tint so text stays readable.
+    val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
+    val glassBlur = chosen.glass != null && !reduceGlass && Build.VERSION.SDK_INT >= 32
+    val theme = if (chosen.glass != null && !glassBlur) chosen.withoutBlur() else chosen
+    val haze = remember { HazeState() }
     // Where Back goes from the emergency profile (opened from Settings or the Help panel).
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
@@ -91,10 +101,18 @@ fun DriveRoot(
     }
 
     AmpliDriveTheme(theme) {
+      Box(Modifier.fillMaxSize()) {
+        // The backdrop is its own layer so glass panels can blur it (hazeSource must come first
+        // so the background drawing is recorded into the layer).
         Box(
             Modifier
                 .fillMaxSize()
-                .themeBackground(theme)
+                .then(if (glassBlur) Modifier.hazeSource(haze) else Modifier)
+                .themeBackground(theme),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
                 .themeOverlay(theme)
                 .safeDrawingPadding(),
         ) {
@@ -106,7 +124,7 @@ fun DriveRoot(
                     uSp = with(density) { unit.toSp().value },
                     compact = maxWidth / maxHeight < 1.72f,
                 )
-                CompositionLocalProvider(LocalDims provides dims) {
+                CompositionLocalProvider(LocalDims provides dims, LocalGlassHaze provides if (glassBlur) haze else null) {
                     when (screen) {
                         Screen.Home -> {
                             // A home screen has nowhere to go back to.
@@ -219,5 +237,6 @@ fun DriveRoot(
                 }
             }
         }
+      }
     }
 }
