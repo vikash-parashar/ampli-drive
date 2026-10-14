@@ -82,9 +82,12 @@ fun SettingsScreen(
     resumeTick: Int,
     onBack: () -> Unit,
     onRequestPermissions: () -> Unit,
+    onOpenFastag: () -> Unit,
+    onOpenEmergency: () -> Unit,
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
+    val emergency by app.emergency.profile.collectAsStateWithLifecycle()
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
     val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
@@ -178,6 +181,21 @@ fun SettingsScreen(
                 action = if (hasBt) null else stringResource(R.string.action_allow),
                 onAction = onRequestPermissions,
             )
+            SettingRow(
+                title = stringResource(R.string.em_title),
+                status = if (emergency.contacts.isEmpty()) {
+                    stringResource(R.string.em_status_empty)
+                } else {
+                    listOf(
+                        stringResource(R.string.em_status, emergency.contacts.size),
+                        emergency.bloodGroup,
+                    ).filter { it.isNotBlank() }.joinToString(" · ")
+                },
+                ok = emergency.contacts.isNotEmpty(),
+                action = stringResource(R.string.action_edit),
+                onAction = onOpenEmergency,
+            )
+            FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             ToggleRow(
                 title = stringResource(R.string.screen_on_title),
                 status = stringResource(R.string.screen_on_hint),
@@ -228,7 +246,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 @Composable
-private fun SettingCard(content: @Composable () -> Unit) {
+internal fun SettingCard(content: @Composable () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = theme.cardShape(dims, scale = 0.9f)
@@ -241,7 +259,7 @@ private fun SettingCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun CardTitle(title: String, status: String?) {
+internal fun CardTitle(title: String, status: String?) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Column {
@@ -251,7 +269,7 @@ private fun CardTitle(title: String, status: String?) {
 }
 
 @Composable
-private fun SettingRow(
+internal fun SettingRow(
     title: String,
     status: String,
     ok: Boolean,
@@ -286,7 +304,7 @@ private fun SettingRow(
 }
 
 @Composable
-private fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
     val theme = LocalDriveTheme.current
     Switch(
         checked = checked,
@@ -302,7 +320,7 @@ private fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun ToggleRow(title: String, status: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun ToggleRow(title: String, status: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     val dims = LocalDims.current
     SettingCard {
         Row(
@@ -321,7 +339,7 @@ private fun ToggleRow(title: String, status: String, checked: Boolean, onChange:
 
 /** A selectable chip, at least 64 dp tall. */
 @Composable
-private fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.radius <= 0f) androidx.compose.ui.graphics.RectangleShape else CircleShape

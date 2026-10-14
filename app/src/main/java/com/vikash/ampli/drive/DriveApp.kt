@@ -6,6 +6,8 @@ import com.vikash.ampli.drive.billing.ProBilling
 import com.vikash.ampli.drive.bluetooth.BluetoothStatus
 import com.vikash.ampli.drive.cameras.CameraAlerts
 import com.vikash.ampli.drive.cameras.NoCameraAlerts
+import com.vikash.ampli.drive.emergency.EmergencyStore
+import com.vikash.ampli.drive.fastag.FastagStore
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.location.SpeedTracker
 import com.vikash.ampli.drive.media.MediaHub
@@ -22,6 +24,8 @@ class DriveApp : Application() {
     val mediaHub: MediaHub by lazy { MediaHub(this) }
     val bluetooth: BluetoothStatus by lazy { BluetoothStatus(this) }
     val billing: ProBilling by lazy { ProBilling(this, prefs) }
+    val fastag: FastagStore by lazy { FastagStore(this) }
+    val emergency: EmergencyStore by lazy { EmergencyStore(this) }
 
     /** Android 12: strings fetched through the app context follow the in-app language too. */
     override fun attachBaseContext(base: Context) {

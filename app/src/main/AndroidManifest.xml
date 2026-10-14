@@ -36,6 +36,25 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="google.navigation" />
         </intent>
+        <!-- Help panel: helplines open in the dialer (no CALL_PHONE). -->
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+        <!-- SOS: SMS composer and share sheet (no SEND_SMS). -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="smsto" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+        <!-- FASTag recharge page. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
         <package android:name="com.google.android.apps.maps" />
         <package android:name="com.vikash.ampli" />
         <package android:name="com.google.android.projection.gearhead" />
@@ -74,7 +93,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Reads media sessions (any player) and the Google Maps navigation notification. -->
+        <!-- Reads media sessions (any player), the Google Maps navigation notification and
+             FASTag toll SMS notifications (no READ_SMS permission). -->
         <service
             android:name=".service.DriveNotificationListener"
             android:exported="true"

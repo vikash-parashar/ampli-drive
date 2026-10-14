@@ -11,8 +11,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -26,7 +28,12 @@ import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.math.roundToInt
 
-enum class Screen { Home, Apps, Settings }
+enum class Screen {
+    Home, Apps, Settings,
+
+    /** Help panel; [Sos] is the same panel opened straight into the SOS countdown. */
+    Help, Sos, Fastag, Emergency,
+}
 
 @Composable
 fun DriveRoot(
@@ -58,6 +65,8 @@ fun DriveRoot(
     val night = coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
         ?: SunTimes.isNightByClock(LocalTime.now())
     val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
+    // Where Back goes from the emergency profile (opened from Settings or the Help panel).
+    var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
 
     // Dark status-bar icons on the light themes.
     val view = LocalView.current
@@ -96,8 +105,11 @@ fun DriveRoot(
                                 resumeTick = resumeTick,
                                 onOpenApps = { onNavigate(Screen.Apps) },
                                 onOpenSettings = { onNavigate(Screen.Settings) },
+                                onOpenHelp = { sos -> onNavigate(if (sos) Screen.Sos else Screen.Help) },
+                                onOpenFastag = { onNavigate(Screen.Fastag) },
                                 onRequestPermissions = onRequestPermissions,
                             )
+                            TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                         }
                         Screen.Apps -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
@@ -111,7 +123,32 @@ fun DriveRoot(
                                 resumeTick = resumeTick,
                                 onBack = { onNavigate(Screen.Home) },
                                 onRequestPermissions = onRequestPermissions,
+                                onOpenFastag = { onNavigate(Screen.Fastag) },
+                                onOpenEmergency = {
+                                    emergencyReturn = Screen.Settings
+                                    onNavigate(Screen.Emergency)
+                                },
                             )
+                        }
+                        Screen.Help, Screen.Sos -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            HelpScreen(
+                                app = app,
+                                startSos = screen == Screen.Sos,
+                                onBack = { onNavigate(Screen.Home) },
+                                onEditProfile = {
+                                    emergencyReturn = Screen.Help
+                                    onNavigate(Screen.Emergency)
+                                },
+                            )
+                        }
+                        Screen.Fastag -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            FastagScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                        }
+                        Screen.Emergency -> {
+                            BackHandler(enabled = true) { onNavigate(emergencyReturn) }
+                            EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
                 }

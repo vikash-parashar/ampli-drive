@@ -70,6 +70,8 @@ fun HomeScreen(
     resumeTick: Int,
     onOpenApps: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenHelp: (sos: Boolean) -> Unit,
+    onOpenFastag: () -> Unit,
     onRequestPermissions: () -> Unit,
 ) {
     val dims = LocalDims.current
@@ -80,6 +82,11 @@ fun HomeScreen(
     val autoPackage by app.prefs.autoPackage.collectAsStateWithLifecycle()
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val autoHint = stringResource(R.string.auto_button_hint)
+    val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
+
+    val fastagChip: @Composable () -> Unit = {
+        FastagChip(app = app, onClick = onOpenFastag, modifier = Modifier.fillMaxHeight())
+    }
 
     val openNav = { Launchers.openNavigation(context, gps.location); Unit }
     val gap = dims.d(2f)
@@ -93,6 +100,7 @@ fun HomeScreen(
         StatusRow(
             gps = gps,
             bt = bt,
+            fastag = if (fastagOn) fastagChip else null,
             onGpsClick = {
                 when {
                     !gps.hasPermission -> onRequestPermissions()
@@ -111,7 +119,8 @@ fun HomeScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(maxOf(dims.d(7.5f), 44.dp)),
+                // 56 dp so the FASTag chip and status pills are full-size touch targets.
+                .height(maxOf(dims.d(7.5f), 56.dp)),
         )
         Row(
             modifier = Modifier
@@ -206,6 +215,8 @@ fun HomeScreen(
             },
             onApps = onOpenApps,
             onSettings = onOpenSettings,
+            onHelp = { onOpenHelp(false) },
+            onSos = { onOpenHelp(true) },
         )
     }
 }
@@ -214,6 +225,7 @@ fun HomeScreen(
 private fun StatusRow(
     gps: GpsState,
     bt: BluetoothUiState,
+    fastag: (@Composable () -> Unit)?,
     onGpsClick: () -> Unit,
     onBtClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -261,6 +273,7 @@ private fun StatusRow(
             )
         }
         Spacer(Modifier.weight(1f))
+        fastag?.invoke()
         if (bt.supported) {
             val text: String
             val icon: ImageVector?
@@ -328,6 +341,8 @@ private fun Dock(
     onAuto: () -> Unit,
     onApps: () -> Unit,
     onSettings: () -> Unit,
+    onHelp: () -> Unit,
+    onSos: () -> Unit,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -345,6 +360,9 @@ private fun Dock(
         )
         DockButton(stringResource(R.string.dock_apps), Icons.Filled.Apps, onApps, item)
         DockButton(stringResource(R.string.dock_settings), Icons.Filled.Settings, onSettings, item)
+        // Red Help on the right end, nearest the driver in right-hand-drive cars.
+        // Tap: helplines. Hold 3 s: SOS.
+        HelpDockButton(onTap = onHelp, onHold = onSos, modifier = item)
     }
 }
 

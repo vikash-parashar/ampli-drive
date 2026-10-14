@@ -136,6 +136,11 @@ data class DriveTheme(
     val musicButton: Color = surfaceHigh,
     val musicTrack: Color = track,
     val musicProgress: Color = accent2,
+
+    // Emergency red (Help button, SOS, low FASTag balance). The same on every theme on purpose:
+    // drivers and responders should recognise it at a glance.
+    val danger: Color = Color(0xFFD7263D),
+    val onDanger: Color = Color.White,
 ) {
     /** The theme as seen inside the music card (paper colours where the theme has them). */
     fun forMusicCard(): DriveTheme = if (musicSurface == null) {
