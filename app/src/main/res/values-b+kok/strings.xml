@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive संगीत आनी नेव्हिगेशन</string>
+    <string name="listener_label">Ampli Car Hub संगीत आनी नेव्हिगेशन</string>
     <string name="bt_label">ब्लूटूथ</string>
     <string name="bt_off">BT बंद</string>
     <string name="bt_on">BT चालू</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">बरें</string>
     <string name="status_attention">लक्ष दियात</string>
     <string name="home_title">डिफॉल्ट होम स्क्रीन</string>
-    <string name="home_ok">होम दाबल्यार Ampli Drive उगडटा</string>
+    <string name="home_ok">होम दाबल्यार Ampli Car Hub उगडटा</string>
     <string name="home_not_default">अजून डिफॉल्ट ना</string>
     <string name="action_change">बदलात</string>
     <string name="home_set_default">डिफॉल्ट होम करात</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">क्लासिक</string>
     <string name="theme_family_saffron">केसरी कुटुंब</string>
     <string name="theme_family_soft">सॉफ्ट कुटुंब</string>
-    <string name="pro_title">Ampli Drive Pro घेयात</string>
+    <string name="pro_title">Ampli Car Hub Pro घेयात</string>
     <string name="pro_body">होम स्क्रीनच्यो सगळ्यो 19 थीम उगडात. एकदांच पयशे, सदांखातीर.</string>
     <string name="pro_point_themes">आनीक 17 थीम, तातूंत Midnight Glass, केसरी कुटुंब आनी सॉफ्ट कुटुंब</string>
     <string name="pro_point_once">एकदांच पेमेंट, सबस्क्रिप्शन ना</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">खरेदी परत हाडात</string>
     <string name="pro_not_now">आतां न्हय</string>
     <string name="pro_unavailable">ह्या युनिटाचेर Google Play ना. उपरांत परत यत्न करात.</string>
-    <string name="pro_active">Ampli Drive Pro चालू आसा. देव बरें करूं!</string>
+    <string name="pro_active">Ampli Car Hub Pro चालू आसा. देव बरें करूं!</string>
     <string name="pro_test_title">टेस्ट बिल्ड: Pro उगडात</string>
     <string name="pro_test_hint">फकत टेस्ट बिल्डांत. पयशे दिनासतना सगळ्यो Pro थीम चालू करता.</string>
     <string name="language_title">भास</string>

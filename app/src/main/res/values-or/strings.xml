@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive ସଙ୍ଗୀତ ଓ ନେଭିଗେସନ୍</string>
+    <string name="listener_label">Ampli Car Hub ସଙ୍ଗୀତ ଓ ନେଭିଗେସନ୍</string>
     <string name="bt_label">ବ୍ଲୁଟୁଥ୍</string>
     <string name="bt_off">BT ବନ୍ଦ</string>
     <string name="bt_on">BT ଚାଲୁ</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ଠିକ୍ ଅଛି</string>
     <string name="status_attention">ଧ୍ୟାନ ଦିଅନ୍ତୁ</string>
     <string name="home_title">ଡିଫଲ୍ଟ ହୋମ୍ ସ୍କ୍ରିନ୍</string>
-    <string name="home_ok">ହୋମ୍ ଦବାଇଲେ Ampli Drive ଖୋଲେ</string>
+    <string name="home_ok">ହୋମ୍ ଦବାଇଲେ Ampli Car Hub ଖୋଲେ</string>
     <string name="home_not_default">ଏପର୍ଯ୍ୟନ୍ତ ଡିଫଲ୍ଟ ନୁହେଁ</string>
     <string name="action_change">ବଦଳାନ୍ତୁ</string>
     <string name="home_set_default">ଡିଫଲ୍ଟ ହୋମ୍ କରନ୍ତୁ</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">କ୍ଲାସିକ୍</string>
     <string name="theme_family_saffron">ଗେରୁଆ ପରିବାର</string>
     <string name="theme_family_soft">ସଫ୍ଟ ପରିବାର</string>
-    <string name="pro_title">Ampli Drive Pro ନିଅନ୍ତୁ</string>
+    <string name="pro_title">Ampli Car Hub Pro ନିଅନ୍ତୁ</string>
     <string name="pro_body">ହୋମ୍ ସ୍କ୍ରିନ୍‌ର ସବୁ 19ଟି ଥିମ୍ ଖୋଲନ୍ତୁ। ଥରେ ଦେୟ, ସବୁଦିନ ପାଇଁ।</string>
     <string name="pro_point_themes">ଆଉ 17ଟି ଥିମ୍, Midnight Glass, ଗେରୁଆ ପରିବାର ଓ ସଫ୍ଟ ପରିବାର ସମେତ</string>
     <string name="pro_point_once">ଥରେ ଦେୟ, କୌଣସି ସବସ୍କ୍ରିପସନ୍ ନାହିଁ</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">କିଣାକୁ ଫେରାନ୍ତୁ</string>
     <string name="pro_not_now">ଏବେ ନୁହେଁ</string>
     <string name="pro_unavailable">ଏହି ୟୁନିଟ୍‌ରେ Google Play ଉପଲବ୍ଧ ନାହିଁ। ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।</string>
-    <string name="pro_active">Ampli Drive Pro ଚାଲୁ ଅଛି। ଧନ୍ୟବାଦ!</string>
+    <string name="pro_active">Ampli Car Hub Pro ଚାଲୁ ଅଛି। ଧନ୍ୟବାଦ!</string>
     <string name="pro_test_title">ଟେଷ୍ଟ ବିଲ୍ଡ: Pro ଖୋଲନ୍ତୁ</string>
     <string name="pro_test_hint">କେବଳ ଟେଷ୍ଟ ବିଲ୍ଡରେ। ଦେୟ ବିନା ସବୁ Pro ଥିମ୍ ଚାଲୁ କରେ।</string>
     <string name="language_title">ଭାଷା</string>

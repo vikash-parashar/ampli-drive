@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive গান ও নেভিগেশন</string>
+    <string name="listener_label">Ampli Car Hub গান ও নেভিগেশন</string>
     <string name="bt_label">ব্লুটুথ</string>
     <string name="bt_off">BT বন্ধ</string>
     <string name="bt_on">BT চালু</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ঠিক আছে</string>
     <string name="status_attention">মনোযোগ দরকার</string>
     <string name="home_title">ডিফল্ট হোম স্ক্রিন</string>
-    <string name="home_ok">হোম চাপলে Ampli Drive খোলে</string>
+    <string name="home_ok">হোম চাপলে Ampli Car Hub খোলে</string>
     <string name="home_not_default">এখনও ডিফল্ট নয়</string>
     <string name="action_change">বদলান</string>
     <string name="home_set_default">ডিফল্ট হোম করুন</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ক্লাসিক</string>
     <string name="theme_family_saffron">গেরুয়া পরিবার</string>
     <string name="theme_family_soft">সফট পরিবার</string>
-    <string name="pro_title">Ampli Drive Pro নিন</string>
+    <string name="pro_title">Ampli Car Hub Pro নিন</string>
     <string name="pro_body">হোম স্ক্রিনের সব 19টি থিম খুলুন। একবার দাম দিন, চিরকাল রাখুন।</string>
     <string name="pro_point_themes">আরও 17টি থিম, যেমন Midnight Glass, গেরুয়া পরিবার আর সফট পরিবার</string>
     <string name="pro_point_once">একবার পেমেন্ট, কোনো সাবস্ক্রিপশন নেই</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">কেনাকাটা ফিরিয়ে আনুন</string>
     <string name="pro_not_now">এখন নয়</string>
     <string name="pro_unavailable">এই ইউনিটে Google Play নেই। পরে আবার চেষ্টা করুন।</string>
-    <string name="pro_active">Ampli Drive Pro চালু আছে। ধন্যবাদ!</string>
+    <string name="pro_active">Ampli Car Hub Pro চালু আছে। ধন্যবাদ!</string>
     <string name="pro_test_title">টেস্ট বিল্ড: Pro খুলুন</string>
     <string name="pro_test_hint">শুধু টেস্ট বিল্ডে। টাকা ছাড়াই সব Pro থিম চালু করে।</string>
     <string name="language_title">ভাষা</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Languages offered in system Settings > Apps > Ampli Drive > Language (Android 13+).
+<!-- Languages offered in system Settings > Apps > Ampli Car Hub > Language (Android 13+).
      Keep in sync with i18n/AppLanguages.kt and the values-* folders. -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en" />

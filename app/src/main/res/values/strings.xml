@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Ampli Drive</string>
+    <string name="app_name" translatable="false">Ampli Car Hub</string>
     <string name="dock_android_auto" translatable="false">Android Auto</string>
-    <string name="listener_label">Ampli Drive music and navigation</string>
+    <string name="listener_label">Ampli Car Hub music and navigation</string>
     <string name="bt_label">Bluetooth</string>
     <string name="bt_off">BT off</string>
     <string name="bt_on">BT on</string>
@@ -59,7 +59,7 @@
     <string name="status_ok">OK</string>
     <string name="status_attention">Needs attention</string>
     <string name="home_title">Default home screen</string>
-    <string name="home_ok">Ampli Drive opens when you press Home</string>
+    <string name="home_ok">Ampli Car Hub opens when you press Home</string>
     <string name="home_not_default">Not the default yet</string>
     <string name="action_change">Change</string>
     <string name="home_set_default">Set as default home</string>
@@ -96,7 +96,7 @@
     <string name="theme_family_classic">Classic</string>
     <string name="theme_family_saffron">Saffron family</string>
     <string name="theme_family_soft">Soft family</string>
-    <string name="pro_title">Get Ampli Drive Pro</string>
+    <string name="pro_title">Get Ampli Car Hub Pro</string>
     <string name="pro_body">Unlock all 19 home-screen themes. Pay once, keep it for good.</string>
     <string name="pro_point_themes">17 extra themes, including Midnight Glass, the Saffron family and the Soft family</string>
     <string name="pro_point_once">One payment, no subscription</string>
@@ -105,7 +105,7 @@
     <string name="pro_restore">Restore purchase</string>
     <string name="pro_not_now">Not now</string>
     <string name="pro_unavailable">Google Play isn\'t available on this unit. Try again later.</string>
-    <string name="pro_active">Ampli Drive Pro is active. Thank you!</string>
+    <string name="pro_active">Ampli Car Hub Pro is active. Thank you!</string>
     <string name="pro_test_title">Test build: unlock Pro</string>
     <string name="pro_test_hint">Only in test builds. Turns on every Pro theme without paying.</string>
     <string name="language_title">Language</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive संगीत और नेविगेशन</string>
+    <string name="listener_label">Ampli Car Hub संगीत और नेविगेशन</string>
     <string name="bt_label">ब्लूटूथ</string>
     <string name="bt_off">BT बंद</string>
     <string name="bt_on">BT चालू</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ठीक है</string>
     <string name="status_attention">ध्यान दें</string>
     <string name="home_title">डिफ़ॉल्ट होम स्क्रीन</string>
-    <string name="home_ok">होम दबाने पर Ampli Drive खुलता है</string>
+    <string name="home_ok">होम दबाने पर Ampli Car Hub खुलता है</string>
     <string name="home_not_default">अभी डिफ़ॉल्ट नहीं है</string>
     <string name="action_change">बदलें</string>
     <string name="home_set_default">डिफ़ॉल्ट होम बनाएँ</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">क्लासिक</string>
     <string name="theme_family_saffron">केसरिया परिवार</string>
     <string name="theme_family_soft">सॉफ़्ट परिवार</string>
-    <string name="pro_title">Ampli Drive Pro लें</string>
+    <string name="pro_title">Ampli Car Hub Pro लें</string>
     <string name="pro_body">होम स्क्रीन की सभी 19 थीम खोलें। एक बार भुगतान, हमेशा के लिए।</string>
     <string name="pro_point_themes">17 और थीम, जिनमें Midnight Glass, केसरिया परिवार और सॉफ़्ट परिवार शामिल हैं</string>
     <string name="pro_point_once">एक बार भुगतान, कोई सब्सक्रिप्शन नहीं</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">ख़रीद वापस लाएँ</string>
     <string name="pro_not_now">अभी नहीं</string>
     <string name="pro_unavailable">इस यूनिट पर Google Play उपलब्ध नहीं है। बाद में फिर कोशिश करें।</string>
-    <string name="pro_active">Ampli Drive Pro चालू है। धन्यवाद!</string>
+    <string name="pro_active">Ampli Car Hub Pro चालू है। धन्यवाद!</string>
     <string name="pro_test_title">टेस्ट बिल्ड: Pro खोलें</string>
     <string name="pro_test_hint">सिर्फ़ टेस्ट बिल्ड में। बिना भुगतान सभी Pro थीम चालू करता है।</string>
     <string name="language_title">भाषा</string>

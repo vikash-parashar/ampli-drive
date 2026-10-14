@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive இசை மற்றும் வழிகாட்டல்</string>
+    <string name="listener_label">Ampli Car Hub இசை மற்றும் வழிகாட்டல்</string>
     <string name="bt_label">ப்ளூடூத்</string>
     <string name="bt_off">BT அணைப்பு</string>
     <string name="bt_on">BT இயக்கம்</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">சரி</string>
     <string name="status_attention">கவனம் தேவை</string>
     <string name="home_title">இயல்பு முகப்புத் திரை</string>
-    <string name="home_ok">ஹோம் அழுத்தும்போது Ampli Drive திறக்கும்</string>
+    <string name="home_ok">ஹோம் அழுத்தும்போது Ampli Car Hub திறக்கும்</string>
     <string name="home_not_default">இன்னும் இயல்பு இல்லை</string>
     <string name="action_change">மாற்று</string>
     <string name="home_set_default">இயல்பு முகப்பாக அமை</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">கிளாசிக்</string>
     <string name="theme_family_saffron">காவி குடும்பம்</string>
     <string name="theme_family_soft">சாஃப்ட் குடும்பம்</string>
-    <string name="pro_title">Ampli Drive Pro பெறுங்கள்</string>
+    <string name="pro_title">Ampli Car Hub Pro பெறுங்கள்</string>
     <string name="pro_body">முகப்புத் திரையின் 19 தீம்களையும் திறங்கள். ஒருமுறை செலுத்துங்கள், என்றும் உங்களுடையது.</string>
     <string name="pro_point_themes">மேலும் 17 தீம்கள்: Midnight Glass, காவி குடும்பம், சாஃப்ட் குடும்பம் உட்பட</string>
     <string name="pro_point_once">ஒருமுறை கட்டணம், சந்தா இல்லை</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">வாங்கியதை மீட்டெடு</string>
     <string name="pro_not_now">இப்போது வேண்டாம்</string>
     <string name="pro_unavailable">இந்த யூனிட்டில் Google Play இல்லை. பிறகு மீண்டும் முயலுங்கள்.</string>
-    <string name="pro_active">Ampli Drive Pro இயக்கத்தில் உள்ளது. நன்றி!</string>
+    <string name="pro_active">Ampli Car Hub Pro இயக்கத்தில் உள்ளது. நன்றி!</string>
     <string name="pro_test_title">சோதனை பில்ட்: Pro திற</string>
     <string name="pro_test_hint">சோதனை பில்ட்களில் மட்டும். பணம் இல்லாமல் எல்லா Pro தீம்களையும் இயக்கும்.</string>
     <string name="language_title">மொழி</string>

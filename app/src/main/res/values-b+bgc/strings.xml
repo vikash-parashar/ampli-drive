@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive संगीत अर नेविगेशन</string>
+    <string name="listener_label">Ampli Car Hub संगीत अर नेविगेशन</string>
     <string name="bt_label">ब्लूटूथ</string>
     <string name="bt_off">BT बंद</string>
     <string name="bt_on">BT चालू</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ठीक सै</string>
     <string name="status_attention">ध्यान द्यो</string>
     <string name="home_title">डिफ़ॉल्ट होम स्क्रीन</string>
-    <string name="home_ok">होम दबाण पै Ampli Drive खुलै सै</string>
+    <string name="home_ok">होम दबाण पै Ampli Car Hub खुलै सै</string>
     <string name="home_not_default">इब्बे डिफ़ॉल्ट कोनी</string>
     <string name="action_change">बदलो</string>
     <string name="home_set_default">डिफ़ॉल्ट होम बणाओ</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">क्लासिक</string>
     <string name="theme_family_saffron">केसरिया परिवार</string>
     <string name="theme_family_soft">सॉफ्ट परिवार</string>
-    <string name="pro_title">Ampli Drive Pro ल्यो</string>
+    <string name="pro_title">Ampli Car Hub Pro ल्यो</string>
     <string name="pro_body">होम स्क्रीन की सारी 19 थीम खोल्लो। एक बार पीस्से, सदा खातर।</string>
     <string name="pro_point_themes">17 और थीम, जिनमैं Midnight Glass, केसरिया परिवार अर सॉफ्ट परिवार सैं</string>
     <string name="pro_point_once">एक बार भुगतान, कोई सब्सक्रिप्शन कोनी</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">खरीद वापस ल्याओ</string>
     <string name="pro_not_now">इब्बे ना</string>
     <string name="pro_unavailable">इस यूनिट पै Google Play कोनी। पाच्छै फेर कोसिस करियो।</string>
-    <string name="pro_active">Ampli Drive Pro चालू सै। धन्यवाद!</string>
+    <string name="pro_active">Ampli Car Hub Pro चालू सै। धन्यवाद!</string>
     <string name="pro_test_title">टेस्ट बिल्ड: Pro खोल्लो</string>
     <string name="pro_test_hint">बस टेस्ट बिल्ड म्है। बिना पीस्से सारी Pro थीम चालू कर दे सै।</string>
     <string name="language_title">भाषा</string>

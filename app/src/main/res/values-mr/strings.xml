@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive संगीत आणि नेव्हिगेशन</string>
+    <string name="listener_label">Ampli Car Hub संगीत आणि नेव्हिगेशन</string>
     <string name="bt_label">ब्लूटूथ</string>
     <string name="bt_off">BT बंद</string>
     <string name="bt_on">BT सुरू</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ठीक आहे</string>
     <string name="status_attention">लक्ष द्या</string>
     <string name="home_title">डीफॉल्ट होम स्क्रीन</string>
-    <string name="home_ok">होम दाबल्यावर Ampli Drive उघडते</string>
+    <string name="home_ok">होम दाबल्यावर Ampli Car Hub उघडते</string>
     <string name="home_not_default">अजून डीफॉल्ट नाही</string>
     <string name="action_change">बदला</string>
     <string name="home_set_default">डीफॉल्ट होम करा</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">क्लासिक</string>
     <string name="theme_family_saffron">केशरी कुटुंब</string>
     <string name="theme_family_soft">सॉफ्ट कुटुंब</string>
-    <string name="pro_title">Ampli Drive Pro घ्या</string>
+    <string name="pro_title">Ampli Car Hub Pro घ्या</string>
     <string name="pro_body">होम स्क्रीनच्या सर्व 19 थीम उघडा. एकदाच पैसे, कायमचे तुमचे.</string>
     <string name="pro_point_themes">आणखी 17 थीम, त्यात Midnight Glass, केशरी कुटुंब आणि सॉफ्ट कुटुंब</string>
     <string name="pro_point_once">एकदाच पेमेंट, कोणतीही सबस्क्रिप्शन नाही</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">खरेदी परत मिळवा</string>
     <string name="pro_not_now">आता नको</string>
     <string name="pro_unavailable">या युनिटवर Google Play उपलब्ध नाही. नंतर पुन्हा प्रयत्न करा.</string>
-    <string name="pro_active">Ampli Drive Pro सुरू आहे. धन्यवाद!</string>
+    <string name="pro_active">Ampli Car Hub Pro सुरू आहे. धन्यवाद!</string>
     <string name="pro_test_title">टेस्ट बिल्ड: Pro उघडा</string>
     <string name="pro_test_hint">फक्त टेस्ट बिल्डमध्ये. पैसे न देता सर्व Pro थीम सुरू करते.</string>
     <string name="language_title">भाषा</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive సంగీతం మరియు నావిగేషన్</string>
+    <string name="listener_label">Ampli Car Hub సంగీతం మరియు నావిగేషన్</string>
     <string name="bt_label">బ్లూటూత్</string>
     <string name="bt_off">BT ఆఫ్</string>
     <string name="bt_on">BT ఆన్</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">సరే</string>
     <string name="status_attention">శ్రద్ధ అవసరం</string>
     <string name="home_title">డిఫాల్ట్ హోమ్ స్క్రీన్</string>
-    <string name="home_ok">హోమ్ నొక్కితే Ampli Drive తెరుచుకుంటుంది</string>
+    <string name="home_ok">హోమ్ నొక్కితే Ampli Car Hub తెరుచుకుంటుంది</string>
     <string name="home_not_default">ఇంకా డిఫాల్ట్ కాదు</string>
     <string name="action_change">మార్చు</string>
     <string name="home_set_default">డిఫాల్ట్ హోమ్‌గా సెట్ చేయండి</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">క్లాసిక్</string>
     <string name="theme_family_saffron">కాషాయ కుటుంబం</string>
     <string name="theme_family_soft">సాఫ్ట్ కుటుంబం</string>
-    <string name="pro_title">Ampli Drive Pro పొందండి</string>
+    <string name="pro_title">Ampli Car Hub Pro పొందండి</string>
     <string name="pro_body">హోమ్ స్క్రీన్ యొక్క మొత్తం 19 థీమ్‌లను తెరవండి. ఒకసారి చెల్లించండి, ఎప్పటికీ మీదే.</string>
     <string name="pro_point_themes">మరో 17 థీమ్‌లు, Midnight Glass, కాషాయ కుటుంబం, సాఫ్ట్ కుటుంబం సహా</string>
     <string name="pro_point_once">ఒకేసారి చెల్లింపు, సబ్‌స్క్రిప్షన్ లేదు</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">కొనుగోలును పునరుద్ధరించండి</string>
     <string name="pro_not_now">ఇప్పుడు కాదు</string>
     <string name="pro_unavailable">ఈ యూనిట్‌లో Google Play అందుబాటులో లేదు. తర్వాత మళ్లీ ప్రయత్నించండి.</string>
-    <string name="pro_active">Ampli Drive Pro యాక్టివ్‌గా ఉంది. ధన్యవాదాలు!</string>
+    <string name="pro_active">Ampli Car Hub Pro యాక్టివ్‌గా ఉంది. ధన్యవాదాలు!</string>
     <string name="pro_test_title">టెస్ట్ బిల్డ్: Pro తెరవండి</string>
     <string name="pro_test_hint">టెస్ట్ బిల్డ్‌లలో మాత్రమే. చెల్లించకుండా అన్ని Pro థీమ్‌లను ఆన్ చేస్తుంది.</string>
     <string name="language_title">భాష</string>

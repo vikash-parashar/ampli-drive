@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * One-time "Ampli Drive Pro" purchase through Google Play Billing (unlocks the Pro themes).
+ * One-time "Ampli Car Hub Pro" purchase through Google Play Billing (unlocks the Pro themes).
  * Create a one-time in-app product with id [PRODUCT_ID] in Play Console under
  * Monetize › Products › In-app products before release.
  *

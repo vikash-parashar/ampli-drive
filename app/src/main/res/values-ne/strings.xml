@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive सङ्गीत र नेभिगेसन</string>
+    <string name="listener_label">Ampli Car Hub सङ्गीत र नेभिगेसन</string>
     <string name="bt_label">ब्लुटुथ</string>
     <string name="bt_off">BT बन्द</string>
     <string name="bt_on">BT चालु</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ठीक छ</string>
     <string name="status_attention">ध्यान दिनुहोस्</string>
     <string name="home_title">पूर्वनिर्धारित होम स्क्रिन</string>
-    <string name="home_ok">होम थिच्दा Ampli Drive खुल्छ</string>
+    <string name="home_ok">होम थिच्दा Ampli Car Hub खुल्छ</string>
     <string name="home_not_default">अझै पूर्वनिर्धारित छैन</string>
     <string name="action_change">बदल्नुहोस्</string>
     <string name="home_set_default">पूर्वनिर्धारित होम बनाउनुहोस्</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">क्लासिक</string>
     <string name="theme_family_saffron">केसरी परिवार</string>
     <string name="theme_family_soft">सफ्ट परिवार</string>
-    <string name="pro_title">Ampli Drive Pro लिनुहोस्</string>
+    <string name="pro_title">Ampli Car Hub Pro लिनुहोस्</string>
     <string name="pro_body">होम स्क्रिनका सबै 19 थिम खोल्नुहोस्। एक पटक भुक्तानी, सधैँका लागि।</string>
     <string name="pro_point_themes">थप 17 थिम, जसमा Midnight Glass, केसरी परिवार र सफ्ट परिवार छन्</string>
     <string name="pro_point_once">एक पटक भुक्तानी, कुनै सदस्यता छैन</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">खरिद फिर्ता ल्याउनुहोस्</string>
     <string name="pro_not_now">अहिले होइन</string>
     <string name="pro_unavailable">यो युनिटमा Google Play उपलब्ध छैन। पछि फेरि प्रयास गर्नुहोस्।</string>
-    <string name="pro_active">Ampli Drive Pro सक्रिय छ। धन्यवाद!</string>
+    <string name="pro_active">Ampli Car Hub Pro सक्रिय छ। धन्यवाद!</string>
     <string name="pro_test_title">टेस्ट बिल्ड: Pro खोल्नुहोस्</string>
     <string name="pro_test_hint">टेस्ट बिल्डमा मात्र। भुक्तानी बिना सबै Pro थिम चालु गर्छ।</string>
     <string name="language_title">भाषा</string>

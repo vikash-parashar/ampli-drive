@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive musique et navigation</string>
+    <string name="listener_label">Ampli Car Hub musique et navigation</string>
     <string name="bt_label">Bluetooth</string>
     <string name="bt_off">BT désactivé</string>
     <string name="bt_on">BT activé</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">OK</string>
     <string name="status_attention">À vérifier</string>
     <string name="home_title">Écran d\'accueil par défaut</string>
-    <string name="home_ok">Ampli Drive s\'ouvre avec le bouton Accueil</string>
+    <string name="home_ok">Ampli Car Hub s\'ouvre avec le bouton Accueil</string>
     <string name="home_not_default">Pas encore par défaut</string>
     <string name="action_change">Modifier</string>
     <string name="home_set_default">Définir par défaut</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">Classiques</string>
     <string name="theme_family_saffron">Famille Safran</string>
     <string name="theme_family_soft">Famille Soft</string>
-    <string name="pro_title">Passer à Ampli Drive Pro</string>
+    <string name="pro_title">Passer à Ampli Car Hub Pro</string>
     <string name="pro_body">Débloquez les 19 thèmes de l\'écran d\'accueil. Un seul paiement, à vous pour toujours.</string>
     <string name="pro_point_themes">17 thèmes en plus, dont Midnight Glass, la famille Safran et la famille Soft</string>
     <string name="pro_point_once">Paiement unique, sans abonnement</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">Restaurer l\'achat</string>
     <string name="pro_not_now">Plus tard</string>
     <string name="pro_unavailable">Google Play n\'est pas disponible sur cet appareil. Réessayez plus tard.</string>
-    <string name="pro_active">Ampli Drive Pro est actif. Merci !</string>
+    <string name="pro_active">Ampli Car Hub Pro est actif. Merci !</string>
     <string name="pro_test_title">Version de test : débloquer Pro</string>
     <string name="pro_test_hint">Uniquement dans les versions de test. Active tous les thèmes Pro sans payer.</string>
     <string name="language_title">Langue</string>

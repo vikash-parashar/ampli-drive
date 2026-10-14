@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive ਸੰਗੀਤ ਅਤੇ ਨੈਵੀਗੇਸ਼ਨ</string>
+    <string name="listener_label">Ampli Car Hub ਸੰਗੀਤ ਅਤੇ ਨੈਵੀਗੇਸ਼ਨ</string>
     <string name="bt_label">ਬਲੂਟੁੱਥ</string>
     <string name="bt_off">BT ਬੰਦ</string>
     <string name="bt_on">BT ਚਾਲੂ</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ਠੀਕ ਹੈ</string>
     <string name="status_attention">ਧਿਆਨ ਦਿਓ</string>
     <string name="home_title">ਡਿਫ਼ਾਲਟ ਹੋਮ ਸਕ੍ਰੀਨ</string>
-    <string name="home_ok">ਹੋਮ ਦਬਾਉਣ \'ਤੇ Ampli Drive ਖੁੱਲ੍ਹਦਾ ਹੈ</string>
+    <string name="home_ok">ਹੋਮ ਦਬਾਉਣ \'ਤੇ Ampli Car Hub ਖੁੱਲ੍ਹਦਾ ਹੈ</string>
     <string name="home_not_default">ਹਾਲੇ ਡਿਫ਼ਾਲਟ ਨਹੀਂ</string>
     <string name="action_change">ਬਦਲੋ</string>
     <string name="home_set_default">ਡਿਫ਼ਾਲਟ ਹੋਮ ਬਣਾਓ</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ਕਲਾਸਿਕ</string>
     <string name="theme_family_saffron">ਕੇਸਰੀ ਪਰਿਵਾਰ</string>
     <string name="theme_family_soft">ਸੌਫ਼ਟ ਪਰਿਵਾਰ</string>
-    <string name="pro_title">Ampli Drive Pro ਲਓ</string>
+    <string name="pro_title">Ampli Car Hub Pro ਲਓ</string>
     <string name="pro_body">ਹੋਮ ਸਕ੍ਰੀਨ ਦੀਆਂ ਸਾਰੀਆਂ 19 ਥੀਮਾਂ ਖੋਲ੍ਹੋ। ਇੱਕ ਵਾਰ ਭੁਗਤਾਨ, ਹਮੇਸ਼ਾ ਲਈ।</string>
     <string name="pro_point_themes">17 ਹੋਰ ਥੀਮਾਂ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ Midnight Glass, ਕੇਸਰੀ ਪਰਿਵਾਰ ਅਤੇ ਸੌਫ਼ਟ ਪਰਿਵਾਰ</string>
     <string name="pro_point_once">ਇੱਕ ਵਾਰ ਭੁਗਤਾਨ, ਕੋਈ ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਨਹੀਂ</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">ਖ਼ਰੀਦ ਵਾਪਸ ਲਿਆਓ</string>
     <string name="pro_not_now">ਹੁਣ ਨਹੀਂ</string>
     <string name="pro_unavailable">ਇਸ ਯੂਨਿਟ \'ਤੇ Google Play ਉਪਲਬਧ ਨਹੀਂ। ਬਾਅਦ ਵਿੱਚ ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
-    <string name="pro_active">Ampli Drive Pro ਚਾਲੂ ਹੈ। ਧੰਨਵਾਦ!</string>
+    <string name="pro_active">Ampli Car Hub Pro ਚਾਲੂ ਹੈ। ਧੰਨਵਾਦ!</string>
     <string name="pro_test_title">ਟੈਸਟ ਬਿਲਡ: Pro ਖੋਲ੍ਹੋ</string>
     <string name="pro_test_hint">ਸਿਰਫ਼ ਟੈਸਟ ਬਿਲਡ ਵਿੱਚ। ਬਿਨਾਂ ਭੁਗਤਾਨ ਸਾਰੀਆਂ Pro ਥੀਮਾਂ ਚਾਲੂ ਕਰਦਾ ਹੈ।</string>
     <string name="language_title">ਭਾਸ਼ਾ</string>

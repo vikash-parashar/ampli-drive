@@ -14,7 +14,7 @@ data class AppLanguage(val tag: String, val nativeName: String)
 /**
  * In-app language switching without AppCompat.
  * - Android 13+: the system's per-app language (LocaleManager), which also shows in
- *   Settings › Apps › Ampli Drive › Language thanks to res/xml/locales_config.xml.
+ *   Settings › Apps › Ampli Car Hub › Language thanks to res/xml/locales_config.xml.
  * - Android 12: the choice is saved in DrivePrefs and applied by wrapping the base context
  *   (see [wrap]) in DriveApp and MainActivity; the activity is recreated to pick it up.
  *

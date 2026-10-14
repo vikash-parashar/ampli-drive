@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive സംഗീതവും നാവിഗേഷനും</string>
+    <string name="listener_label">Ampli Car Hub സംഗീതവും നാവിഗേഷനും</string>
     <string name="bt_label">ബ്ലൂടൂത്ത്</string>
     <string name="bt_off">BT ഓഫ്</string>
     <string name="bt_on">BT ഓൺ</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ശരി</string>
     <string name="status_attention">ശ്രദ്ധിക്കുക</string>
     <string name="home_title">ഡിഫോൾട്ട് ഹോം സ്ക്രീൻ</string>
-    <string name="home_ok">ഹോം അമർത്തുമ്പോൾ Ampli Drive തുറക്കും</string>
+    <string name="home_ok">ഹോം അമർത്തുമ്പോൾ Ampli Car Hub തുറക്കും</string>
     <string name="home_not_default">ഇതുവരെ ഡിഫോൾട്ട് അല്ല</string>
     <string name="action_change">മാറ്റുക</string>
     <string name="home_set_default">ഡിഫോൾട്ട് ഹോം ആക്കുക</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ക്ലാസിക്</string>
     <string name="theme_family_saffron">കാവി കുടുംബം</string>
     <string name="theme_family_soft">സോഫ്റ്റ് കുടുംബം</string>
-    <string name="pro_title">Ampli Drive Pro നേടൂ</string>
+    <string name="pro_title">Ampli Car Hub Pro നേടൂ</string>
     <string name="pro_body">ഹോം സ്ക്രീനിലെ 19 തീമുകളും തുറക്കൂ. ഒരിക്കൽ പണം നൽകൂ, എന്നും നിങ്ങളുടേത്.</string>
     <string name="pro_point_themes">17 തീമുകൾ കൂടി: Midnight Glass, കാവി കുടുംബം, സോഫ്റ്റ് കുടുംബം ഉൾപ്പെടെ</string>
     <string name="pro_point_once">ഒറ്റത്തവണ പണമടവ്, സബ്സ്ക്രിപ്ഷൻ ഇല്ല</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">വാങ്ങൽ പുനഃസ്ഥാപിക്കുക</string>
     <string name="pro_not_now">ഇപ്പോൾ വേണ്ട</string>
     <string name="pro_unavailable">ഈ യൂണിറ്റിൽ Google Play ലഭ്യമല്ല. പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
-    <string name="pro_active">Ampli Drive Pro സജീവമാണ്. നന്ദി!</string>
+    <string name="pro_active">Ampli Car Hub Pro സജീവമാണ്. നന്ദി!</string>
     <string name="pro_test_title">ടെസ്റ്റ് ബിൽഡ്: Pro തുറക്കുക</string>
     <string name="pro_test_hint">ടെസ്റ്റ് ബിൽഡുകളിൽ മാത്രം. പണം നൽകാതെ എല്ലാ Pro തീമുകളും ഓണാക്കും.</string>
     <string name="language_title">ഭാഷ</string>

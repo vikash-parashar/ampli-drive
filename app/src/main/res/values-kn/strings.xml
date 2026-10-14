@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive ಸಂಗೀತ ಮತ್ತು ನ್ಯಾವಿಗೇಶನ್</string>
+    <string name="listener_label">Ampli Car Hub ಸಂಗೀತ ಮತ್ತು ನ್ಯಾವಿಗೇಶನ್</string>
     <string name="bt_label">ಬ್ಲೂಟೂತ್</string>
     <string name="bt_off">BT ಆಫ್</string>
     <string name="bt_on">BT ಆನ್</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ಸರಿ</string>
     <string name="status_attention">ಗಮನ ಬೇಕು</string>
     <string name="home_title">ಡೀಫಾಲ್ಟ್ ಹೋಮ್ ಸ್ಕ್ರೀನ್</string>
-    <string name="home_ok">ಹೋಮ್ ಒತ್ತಿದಾಗ Ampli Drive ತೆರೆಯುತ್ತದೆ</string>
+    <string name="home_ok">ಹೋಮ್ ಒತ್ತಿದಾಗ Ampli Car Hub ತೆರೆಯುತ್ತದೆ</string>
     <string name="home_not_default">ಇನ್ನೂ ಡೀಫಾಲ್ಟ್ ಅಲ್ಲ</string>
     <string name="action_change">ಬದಲಿಸಿ</string>
     <string name="home_set_default">ಡೀಫಾಲ್ಟ್ ಹೋಮ್ ಮಾಡಿ</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ಕ್ಲಾಸಿಕ್</string>
     <string name="theme_family_saffron">ಕೇಸರಿ ಕುಟುಂಬ</string>
     <string name="theme_family_soft">ಸಾಫ್ಟ್ ಕುಟುಂಬ</string>
-    <string name="pro_title">Ampli Drive Pro ಪಡೆಯಿರಿ</string>
+    <string name="pro_title">Ampli Car Hub Pro ಪಡೆಯಿರಿ</string>
     <string name="pro_body">ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನ ಎಲ್ಲಾ 19 ಥೀಮ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ. ಒಮ್ಮೆ ಪಾವತಿಸಿ, ಶಾಶ್ವತವಾಗಿ ನಿಮ್ಮದು.</string>
     <string name="pro_point_themes">ಇನ್ನೂ 17 ಥೀಮ್‌ಗಳು: Midnight Glass, ಕೇಸರಿ ಕುಟುಂಬ ಮತ್ತು ಸಾಫ್ಟ್ ಕುಟುಂಬ ಸೇರಿ</string>
     <string name="pro_point_once">ಒಮ್ಮೆ ಮಾತ್ರ ಪಾವತಿ, ಚಂದಾದಾರಿಕೆ ಇಲ್ಲ</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">ಖರೀದಿಯನ್ನು ಮರುಸ್ಥಾಪಿಸಿ</string>
     <string name="pro_not_now">ಈಗ ಬೇಡ</string>
     <string name="pro_unavailable">ಈ ಯುನಿಟ್‌ನಲ್ಲಿ Google Play ಲಭ್ಯವಿಲ್ಲ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
-    <string name="pro_active">Ampli Drive Pro ಸಕ್ರಿಯವಾಗಿದೆ. ಧನ್ಯವಾದಗಳು!</string>
+    <string name="pro_active">Ampli Car Hub Pro ಸಕ್ರಿಯವಾಗಿದೆ. ಧನ್ಯವಾದಗಳು!</string>
     <string name="pro_test_title">ಟೆಸ್ಟ್ ಬಿಲ್ಡ್: Pro ತೆರೆಯಿರಿ</string>
     <string name="pro_test_hint">ಟೆಸ್ಟ್ ಬಿಲ್ಡ್‌ಗಳಲ್ಲಿ ಮಾತ್ರ. ಪಾವತಿ ಇಲ್ಲದೆ ಎಲ್ಲಾ Pro ಥೀಮ್‌ಗಳನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ.</string>
     <string name="language_title">ಭಾಷೆ</string>

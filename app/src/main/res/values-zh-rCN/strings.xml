@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive 音乐与导航</string>
+    <string name="listener_label">Ampli Car Hub 音乐与导航</string>
     <string name="bt_label">蓝牙</string>
     <string name="bt_off">蓝牙已关闭</string>
     <string name="bt_on">蓝牙已开启</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">正常</string>
     <string name="status_attention">需要处理</string>
     <string name="home_title">默认主屏幕</string>
-    <string name="home_ok">按主屏幕键会打开 Ampli Drive</string>
+    <string name="home_ok">按主屏幕键会打开 Ampli Car Hub</string>
     <string name="home_not_default">尚未设为默认</string>
     <string name="action_change">更改</string>
     <string name="home_set_default">设为默认主屏幕</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">经典</string>
     <string name="theme_family_saffron">藏红花系列</string>
     <string name="theme_family_soft">柔和系列</string>
-    <string name="pro_title">获取 Ampli Drive Pro</string>
+    <string name="pro_title">获取 Ampli Car Hub Pro</string>
     <string name="pro_body">解锁全部 19 款主屏幕主题。一次付费，永久拥有。</string>
     <string name="pro_point_themes">另外 17 款主题，包括 Midnight Glass、藏红花系列和柔和系列</string>
     <string name="pro_point_once">一次性付费，无需订阅</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">恢复购买</string>
     <string name="pro_not_now">以后再说</string>
     <string name="pro_unavailable">此设备无法使用 Google Play，请稍后重试。</string>
-    <string name="pro_active">Ampli Drive Pro 已激活，谢谢！</string>
+    <string name="pro_active">Ampli Car Hub Pro 已激活，谢谢！</string>
     <string name="pro_test_title">测试版：解锁 Pro</string>
     <string name="pro_test_hint">仅限测试版。无需付费即可开启所有 Pro 主题。</string>
     <string name="language_title">语言</string>

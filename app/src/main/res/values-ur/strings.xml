@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive موسیقی اور نیویگیشن</string>
+    <string name="listener_label">Ampli Car Hub موسیقی اور نیویگیشن</string>
     <string name="bt_label">بلوٹوتھ</string>
     <string name="bt_off">BT بند</string>
     <string name="bt_on">BT آن</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ٹھیک ہے</string>
     <string name="status_attention">توجہ درکار</string>
     <string name="home_title">ڈیفالٹ ہوم اسکرین</string>
-    <string name="home_ok">ہوم دبانے پر Ampli Drive کھلتا ہے</string>
+    <string name="home_ok">ہوم دبانے پر Ampli Car Hub کھلتا ہے</string>
     <string name="home_not_default">ابھی ڈیفالٹ نہیں</string>
     <string name="action_change">بدلیں</string>
     <string name="home_set_default">ڈیفالٹ ہوم بنائیں</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">کلاسک</string>
     <string name="theme_family_saffron">زعفرانی خاندان</string>
     <string name="theme_family_soft">سافٹ خاندان</string>
-    <string name="pro_title">Ampli Drive Pro حاصل کریں</string>
+    <string name="pro_title">Ampli Car Hub Pro حاصل کریں</string>
     <string name="pro_body">ہوم اسکرین کی تمام 19 تھیمز کھولیں۔ ایک بار ادائیگی، ہمیشہ کے لیے۔</string>
     <string name="pro_point_themes">مزید 17 تھیمز، جن میں Midnight Glass، زعفرانی خاندان اور سافٹ خاندان شامل ہیں</string>
     <string name="pro_point_once">ایک بار ادائیگی، کوئی سبسکرپشن نہیں</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">خریداری بحال کریں</string>
     <string name="pro_not_now">ابھی نہیں</string>
     <string name="pro_unavailable">اس یونٹ پر Google Play دستیاب نہیں۔ بعد میں دوبارہ کوشش کریں۔</string>
-    <string name="pro_active">Ampli Drive Pro فعال ہے۔ شکریہ!</string>
+    <string name="pro_active">Ampli Car Hub Pro فعال ہے۔ شکریہ!</string>
     <string name="pro_test_title">ٹیسٹ بلڈ: Pro کھولیں</string>
     <string name="pro_test_hint">صرف ٹیسٹ بلڈ میں۔ ادائیگی کے بغیر تمام Pro تھیمز آن کرتا ہے۔</string>
     <string name="language_title">زبان</string>

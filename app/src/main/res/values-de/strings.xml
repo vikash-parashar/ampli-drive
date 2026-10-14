@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive Musik und Navigation</string>
+    <string name="listener_label">Ampli Car Hub Musik und Navigation</string>
     <string name="bt_label">Bluetooth</string>
     <string name="bt_off">BT aus</string>
     <string name="bt_on">BT an</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">OK</string>
     <string name="status_attention">Handlungsbedarf</string>
     <string name="home_title">Standard-Startbildschirm</string>
-    <string name="home_ok">Ampli Drive öffnet sich mit der Home-Taste</string>
+    <string name="home_ok">Ampli Car Hub öffnet sich mit der Home-Taste</string>
     <string name="home_not_default">Noch nicht als Standard festgelegt</string>
     <string name="action_change">Ändern</string>
     <string name="home_set_default">Als Standard festlegen</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">Klassisch</string>
     <string name="theme_family_saffron">Safran-Familie</string>
     <string name="theme_family_soft">Soft-Familie</string>
-    <string name="pro_title">Ampli Drive Pro holen</string>
+    <string name="pro_title">Ampli Car Hub Pro holen</string>
     <string name="pro_body">Schalte alle 19 Designs frei. Einmal zahlen, für immer behalten.</string>
     <string name="pro_point_themes">17 weitere Designs, darunter Midnight Glass, die Safran- und die Soft-Familie</string>
     <string name="pro_point_once">Einmalzahlung, kein Abo</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">Kauf wiederherstellen</string>
     <string name="pro_not_now">Nicht jetzt</string>
     <string name="pro_unavailable">Google Play ist auf diesem Gerät nicht verfügbar. Versuche es später noch einmal.</string>
-    <string name="pro_active">Ampli Drive Pro ist aktiv. Danke!</string>
+    <string name="pro_active">Ampli Car Hub Pro ist aktiv. Danke!</string>
     <string name="pro_test_title">Testversion: Pro freischalten</string>
     <string name="pro_test_hint">Nur in Testversionen. Schaltet alle Pro-Designs ohne Bezahlung frei.</string>
     <string name="language_title">Sprache</string>

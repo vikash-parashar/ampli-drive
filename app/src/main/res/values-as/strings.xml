@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive সংগীত আৰু নেভিগেচন</string>
+    <string name="listener_label">Ampli Car Hub সংগীত আৰু নেভিগেচন</string>
     <string name="bt_label">ব্লুটুথ</string>
     <string name="bt_off">BT বন্ধ</string>
     <string name="bt_on">BT অন</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">ঠিক আছে</string>
     <string name="status_attention">মনোযোগ দিয়ক</string>
     <string name="home_title">ডিফ\'ল্ট হ\'ম স্ক্ৰীন</string>
-    <string name="home_ok">হ\'ম টিপিলে Ampli Drive খোল খায়</string>
+    <string name="home_ok">হ\'ম টিপিলে Ampli Car Hub খোল খায়</string>
     <string name="home_not_default">এতিয়াও ডিফ\'ল্ট নহয়</string>
     <string name="action_change">সলনি কৰক</string>
     <string name="home_set_default">ডিফ\'ল্ট হ\'ম কৰক</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ক্লাছিক</string>
     <string name="theme_family_saffron">গেৰুৱা পৰিয়াল</string>
     <string name="theme_family_soft">ছফ্ট পৰিয়াল</string>
-    <string name="pro_title">Ampli Drive Pro লওক</string>
+    <string name="pro_title">Ampli Car Hub Pro লওক</string>
     <string name="pro_body">হ\'ম স্ক্ৰীনৰ সকলো 19টা থীম খোলক। এবাৰ পৰিশোধ, চিৰদিনৰ বাবে।</string>
     <string name="pro_point_themes">আৰু 17টা থীম, Midnight Glass, গেৰুৱা পৰিয়াল আৰু ছফ্ট পৰিয়ালকে ধৰি</string>
     <string name="pro_point_once">এবাৰ পৰিশোধ, কোনো চাবস্ক্ৰিপচন নাই</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">ক্ৰয় পুনৰুদ্ধাৰ কৰক</string>
     <string name="pro_not_now">এতিয়া নহয়</string>
     <string name="pro_unavailable">এই ইউনিটত Google Play উপলব্ধ নহয়। পিছত আকৌ চেষ্টা কৰক।</string>
-    <string name="pro_active">Ampli Drive Pro সক্ৰিয় আছে। ধন্যবাদ!</string>
+    <string name="pro_active">Ampli Car Hub Pro সক্ৰিয় আছে। ধন্যবাদ!</string>
     <string name="pro_test_title">টেষ্ট বিল্ড: Pro খোলক</string>
     <string name="pro_test_hint">কেৱল টেষ্ট বিল্ডত। পৰিশোধ নকৰাকৈ সকলো Pro থীম অন কৰে।</string>
     <string name="language_title">ভাষা</string>

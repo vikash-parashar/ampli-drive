@@ -187,7 +187,7 @@ fun SettingsScreen(
             InfoCard(
                 title = stringResource(R.string.about_title),
                 lines = listOfNotNull(
-                    "Ampli Drive ${BuildConfig.VERSION_NAME}",
+                    "Ampli Car Hub ${BuildConfig.VERSION_NAME}",
                     if (pro.isPro) stringResource(R.string.pro_active) else null,
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.about_limits),

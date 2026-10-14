@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
 <resources>
-    <string name="listener_label">Ampli Drive સંગીત અને નેવિગેશન</string>
+    <string name="listener_label">Ampli Car Hub સંગીત અને નેવિગેશન</string>
     <string name="bt_label">બ્લૂટૂથ</string>
     <string name="bt_off">BT બંધ</string>
     <string name="bt_on">BT ચાલુ</string>
@@ -55,7 +55,7 @@
     <string name="status_ok">બરાબર</string>
     <string name="status_attention">ધ્યાન આપો</string>
     <string name="home_title">ડિફૉલ્ટ હોમ સ્ક્રીન</string>
-    <string name="home_ok">હોમ દબાવતાં Ampli Drive ખૂલે છે</string>
+    <string name="home_ok">હોમ દબાવતાં Ampli Car Hub ખૂલે છે</string>
     <string name="home_not_default">હજી ડિફૉલ્ટ નથી</string>
     <string name="action_change">બદલો</string>
     <string name="home_set_default">ડિફૉલ્ટ હોમ બનાવો</string>
@@ -92,7 +92,7 @@
     <string name="theme_family_classic">ક્લાસિક</string>
     <string name="theme_family_saffron">કેસરી પરિવાર</string>
     <string name="theme_family_soft">સૉફ્ટ પરિવાર</string>
-    <string name="pro_title">Ampli Drive Pro મેળવો</string>
+    <string name="pro_title">Ampli Car Hub Pro મેળવો</string>
     <string name="pro_body">હોમ સ્ક્રીનની બધી 19 થીમ ખોલો. એક વાર ચૂકવો, કાયમ તમારી.</string>
     <string name="pro_point_themes">બીજી 17 થીમ, જેમાં Midnight Glass, કેસરી પરિવાર અને સૉફ્ટ પરિવાર</string>
     <string name="pro_point_once">એક જ વાર ચુકવણી, કોઈ સબ્સ્ક્રિપ્શન નહીં</string>
@@ -101,7 +101,7 @@
     <string name="pro_restore">ખરીદી પાછી મેળવો</string>
     <string name="pro_not_now">હમણાં નહીં</string>
     <string name="pro_unavailable">આ યુનિટ પર Google Play ઉપલબ્ધ નથી. પછીથી ફરી પ્રયાસ કરો.</string>
-    <string name="pro_active">Ampli Drive Pro ચાલુ છે. આભાર!</string>
+    <string name="pro_active">Ampli Car Hub Pro ચાલુ છે. આભાર!</string>
     <string name="pro_test_title">ટેસ્ટ બિલ્ડ: Pro ખોલો</string>
     <string name="pro_test_hint">માત્ર ટેસ્ટ બિલ્ડમાં. ચુકવણી વિના બધી Pro થીમ ચાલુ કરે છે.</string>
     <string name="language_title">ભાષા</string>
