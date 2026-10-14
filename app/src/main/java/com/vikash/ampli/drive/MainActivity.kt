@@ -22,6 +22,7 @@ import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
 import com.vikash.ampli.drive.voice.VoiceKeys
 import com.vikash.ampli.drive.voice.VoiceService
+import com.vikash.ampli.drive.system.BtPermissions
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -188,7 +189,7 @@ class MainActivity : ComponentActivity() {
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.BLUETOOTH_CONNECT,
+                BtPermissions.connect,
             ),
         )
     }

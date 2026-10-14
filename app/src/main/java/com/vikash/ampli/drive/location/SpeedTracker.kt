@@ -8,6 +8,7 @@ import android.location.GnssStatus
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -139,7 +140,12 @@ class SpeedTracker(
                 listener,
                 Looper.getMainLooper(),
             )
-            lm.registerGnssStatusCallback(appContext.mainExecutor, gnssCallback)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                lm.registerGnssStatusCallback(appContext.mainExecutor, gnssCallback)
+            } else {
+                @Suppress("DEPRECATION")
+                lm.registerGnssStatusCallback(gnssCallback, main)
+            }
             running = true
             main.postDelayed(staleCheck, STALE_CHECK_MS)
         } catch (e: SecurityException) {

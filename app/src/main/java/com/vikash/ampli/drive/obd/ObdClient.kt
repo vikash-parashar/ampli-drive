@@ -1,13 +1,11 @@
 package com.vikash.ampli.drive.obd
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import android.content.pm.PackageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +21,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import com.vikash.ampli.drive.system.BtPermissions
 
 /** Live engine data from the ELM327 dongle. */
 data class ObdState(
@@ -64,7 +63,7 @@ class ObdClient(context: Context) {
         get() = appContext.getSystemService(BluetoothManager::class.java)?.adapter
 
     fun hasPermission(): Boolean =
-        appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        BtPermissions.hasConnect(appContext)
 
     val bluetoothAvailable: Boolean get() = adapter != null
 

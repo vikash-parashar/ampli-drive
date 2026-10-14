@@ -1,12 +1,11 @@
 <resources>
-    <!-- Launchers should appear instantly. Android 12+ still flashes its system splash: the new
-         Car Hub icon (adaptive launcher icon) on the night colour, with no extra delay. -->
+    <!-- Launchers should appear instantly: on Android 8 to 11 the night-coloured window
+         background is all that shows before the first frame. The Android 12+ system splash
+         attributes live in values-v31/themes.xml. -->
     <style name="Theme.AmpliDrive" parent="android:Theme.Material.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/ampli_night</item>
         <item name="android:windowBackground">@color/ampli_night</item>
         <item name="android:windowShowWallpaper">false</item>
-        <item name="android:windowSplashScreenBackground">@color/ampli_night</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
     </style>
 </resources>

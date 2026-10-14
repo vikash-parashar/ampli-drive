@@ -1,6 +1,5 @@
 package com.vikash.ampli.drive.ui
 
-import android.Manifest
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,6 +46,7 @@ import com.vikash.ampli.drive.obd.DtcCatalog
 import com.vikash.ampli.drive.obd.ObdState
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.VoiceLocales
+import com.vikash.ampli.drive.system.BtPermissions
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -116,7 +116,7 @@ private fun ObdConnect(app: DriveApp, state: ObdState, modifier: Modifier) {
                     SectionLabel(stringResource(R.string.obd_paired_devices))
                     if (!hasPermission) {
                         Text(stringResource(R.string.obd_need_permission), fontSize = dims.t(2.6f, min = 15f), color = theme.text)
-                        BigButton(stringResource(R.string.action_allow), { permission.launch(Manifest.permission.BLUETOOTH_CONNECT) }, icon = Icons.Filled.Bluetooth)
+                        BigButton(stringResource(R.string.action_allow), { permission.launch(BtPermissions.connect) }, icon = Icons.Filled.Bluetooth)
                     } else if (devices.isEmpty()) {
                         Text(stringResource(R.string.obd_no_devices), fontSize = dims.t(2.6f, min = 15f), color = theme.muted)
                         BigButton(stringResource(R.string.action_refresh), { tick++ }, icon = Icons.Filled.Refresh, primary = false)

@@ -17,6 +17,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
+import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
 
 /** An Indian helpline shown on the Help panel. */
 data class Helpline(val number: String, val labelRes: Int)
@@ -91,7 +93,10 @@ object Sos {
         for (provider in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
             try {
                 if (provider in lm.allProviders && lm.isProviderEnabled(provider)) {
-                    lm.getCurrentLocation(provider, signal, context.mainExecutor) { loc -> if (loc != null) onFix(loc) }
+                    // Compat: getCurrentLocation is Android 11+; older versions get a single update instead.
+                    LocationManagerCompat.getCurrentLocation(lm, provider, signal, ContextCompat.getMainExecutor(context)) { loc ->
+                        if (loc != null) onFix(loc)
+                    }
                 }
             } catch (_: Exception) {
             }

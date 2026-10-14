@@ -5,6 +5,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -39,15 +40,18 @@ class Listener(context: Context) {
         data object Unavailable : Result
     }
 
-    fun isAvailable(): Boolean = SpeechRecognizer.isRecognitionAvailable(appContext) ||
-        SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+    fun isAvailable(): Boolean = SpeechRecognizer.isRecognitionAvailable(appContext) || onDeviceAvailable()
+
+    /** On-device recognition is an Android 12+ API; older units use the recognition service only. */
+    private fun onDeviceAvailable(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
 
     /** Listens once. [onPartial] gets the live transcript for the overlay. */
     suspend fun listen(appLanguage: String, onPartial: (String) -> Unit): Result {
         audio?.requestAudioFocus(listenFocus)
         try {
             val tags = VoiceLocales.recognition(appLanguage)
-            val onDevice = SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+            val onDevice = onDeviceAvailable()
             val service = SpeechRecognizer.isRecognitionAvailable(appContext)
             // The app language first on either engine, English only as the last resort.
             val attempts = buildList {
@@ -88,7 +92,7 @@ class Listener(context: Context) {
 
     private suspend fun once(onDevice: Boolean, tag: String, onPartial: (String) -> Unit): Attempt {
         val recognizer = try {
-            if (onDevice) {
+            if (onDevice && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
             } else {
                 SpeechRecognizer.createSpeechRecognizer(appContext)

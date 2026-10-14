@@ -10,7 +10,9 @@ android {
 
     defaultConfig {
         applicationId = "com.vikash.ampli.drive"
-        minSdk = 31
+        // 26 (Android 8.0): many head units report "Android 12+" in About but really run Android 8 to 11.
+        // Newer APIs are guarded with SDK_INT checks or androidx compat; lint fails the build on NewApi.
+        minSdk = 26
         targetSdk = 35
         // CI passes the run number so each test build installs as an update over the last one.
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
@@ -60,6 +62,17 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    // CI runs lintDebug: any call to an API newer than minSdk without a version check fails the
+    // build, so head units on Android 8 to 11 can't crash on a missing method.
+    lint {
+        checkOnly += "NewApi"
+        error += "NewApi"
+        abortOnError = true
+        checkReleaseBuilds = false
+        textReport = true
+        textOutput = file("stdout")
     }
 }
 

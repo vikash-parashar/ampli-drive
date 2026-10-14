@@ -1,6 +1,5 @@
 package com.vikash.ampli.drive.ui
 
-import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
@@ -47,6 +46,7 @@ import com.vikash.ampli.drive.tpms.TpmsMonitor
 import com.vikash.ampli.drive.tpms.TyreAlert
 import com.vikash.ampli.drive.tpms.Wheel
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
+import com.vikash.ampli.drive.system.BtPermissions
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -91,7 +91,7 @@ private fun TyresBody(app: DriveApp, pairing: Boolean, setPairing: (Boolean) -> 
     }
 
     // Ask for "Nearby devices" the first time; scan fast while this screen is open.
-    LaunchedEffect(Unit) { if (!app.tpms.hasPermission()) permission.launch(Manifest.permission.BLUETOOTH_SCAN) }
+    LaunchedEffect(Unit) { if (!app.tpms.hasPermission()) permission.launch(BtPermissions.scan) }
     DisposableEffect(hasPermission) {
         if (hasPermission) app.tpms.start(fast = true)
         onDispose {
@@ -112,7 +112,7 @@ private fun TyresBody(app: DriveApp, pairing: Boolean, setPairing: (Boolean) -> 
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
             if (!hasPermission) {
                 Text(stringResource(R.string.tyres_need_permission), fontSize = dims.t(2.6f, min = 15f), color = theme.text)
-                BigButton(stringResource(R.string.action_allow), { permission.launch(Manifest.permission.BLUETOOTH_SCAN) }, icon = Icons.Filled.Bluetooth)
+                BigButton(stringResource(R.string.action_allow), { permission.launch(BtPermissions.scan) }, icon = Icons.Filled.Bluetooth)
             } else if (!app.tpms.bluetoothLeAvailable) {
                 Text(stringResource(R.string.tyres_no_ble), fontSize = dims.t(2.6f, min = 15f), color = theme.warning)
             }

@@ -82,6 +82,7 @@ import com.vikash.ampli.drive.ui.theme.DriveThemes
 import com.vikash.ampli.drive.ui.theme.HomeLayout
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.ui.theme.ThemeFamily
+import com.vikash.ampli.drive.system.BtPermissions
 
 @Composable
 fun SettingsScreen(
@@ -111,7 +112,7 @@ fun SettingsScreen(
     val isHome = remember(resumeTick) { Launchers.isDefaultHome(context) }
     val hasFine = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_FINE_LOCATION) }
     val hasCoarse = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) }
-    val hasBt = remember(resumeTick) { granted(context, Manifest.permission.BLUETOOTH_CONNECT) }
+    val hasBt = remember(resumeTick) { BtPermissions.hasConnect(context) }
     val hasNotif = remember(resumeTick) { app.mediaHub.hasAccess() }
     val language = remember(resumeTick, savedLanguage) { AppLanguages.current(context, savedLanguage) }
 

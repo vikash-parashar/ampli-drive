@@ -1,6 +1,5 @@
 package com.vikash.ampli.drive.tpms
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
@@ -14,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import com.vikash.ampli.drive.system.BtPermissions
 
 /** A reading with the time it was heard. */
 data class SeenSensor(val reading: TpmsReading, val time: Long, val rssi: Int)
@@ -47,7 +47,7 @@ class TpmsMonitor(context: Context) {
         set(value) { engine.limits = value }
 
     fun hasPermission(): Boolean =
-        appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+        BtPermissions.hasScan(appContext)
 
     val bluetoothLeAvailable: Boolean
         get() = appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) &&

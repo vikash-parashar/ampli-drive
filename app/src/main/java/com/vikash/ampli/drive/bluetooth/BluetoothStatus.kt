@@ -1,7 +1,7 @@
 package com.vikash.ampli.drive.bluetooth
 
 import com.vikash.ampli.drive.R
-import android.Manifest
+import com.vikash.ampli.drive.system.BtPermissions
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,7 +58,7 @@ class BluetoothStatus(context: Context) {
     }
 
     fun hasPermission(): Boolean =
-        appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        BtPermissions.hasConnect(appContext)
 
     fun start() {
         val granted = hasPermission()

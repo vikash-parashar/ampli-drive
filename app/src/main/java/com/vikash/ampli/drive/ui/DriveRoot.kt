@@ -77,7 +77,8 @@ fun DriveRoot(
         ?: SunTimes.isNightByClock(LocalTime.now())
     val chosen = DriveThemes.resolve(themeChoice, night, pro.isPro)
     // Glass themes blur the backdrop behind panels, except with "Reduce glass effects" (on by
-    // default on 2 GB units) or on Android 12.0, where RenderNode blur is unreliable. Without
+    // default on 2 GB units) or below Android 12L (API 32): there is no RenderEffect blur before
+    // Android 12, and on 12.0 RenderNode blur is unreliable. Without
     // blur they switch to a stronger tint so text stays readable.
     val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
     val glassBlur = chosen.glass != null && !reduceGlass && Build.VERSION.SDK_INT >= 32
