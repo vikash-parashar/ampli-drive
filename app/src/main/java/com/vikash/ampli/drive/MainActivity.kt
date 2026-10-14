@@ -58,6 +58,8 @@ class MainActivity : ComponentActivity() {
         app.billing.start()
         // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
         app.car
+        // Speaks Google Maps' turns when Settings › Haryanvi navigation prompts is on.
+        app.navPrompter.start()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

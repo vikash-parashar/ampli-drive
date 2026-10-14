@@ -47,6 +47,37 @@ object HaryanviLines {
         /** Driving too long: break reminder. */
         BreakReminder,
 
+        // Turn-by-turn (Settings › Haryanvi navigation prompts), read from Google Maps' notification.
+        // A far prompt is NavSoon + the manoeuvre ("400 मीटर आगे, बाएं हाथ नै मुड़ ले"),
+        // a near one NavNow + the manoeuvre ("इब्बे, बाएं हाथ नै मुड़ ले").
+
+        /** Prefix for a turn ahead: %1$s is the distance ("400 मीटर"). */
+        NavSoon,
+
+        /** Prefix for a turn right now. */
+        NavNow,
+        NavLeft,
+        NavRight,
+        NavSlightLeft,
+        NavSlightRight,
+        NavSharpLeft,
+        NavSharpRight,
+        NavUTurn,
+        NavKeepLeft,
+        NavKeepRight,
+        NavFlyover,
+        NavRamp,
+        NavExit,
+        NavRoundabout,
+
+        /** Roundabout with a known exit: %1$d is the exit number. */
+        NavRoundaboutExit,
+        NavArrive,
+        NavContinue,
+
+        /** Faster than the known limit while navigating: %1$d is the limit. */
+        SpeedLimit,
+
         /** Safety prompts: never playful. */
         Sos(safety = true),
         Crash(safety = true),
@@ -148,6 +179,172 @@ object HaryanviLines {
             Line("%1\$s घंटे तै चला रया सै, थोड़ा रुक कै कमर सीधी कर ले।", "%1\$s ghante te chala reya sai, thoda ruk ke kamar seedhi kar le."),
             // Bhai %s ghante ho gaye, dhaba aave te ruk liyo.
             Line("भाई %1\$s घंटे हो गए, ढाबा आवै तै रुक लियो।", "Bhai %1\$s ghante ho gaye, dhaba aave te ruk liyo."),
+        ),
+        Event.NavSoon to listOf(
+            // %s aage,
+            Line("%1\$s आगे,", "%1\$s aage,"),
+            // %s pe,
+            Line("%1\$s पै,", "%1\$s pe,"),
+            // %s baad,
+            Line("%1\$s बाद,", "%1\$s baad,"),
+            // Sun bhai, %s aage,
+            Line("सुण भाई, %1\$s आगे,", "Sun bhai, %1\$s aage,"),
+        ),
+        Event.NavNow to listOf(
+            // Abhi,
+            Line("अभी,", "Abhi,"),
+            // Ibbe,
+            Line("इब्बे,", "Ibbe,"),
+            // Bas abhi,
+            Line("बस अभी,", "Bas abhi,"),
+            // Le bhai, ibbe,
+            Line("ले भाई, इब्बे,", "Le bhai, ibbe,"),
+        ),
+        Event.NavLeft to listOf(
+            // baayen haath nai mud le bhai.
+            Line("बाएं हाथ नै मुड़ ले भाई।", "baayen haath nai mud le bhai."),
+            // ulte haath nai kaat le.
+            Line("उल्टे हाथ नै काट ले।", "ulte haath nai kaat le."),
+            // baayen mud ja, aaram te.
+            Line("बाएं मुड़ ज्या, आराम तै।", "baayen mud jya, aaram te."),
+            // left le le bhai.
+            Line("लेफ्ट ले ले भाई।", "left le le bhai."),
+        ),
+        Event.NavRight to listOf(
+            // daayen haath nai mud le bhai.
+            Line("दाएं हाथ नै मुड़ ले भाई।", "daayen haath nai mud le bhai."),
+            // sulte haath nai kaat le.
+            Line("सुलटे हाथ नै काट ले।", "sulte haath nai kaat le."),
+            // daayen mud ja, aaram te.
+            Line("दाएं मुड़ ज्या, आराम तै।", "daayen mud jya, aaram te."),
+            // right le le bhai.
+            Line("राइट ले ले भाई।", "right le le bhai."),
+        ),
+        Event.NavSlightLeft to listOf(
+            // halka sa baayen nai ho le.
+            Line("हल्का सा बाएं नै हो ले।", "halka sa baayen nai ho le."),
+            // thoda sa ulte haath nai daba le.
+            Line("थोड़ा सा उल्टे हाथ नै दबा ले।", "thoda sa ulte haath nai daba le."),
+            // baayen nai halka sarak le.
+            Line("बाएं नै हल्का सरक ले।", "baayen nai halka sarak le."),
+        ),
+        Event.NavSlightRight to listOf(
+            // halka sa daayen nai ho le.
+            Line("हल्का सा दाएं नै हो ले।", "halka sa daayen nai ho le."),
+            // thoda sa sulte haath nai daba le.
+            Line("थोड़ा सा सुलटे हाथ नै दबा ले।", "thoda sa sulte haath nai daba le."),
+            // daayen nai halka sarak le.
+            Line("दाएं नै हल्का सरक ले।", "daayen nai halka sarak le."),
+        ),
+        Event.NavSharpLeft to listOf(
+            // poora baayen nai ghuma le, teekha mod sai.
+            Line("पूरा बाएं नै घुमा ले, तीखा मोड़ सै।", "poora baayen nai ghuma le, teekha mod sai."),
+            // teekha mod sai, baayen nai poora kaat le.
+            Line("तीखा मोड़ सै, बाएं नै पूरा काट ले।", "teekha mod sai, baayen nai poora kaat le."),
+            // sambhal ke, tez baayen mod sai.
+            Line("संभल कै, तेज बाएं मोड़ सै।", "sambhal ke, tez baayen mod sai."),
+        ),
+        Event.NavSharpRight to listOf(
+            // poora daayen nai ghuma le, teekha mod sai.
+            Line("पूरा दाएं नै घुमा ले, तीखा मोड़ सै।", "poora daayen nai ghuma le, teekha mod sai."),
+            // teekha mod sai, daayen nai poora kaat le.
+            Line("तीखा मोड़ सै, दाएं नै पूरा काट ले।", "teekha mod sai, daayen nai poora kaat le."),
+            // sambhal ke, tez daayen mod sai.
+            Line("संभल कै, तेज दाएं मोड़ सै।", "sambhal ke, tez daayen mod sai."),
+        ),
+        Event.NavUTurn to listOf(
+            // U-turn maar le bhai, ulta ghoom le.
+            Line("यू-टर्न मार ले भाई, उल्टा घूम ले।", "U-turn maar le bhai, ulta ghoom le."),
+            // gaadi paachhe nai ghuma le, U-turn sai.
+            Line("गाड्डी पाच्छै नै घुमा ले, यू-टर्न सै।", "gaadi paachhe nai ghuma le, U-turn sai."),
+            // U-turn le le, dheere te.
+            Line("यू-टर्न ले ले, धीरे तै।", "U-turn le le, dheere te."),
+            // ulta ghuma le bhai, rasta paachhe sai.
+            Line("उल्टा घुमा ले भाई, रास्ता पाच्छै सै।", "ulta ghuma le bhai, rasta paachhe sai."),
+        ),
+        Event.NavKeepLeft to listOf(
+            // baayen wali lane mein rahiyo.
+            Line("बाएं आळी लेन मैं रहियो।", "baayen aali lane mein rahiyo."),
+            // baayen nai chipak ke chaliye.
+            Line("बाएं नै चिपक कै चालिए।", "baayen nai chipak ke chaliye."),
+            // baayen paase reh bhai.
+            Line("बाएं पास्सै रह भाई।", "baayen paase reh bhai."),
+        ),
+        Event.NavKeepRight to listOf(
+            // daayen wali lane mein rahiyo.
+            Line("दाएं आळी लेन मैं रहियो।", "daayen aali lane mein rahiyo."),
+            // daayen nai chipak ke chaliye.
+            Line("दाएं नै चिपक कै चालिए।", "daayen nai chipak ke chaliye."),
+            // daayen paase reh bhai.
+            Line("दाएं पास्सै रह भाई।", "daayen paase reh bhai."),
+        ),
+        Event.NavFlyover to listOf(
+            // flyover pe chadh le bhai.
+            Line("फ्लाईओवर पै चढ़ ले भाई।", "flyover pe chadh le bhai."),
+            // upar wala pul pakad le.
+            Line("ऊपर आळा पुल पकड़ ले।", "upar aala pul pakad le."),
+            // flyover le le, neeche mat utariyo.
+            Line("फ्लाईओवर ले ले, नीचै मत उतरियो।", "flyover le le, neeche mat utariyo."),
+        ),
+        Event.NavRamp to listOf(
+            // ramp pakad le bhai.
+            Line("रैंप पकड़ ले भाई।", "ramp pakad le bhai."),
+            // ramp pe chadh le, aaram te.
+            Line("रैंप पै चढ़ ले, आराम तै।", "ramp pe chadh le, aaram te."),
+            // side wala ramp le le.
+            Line("साइड आळा रैंप ले ले।", "side aala ramp le le."),
+        ),
+        Event.NavExit to listOf(
+            // exit le le bhai.
+            Line("एग्जिट ले ले भाई।", "exit le le bhai."),
+            // bahar nikal le, exit aa gaya.
+            Line("बाहर लिकड़ ले, एग्जिट आ ग्या।", "bahar likad le, exit aa gaya."),
+            // highway te utar le, exit sai.
+            Line("हाईवे तै उतर ले, एग्जिट सै।", "highway te utar le, exit sai."),
+        ),
+        Event.NavRoundabout to listOf(
+            // gol chakkar aa reya sai, sambhal ke.
+            Line("गोल चक्कर आ रया सै, संभल कै।", "gol chakkar aa reya sai, sambhal ke."),
+            // chowk pe ghoom le bhai, gol chakkar sai.
+            Line("चौक पै घूम ले भाई, गोल चक्कर सै।", "chowk pe ghoom le bhai, gol chakkar sai."),
+            // gol chakkar sai, dheere kar le.
+            Line("गोल चक्कर सै, धीरे कर ले।", "gol chakkar sai, dheere kar le."),
+        ),
+        Event.NavRoundaboutExit to listOf(
+            // gol chakkar pe %d number wala rasta pakad le.
+            Line("गोल चक्कर पै %1\$d नंबर आळा रास्ता पकड़ ले।", "gol chakkar pe %1\$d number aala rasta pakad le."),
+            // chakkar mein ghoom ke %d number se nikal le.
+            Line("चक्कर मैं घूम कै %1\$d नंबर तै लिकड़ ले।", "chakkar mein ghoom ke %1\$d number te likad le."),
+            // gol chakkar sai, %d number ka rasta lena sai.
+            Line("गोल चक्कर सै, %1\$d नंबर का रास्ता लेणा सै।", "gol chakkar sai, %1\$d number ka rasta lena sai."),
+        ),
+        Event.NavArrive to listOf(
+            // Pahunch gaye bhai, manzil aa gayi!
+            Line("पहुंच गे भाई, मंजिल आ गी!", "Pahunch ge bhai, manzil aa gi!"),
+            // Lyo ji, aa gaya thikana!
+            Line("ल्यो जी, आ ग्या ठिकाणा!", "Lyo ji, aa gaya thikana!"),
+            // Bas bhai, yahin sai manzil.
+            Line("बस भाई, याड़े ए सै मंजिल।", "Bas bhai, yaade e sai manzil."),
+            // Aa gaye bhai, gaadi side laga le aaram te.
+            Line("आ गे भाई, गाड्डी साइड ला ले आराम तै।", "Aa ge bhai, gaadi side la le aaram te."),
+        ),
+        Event.NavContinue to listOf(
+            // Seedha chalta reh bhai.
+            Line("सीधा चालता रह भाई।", "Seedha chalta reh bhai."),
+            // Seedhe seedhe chal, kit mudna koni.
+            Line("सीधे सीधे चाल, कित मुड़णा कोनी।", "Seedhe seedhe chal, kit mudna koni."),
+            // Seedha rasta sai, mauj te chala.
+            Line("सीधा रास्ता सै, मौज तै चला।", "Seedha rasta sai, mauj te chala."),
+        ),
+        Event.SpeedLimit to listOf(
+            // Speed ghata le bhai, limit %d sai.
+            Line("स्पीड घटा ले भाई, लिमिट %1\$d सै।", "Speed ghata le bhai, limit %1\$d sai."),
+            // Dheere kar le, yahan %d ki limit sai.
+            Line("धीरे कर ले, आड़े %1\$d की लिमिट सै।", "Dheere kar le, aade %1\$d ki limit sai."),
+            // %d te upar na, chalaan kat jaga.
+            Line("%1\$d तै ऊपर ना, चालान कट ज्यागा।", "%1\$d te upar na, chalaan kat jyaga."),
+            // Aaram te bhai, %d ki limit sai, ghar pe koi baat dekh reya sai.
+            Line("आराम तै भाई, %1\$d की लिमिट सै, घरां कोए बाट देख रया सै।", "Aaram te bhai, %1\$d ki limit sai, ghara koi baat dekh reya sai."),
         ),
     )
 

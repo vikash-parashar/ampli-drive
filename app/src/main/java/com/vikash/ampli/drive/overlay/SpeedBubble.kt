@@ -9,11 +9,13 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
@@ -35,6 +37,8 @@ class SpeedBubble(private val app: DriveApp) {
     private var view: BubbleView? = null
     private var params: WindowManager.LayoutParams? = null
     private var job: Job? = null
+    private var captionJob: Job? = null
+    private var caption: TextView? = null
     private val scope = MainScope()
 
     val isShowing: Boolean get() = view != null
@@ -74,11 +78,77 @@ class SpeedBubble(private val app: DriveApp) {
                 BubbleLogic.model(gps.speedKmh, limit ?: cam?.limitKmh, cam?.distanceMeters)
             }.collect { v.model = it }
         }
+        // Haryanvi navigation prompts: the spoken line, under the bubble, for a few seconds.
+        captionJob = scope.launch {
+            app.navPrompter.caption.collect { text -> if (text == null) hideCaption() else showCaption(text) }
+        }
+    }
+
+    private fun showCaption(text: String) {
+        val bubble = params ?: return
+        val dm = app.resources.displayMetrics
+        val density = dm.density
+        val tv = caption ?: TextView(app).apply {
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            val pad = (10 * density).toInt()
+            setPadding(pad, pad / 2, pad, pad / 2)
+            maxLines = 3
+            background = GradientDrawable().apply {
+                cornerRadius = 12 * density
+                setColor(Color.argb(0xE6, 0x16, 0x18, 0x1D))
+            }
+            setOnClickListener { openLauncher() }
+        }
+        tv.text = text
+        val maxW = (dm.widthPixels * 0.45f).toInt()
+        tv.maxWidth = maxW
+        tv.measure(
+            View.MeasureSpec.makeMeasureSpec(maxW, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(dm.heightPixels, View.MeasureSpec.AT_MOST),
+        )
+        val w = tv.measuredWidth
+        val h = tv.measuredHeight
+        // Below the bubble, or above it near the bottom edge; never off screen.
+        val below = bubble.y + bubble.height + (4 * density).toInt()
+        val y = if (below + h <= dm.heightPixels) below else (bubble.y - h - (4 * density).toInt()).coerceAtLeast(0)
+        val x = (bubble.x + bubble.width / 2 - w / 2).coerceIn(0, (dm.widthPixels - w).coerceAtLeast(0))
+        val p = (tv.layoutParams as? WindowManager.LayoutParams) ?: WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            PixelFormat.TRANSLUCENT,
+        ).apply { gravity = Gravity.TOP or Gravity.START }
+        p.x = x
+        p.y = y
+        try {
+            if (caption == null) {
+                wm?.addView(tv, p)
+                caption = tv
+            } else {
+                wm?.updateViewLayout(tv, p)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun hideCaption() {
+        caption?.let {
+            try {
+                wm?.removeView(it)
+            } catch (_: Exception) {
+            }
+        }
+        caption = null
     }
 
     fun hide() {
         job?.cancel()
         job = null
+        captionJob?.cancel()
+        captionJob = null
+        hideCaption()
         view?.let {
             try {
                 wm?.removeView(it)
