@@ -5,6 +5,7 @@ import android.content.Context
 import com.vikash.ampli.drive.billing.ProBilling
 import com.vikash.ampli.drive.bluetooth.BluetoothStatus
 import com.vikash.ampli.drive.cameras.CameraAlerts
+import com.vikash.ampli.drive.car.CarMonitor
 import com.vikash.ampli.drive.cameras.CameraRepository
 import com.vikash.ampli.drive.cameras.LiveCameraAlerts
 import com.vikash.ampli.drive.emergency.EmergencyStore
@@ -12,7 +13,9 @@ import com.vikash.ampli.drive.fastag.FastagStore
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.location.SpeedTracker
 import com.vikash.ampli.drive.media.MediaHub
+import com.vikash.ampli.drive.obd.ObdClient
 import com.vikash.ampli.drive.prefs.DrivePrefs
+import com.vikash.ampli.drive.tpms.TpmsMonitor
 import com.vikash.ampli.drive.voice.Speaker
 import com.vikash.ampli.drive.voice.VoiceAssistant
 import com.vikash.ampli.drive.voice.WakeModel
@@ -34,6 +37,13 @@ class DriveApp : Application() {
     val billing: ProBilling by lazy { ProBilling(this, prefs) }
     val fastag: FastagStore by lazy { FastagStore(this) }
     val emergency: EmergencyStore by lazy { EmergencyStore(this) }
+
+    /** Car owner features: break reminder, papers, parking, crash detection, weather, expenses. */
+    val car: CarMonitor by lazy { CarMonitor(this) }
+
+    /** OBD-II dongle (Pro) and BLE tyre sensors (Pro). */
+    val obd: ObdClient by lazy { ObdClient(this) }
+    val tpms: TpmsMonitor by lazy { TpmsMonitor(this) }
 
     /** "Hey Ampli": the conversation, and the offline wake-word model it downloads once. */
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }

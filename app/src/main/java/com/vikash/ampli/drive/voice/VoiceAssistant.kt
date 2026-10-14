@@ -268,6 +268,22 @@ class VoiceAssistant(private val app: DriveApp) {
                 say(res, lang, greeting(res))
                 return Expect.Destination
             }
+            VoiceIntent.ServiceDue -> {
+                say(res, lang, CarAnswers.service(app, res))
+                return null
+            }
+            VoiceIntent.TyrePressure -> {
+                say(res, lang, CarAnswers.tyres(app, res))
+                return null
+            }
+            VoiceIntent.EngineStatus -> {
+                say(res, lang, CarAnswers.engine(app, res, VoiceLocales.parserLanguage(lang) == "hi"))
+                return null
+            }
+            VoiceIntent.WhereParked -> {
+                say(res, lang, CarAnswers.parked(app, res))
+                return null
+            }
             VoiceIntent.Cancel -> {
                 say(res, lang, R.string.voice_cancelled)
                 return null

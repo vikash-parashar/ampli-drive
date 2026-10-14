@@ -3,6 +3,9 @@ name: Build APK
 on:
   push:
     branches: [main]
+  # Pull requests build, test and upload the APK, but never publish a build-N release.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -43,7 +46,12 @@ jobs:
           ./gradlew --no-daemon assembleDebug
 
       - name: Rename APK
+        if: github.event_name != 'pull_request'
         run: cp app/build/outputs/apk/debug/app-debug.apk "AmpliCarHub-${GITHUB_RUN_NUMBER}.apk"
+
+      - name: Rename PR APK
+        if: github.event_name == 'pull_request'
+        run: cp app/build/outputs/apk/debug/app-debug.apk "AmpliCarHub-pr-${GITHUB_RUN_NUMBER}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -52,8 +60,20 @@ jobs:
 
       # A release gives a direct download link that opens in the head unit's browser.
       - uses: softprops/action-gh-release@v2
+        if: github.event_name != 'pull_request'
         with:
           tag_name: build-${{ github.run_number }}
           name: Ampli Car Hub test build ${{ github.run_number }}
           prerelease: true
           files: AmpliCarHub-*.apk
+
+      # PR test builds get their own pr-test-N prerelease so they can be sideloaded the
+      # same way. Forks have a read-only token, so they only get the artifact.
+      - uses: softprops/action-gh-release@v2
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          tag_name: pr-test-${{ github.run_number }}
+          target_commitish: ${{ github.event.pull_request.head.sha }}
+          name: "Ampli Car Hub PR #${{ github.event.pull_request.number }} test build ${{ github.run_number }}"
+          prerelease: true
+          files: AmpliCarHub-pr-*.apk

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.CopyOnWriteArrayList
 
 data class GpsState(
     /** ACCESS_FINE_LOCATION granted (GPS_PROVIDER needs it). */
@@ -31,6 +32,11 @@ data class GpsState(
     val satellitesUsed: Int = 0,
     val satellitesInView: Int = 0,
 )
+
+/** Gets every GPS fix: [smoothedKmh] is what the speedometer shows, [rawKmh] the unsmoothed reading. */
+fun interface FixListener {
+    fun onFix(location: Location, smoothedKmh: Float, rawKmh: Float?)
+}
 
 /**
  * Reads the head unit's own GPS through LocationManager (no Play Services needed).
@@ -51,6 +57,17 @@ class SpeedTracker(
     private var lastFix: Location? = null
     private var lastFixAt = 0L
     private val samples = ArrayDeque<Float>()
+    private val fixListeners = CopyOnWriteArrayList<FixListener>()
+
+    /** Called when GPS stops (launcher hidden without the drive monitor), with the last fix. */
+    var onStopped: ((Location?) -> Unit)? = null
+
+    /** True between [start] and [stop]. */
+    val isRunning: Boolean get() = running
+
+    fun addFixListener(listener: FixListener) {
+        fixListeners.addIfAbsent(listener)
+    }
 
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location) = handleFix(location)
@@ -145,6 +162,7 @@ class SpeedTracker(
         samples.clear()
         cameraAlerts.reset()
         _state.update { it.copy(speedKmh = null, satellitesUsed = 0, satellitesInView = 0) }
+        onStopped?.invoke(lastFix)
     }
 
     private fun handleFix(location: Location) {
@@ -168,7 +186,10 @@ class SpeedTracker(
                 providerEnabled = true,
             )
         }
-        if (smoothed != null) cameraAlerts.onLocation(location, smoothed)
+        if (smoothed != null) {
+            cameraAlerts.onLocation(location, smoothed)
+            for (l in fixListeners) l.onFix(location, smoothed, raw)
+        }
     }
 
     /** Median of the last three readings removes single-fix spikes; tiny values read as 0. */

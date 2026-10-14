@@ -4,8 +4,10 @@ import android.content.Intent
 import android.provider.Settings
 import android.text.format.DateFormat
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
+import androidx.compose.material.icons.filled.CarRepair
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.GpsNotFixed
@@ -36,6 +39,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -73,6 +78,8 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenHelp: (sos: Boolean) -> Unit,
     onOpenFastag: () -> Unit,
+    onOpenCar: () -> Unit,
+    onOpenParked: () -> Unit,
     onRequestPermissions: () -> Unit,
 ) {
     val dims = LocalDims.current
@@ -94,6 +101,12 @@ fun HomeScreen(
         CameraChip(app = app, modifier = Modifier.fillMaxHeight())
     }
 
+    // Shows only when something needs attention (weather, tyres, engine, papers/service due).
+    val carChip: @Composable () -> Unit = {
+        CarChip(app = app, onClick = onOpenCar, modifier = Modifier.fillMaxHeight())
+    }
+    val carAlert = carNeedsAttention(app)
+
     val openNav = { Launchers.openNavigation(context, gps.location); Unit }
     val gap = dims.d(2f)
 
@@ -108,6 +121,7 @@ fun HomeScreen(
             bt = bt,
             fastag = if (fastagOn) fastagChip else null,
             camera = if (camerasOn) cameraChip else null,
+            car = carChip,
             onGpsClick = {
                 when {
                     !gps.hasPermission -> onRequestPermissions()
@@ -136,13 +150,21 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(gap),
         ) {
             val map = @Composable { m: Modifier, showTurn: Boolean ->
-                MapPane(
-                    gps = gps,
-                    onOpenNavigation = openNav,
-                    onRequestPermissions = onRequestPermissions,
-                    modifier = m,
-                    showTurn = showTurn,
-                )
+                Box(m) {
+                    MapPane(
+                        gps = gps,
+                        onOpenNavigation = openNav,
+                        onRequestPermissions = onRequestPermissions,
+                        modifier = Modifier.fillMaxSize(),
+                        showTurn = showTurn,
+                    )
+                    // Where the car is parked, while parked.
+                    ParkedPill(
+                        app = app,
+                        onClick = onOpenParked,
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = dims.d(2f), bottom = dims.d(5f)),
+                    )
+                }
             }
             val speed = @Composable { m: Modifier -> SpeedPane(gps = gps, cameraAlerts = app.cameraAlerts, modifier = m) }
             val music = @Composable { m: Modifier -> MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) }
@@ -221,6 +243,8 @@ fun HomeScreen(
                     onOpenApps()
                 }
             },
+            onCar = onOpenCar,
+            carAlert = carAlert,
             onApps = onOpenApps,
             onSettings = onOpenSettings,
             onHelp = { onOpenHelp(false) },
@@ -235,6 +259,7 @@ private fun StatusRow(
     bt: BluetoothUiState,
     fastag: (@Composable () -> Unit)?,
     camera: (@Composable () -> Unit)?,
+    car: (@Composable () -> Unit)?,
     onGpsClick: () -> Unit,
     onBtClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -282,6 +307,7 @@ private fun StatusRow(
             )
         }
         Spacer(Modifier.weight(1f))
+        car?.invoke()
         camera?.invoke()
         fastag?.invoke()
         if (bt.supported) {
@@ -350,6 +376,8 @@ private fun Dock(
     onMusic: () -> Unit,
     onPhone: () -> Unit,
     onAuto: () -> Unit,
+    onCar: () -> Unit,
+    carAlert: Boolean,
     onApps: () -> Unit,
     onSettings: () -> Unit,
     onHelp: () -> Unit,
@@ -371,6 +399,8 @@ private fun Dock(
             onAuto,
             item,
         )
+        // Car hub: parked car, papers, expenses, engine, tyres. A red dot when something is due.
+        DockButton(stringResource(R.string.dock_car), Icons.Filled.CarRepair, onCar, item, badge = carAlert)
         DockButton(stringResource(R.string.dock_apps), Icons.Filled.Apps, onApps, item)
         DockButton(stringResource(R.string.dock_settings), Icons.Filled.Settings, onSettings, item)
         // Red Help on the right end, nearest the driver in right-hand-drive cars.
@@ -386,6 +416,7 @@ private fun DockButton(
     onClick: () -> Unit,
     modifier: Modifier,
     highlight: Boolean = false,
+    badge: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -423,12 +454,23 @@ private fun DockButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            icon,
-            contentDescription = label,
-            tint = iconTint,
-            modifier = Modifier.size(maxOf(dims.d(5f), 28.dp)),
-        )
+        Box {
+            Icon(
+                icon,
+                contentDescription = label,
+                tint = iconTint,
+                modifier = Modifier.size(maxOf(dims.d(5f), 28.dp)),
+            )
+            if (badge) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(theme.danger),
+                )
+            }
+        }
         Spacer(Modifier.height(dims.d(0.8f)))
         Text(
             theme.label(label),
