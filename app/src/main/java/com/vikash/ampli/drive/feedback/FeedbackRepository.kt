@@ -144,7 +144,11 @@ class FeedbackRepository(private val app: DriveApp) {
     suspend fun vote(featureId: Long): Boolean = withContext(Dispatchers.IO) { client?.vote(featureId, app.prefs.installId)?.ok == true }
 
     /** Copies a picked screenshot. Null when it is unreadable or larger than 2 MB. */
-    fun importImage(uri: Uri): Attachment? = try {
+    fun importImage(uri: Uri): Attachment? {
+        return try { importImageOrThrow(uri) } catch (_: Exception) { null }
+    }
+
+    private fun importImageOrThrow(uri: Uri): Attachment? {
         val mime = app.contentResolver.getType(uri) ?: "image/jpeg"
         val ext = if (mime.endsWith("png")) "png" else if (mime.endsWith("webp")) "webp" else "jpg"
         val dir = File(app.cacheDir, "feedback").apply { mkdirs() }
@@ -166,14 +170,12 @@ class FeedbackRepository(private val app: DriveApp) {
                 }
             }
         } ?: return null
-        if (tooBig) {
+        return if (tooBig) {
             f.delete()
             null
         } else {
             Attachment(f, mime)
         }
-    } catch (_: Exception) {
-        null
     }
 
     /** This app's own recent log lines (only when the driver ticks "Attach app logs"). */
