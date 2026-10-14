@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,7 +112,8 @@ class BluetoothStatus(context: Context) {
 
     @SuppressLint("MissingPermission")
     private fun safeName(device: BluetoothDevice): String? = try {
-        device.alias ?: device.name
+        // The user-set alias is Android 11+; older units show the device's own name.
+        (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) device.alias else null) ?: device.name
     } catch (_: SecurityException) {
         null
     }

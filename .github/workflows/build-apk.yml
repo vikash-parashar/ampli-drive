@@ -47,7 +47,7 @@ jobs:
       - name: Lint (NewApi)
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon lintDebug
+          ./gradlew --no-daemon lintDebug || { cat app/build/reports/lint-results-debug.txt; exit 1; }
 
       - name: Build debug APK
         run: |
