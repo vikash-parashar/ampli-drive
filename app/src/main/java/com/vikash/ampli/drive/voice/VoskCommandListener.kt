@@ -83,10 +83,13 @@ class VoskCommandListener(private val app: DriveApp) {
         speech = null
     }
 
-    private fun field(json: String?, key: String): String = try {
-        JSONObject(json ?: return "").optString(key)
-    } catch (_: Exception) {
-        ""
+    private fun field(json: String?, key: String): String {
+        if (json == null) return ""
+        return try {
+            JSONObject(json).optString(key)
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     private companion object {
