@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
+import com.vikash.ampli.drive.voice.VoiceService
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -68,6 +70,8 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        handleVoiceIntent(intent)
+
         if (!app.prefs.askedPermissions) {
             app.prefs.askedPermissions = true
             askPermissions()
@@ -84,6 +88,9 @@ class MainActivity : ComponentActivity() {
         // Notification access may have just been granted in Settings.
         app.mediaHub.start()
         resumeTick.intValue++
+        // "Hey Ampli" wake word. A microphone service may only start while we are in front,
+        // which as the HOME app includes right after boot (see VoiceService).
+        VoiceService.start(this)
     }
 
     override fun onStop() {
@@ -98,6 +105,26 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) screen.value = Screen.Home
+        handleVoiceIntent(intent)
+    }
+
+    /** The assistant brings the launcher forward for the place list or the Help panel. */
+    private fun handleVoiceIntent(intent: Intent?) {
+        when (intent?.getStringExtra(EXTRA_VOICE_ACTION)) {
+            VOICE_OPEN_HELP -> screen.value = Screen.Help
+            null -> Unit
+            else -> screen.value = Screen.Home
+        }
+        intent?.removeExtra(EXTRA_VOICE_ACTION)
+    }
+
+    /** Steering-wheel voice key or a search key, when the head unit passes it to the home app. */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) {
+            if (event.repeatCount == 0) app.voice.start()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun startSensors() {
@@ -113,5 +140,10 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.BLUETOOTH_CONNECT,
             ),
         )
+    }
+
+    companion object {
+        const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
+        const val VOICE_OPEN_HELP = "help"
     }
 }

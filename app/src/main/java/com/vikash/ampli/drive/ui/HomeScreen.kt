@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.GpsNotFixed
 import androidx.compose.material.icons.filled.GpsOff
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Phone
@@ -205,6 +206,7 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .height(maxOf(dims.d(15f), MinTouch)),
             onNavigate = openNav,
+            onVoice = { app.voice.start() },
             onMusic = { Launchers.openMusic(context, app.mediaHub.currentPackage()) },
             onPhone = { Launchers.openDialer(context) },
             onAuto = {
@@ -336,6 +338,7 @@ private fun GpsPill(gps: GpsState, onClick: () -> Unit) {
 private fun Dock(
     modifier: Modifier,
     onNavigate: () -> Unit,
+    onVoice: () -> Unit,
     onMusic: () -> Unit,
     onPhone: () -> Unit,
     onAuto: () -> Unit,
@@ -350,6 +353,8 @@ private fun Dock(
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(gap)) {
         val item = Modifier.weight(1f).fillMaxHeight()
         DockButton(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, onNavigate, item, highlight = true)
+        // Same flow as the wake word; works without "Always listen" and without the model.
+        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item)
         DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item)
         DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item)
         DockButton(

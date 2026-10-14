@@ -51,6 +51,15 @@ class DrivePrefs(context: Context) {
     private val _autoPackage = MutableStateFlow(sp.getString(KEY_AUTO_PKG, null))
     val autoPackage: StateFlow<String?> = _autoPackage.asStateFlow()
 
+    /** "Always listen for Hey Ampli": off by default; VoiceService runs only while this is on. */
+    private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
+    val voiceAlways: StateFlow<Boolean> = _voiceAlways.asStateFlow()
+
+    /** When the assistant last said the full greeting (wall-clock ms), so it isn't repeated every time. */
+    var lastVoiceGreeting: Long
+        get() = sp.getLong(KEY_VOICE_GREETED, 0L)
+        set(value) { sp.edit().putLong(KEY_VOICE_GREETED, value).apply() }
+
     /** Whether we already asked for location/Bluetooth once (first-launch flow). */
     var askedPermissions: Boolean
         get() = sp.getBoolean(KEY_ASKED, false)
@@ -94,6 +103,11 @@ class DrivePrefs(context: Context) {
         _autoPackage.value = pkg
     }
 
+    fun setVoiceAlways(value: Boolean) {
+        sp.edit().putBoolean(KEY_VOICE_ALWAYS, value).apply()
+        _voiceAlways.value = value
+    }
+
     private fun readThemeChoice(): ThemeChoice {
         // Earlier builds stored only "Auto" / "Day" / "Night".
         val legacy = sp.getString(KEY_THEME_LEGACY, "Auto")
@@ -123,6 +137,8 @@ class DrivePrefs(context: Context) {
         private const val KEY_LANGUAGE = "app_language"
         private const val KEY_AUTO_PKG = "auto_package"
         private const val KEY_ASKED = "asked_permissions"
+        private const val KEY_VOICE_ALWAYS = "voice_always_listen"
+        private const val KEY_VOICE_GREETED = "voice_last_greeting"
 
         /** Read before the app object exists (attachBaseContext on Android 12). */
         fun readLanguage(context: Context): String =

@@ -9,12 +9,25 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Connected phone name in the status row. -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- "Hey Ampli": wake word and voice commands. The wake word runs offline in a
+         microphone foreground service, only while the driver has switched it on. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- "Play <song> from my storage" (MediaStore, USB and SD included). -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- No RECEIVE_BOOT_COMPLETED: a microphone service can't start from boot (see VoiceService). -->
 
     <!-- The head unit has GPS but may lack some of these; none are required to install. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <!-- Package visibility (Android 11+): apps the launcher lists or opens. -->
     <queries>
@@ -55,11 +68,39 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>
+        <!-- Voice: speech recognition and text-to-speech engines. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+        <!-- Voice: "play <song>" in a music player. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="audio/*" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+        </intent>
         <package android:name="com.google.android.apps.maps" />
         <package android:name="com.vikash.ampli" />
+        <package android:name="com.syu.bt" />
+        <!-- Android Auto and head-unit phone-link apps ("connect my phone"). -->
         <package android:name="com.google.android.projection.gearhead" />
         <package android:name="com.zjinnova.zlink" />
-        <package android:name="com.syu.bt" />
+        <package android:name="com.suding.speedplay" />
+        <package android:name="com.autokit" />
+        <package android:name="com.autokit.app" />
+        <package android:name="net.easyconn" />
+        <package android:name="net.easyconn.carman.wws" />
+        <package android:name="com.carlinkit" />
+        <package android:name="com.carbit.phonelink" />
+        <package android:name="com.syu.carlink" />
+        <package android:name="com.fyt.phonelink" />
+        <package android:name="com.ts.phonelink" />
+        <package android:name="com.tw.carplay" />
+        <package android:name="com.ex.phonelink" />
     </queries>
 
     <application
@@ -104,5 +145,11 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <!-- "Hey Ampli" wake word (Vosk, offline). Started only from the visible launcher. -->
+        <service
+            android:name=".voice.VoiceService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
     </application>
 </manifest>

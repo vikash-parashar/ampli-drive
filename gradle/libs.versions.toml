@@ -11,6 +11,8 @@ maplibre = "11.8.8"
 # Google Play Billing for the one-time Ampli Drive Pro unlock (same version as the Ampli music app).
 billing = "7.1.1"
 junit = "4.13.2"
+# Offline "Hey Ampli" wake-word spotting (Apache-2.0). Needs JNA as an AAR (see app/build.gradle.kts).
+vosk = "0.3.47"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -26,6 +28,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibre" }
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

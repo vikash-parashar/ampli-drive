@@ -151,6 +151,10 @@ fun DriveRoot(
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
+                    // "Hey Ampli" sheet over whichever screen is showing.
+                    val voice by app.voice.state.collectAsStateWithLifecycle()
+                    if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
+                    VoiceOverlay(state = voice, onCancel = app.voice::cancel, onChoose = app.voice::choose)
                 }
             }
         }

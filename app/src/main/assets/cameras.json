@@ -1,0 +1,5 @@
+{
+  "version": 0,
+  "note": "Placeholder. The real India speed-camera dataset ships with the camera-alerts task. Entry format: {\"lat\": 18.52, \"lon\": 73.85, \"road\": \"NH 48\", \"limitKmh\": 60}",
+  "cameras": []
+}

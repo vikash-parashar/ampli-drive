@@ -74,6 +74,10 @@ dependencies {
     implementation(libs.maplibre.android)
     implementation(libs.billing.ktx)
 
+    // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
+    implementation(libs.vosk.android)
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
+
     // FastagParser tests: ./gradlew testDebugUnitTest
     testImplementation(libs.junit)
 }

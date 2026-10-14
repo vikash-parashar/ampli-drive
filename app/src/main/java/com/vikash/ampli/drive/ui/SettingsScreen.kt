@@ -196,6 +196,7 @@ fun SettingsScreen(
                 onAction = onOpenEmergency,
             )
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
+            VoiceSettingsCard(app = app, resumeTick = resumeTick)
             ToggleRow(
                 title = stringResource(R.string.screen_on_title),
                 status = stringResource(R.string.screen_on_hint),
