@@ -14,7 +14,7 @@ Google counts data as "collected" when it leaves the device. Data that only stay
 
 | Data type (Play category) | Collected | Shared | Optional | Purpose | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Location › Precise location | Yes | No | Yes | App functionality | Sent to Open-Meteo for weather ahead and to Photon for place search, with no identifier. Processed ephemerally: Play lets you mark data as "processed ephemerally" when it is used only to answer the request. Not sent to us. |
+| Location › Precise location | Yes | No | Yes | App functionality | Sent to Open-Meteo for weather ahead, to Photon for place search and to the routing server (OSRM) for in-app navigation, with no identifier. Processed ephemerally: Play lets you mark data as "processed ephemerally" when it is used only to answer the request. Not sent to us. |
 | App activity › Other user-generated content (Help & feedback text) | Yes | No | Yes | Developer communications, App functionality | Only what the user types in a report. |
 | Personal info › Email address | Yes | No | Yes | Developer communications | Only if the user types it in a report, to get a reply. |
 | Messages › Other in-app messages | Yes | No | Yes | Developer communications | Support messages and feature requests (spec: "Messages, optional, not shared"). |

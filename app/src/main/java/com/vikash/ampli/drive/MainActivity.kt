@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
         app.billing.start()
         // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
         app.car
-        // Speaks Google Maps' turns when Settings › Haryanvi navigation prompts is on.
+        // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
         app.navPrompter.start()
 
         lifecycleScope.launch {
@@ -167,6 +167,8 @@ class MainActivity : ComponentActivity() {
             VOICE_CRASH -> screen.value = Screen.Crash
             // The form itself waits until the car is stopped.
             VOICE_FEEDBACK -> screen.value = Screen.Feedback
+            // "Hey Ampli, <place> le chal" with the Ampli map: Car Hub's own navigation.
+            VOICE_NAVIGATE -> screen.value = Screen.Navigation
             null -> Unit
             else -> screen.value = Screen.Home
         }
@@ -238,5 +240,6 @@ class MainActivity : ComponentActivity() {
         const val VOICE_OPEN_HELP = "help"
         const val VOICE_CRASH = "crash"
         const val VOICE_FEEDBACK = "feedback"
+        const val VOICE_NAVIGATE = "navigate"
     }
 }

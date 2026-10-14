@@ -40,6 +40,7 @@ import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.map.GlanceMap
 import com.vikash.ampli.drive.map.MapDiagnostics
 import com.vikash.ampli.drive.map.BASIC_ATTRIBUTION
+import com.vikash.ampli.drive.nav.NavSession
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
 import com.vikash.ampli.drive.ui.theme.CardStyle
@@ -57,6 +58,9 @@ fun MapPane(
     parked: Pair<Double, Double>? = null,
     textureMode: Boolean = true,
     onNoFrames: () -> Unit = {},
+    /** Car Hub's own navigation: route on the map and a compact card instead of Maps' turn. */
+    nav: NavSession = NavSession(),
+    onOpenNav: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -86,19 +90,25 @@ fun MapPane(
                     onClick = onOpenNavigation,
                 )
                 else -> {
+                    val navigating = nav.phase == NavSession.Phase.Active
                     GlanceMap(
-                        location = location,
+                        location = homeShownLocation(location, nav),
                         styleUrl = theme.map.url,
                         puckColor = theme.mapPuck.toArgb(),
                         parked = parked,
                         textureMode = textureMode,
                         onNoFrames = onNoFrames,
+                        route = if (nav.visible) nav.route?.points else null,
+                        routeKey = nav.routeVersion,
+                        routeColor = theme.mapPuck.toArgb(),
+                        navigating = navigating,
                         modifier = Modifier.fillMaxSize(),
                     )
                     // Tint so the tiles sit in the theme's colour world (green HUD, magenta synthwave…).
                     if (theme.mapTint.alpha > 0f) Box(Modifier.fillMaxSize().background(theme.mapTint))
-                    // Taps anywhere on the glance map hand off to Google Maps.
-                    Box(Modifier.fillMaxSize().clickable(onClick = onOpenNavigation))
+                    // Taps anywhere on the glance map: the navigation screen while navigating, else
+                    // the destination search (Ampli map) or Google Maps.
+                    Box(Modifier.fillMaxSize().clickable(onClick = if (nav.visible) onOpenNav else onOpenNavigation))
                     val mapStatus by MapDiagnostics.status.collectAsStateWithLifecycle()
                     Text(
                         if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · " + BASIC_ATTRIBUTION else GLANCE_ATTRIBUTION,
@@ -117,7 +127,16 @@ fun MapPane(
             }
 
             val current = turn
-            if (current != null && showTurn) {
+            if (nav.visible && showTurn) {
+                NavHomeCard(
+                    session = nav,
+                    onClick = onOpenNav,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(dims.d(2f)),
+                )
+            } else if (current != null && showTurn && !nav.visible) {
                 NextTurnCard(
                     turn = current,
                     onClick = onOpenNavigation,
@@ -135,7 +154,7 @@ fun MapPane(
                         .align(Alignment.BottomStart)
                         .padding(start = dims.d(2f), bottom = dims.d(5f)),
                 )
-            } else if (current == null && location != null) {
+            } else if (current == null && location != null && !nav.visible) {
                 Pill(
                     text = stringResource(R.string.map_tap_to_navigate),
                     icon = Icons.Filled.Navigation,

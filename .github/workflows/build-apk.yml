@@ -17,6 +17,8 @@ jobs:
     env:
       # Help & feedback server (Settings › Variables › Actions). Empty = email fallback in the app.
       OWNER_API_URL: ${{ vars.OWNER_API_URL }}
+      # In-app navigation routing server (your own OSRM). Empty = OSRM's public demo server, testing only.
+      ROUTING_BASE_URL: ${{ vars.ROUTING_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 

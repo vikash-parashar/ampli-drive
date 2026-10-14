@@ -59,6 +59,7 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.bluetooth.BluetoothUiState
 import com.vikash.ampli.drive.location.GpsState
 import com.vikash.ampli.drive.nav.NavTurnRepository
+import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.AppChooser
 import com.vikash.ampli.drive.system.AppRole
@@ -88,6 +89,9 @@ fun HomeScreen(
     onOpenCar: () -> Unit,
     onOpenParked: () -> Unit,
     onRequestPermissions: () -> Unit,
+    /** Car Hub's own navigation: the full navigation screen, and "Where to?". */
+    onOpenNavScreen: () -> Unit = {},
+    onOpenNavSearch: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -96,6 +100,8 @@ fun HomeScreen(
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
     val autoPackage by app.prefs.autoPackage.collectAsStateWithLifecycle()
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
+    val nav by app.navigator.state.collectAsStateWithLifecycle()
+    val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
     val autoHint = stringResource(R.string.auto_button_hint)
     val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
     val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
@@ -114,7 +120,16 @@ fun HomeScreen(
     }
     val carAlert = carNeedsAttention(app)
 
-    val openNav = { Launchers.openNavigation(context, gps.location); Unit }
+    // Navigate button and map taps: the trip in progress, else "Where to?" on the Ampli map, else
+    // Google Maps (Settings › Navigate with).
+    val openNav = {
+        when {
+            nav.visible -> onOpenNavScreen()
+            navApp == NavApp.Ampli -> onOpenNavSearch()
+            else -> Launchers.openNavigation(context, gps.location)
+        }
+        Unit
+    }
     val gap = dims.d(2f)
 
     Column(
@@ -175,6 +190,8 @@ fun HomeScreen(
                         onRequestPermissions = onRequestPermissions,
                         modifier = Modifier.fillMaxSize(),
                         showTurn = showTurn,
+                        nav = nav,
+                        onOpenNav = onOpenNavScreen,
                     )
                     // Where the car is parked, while parked.
                     ParkedPill(
@@ -241,8 +258,12 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(gap),
                     ) {
                         speed(Modifier.weight(1f).fillMaxWidth())
-                        turn?.let {
-                            NextTurnCard(turn = it, onClick = openNav, modifier = Modifier.fillMaxWidth(), large = !dims.compact)
+                        if (nav.visible) {
+                            NavHomeCard(session = nav, onClick = onOpenNavScreen, modifier = Modifier.fillMaxWidth(), large = !dims.compact)
+                        } else {
+                            turn?.let {
+                                NextTurnCard(turn = it, onClick = openNav, modifier = Modifier.fillMaxWidth(), large = !dims.compact)
+                            }
                         }
                     }
                     Column(

@@ -1,0 +1,82 @@
+{
+  "code": "Ok",
+  "routes": [
+    {
+      "geometry": {
+        "coordinates": [
+          [77.0266, 28.4595], [77.0276, 28.4595], [77.0286, 28.4595],
+          [77.0286, 28.4605], [77.0286, 28.4615], [77.0286, 28.4625],
+          [77.0296, 28.4625], [77.0306, 28.4625], [77.0316, 28.463],
+          [77.0326, 28.4635]
+        ],
+        "type": "LineString"
+      },
+      "legs": [
+        {
+          "steps": [
+            {
+              "geometry": {"coordinates": [[77.0266, 28.4595], [77.0276, 28.4595], [77.0286, 28.4595]], "type": "LineString"},
+              "maneuver": {"bearing_after": 90, "bearing_before": 0, "location": [77.0266, 28.4595], "type": "depart"},
+              "mode": "driving", "driving_side": "left", "name": "Sector 14 Road", "ref": "",
+              "intersections": [{"out": 0, "entry": [true], "bearings": [90], "location": [77.0266, 28.4595]}],
+              "weight": 30.2, "duration": 30.2, "distance": 195.6
+            },
+            {
+              "geometry": {"coordinates": [[77.0286, 28.4595], [77.0286, 28.4605], [77.0286, 28.4615]], "type": "LineString"},
+              "maneuver": {"bearing_after": 0, "bearing_before": 90, "location": [77.0286, 28.4595], "modifier": "left", "type": "turn"},
+              "mode": "driving", "driving_side": "left", "name": "Old Delhi Road", "ref": "",
+              "intersections": [{"out": 1, "in": 2, "entry": [true, true, false], "bearings": [0, 90, 270], "location": [77.0286, 28.4595]}],
+              "weight": 35.0, "duration": 35.0, "distance": 222.4
+            },
+            {
+              "geometry": {"coordinates": [[77.0286, 28.4615], [77.0286, 28.4625]], "type": "LineString"},
+              "maneuver": {"bearing_after": 0, "bearing_before": 0, "location": [77.0286, 28.4615], "modifier": "straight", "type": "new name"},
+              "mode": "driving", "driving_side": "left", "name": "Mehrauli Road", "ref": "",
+              "intersections": [{"out": 0, "in": 1, "entry": [true, false], "bearings": [0, 180], "location": [77.0286, 28.4615]}],
+              "weight": 15.0, "duration": 15.0, "distance": 111.2
+            },
+            {
+              "geometry": {"coordinates": [[77.0286, 28.4625], [77.0296, 28.4625], [77.0306, 28.4625]], "type": "LineString"},
+              "maneuver": {"bearing_after": 90, "bearing_before": 0, "location": [77.0286, 28.4625], "modifier": "right", "type": "roundabout", "exit": 2},
+              "mode": "driving", "driving_side": "left", "name": "Sohna Road", "ref": "SH 13",
+              "intersections": [{"out": 1, "in": 2, "entry": [true, true, false], "bearings": [0, 90, 180], "location": [77.0286, 28.4625]}],
+              "weight": 30.0, "duration": 30.0, "distance": 195.6
+            },
+            {
+              "geometry": {"coordinates": [[77.0306, 28.4625], [77.0316, 28.463], [77.0326, 28.4635]], "type": "LineString"},
+              "maneuver": {"bearing_after": 60, "bearing_before": 90, "location": [77.0306, 28.4625], "modifier": "slight left", "type": "fork"},
+              "mode": "driving", "driving_side": "left", "name": "Rajiv Chowk Flyover", "ref": "NH 48",
+              "intersections": [{"out": 0, "in": 2, "entry": [true, true, false], "bearings": [60, 100, 270], "location": [77.0306, 28.4625]}],
+              "weight": 20.0, "duration": 20.0, "distance": 223.0
+            },
+            {
+              "geometry": {"coordinates": [[77.0326, 28.4635], [77.0326, 28.4635]], "type": "LineString"},
+              "maneuver": {"bearing_after": 0, "bearing_before": 60, "location": [77.0326, 28.4635], "modifier": "left", "type": "arrive"},
+              "mode": "driving", "driving_side": "left", "name": "Rajiv Chowk Flyover", "ref": "NH 48",
+              "intersections": [{"in": 0, "entry": [true], "bearings": [240], "location": [77.0326, 28.4635]}],
+              "weight": 0, "duration": 0, "distance": 0
+            }
+          ],
+          "annotation": {
+            "maxspeed": [
+              {"speed": 50, "unit": "km/h"}, {"speed": 50, "unit": "km/h"},
+              {"unknown": true}, {"unknown": true}, {"unknown": true},
+              {"speed": 40, "unit": "mph"}, {"none": true},
+              {"speed": 60, "unit": "km/h"}, {"speed": 60, "unit": "km/h"}
+            ]
+          },
+          "summary": "Old Delhi Road, Sohna Road",
+          "weight": 130.2, "duration": 130.2, "distance": 947.8
+        }
+      ],
+      "weight_name": "routability",
+      "weight": 130.2,
+      "duration": 130.2,
+      "distance": 947.8
+    }
+  ],
+  "waypoints": [
+    {"hint": "mX8Jgv___38AAAAA\/w==", "distance": 3.2, "name": "Sector 14 Road", "location": [77.0266, 28.4595]},
+    {"hint": "xYZ\/abc==", "distance": 1.1, "name": "राजीव चौक Flyover", "location": [77.0326, 28.4635]}
+  ]
+}
