@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,48 +25,68 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.location.GpsState
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.map.GlanceMap
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
-import com.vikash.ampli.drive.ui.theme.Ampli
+import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
+import com.vikash.ampli.drive.ui.theme.ThemeFamily
 
 @Composable
 fun MapPane(
     gps: GpsState,
-    night: Boolean,
     onOpenNavigation: () -> Unit,
     onRequestPermissions: () -> Unit,
     modifier: Modifier = Modifier,
+    showTurn: Boolean = true,
 ) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val location = gps.location
+    // Saffron family frames the map in a thick coloured border.
+    val frame = if (theme.family == ThemeFamily.Saffron && theme.cardStyle != CardStyle.Pop) {
+        Modifier.border(3.dp, theme.accent, theme.cardShape(dims))
+    } else {
+        Modifier
+    }
 
-    Pane(modifier) {
-        Box(Modifier.fillMaxSize().background(Color(0xFF0B0A10))) {
+    Pane(modifier.then(frame), fill = theme.background) {
+        Box(Modifier.fillMaxSize()) {
             when {
                 !gps.hasPermission -> MapMessage(
-                    text = "Allow location to see the map and your speed",
-                    button = "Allow location",
+                    text = stringResource(R.string.map_allow_text),
+                    button = stringResource(R.string.map_allow_button),
                     onClick = onRequestPermissions,
                 )
                 location == null -> MapMessage(
-                    text = if (gps.providerEnabled || !gps.hasGps) "Waiting for a GPS fix…" else "Turn on location to see the map",
-                    button = "Open Google Maps",
+                    text = stringResource(
+                        if (gps.providerEnabled || !gps.hasGps) R.string.map_waiting_fix else R.string.map_location_off,
+                    ),
+                    button = stringResource(R.string.map_open_google_maps),
                     onClick = onOpenNavigation,
                 )
                 else -> {
-                    GlanceMap(location = location, modifier = Modifier.fillMaxSize())
-                    // A light map at night glares; dim it instead of loading a second style.
-                    if (night) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.28f)))
+                    GlanceMap(
+                        location = location,
+                        styleUrl = theme.map.url,
+                        puckColor = theme.mapPuck.toArgb(),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    // Tint so the tiles sit in the theme's colour world (green HUD, magenta synthwave…).
+                    if (theme.mapTint.alpha > 0f) Box(Modifier.fillMaxSize().background(theme.mapTint))
                     // Taps anywhere on the glance map hand off to Google Maps.
                     Box(Modifier.fillMaxSize().clickable(onClick = onOpenNavigation))
                     Text(
@@ -87,7 +106,7 @@ fun MapPane(
             }
 
             val current = turn
-            if (current != null) {
+            if (current != null && showTurn) {
                 NextTurnCard(
                     turn = current,
                     onClick = onOpenNavigation,
@@ -96,21 +115,21 @@ fun MapPane(
                         .fillMaxWidth()
                         .padding(dims.d(2f)),
                 )
-                current.subText?.let { eta ->
-                    Pill(
-                        text = eta,
-                        background = Ampli.NightRaised.copy(alpha = 0.92f),
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(start = dims.d(2f), bottom = dims.d(5f)),
-                    )
-                }
-            } else if (location != null) {
+            }
+            if (current?.subText != null) {
                 Pill(
-                    text = "Tap to navigate",
+                    text = current.subText,
+                    background = theme.surface,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = dims.d(2f), bottom = dims.d(5f)),
+                )
+            } else if (current == null && location != null) {
+                Pill(
+                    text = stringResource(R.string.map_tap_to_navigate),
                     icon = Icons.Filled.Navigation,
-                    iconTint = Ampli.Blush,
-                    background = Ampli.NightRaised.copy(alpha = 0.92f),
+                    iconTint = theme.accentSoft,
+                    background = theme.surface,
                     onClick = onOpenNavigation,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -124,6 +143,7 @@ fun MapPane(
 @Composable
 private fun MapMessage(text: String, button: String, onClick: () -> Unit) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     Column(
         modifier = Modifier.fillMaxSize().padding(dims.d(3f)),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -132,30 +152,33 @@ private fun MapMessage(text: String, button: String, onClick: () -> Unit) {
         Icon(
             Icons.Filled.LocationOn,
             contentDescription = null,
-            tint = Ampli.Blush,
+            tint = theme.accentSoft,
             modifier = Modifier.size(maxOf(dims.d(8f), 40.dp)),
         )
         Text(
             text,
             fontSize = dims.t(2.8f, min = 16f),
-            color = Ampli.Text,
+            color = theme.text,
             textAlign = TextAlign.Center,
         )
         BigButton(text = button, onClick = onClick)
     }
 }
 
-/** The next manoeuvre from Google Maps' notification, styled like the mockup's turn card. */
+/**
+ * The next manoeuvre from Google Maps' notification. Each theme paints it its own way:
+ * rose gradient, glass, solid navy, red cut-corner, neon outline, saffron tile, soft shadow…
+ */
 @Composable
-private fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modifier, large: Boolean = false) {
     val dims = LocalDims.current
-    val shape = RoundedCornerShape(dims.d(2.2f))
+    val theme = LocalDriveTheme.current
+    val shape = theme.cardShape(dims, scale = 0.8f)
     val arrow = remember(turn.arrow) { turn.arrow?.asImageBitmap() }
+    val scale = if (large) 1.6f else 1f
     Row(
         modifier = modifier
-            .clip(shape)
-            .background(Ampli.NightRaised.copy(alpha = 0.94f))
-            .border(1.dp, Color(0x12FFFFFF), shape)
+            .themedCard(theme, shape, fill = theme.turnBackground, border = theme.turnBorder, accentEdge = false)
             .clickable(onClick = onClick)
             .padding(horizontal = dims.d(2f), vertical = dims.d(1.8f)),
         verticalAlignment = Alignment.CenterVertically,
@@ -163,39 +186,50 @@ private fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier
     ) {
         Box(
             Modifier
-                .size(maxOf(dims.d(9f), 48.dp))
-                .clip(RoundedCornerShape(dims.d(1.8f)))
-                .background(Ampli.Rose),
+                .size(maxOf(dims.d(9f * scale), 48.dp))
+                .clip(theme.cardShape(dims, scale = 0.45f))
+                .background(theme.turnTile),
             contentAlignment = Alignment.Center,
         ) {
             if (arrow != null) {
-                Image(arrow, contentDescription = null, modifier = Modifier.size(maxOf(dims.d(6f), 32.dp)))
+                Image(
+                    arrow,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(theme.turnTileText),
+                    modifier = Modifier.size(maxOf(dims.d(6f * scale), 32.dp)),
+                )
             } else {
-                Icon(Icons.Filled.Navigation, contentDescription = null, tint = Color.White, modifier = Modifier.size(maxOf(dims.d(6f), 32.dp)))
+                Icon(
+                    Icons.Filled.Navigation,
+                    contentDescription = null,
+                    tint = theme.turnTileText,
+                    modifier = Modifier.size(maxOf(dims.d(6f * scale), 32.dp)),
+                )
             }
         }
         Column(Modifier.weight(1f)) {
             Text(
                 turn.title,
-                fontSize = dims.t(4.6f, min = 20f),
-                fontWeight = FontWeight.ExtraBold,
-                color = Ampli.Text,
+                style = theme.numberStyle(theme.turnText),
+                fontSize = dims.t(4.6f * scale, min = 20f),
+                fontWeight = if (theme.numberWeight == FontWeight.Normal) FontWeight.Normal else FontWeight.ExtraBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             turn.text?.let {
                 Text(
                     it,
-                    fontSize = dims.t(2.6f),
-                    color = Ampli.Muted,
+                    fontSize = dims.t(2.6f * (if (large) 1.3f else 1f)),
+                    color = theme.turnMuted,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = if (dims.compact) 1 else 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
             Text(
-                "via Google Maps",
+                stringResource(R.string.map_via_google_maps),
                 fontSize = dims.t(1.9f, min = 11f),
-                color = Ampli.Muted.copy(alpha = 0.8f),
+                color = theme.turnMuted.copy(alpha = 0.8f),
                 maxLines = 1,
             )
         }

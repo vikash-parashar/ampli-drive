@@ -39,16 +39,18 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.system.AppEntry
 import com.vikash.ampli.drive.system.InstalledApps
 import com.vikash.ampli.drive.system.Launchers
-import com.vikash.ampli.drive.ui.theme.Ampli
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
 /** All launchable apps. Tap opens; long-press puts the app on the dock's Auto button. */
 @Composable
@@ -63,14 +65,14 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
         ScreenHeader(
-            title = "All apps",
-            hint = "Long-press an app to put it on the Auto button",
+            title = stringResource(R.string.apps_title),
+            hint = stringResource(R.string.apps_hint),
             onBack = onBack,
         )
         val list = apps
         if (list == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Ampli.Rose)
+                CircularProgressIndicator(color = LocalDriveTheme.current.accent)
             }
         } else {
             LazyVerticalGrid(
@@ -88,10 +90,10 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
                         onLongPress = {
                             if (entry.packageName == autoPackage) {
                                 app.prefs.setAutoPackage(null)
-                                Toast.makeText(context, "Removed from the Auto button", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.apps_removed_from_auto), Toast.LENGTH_SHORT).show()
                             } else {
                                 app.prefs.setAutoPackage(entry.packageName)
-                                Toast.makeText(context, "${entry.label} is now on the Auto button", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.apps_added_to_auto, entry.label), Toast.LENGTH_SHORT).show()
                             }
                         },
                     )
@@ -117,7 +119,7 @@ fun ScreenHeader(title: String, hint: String?, onBack: () -> Unit) {
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onSurface)
         }
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = dims.t(4.2f, min = 22f), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
@@ -143,7 +145,7 @@ private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLong
             .heightIn(min = 120.dp)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, if (isAuto) Ampli.Rose else MaterialTheme.colorScheme.outlineVariant, shape)
+            .border(1.dp, if (isAuto) LocalDriveTheme.current.accent else MaterialTheme.colorScheme.outlineVariant, shape)
             .pointerInput(entry) {
                 detectTapGestures(onTap = { currentOnOpen() }, onLongPress = { currentOnLongPress() })
             }
@@ -157,8 +159,8 @@ private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLong
             if (isAuto) {
                 Icon(
                     Icons.Filled.DirectionsCar,
-                    contentDescription = "On the Auto button",
-                    tint = Ampli.Rose,
+                    contentDescription = stringResource(R.string.apps_on_auto),
+                    tint = LocalDriveTheme.current.accent,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .size(22.dp)

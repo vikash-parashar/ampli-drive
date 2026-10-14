@@ -72,4 +72,5 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.maplibre.android)
+    implementation(libs.billing.ktx)
 }

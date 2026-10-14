@@ -1,14 +1,22 @@
 package com.vikash.ampli.drive.ui
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -19,34 +27,58 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.BuildConfig
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
-import com.vikash.ampli.drive.prefs.ThemeMode
+import com.vikash.ampli.drive.prefs.ThemeChoice
 import com.vikash.ampli.drive.system.Launchers
-import com.vikash.ampli.drive.ui.theme.Ampli
+import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.Decoration
+import com.vikash.ampli.drive.ui.theme.DriveTheme
+import com.vikash.ampli.drive.ui.theme.DriveThemes
+import com.vikash.ampli.drive.ui.theme.HomeLayout
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
+import com.vikash.ampli.drive.ui.theme.ThemeFamily
 
 @Composable
 fun SettingsScreen(
     app: DriveApp,
+    night: Boolean,
     resumeTick: Int,
     onBack: () -> Unit,
     onRequestPermissions: () -> Unit,
@@ -54,8 +86,12 @@ fun SettingsScreen(
     val dims = LocalDims.current
     val context = LocalContext.current
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
-    val themeMode by app.prefs.themeMode.collectAsStateWithLifecycle()
+    val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
+    val pro by app.prefs.pro.collectAsStateWithLifecycle()
+    val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
+    val price by app.billing.price.collectAsStateWithLifecycle()
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
+    var showProSheet by rememberSaveable { mutableStateOf(false) }
 
     // Re-read every time the launcher comes back from a system settings screen.
     val isHome = remember(resumeTick) { Launchers.isDefaultHome(context) }
@@ -63,98 +99,155 @@ fun SettingsScreen(
     val hasCoarse = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) }
     val hasBt = remember(resumeTick) { granted(context, Manifest.permission.BLUETOOTH_CONNECT) }
     val hasNotif = remember(resumeTick) { app.mediaHub.hasAccess() }
+    val language = remember(resumeTick, savedLanguage) { AppLanguages.current(context, savedLanguage) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(dims.d(2.4f)),
         verticalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
-        ScreenHeader(title = "Settings", hint = null, onBack = onBack)
+        ScreenHeader(title = stringResource(R.string.settings_title), hint = null, onBack = onBack)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
+            ThemePicker(
+                choice = themeChoice,
+                night = night,
+                isPro = pro.isPro,
+                onChange = app.prefs::setTheme,
+                onLocked = { showProSheet = true },
+            )
+            if (BuildConfig.DEBUG) {
+                ToggleRow(
+                    title = stringResource(R.string.pro_test_title),
+                    status = stringResource(R.string.pro_test_hint),
+                    checked = pro.testUnlock,
+                    onChange = app.prefs::setProTestUnlock,
+                )
+            }
+            LanguagePicker(
+                selected = language,
+                onSelect = { tag ->
+                    app.prefs.setLanguage(tag)
+                    if (AppLanguages.apply(context, tag)) context.findActivity()?.recreate()
+                },
+            )
             SettingRow(
-                title = "Default home screen",
-                status = if (isHome) "Ampli Drive opens when you press Home" else "Not the default yet",
+                title = stringResource(R.string.home_title),
+                status = stringResource(if (isHome) R.string.home_ok else R.string.home_not_default),
                 ok = isHome,
-                action = if (isHome) "Change" else "Set as default home",
+                action = stringResource(if (isHome) R.string.action_change else R.string.home_set_default),
                 onAction = { Launchers.openHomeSettings(context) },
             )
             SettingRow(
-                title = "Location",
-                status = when {
-                    !hasFine && hasCoarse -> "Only approximate location: the speedometer needs precise location"
-                    !hasFine -> "Off: no map, speed or automatic day/night"
-                    !gps.hasGps -> "Allowed, but this unit reports no GPS receiver"
-                    !gps.providerEnabled -> "Allowed, but location is switched off on the unit"
-                    else -> "Allowed: GPS speed and map are on"
-                },
+                title = stringResource(R.string.location_title),
+                status = stringResource(
+                    when {
+                        !hasFine && hasCoarse -> R.string.location_approximate
+                        !hasFine -> R.string.location_off
+                        !gps.hasGps -> R.string.location_no_gps
+                        !gps.providerEnabled -> R.string.location_switched_off
+                        else -> R.string.location_ok
+                    },
+                ),
                 ok = hasFine && gps.hasGps && gps.providerEnabled,
                 action = when {
-                    !hasFine -> "Allow"
-                    !gps.providerEnabled -> "Turn on"
+                    !hasFine -> stringResource(R.string.action_allow)
+                    !gps.providerEnabled -> stringResource(R.string.action_turn_on)
                     else -> null
                 },
                 onAction = {
                     if (!hasFine) onRequestPermissions() else Launchers.openLocationSettings(context)
                 },
-                secondaryAction = if (!hasFine) "App settings" else null,
+                secondaryAction = if (!hasFine) stringResource(R.string.action_app_settings) else null,
                 onSecondary = { Launchers.openAppDetails(context) },
             )
             SettingRow(
-                title = "Notification access",
-                status = if (hasNotif) {
-                    "Allowed: music controls and Google Maps turns work"
-                } else {
-                    "Needed to show music from any app and the next turn from Google Maps"
-                },
+                title = stringResource(R.string.notif_title),
+                status = stringResource(if (hasNotif) R.string.notif_ok else R.string.notif_needed),
                 ok = hasNotif,
-                action = if (hasNotif) "Manage" else "Allow access",
+                action = stringResource(if (hasNotif) R.string.action_manage else R.string.allow_access),
                 onAction = { Launchers.openNotificationAccess(context) },
             )
             SettingRow(
-                title = "Bluetooth",
-                status = if (hasBt) "Allowed: shows the connected phone" else "Off: the phone name won't show in the status row",
+                title = stringResource(R.string.bt_label),
+                status = stringResource(if (hasBt) R.string.bt_ok else R.string.bt_needed),
                 ok = hasBt,
-                action = if (hasBt) null else "Allow",
+                action = if (hasBt) null else stringResource(R.string.action_allow),
                 onAction = onRequestPermissions,
             )
             ToggleRow(
-                title = "Keep screen on",
-                status = "While the home screen is showing",
+                title = stringResource(R.string.screen_on_title),
+                status = stringResource(R.string.screen_on_hint),
                 checked = keepScreenOn,
                 onChange = app.prefs::setKeepScreenOn,
             )
-            ThemeRow(selected = themeMode, onSelect = app.prefs::setThemeMode)
             InfoCard(
-                title = "About",
-                lines = listOf(
+                title = stringResource(R.string.about_title),
+                lines = listOfNotNull(
                     "Ampli Drive ${BuildConfig.VERSION_NAME}",
-                    "Map: $GLANCE_ATTRIBUTION",
-                    "Speed-limit and speed-camera data are not available yet.",
+                    if (pro.isPro) stringResource(R.string.pro_active) else null,
+                    stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
+                    stringResource(R.string.about_limits),
                 ),
             )
         }
     }
+
+    if (showProSheet) {
+        ProSheet(
+            price = price,
+            onBuy = {
+                val activity = context.findActivity()
+                if (activity == null || !app.billing.purchase(activity)) {
+                    Toast.makeText(context, context.getString(R.string.pro_unavailable), Toast.LENGTH_LONG).show()
+                } else {
+                    showProSheet = false
+                }
+            },
+            onRestore = {
+                if (!app.billing.restore()) {
+                    Toast.makeText(context, context.getString(R.string.pro_unavailable), Toast.LENGTH_LONG).show()
+                }
+                showProSheet = false
+            },
+            onDismiss = { showProSheet = false },
+        )
+    }
 }
 
-private fun granted(context: android.content.Context, permission: String): Boolean =
+private fun granted(context: Context, permission: String): Boolean =
     context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 @Composable
 private fun SettingCard(content: @Composable () -> Unit) {
     val dims = LocalDims.current
-    val shape = RoundedCornerShape(dims.d(2.4f))
+    val theme = LocalDriveTheme.current
+    val shape = theme.cardShape(dims, scale = 0.9f)
     Box(
         Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .themedCard(theme, shape, accentEdge = false)
             .padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f)),
     ) { content() }
+}
+
+@Composable
+private fun CardTitle(title: String, status: String?) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Column {
+        Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = theme.text)
+        if (status != null) Text(status, fontSize = dims.t(2.4f), color = theme.muted)
+    }
 }
 
 @Composable
@@ -168,6 +261,7 @@ private fun SettingRow(
     onSecondary: () -> Unit = {},
 ) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     SettingCard {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch),
@@ -176,14 +270,11 @@ private fun SettingRow(
         ) {
             Icon(
                 if (ok) Icons.Filled.CheckCircle else Icons.Filled.Error,
-                contentDescription = if (ok) "OK" else "Needs attention",
-                tint = if (ok) Ampli.Online else Ampli.Warning,
+                contentDescription = stringResource(if (ok) R.string.status_ok else R.string.status_attention),
+                tint = if (ok) theme.ok else theme.warning,
                 modifier = Modifier.size(32.dp),
             )
-            Column(Modifier.weight(1f)) {
-                Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Text(status, fontSize = dims.t(2.4f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            Box(Modifier.weight(1f)) { CardTitle(title, status) }
             if (secondaryAction != null) {
                 BigButton(text = secondaryAction, onClick = onSecondary, primary = false)
             }
@@ -192,6 +283,22 @@ private fun SettingRow(
             }
         }
     }
+}
+
+@Composable
+private fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
+    val theme = LocalDriveTheme.current
+    Switch(
+        checked = checked,
+        onCheckedChange = onChange,
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = theme.onAccent,
+            checkedTrackColor = theme.accent,
+            uncheckedThumbColor = theme.muted,
+            uncheckedTrackColor = theme.surfaceHigh,
+            uncheckedBorderColor = theme.border,
+        ),
+    )
 }
 
 @Composable
@@ -206,56 +313,473 @@ private fun ToggleRow(title: String, status: String, checked: Boolean, onChange:
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Text(status, fontSize = dims.t(2.4f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Box(Modifier.weight(1f)) { CardTitle(title, status) }
+            ThemedSwitch(checked, onChange)
+        }
+    }
+}
+
+/** A selectable chip, at least 64 dp tall. */
+@Composable
+private fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = if (theme.radius <= 0f) androidx.compose.ui.graphics.RectangleShape else CircleShape
+    Box(
+        modifier = modifier
+            .heightIn(min = MinTouch)
+            .clip(shape)
+            .background(if (selected) theme.accent else theme.surfaceHigh)
+            .border(1.dp, if (selected) theme.accent else theme.border, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = dims.d(2.4f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text,
+            color = if (selected) theme.onAccent else theme.text,
+            fontSize = dims.t(2.6f, min = 16f),
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------------ Themes
+
+private enum class Slot { Day, Night }
+
+@Composable
+private fun ThemePicker(
+    choice: ThemeChoice,
+    night: Boolean,
+    isPro: Boolean,
+    onChange: (ThemeChoice) -> Unit,
+    onLocked: () -> Unit,
+) {
+    val dims = LocalDims.current
+    val active = LocalDriveTheme.current
+    var slot by rememberSaveable { mutableStateOf(if (night) Slot.Night else Slot.Day) }
+
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+            ) {
+                Icon(Icons.Filled.Palette, contentDescription = null, tint = active.accentSoft, modifier = Modifier.size(32.dp))
+                Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.theme_title), null) }
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = onChange,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Ampli.Rose,
-                ),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = MinTouch)
+                    .clickable { onChange(toggledAuto(choice, active)) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+            ) {
+                Box(Modifier.weight(1f)) {
+                    CardTitle(stringResource(R.string.theme_auto), stringResource(R.string.theme_auto_hint))
+                }
+                ThemedSwitch(choice.auto) { onChange(toggledAuto(choice, active)) }
+            }
+            if (choice.auto) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
+                ) {
+                    Text(stringResource(R.string.theme_choose_for), fontSize = dims.t(2.6f), color = active.muted)
+                    Chip(stringResource(R.string.theme_day), slot == Slot.Day, { slot = Slot.Day })
+                    Chip(stringResource(R.string.theme_night), slot == Slot.Night, { slot = Slot.Night })
+                }
+            }
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val columns = (maxWidth / 190.dp).toInt().coerceIn(2, 5)
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                  for (family in ThemeFamily.entries) {
+                    Text(
+                        stringResource(
+                            when (family) {
+                                ThemeFamily.Classic -> R.string.theme_family_classic
+                                ThemeFamily.Saffron -> R.string.theme_family_saffron
+                                ThemeFamily.Soft -> R.string.theme_family_soft
+                            },
+                        ),
+                        fontSize = dims.t(2.6f, min = 15f),
+                        fontWeight = FontWeight.Bold,
+                        color = active.muted,
+                        modifier = Modifier.padding(top = dims.d(0.8f)),
+                    )
+                    for (row in DriveThemes.all.filter { it.family == family }.chunked(columns)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                            for (t in row) {
+                                val tag = when {
+                                    !choice.auto -> null
+                                    t.id == choice.dayId && t.id == choice.nightId ->
+                                        stringResource(R.string.theme_day) + " · " + stringResource(R.string.theme_night)
+                                    t.id == choice.dayId -> stringResource(R.string.theme_day)
+                                    t.id == choice.nightId -> stringResource(R.string.theme_night)
+                                    else -> null
+                                }
+                                ThemeCard(
+                                    theme = t,
+                                    inUse = t.id == active.id,
+                                    locked = t.isPro && !isPro,
+                                    slotTag = tag,
+                                    onClick = {
+                                        if (t.isPro && !isPro) {
+                                            onLocked()
+                                        } else {
+                                            onChange(
+                                                when {
+                                                    !choice.auto -> choice.copy(fixedId = t.id)
+                                                    slot == Slot.Day -> choice.copy(dayId = t.id)
+                                                    else -> choice.copy(nightId = t.id)
+                                                },
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            // Keep the last row's cards the same width as the others.
+                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                  }
+                }
+            }
+        }
+    }
+}
+
+/** Turning Auto off keeps whatever is showing now; turning it on restores the day/night pair. */
+private fun toggledAuto(choice: ThemeChoice, showing: DriveTheme): ThemeChoice =
+    if (choice.auto) choice.copy(auto = false, fixedId = showing.id) else choice.copy(auto = true)
+
+@Composable
+private fun ThemeCard(
+    theme: DriveTheme,
+    inUse: Boolean,
+    locked: Boolean,
+    slotTag: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dims = LocalDims.current
+    val ui = LocalDriveTheme.current
+    val shape = RoundedCornerShape(dims.d(1.8f))
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(ui.surfaceHigh)
+            .border(if (inUse) 3.dp else 1.dp, if (inUse) ui.accent else ui.border, shape)
+            .clickable(onClick = onClick)
+            .padding(dims.d(1f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(0.8f)),
+    ) {
+        Box(Modifier.fillMaxWidth().aspectRatio(1024f / 600f).clip(RoundedCornerShape(dims.d(1.2f)))) {
+            ThemeSwatch(theme, Modifier.fillMaxSize())
+            if (locked) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xCC000000)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Lock,
+                        contentDescription = stringResource(R.string.theme_locked),
+                        tint = Color(0xFFFBBF24),
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+            if (inUse) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(6.dp)
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(ui.accent),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.theme_in_use),
+                        tint = ui.onAccent,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                theme.code,
+                fontSize = dims.t(2f, min = 12f),
+                color = ui.muted,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
             )
+            Text(
+                theme.name,
+                fontSize = dims.t(2.4f, min = 14f),
+                fontWeight = FontWeight.SemiBold,
+                color = ui.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Badge(
+                text = stringResource(if (theme.isPro) R.string.theme_pro else R.string.theme_free),
+                background = if (theme.isPro) Color(0xFFFBBF24) else ui.ok,
+                content = Color(0xFF111111),
+            )
+            if (slotTag != null) Badge(text = slotTag, background = ui.accent, content = ui.onAccent)
         }
     }
 }
 
 @Composable
-private fun ThemeRow(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
+private fun Badge(text: String, background: Color, content: Color) {
+    val dims = LocalDims.current
+    Text(
+        text,
+        color = content,
+        fontSize = dims.t(1.8f, min = 11f),
+        fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(background)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
+}
+
+/** A miniature of the home screen in [t]'s colours and layout, drawn with a few rectangles. */
+@Composable
+private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        if (t.decoration == Decoration.Synthwave) {
+            drawRect(
+                Brush.verticalGradient(
+                    0f to Color(0xFF0D0221), 0.5f to Color(0xFF4A1366), 0.53f to Color(0xFFB8236F),
+                    0.532f to Color(0xFF12002A), 1f to Color(0xFF12002A),
+                ),
+            )
+            drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
+        } else {
+            drawRect(t.background)
+        }
+        if (t.decoration == Decoration.Holi) {
+            drawCircle(Color(0x8CFF3D8B), radius = h * 0.3f, center = Offset(0f, 0f))
+            drawCircle(Color(0x8CFFD23F), radius = h * 0.3f, center = Offset(w, 0f))
+        }
+        val pad = h * 0.05f
+        val gap = h * 0.035f
+        val dockH = h * 0.15f
+        val top = pad + h * 0.08f
+        val bottom = h - pad - dockH - gap
+        val r = CornerRadius(h * t.radius / 100f * 1.2f)
+        val mapColor = if (t.map.name == "Liberty" || t.map.name == "Positron" || t.map.name == "Bright") Color(0xFFE7EBF0) else Color(0xFF1A1D26)
+
+        fun pane(x: Float, y: Float, pw: Float, ph: Float, fill: Color) {
+            if (t.cardStyle == CardStyle.Pop) drawRoundRect(t.accent2, Offset(x + 3f, y + 3f), Size(pw, ph), r)
+            if (t.cardStyle == CardStyle.Neumorphic) {
+                drawRoundRect(t.shadowDark, Offset(x + 2f, y + 2f), Size(pw, ph), r)
+                drawRoundRect(t.shadowLight, Offset(x - 2f, y - 2f), Size(pw, ph), r)
+            }
+            drawRoundRect(fill, Offset(x, y), Size(pw, ph), r)
+            if (t.borderWidth.value > 0f && t.border.alpha > 0f) {
+                drawRoundRect(t.border, Offset(x, y), Size(pw, ph), r, style = Stroke(width = maxOf(1f, t.borderWidth.value)))
+            }
+        }
+
+        fun mapPane(x: Float, y: Float, pw: Float, ph: Float) {
+            pane(x, y, pw, ph, mapColor)
+            drawLine(t.accent2, Offset(x + pw * 0.2f, y + ph * 0.9f), Offset(x + pw * 0.55f, y + ph * 0.45f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
+            drawLine(t.accent2, Offset(x + pw * 0.55f, y + ph * 0.45f), Offset(x + pw * 0.8f, y + ph * 0.2f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
+            if (t.mapTint.alpha > 0f) drawRoundRect(t.mapTint, Offset(x, y), Size(pw, ph), r)
+            // Turn card
+            drawRoundRect(t.accent, Offset(x + pw * 0.08f, y + ph * 0.08f), Size(pw * 0.25f, ph * 0.18f), r)
+        }
+
+        fun speedPane(x: Float, y: Float, pw: Float, ph: Float) {
+            pane(x, y, pw, ph, t.speedSurface ?: t.surface)
+            val d = minOf(pw, ph) * 0.62f
+            val c = Offset(x + pw / 2f, y + ph / 2f)
+            drawArc(t.track, 135f, 270f, false, Offset(c.x - d / 2, c.y - d / 2), Size(d, d), style = Stroke(width = d * 0.1f, cap = StrokeCap.Round))
+            drawArc(t.speedText ?: t.accent, 135f, 170f, false, Offset(c.x - d / 2, c.y - d / 2), Size(d, d), style = Stroke(width = d * 0.1f, cap = StrokeCap.Round))
+        }
+
+        fun musicPane(x: Float, y: Float, pw: Float, ph: Float) {
+            pane(x, y, pw, ph, t.musicSurface ?: t.surface)
+            drawRoundRect(t.accent, Offset(x + pw * 0.12f, y + ph * 0.1f), Size(pw * 0.76f, ph * 0.42f), r)
+            drawRoundRect(t.musicText.copy(alpha = 0.8f), Offset(x + pw * 0.12f, y + ph * 0.6f), Size(pw * 0.6f, ph * 0.06f))
+            drawRoundRect(t.muted.copy(alpha = 0.7f), Offset(x + pw * 0.12f, y + ph * 0.7f), Size(pw * 0.4f, ph * 0.05f))
+            drawCircle(t.accent, radius = ph * 0.08f, center = Offset(x + pw / 2f, y + ph * 0.86f))
+        }
+
+        // Clock stub
+        drawRoundRect(t.text.copy(alpha = 0.85f), Offset(pad, pad), Size(w * 0.09f, h * 0.05f))
+        val areaW = w - pad * 2
+        val areaH = bottom - top
+        when (t.layout) {
+            HomeLayout.MapSpeedMusic, HomeLayout.SpeedMapMusic, HomeLayout.MusicSpeedMap -> {
+                val ws = when (t.layout) {
+                    HomeLayout.MapSpeedMusic -> listOf(1.55f, 1f, 1.05f)
+                    HomeLayout.SpeedMapMusic -> listOf(0.95f, 1.5f, 1.05f)
+                    else -> listOf(1f, 0.95f, 1.6f)
+                }
+                val unit = (areaW - gap * 2) / ws.sum()
+                var x = pad
+                ws.forEachIndexed { i, wt ->
+                    val pw = unit * wt
+                    val kind = when (t.layout) {
+                        HomeLayout.MapSpeedMusic -> i
+                        HomeLayout.SpeedMapMusic -> listOf(1, 0, 2)[i]
+                        else -> listOf(2, 1, 0)[i]
+                    }
+                    when (kind) {
+                        0 -> mapPane(x, top, pw, areaH)
+                        1 -> speedPane(x, top, pw, areaH)
+                        else -> musicPane(x, top, pw, areaH)
+                    }
+                    x += pw + gap
+                }
+            }
+            HomeLayout.MapTopRow -> {
+                val mh = (areaH - gap) * 0.55f
+                mapPane(pad, top, areaW, mh)
+                val unit = (areaW - gap) / 2.2f
+                speedPane(pad, top + mh + gap, unit * 0.8f, areaH - mh - gap)
+                musicPane(pad + unit * 0.8f + gap, top + mh + gap, unit * 1.4f, areaH - mh - gap)
+            }
+            HomeLayout.MapStacked -> {
+                val unit = (areaW - gap) / 2.75f
+                mapPane(pad, top, unit * 1.75f, areaH)
+                val x = pad + unit * 1.75f + gap
+                val sh = (areaH - gap) * 0.45f
+                speedPane(x, top, unit, sh)
+                musicPane(x, top + sh + gap, unit, areaH - sh - gap)
+            }
+            HomeLayout.GiantSpeed -> {
+                val unit = (areaW - gap) / 2.45f
+                // Giant number blocks
+                drawRect(t.text, Offset(pad, top + areaH * 0.15f), Size(unit * 0.55f, areaH * 0.55f))
+                drawRect(t.text, Offset(pad + unit * 0.65f, top + areaH * 0.15f), Size(unit * 0.55f, areaH * 0.55f))
+                drawRect(t.accent2, Offset(pad, top + areaH * 0.82f), Size(unit * 0.9f, areaH * 0.08f))
+                val x = pad + unit * 1.45f + gap
+                mapPane(x, top, unit, (areaH - gap) * 0.45f)
+                musicPane(x, top + (areaH - gap) * 0.45f + gap, unit, (areaH - gap) * 0.55f)
+            }
+        }
+        // Dock
+        val dw = (areaW - gap * 5) / 6f
+        for (i in 0 until 6) {
+            val x = pad + i * (dw + gap)
+            pane(x, h - pad - dockH, dw, dockH, if (i == 0) t.dockActive else t.surface)
+        }
+        if (t.decoration == Decoration.Scanlines) {
+            var y = 0f
+            while (y < h) {
+                drawLine(t.accent.copy(alpha = 0.08f), Offset(0f, y), Offset(w, y), strokeWidth = 1f)
+                y += 3f
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, onDismiss: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = if (theme.surface.alpha < 1f) theme.background else theme.surface,
+        contentColor = theme.text,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = dims.d(4f), vertical = dims.d(1f)),
+            verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+        ) {
+            Text(
+                stringResource(R.string.pro_title),
+                fontSize = dims.t(4.4f, min = 22f),
+                fontWeight = FontWeight.ExtraBold,
+                color = theme.text,
+            )
+            Text(stringResource(R.string.pro_body), fontSize = dims.t(2.8f, min = 16f), color = theme.muted)
+            // Little strip of the Pro themes.
+            Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
+                for (t in listOf(
+                    DriveThemes.MidnightGlass, DriveThemes.SportRed, DriveThemes.Synthwave,
+                    DriveThemes.DesiSaffron, DriveThemes.HoliPop, DriveThemes.SoftNight,
+                )) {
+                    Box(
+                        Modifier
+                            .weight(1f)
+                            .aspectRatio(1024f / 600f)
+                            .clip(RoundedCornerShape(dims.d(1f))),
+                    ) { ThemeSwatch(t, Modifier.fillMaxSize()) }
+                }
+            }
+            for (point in listOf(R.string.pro_point_themes, R.string.pro_point_once)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = theme.ok, modifier = Modifier.size(24.dp))
+                    Text(stringResource(point), fontSize = dims.t(2.6f, min = 15f), color = theme.text)
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = dims.d(1f), bottom = dims.d(3f)),
+                horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+            ) {
+                BigButton(
+                    text = if (price != null) stringResource(R.string.pro_buy_price, price) else stringResource(R.string.pro_buy),
+                    onClick = onBuy,
+                    modifier = Modifier.weight(1.4f),
+                )
+                BigButton(text = stringResource(R.string.pro_restore), onClick = onRestore, primary = false, modifier = Modifier.weight(1f))
+                BigButton(text = stringResource(R.string.pro_not_now), onClick = onDismiss, primary = false, modifier = Modifier.weight(0.8f))
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------- Language
+
+@Composable
+private fun LanguagePicker(selected: String, onSelect: (String) -> Unit) {
     val dims = LocalDims.current
     SettingCard {
-        Row(
-            modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text("Day / night", fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Text(
-                    "Auto switches at local sunrise and sunset, worked out from GPS",
-                    fontSize = dims.t(2.4f),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            for (mode in ThemeMode.entries) {
-                val on = mode == selected
-                Box(
-                    modifier = Modifier
-                        .heightIn(min = MinTouch)
-                        .clip(CircleShape)
-                        .background(if (on) Ampli.Rose else MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clickable { onSelect(mode) }
-                        .padding(horizontal = dims.d(3f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        mode.name,
-                        color = if (on) Color.White else MaterialTheme.colorScheme.onSurface,
-                        fontSize = dims.t(2.6f, min = 16f),
-                        fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
-                    )
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+            CardTitle(stringResource(R.string.language_title), stringResource(R.string.language_hint))
+            val options = listOf("" to stringResource(R.string.language_system)) +
+                AppLanguages.all.map { it.tag to it.nativeName }
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val columns = (maxWidth / 170.dp).toInt().coerceIn(2, 6)
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1f))) {
+                    for (row in options.chunked(columns)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
+                            for ((tag, name) in row) {
+                                Chip(name, selected == tag, { onSelect(tag) }, Modifier.weight(1f))
+                            }
+                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
                 }
             }
         }
@@ -265,11 +789,12 @@ private fun ThemeRow(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
 @Composable
 private fun InfoCard(title: String, lines: List<String>) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     SettingCard {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+            Text(title, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.SemiBold, color = theme.text)
             for (line in lines) {
-                Text(line, fontSize = dims.t(2.3f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(line, fontSize = dims.t(2.3f), color = theme.muted)
             }
         }
     }

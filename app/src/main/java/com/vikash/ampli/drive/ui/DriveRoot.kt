@@ -1,25 +1,27 @@
 package com.vikash.ampli.drive.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.MaterialTheme
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.location.SunTimes
-import com.vikash.ampli.drive.prefs.ThemeMode
 import com.vikash.ampli.drive.ui.theme.AmpliDriveTheme
+import com.vikash.ampli.drive.ui.theme.DriveThemes
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -34,7 +36,8 @@ fun DriveRoot(
     onNavigate: (Screen) -> Unit,
     onRequestPermissions: () -> Unit,
 ) {
-    val themeMode by app.prefs.themeMode.collectAsStateWithLifecycle()
+    val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
+    val pro by app.prefs.pro.collectAsStateWithLifecycle()
     val gpsState = app.speedTracker.state.collectAsStateWithLifecycle()
 
     // Only a coarse position matters for sunrise/sunset; avoids recomposing on every fix.
@@ -51,18 +54,28 @@ fun DriveRoot(
             value = System.currentTimeMillis()
         }
     }
-    val night = when (themeMode) {
-        ThemeMode.Night -> true
-        ThemeMode.Day -> false
-        ThemeMode.Auto -> coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
-            ?: SunTimes.isNightByClock(LocalTime.now())
+    // Sun position decides day/night; before the first GPS fix, the clock does.
+    val night = coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
+        ?: SunTimes.isNightByClock(LocalTime.now())
+    val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
+
+    // Dark status-bar icons on the light themes.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = theme.isLight
+            controller.isAppearanceLightNavigationBars = theme.isLight
+        }
     }
 
-    AmpliDriveTheme(night = night) {
+    AmpliDriveTheme(theme) {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .themeBackground(theme)
+                .themeOverlay(theme)
                 .safeDrawingPadding(),
         ) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -80,7 +93,6 @@ fun DriveRoot(
                             BackHandler(enabled = true) {}
                             HomeScreen(
                                 app = app,
-                                night = night,
                                 resumeTick = resumeTick,
                                 onOpenApps = { onNavigate(Screen.Apps) },
                                 onOpenSettings = { onNavigate(Screen.Settings) },
@@ -95,6 +107,7 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
                             SettingsScreen(
                                 app = app,
+                                night = night,
                                 resumeTick = resumeTick,
                                 onBack = { onNavigate(Screen.Home) },
                                 onRequestPermissions = onRequestPermissions,

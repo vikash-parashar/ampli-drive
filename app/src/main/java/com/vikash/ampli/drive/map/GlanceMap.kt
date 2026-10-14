@@ -36,18 +36,23 @@ const val GLANCE_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap 
 
 private const val FOLLOW_ZOOM = 15.5
 private const val MAX_FPS = 30
-private val COLOR_ROSE: Int = 0xFFE11D48.toInt()
 private val COLOR_WHITE: Int = 0xFFFFFFFF.toInt()
 
 /**
  * MapLibre glance map that follows [location]. Call it only once a first fix exists, so the
- * map never opens zoomed out on a country view.
+ * map never opens zoomed out on a country view. [styleUrl] and [puckColor] follow the
+ * home-screen theme; a style that fails to load falls back to [GLANCE_STYLE_URL].
  */
 @Composable
-fun GlanceMap(location: Location, modifier: Modifier = Modifier) {
+fun GlanceMap(
+    location: Location,
+    modifier: Modifier = Modifier,
+    styleUrl: String = GLANCE_STYLE_URL,
+    puckColor: Int = 0xFFE11D48.toInt(),
+) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val holder = remember { MapHolder() }
+    val holder = remember { MapHolder(context.applicationContext, styleUrl, puckColor) }
     val mapView = remember {
         MapLibre.getInstance(context.applicationContext)
         val options = MapLibreMapOptions.createFromAttributes(context)
@@ -56,6 +61,7 @@ fun GlanceMap(location: Location, modifier: Modifier = Modifier) {
         MapView(context, options).also { view ->
             view.onCreate(null)
             view.setMaximumFps(MAX_FPS)
+            view.addOnDidFailLoadingMapListener { _ -> holder.onStyleFailed() }
             view.getMapAsync { map -> holder.onMapReady(context, map) }
         }
     }
@@ -80,13 +86,19 @@ fun GlanceMap(location: Location, modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(location) { holder.update(location) }
+    LaunchedEffect(styleUrl, puckColor) { holder.setLook(styleUrl, puckColor) }
 
     AndroidView(factory = { mapView }, modifier = modifier)
 }
 
 /** Keeps MapView lifecycle calls balanced and buffers the location until the style loads. */
-private class MapHolder {
+private class MapHolder(
+    private val appContext: Context,
+    private var styleUrl: String,
+    private var puckColor: Int,
+) {
     private var map: MapLibreMap? = null
+    private var loadedUrl: String? = null
     private var tracking = false
     private var pending: Location? = null
     private var started = false
@@ -101,8 +113,52 @@ private class MapHolder {
         map.uiSettings.setAttributionEnabled(false)
         map.uiSettings.setLogoEnabled(false)
         pending?.let { moveTo(map, it) }
-        map.setStyle(Style.Builder().fromUri(GLANCE_STYLE_URL)) { style ->
-            if (!destroyed) enableTracking(context, map, style)
+        loadStyle(map)
+    }
+
+    /** Theme changed: swap the map style and/or recolour the position puck. */
+    fun setLook(url: String, puck: Int) {
+        val puckChanged = puck != puckColor
+        styleUrl = url
+        puckColor = puck
+        val m = map ?: return
+        if (url != loadedUrl) {
+            loadStyle(m)
+        } else if (puckChanged && tracking) {
+            recolourPuck(m)
+        }
+    }
+
+    /** A style URL that cannot load (offline or renamed) falls back to the default style once. */
+    fun onStyleFailed() {
+        if (destroyed || styleUrl == GLANCE_STYLE_URL) return
+        styleUrl = GLANCE_STYLE_URL
+        map?.let { loadStyle(it) }
+    }
+
+    private fun loadStyle(map: MapLibreMap) {
+        val url = styleUrl
+        loadedUrl = url
+        map.setStyle(Style.Builder().fromUri(url)) { style ->
+            if (destroyed) return@setStyle
+            // The location component re-adds its layers on every new style by itself.
+            if (!tracking) enableTracking(appContext, map, style) else recolourPuck(map)
+        }
+    }
+
+    private fun puckOptions(context: Context): LocationComponentOptions =
+        LocationComponentOptions.builder(context)
+            .foregroundTintColor(puckColor)
+            .bearingTintColor(puckColor)
+            .backgroundTintColor(COLOR_WHITE)
+            .accuracyAlpha(0f)
+            .pulseEnabled(false)
+            .build()
+
+    private fun recolourPuck(map: MapLibreMap) {
+        try {
+            map.locationComponent.applyStyle(puckOptions(appContext))
+        } catch (_: Exception) {
         }
     }
 
@@ -122,13 +178,7 @@ private class MapHolder {
 
     private fun enableTracking(context: Context, map: MapLibreMap, style: Style) {
         try {
-            val look = LocationComponentOptions.builder(context)
-                .foregroundTintColor(COLOR_ROSE)
-                .bearingTintColor(COLOR_ROSE)
-                .backgroundTintColor(COLOR_WHITE)
-                .accuracyAlpha(0f)
-                .pulseEnabled(false)
-                .build()
+            val look = puckOptions(context)
             val activation = LocationComponentActivationOptions.builder(context, style)
                 .locationComponentOptions(look)
                 // Our own GPS listener feeds fixes in; no second location client.

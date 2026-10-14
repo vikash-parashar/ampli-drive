@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -20,14 +18,23 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.DriveTheme
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
 /** Smallest touch target for anything a driver taps. */
 val MinTouch: Dp = 64.dp
@@ -52,16 +59,36 @@ data class Dims(
 
 val LocalDims = staticCompositionLocalOf { Dims(u = 6.dp, uSp = 6f, compact = false) }
 
-/** The raised card every pane sits on. */
+/** Style for big numbers (speed, distance, clock): theme weight, italics and neon glow. */
+fun DriveTheme.numberStyle(color: Color = text, glowColor: Color? = glow): TextStyle = TextStyle(
+    color = color,
+    fontFamily = font.family,
+    fontWeight = numberWeight,
+    fontStyle = if (italicNumbers) FontStyle.Italic else FontStyle.Normal,
+    shadow = glowColor?.let { Shadow(color = it.copy(alpha = 0.8f), blurRadius = 24f) },
+)
+
+/** Style for small caption labels (KM/H, SPEED LIMIT…). */
+fun DriveTheme.labelStyle(color: Color = muted): TextStyle = TextStyle(
+    color = color,
+    fontFamily = font.family,
+    fontWeight = FontWeight.SemiBold,
+    letterSpacing = labelSpacing.em,
+)
+
+/** The raised card every pane sits on, painted in the active theme's card style. */
 @Composable
-fun Pane(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun Pane(
+    modifier: Modifier = Modifier,
+    fill: Color? = null,
+    content: @Composable () -> Unit,
+) {
     val dims = LocalDims.current
-    val shape = RoundedCornerShape(dims.d(2.6f))
+    val theme = LocalDriveTheme.current
+    val shape = theme.cardShape(dims)
+    val color = fill ?: theme.surface
     Box(
-        modifier = modifier
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape),
+        modifier = modifier.themedCard(theme, shape, fill = Brush.linearGradient(listOf(color, color))),
     ) { content() }
 }
 
@@ -72,17 +99,19 @@ fun Pill(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     dotColor: Color? = null,
-    iconTint: Color = MaterialTheme.colorScheme.onSurface,
-    background: Color = MaterialTheme.colorScheme.surfaceContainer,
+    iconTint: Color? = null,
+    background: Color? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
     val clickMod = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
     Row(
         modifier = modifier
-            .clip(CircleShape)
-            .background(background)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+            .clip(shape)
+            .background(background ?: theme.surface)
+            .border(1.dp, theme.border, shape)
             .then(clickMod)
             .padding(horizontal = dims.d(1.8f), vertical = dims.d(0.9f)),
         verticalAlignment = Alignment.CenterVertically,
@@ -92,19 +121,19 @@ fun Pill(
             Box(Modifier.size(dims.d(1.2f)).clip(CircleShape).background(dotColor))
         }
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(dims.d(2.8f)))
+            Icon(icon, contentDescription = null, tint = iconTint ?: theme.text, modifier = Modifier.size(dims.d(2.8f)))
         }
         Text(
             text,
             fontSize = dims.t(2.4f, min = 13f),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = theme.text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
     }
 }
 
-/** Big rounded action button used in empty states and settings. Always >= 64 dp tall. */
+/** Big action button used in empty states and settings. Always >= 64 dp tall. */
 @Composable
 fun BigButton(
     text: String,
@@ -114,13 +143,23 @@ fun BigButton(
     primary: Boolean = true,
 ) {
     val dims = LocalDims.current
-    val bg = if (primary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
-    val fg = if (primary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+    val theme = LocalDriveTheme.current
+    val bg = if (primary) theme.accent else theme.surfaceHigh
+    val fg = if (primary) theme.onAccent else theme.text
+    val shape = theme.buttonShape(dims)
     Row(
         modifier = modifier
             .heightIn(min = MinTouch)
-            .clip(RoundedCornerShape(dims.d(2.2f)))
+            .then(
+                if (theme.cardStyle == CardStyle.Neumorphic) {
+                    Modifier.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight, 4.dp, 8.dp)
+                } else {
+                    Modifier
+                },
+            )
+            .clip(shape)
             .background(bg)
+            .then(if (!primary && theme.cardStyle == CardStyle.Outline) Modifier.border(1.dp, theme.border, shape) else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = dims.d(3f)),
         verticalAlignment = Alignment.CenterVertically,
@@ -130,3 +169,4 @@ fun BigButton(
         Text(text, color = fg, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
+

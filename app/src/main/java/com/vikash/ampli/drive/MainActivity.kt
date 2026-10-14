@@ -1,6 +1,7 @@
 package com.vikash.ampli.drive
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
@@ -13,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.Screen
 import kotlinx.coroutines.launch
@@ -33,9 +35,16 @@ class MainActivity : ComponentActivity() {
             resumeTick.intValue++
         }
 
+    /** Android 12 has no per-app language API: apply the saved language here. */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguages.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Re-checks Play for the Pro purchase (refunds, purchases on another device).
+        app.billing.start()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

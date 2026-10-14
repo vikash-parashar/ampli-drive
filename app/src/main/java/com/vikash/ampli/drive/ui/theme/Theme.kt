@@ -1,12 +1,17 @@
 package com.vikash.ampli.drive.ui.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 
 /** Ampli brand colors, shared with the Ampli music player. */
@@ -27,62 +32,76 @@ object Ampli {
     val Gradient: Brush = Brush.linearGradient(listOf(Slate, Rose))
 }
 
-private val NightColors = darkColorScheme(
-    primary = Ampli.Blush,
-    onPrimary = Color(0xFF4C0519),
-    primaryContainer = Ampli.Rose,
-    onPrimaryContainer = Color.White,
-    secondary = Color(0xFFCBD5E1),
-    secondaryContainer = Ampli.NightRaised2,
-    onSecondaryContainer = Color(0xFFF1F5F9),
-    tertiary = Ampli.Rose,
-    background = Ampli.Night,
-    onBackground = Ampli.Text,
-    surface = Ampli.Night,
-    onSurface = Ampli.Text,
-    surfaceVariant = Ampli.NightRaised,
-    onSurfaceVariant = Ampli.Muted,
-    surfaceContainer = Ampli.NightRaised,
-    surfaceContainerHigh = Ampli.NightRaised2,
-    outline = Ampli.Slate,
-    outlineVariant = Color(0x12FFFFFF),
-)
-
-private val DayColors = lightColorScheme(
-    primary = Ampli.RoseDeep,
-    onPrimary = Color.White,
-    primaryContainer = Ampli.Rose,
-    onPrimaryContainer = Color.White,
-    secondary = Color(0xFF475569),
-    secondaryContainer = Color(0xFFE2E8F0),
-    onSecondaryContainer = Color(0xFF0F172A),
-    tertiary = Ampli.Rose,
-    background = Color(0xFFF4F1F3),
-    onBackground = Color(0xFF17131A),
-    surface = Color(0xFFF4F1F3),
-    onSurface = Color(0xFF17131A),
-    surfaceVariant = Color.White,
-    onSurfaceVariant = Color(0xFF5B5560),
-    surfaceContainer = Color.White,
-    surfaceContainerHigh = Color(0xFFEDE7EA),
-    outline = Color(0xFF94A3B8),
-    outlineVariant = Color(0x14000000),
-)
-
-private val DriveTypography = Typography().run {
-    copy(
-        headlineSmall = headlineSmall.copy(fontWeight = FontWeight.Bold),
-        titleLarge = titleLarge.copy(fontWeight = FontWeight.Bold),
-        titleMedium = titleMedium.copy(fontWeight = FontWeight.SemiBold),
+/** System font families that need an Android Typeface lookup. */
+object DriveFonts {
+    /** Roboto Condensed ships on every Android build as "sans-serif-condensed". */
+    val Condensed: FontFamily = FontFamily(
+        android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL),
     )
 }
 
-/** Night is the default look; [night] = false swaps to the day palette. */
-@Composable
-fun AmpliDriveTheme(night: Boolean = true, content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = if (night) NightColors else DayColors,
-        typography = DriveTypography,
-        content = content,
+private fun schemeFor(t: DriveTheme): ColorScheme {
+    val base = if (t.isLight) lightColorScheme() else darkColorScheme()
+    return base.copy(
+        primary = t.accentSoft,
+        onPrimary = t.onAccent,
+        primaryContainer = t.accent,
+        onPrimaryContainer = t.onAccent,
+        secondary = t.muted,
+        secondaryContainer = t.surfaceHigh,
+        onSecondaryContainer = t.text,
+        tertiary = t.accent2,
+        background = t.background,
+        onBackground = t.text,
+        surface = t.background,
+        onSurface = t.text,
+        surfaceVariant = t.surface,
+        onSurfaceVariant = t.muted,
+        surfaceContainer = t.surface,
+        surfaceContainerHigh = t.surfaceHigh,
+        surfaceContainerHighest = t.surfaceHigh,
+        surfaceContainerLow = t.surface,
+        surfaceContainerLowest = t.background,
+        outline = t.track,
+        outlineVariant = t.border,
+        error = t.warning,
     )
+}
+
+private fun TextStyle.withFont(family: FontFamily) = copy(fontFamily = family)
+
+private fun typographyFor(t: DriveTheme): Typography {
+    val f = t.font.family
+    return Typography().run {
+        copy(
+            displayLarge = displayLarge.withFont(f),
+            displayMedium = displayMedium.withFont(f),
+            displaySmall = displaySmall.withFont(f),
+            headlineLarge = headlineLarge.withFont(f),
+            headlineMedium = headlineMedium.withFont(f),
+            headlineSmall = headlineSmall.copy(fontFamily = f, fontWeight = FontWeight.Bold),
+            titleLarge = titleLarge.copy(fontFamily = f, fontWeight = FontWeight.Bold),
+            titleMedium = titleMedium.copy(fontFamily = f, fontWeight = FontWeight.SemiBold),
+            titleSmall = titleSmall.withFont(f),
+            bodyLarge = bodyLarge.withFont(f),
+            bodyMedium = bodyMedium.withFont(f),
+            bodySmall = bodySmall.withFont(f),
+            labelLarge = labelLarge.withFont(f),
+            labelMedium = labelMedium.withFont(f),
+            labelSmall = labelSmall.withFont(f),
+        )
+    }
+}
+
+/**
+ * Provides [theme] through [LocalDriveTheme] and maps it onto Material colours and type, so
+ * plain `Text` picks up the theme's font (Text's default style is bodyLarge).
+ */
+@Composable
+fun AmpliDriveTheme(theme: DriveTheme, content: @Composable () -> Unit) {
+    val scheme = remember(theme) { schemeFor(theme) }
+    val type = remember(theme) { typographyFor(theme) }
+    CompositionLocalProvider(LocalDriveTheme provides theme) {
+        MaterialTheme(colorScheme = scheme, typography = type, content = content)
+    }
 }

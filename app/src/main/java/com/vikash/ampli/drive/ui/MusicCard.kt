@@ -42,16 +42,27 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.media.MediaHub
 import com.vikash.ampli.drive.media.MediaSource
 import com.vikash.ampli.drive.media.NowPlaying
 import com.vikash.ampli.drive.system.Launchers
-import com.vikash.ampli.drive.ui.theme.Ampli
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.shape.RoundedCornerShape as Rounded
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.FontChoice
+import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -63,7 +74,19 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
     // Returning from the notification-access screen: pick up the new permission.
     LaunchedEffect(resumeTick) { hub.refresh() }
 
-    Pane(modifier) {
+    // Saffron themes draw this card on cream "paper"; everything inside reads the paper colours.
+    val outer = LocalDriveTheme.current
+    val paper = remember(outer) { outer.forMusicCard() }
+    Pane(modifier, fill = paper.surface) {
+      androidx.compose.runtime.CompositionLocalProvider(LocalDriveTheme provides paper) {
+        androidx.compose.material3.MaterialTheme(
+            colorScheme = MaterialTheme.colorScheme.copy(
+                onSurface = paper.text,
+                onSurfaceVariant = paper.muted,
+                surfaceContainerHigh = paper.surfaceHigh,
+            ),
+            typography = MaterialTheme.typography,
+        ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(dims.d(2.2f)),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
@@ -76,7 +99,7 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
                     AlbumArt(np, Modifier.fillMaxWidth().weight(1f))
                     Column {
                         Text(
-                            np.title ?: "Unknown track",
+                            np.title ?: stringResource(R.string.music_unknown_track),
                             fontSize = dims.t(3.2f, min = 18f),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -109,12 +132,15 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
                 SourceChips(state.sources, state.selectedPackage, onSelect = hub::select)
             }
         }
+        }
+      }
     }
 }
 
 @Composable
 private fun AccessNeeded(onAllow: () -> Unit) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,16 +149,16 @@ private fun AccessNeeded(onAllow: () -> Unit) {
         Icon(
             Icons.Filled.NotificationsActive,
             contentDescription = null,
-            tint = Ampli.Blush,
+            tint = theme.accentSoft,
             modifier = Modifier.size(maxOf(dims.d(8f), 40.dp)),
         )
         Text(
-            "Allow notification access to show and control the music that's playing.",
+            stringResource(R.string.music_access_text),
             fontSize = dims.t(2.5f),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        BigButton(text = "Allow access", onClick = onAllow, modifier = Modifier.fillMaxWidth())
+        BigButton(text = stringResource(R.string.allow_access), onClick = onAllow, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -151,29 +177,30 @@ private fun NothingPlaying(onOpen: () -> Unit) {
             modifier = Modifier.size(maxOf(dims.d(8f), 40.dp)),
         )
         Text(
-            "Nothing playing",
+            stringResource(R.string.music_nothing_playing),
             fontSize = dims.t(3f, min = 18f),
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            "Start music on your phone or in a player app and it shows up here.",
+            stringResource(R.string.music_nothing_hint),
             fontSize = dims.t(2.3f),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        BigButton(text = "Open music", onClick = onOpen, primary = false, modifier = Modifier.fillMaxWidth())
+        BigButton(text = stringResource(R.string.music_open), onClick = onOpen, primary = false, modifier = Modifier.fillMaxWidth())
     }
 }
 
 @Composable
 private fun AlbumArt(np: NowPlaying, modifier: Modifier) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     val art = remember(np.art) { np.art?.asImageBitmap() }
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(dims.d(2f)))
-            .background(Ampli.Gradient),
+            .clip(theme.cardShape(dims, scale = 0.7f))
+            .background(Brush.linearGradient(listOf(theme.accent, theme.gauge.last(), theme.background))),
         contentAlignment = Alignment.Center,
     ) {
         if (art != null) {
@@ -201,18 +228,35 @@ private fun ProgressBar(np: NowPlaying) {
         }
     }
     val fraction = (np.positionAt(now).toFloat() / np.durationMs.toFloat()).coerceIn(0f, 1f)
+    val theme = LocalDriveTheme.current
+    if (theme.font == FontChoice.Mono) {
+        // HUD: segmented bar like an LED meter.
+        Canvas(Modifier.fillMaxWidth().height(maxOf(dims.d(2.4f), 12.dp))) {
+            val seg = 9.dp.toPx()
+            val gap = 3.dp.toPx()
+            var x = 0f
+            while (x + seg <= size.width) {
+                val lit = (x + seg / 2f) / size.width <= fraction
+                drawRect(if (lit) theme.accent else theme.accent.copy(alpha = 0.2f), Offset(x, 0f), Size(seg, size.height))
+                x += seg + gap
+            }
+        }
+        return
+    }
+    val barShape: Shape = if (theme.radius <= 0f) RectangleShape else CircleShape
+    val h = if (theme.cardStyle == CardStyle.Neumorphic) maxOf(dims.d(1.6f), 8.dp) else maxOf(dims.d(0.8f), 4.dp)
     Box(
         Modifier
             .fillMaxWidth()
-            .height(maxOf(dims.d(0.8f), 4.dp))
-            .clip(CircleShape)
-            .background(Ampli.Slate),
+            .height(h)
+            .clip(barShape)
+            .background(theme.track),
     ) {
         Box(
             Modifier
                 .fillMaxWidth(fraction)
-                .height(maxOf(dims.d(0.8f), 4.dp))
-                .background(Ampli.Rose),
+                .height(h)
+                .background(theme.accent2),
         )
     }
 }
@@ -225,15 +269,15 @@ private fun Controls(playing: Boolean, onPrev: () -> Unit, onPlayPause: () -> Un
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RoundButton(Icons.Filled.SkipPrevious, "Previous", onPrev, maxOf(dims.d(8f), MinTouch), filled = false)
+        RoundButton(Icons.Filled.SkipPrevious, stringResource(R.string.music_previous), onPrev, maxOf(dims.d(8f), MinTouch), filled = false)
         RoundButton(
             if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-            if (playing) "Pause" else "Play",
+            stringResource(if (playing) R.string.music_pause else R.string.music_play),
             onPlayPause,
             maxOf(dims.d(10f), 72.dp),
             filled = true,
         )
-        RoundButton(Icons.Filled.SkipNext, "Next", onNext, maxOf(dims.d(8f), MinTouch), filled = false)
+        RoundButton(Icons.Filled.SkipNext, stringResource(R.string.music_next), onNext, maxOf(dims.d(8f), MinTouch), filled = false)
     }
 }
 
@@ -245,18 +289,48 @@ private fun RoundButton(
     size: androidx.compose.ui.unit.Dp,
     filled: Boolean,
 ) {
+    val theme = LocalDriveTheme.current
+    val dims = LocalDims.current
+    val shape: Shape = when {
+        theme.cardStyle == CardStyle.Skewed -> skewShape()
+        theme.cardStyle == CardStyle.Solid && theme.isLight -> Rounded(dims.d(theme.radius * 0.6f))
+        theme.radius <= 0f -> RectangleShape
+        else -> CircleShape
+    }
+    val outlined = !filled && (theme.cardStyle == CardStyle.Outline || theme.cardStyle == CardStyle.NeonGlow)
+    val outlineColor = if (theme.cardStyle == CardStyle.NeonGlow) theme.accent2 else theme.border
     Box(
         modifier = Modifier
             .size(size)
-            .clip(CircleShape)
-            .background(if (filled) Ampli.Rose else Color.Transparent)
+            .then(
+                if (theme.cardStyle == CardStyle.Neumorphic) {
+                    Modifier.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight, 4.dp, 8.dp)
+                } else {
+                    Modifier
+                },
+            )
+            .clip(shape)
+            .background(
+                when {
+                    filled && theme.cardStyle == CardStyle.Neumorphic -> theme.surface
+                    filled -> theme.accent
+                    theme.cardStyle == CardStyle.Neumorphic || theme.cardStyle == CardStyle.Skewed -> theme.surfaceHigh
+                    else -> Color.Transparent
+                },
+            )
+            .then(if (outlined) Modifier.border(2.dp, outlineColor, shape) else Modifier)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             icon,
             contentDescription = description,
-            tint = if (filled) Color.White else MaterialTheme.colorScheme.onSurface,
+            tint = when {
+                filled && theme.cardStyle == CardStyle.Neumorphic -> theme.accent
+                filled -> theme.onAccent
+                theme.cardStyle == CardStyle.NeonGlow -> theme.accent2
+                else -> theme.text
+            },
             modifier = Modifier.size(size * 0.5f),
         )
     }
@@ -266,6 +340,8 @@ private fun RoundButton(
 @Composable
 private fun SourceChips(sources: List<MediaSource>, selected: String?, onSelect: (String) -> Unit) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val chipShape: Shape = if (theme.radius <= 0f) RectangleShape else CircleShape
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -285,13 +361,13 @@ private fun SourceChips(sources: List<MediaSource>, selected: String?, onSelect:
                 Text(
                     source.label,
                     fontSize = dims.t(2.1f, min = 14f),
-                    color = if (on) Ampli.Blush else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (on) theme.accentSoft else theme.muted,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
                     maxLines = 1,
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (on) Ampli.Rose.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .border(1.dp, if (on) Ampli.Blush.copy(alpha = 0.35f) else MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        .clip(chipShape)
+                        .background(if (on) theme.accent.copy(alpha = 0.16f) else theme.surfaceHigh)
+                        .border(1.dp, if (on) theme.accentSoft.copy(alpha = 0.45f) else theme.border, chipShape)
                         .padding(horizontal = dims.d(1.8f), vertical = dims.d(1f)),
                 )
             }

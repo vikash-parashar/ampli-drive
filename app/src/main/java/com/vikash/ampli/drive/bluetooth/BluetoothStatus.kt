@@ -1,5 +1,6 @@
 package com.vikash.ampli.drive.bluetooth
 
+import com.vikash.ampli.drive.R
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -48,7 +49,7 @@ class BluetoothStatus(context: Context) {
                 }
                 BluetoothDevice.ACTION_ACL_CONNECTED -> {
                     val name = deviceFrom(intent)?.let { safeName(it) }
-                    _state.value = _state.value.copy(enabled = true, connectedName = name ?: "Connected")
+                    _state.value = _state.value.copy(enabled = true, connectedName = name ?: appContext.getString(R.string.bt_connected_unknown))
                 }
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                     _state.value = _state.value.copy(connectedName = findConnectedName())
