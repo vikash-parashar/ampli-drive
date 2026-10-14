@@ -3,7 +3,6 @@ package com.vikash.ampli.drive.voice
 import com.vikash.ampli.drive.DriveApp
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
-import org.json.JSONArray
 import org.json.JSONObject
 import org.vosk.Recognizer
 import org.vosk.android.RecognitionListener
@@ -113,7 +112,9 @@ object VoskCommands {
     /** Only while a list of places is showing. */
     val CHOICES = listOf("first", "second", "third", "first one", "second one", "third one", "one", "two", "three")
 
-    fun grammarJson(): String = JSONArray(COMMANDS + CHOICES + "[unk]").toString()
+    fun grammarJson(): String = (COMMANDS + CHOICES + "[unk]").joinToString(",", "[", "]") { phrase ->
+        "\"" + phrase.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+    }
 
     /** Drops Vosk's "[unk]" tokens and extra spaces. */
     fun clean(text: String): String = text.replace("[unk]", " ").replace(Regex("\\s+"), " ").trim()
