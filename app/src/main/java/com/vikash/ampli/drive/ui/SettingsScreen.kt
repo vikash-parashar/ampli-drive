@@ -90,6 +90,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.ui.theme.ThemeFamily
 import com.vikash.ampli.drive.ui.theme.ThemeAccess
 import com.vikash.ampli.drive.system.BtPermissions
+import com.vikash.ampli.drive.tripcost.TripCostFlags
 
 @Composable
 fun SettingsScreen(
@@ -904,7 +905,15 @@ internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, 
                     ) { ThemeSwatch(t, Modifier.fillMaxSize()) }
                 }
             }
-            for (point in listOf(R.string.pro_point_themes, R.string.pro_point_car, R.string.pro_point_once)) {
+            // Trip cost stays hidden until TripCostFlags.ENABLED is switched on.
+            val points = listOfNotNull(
+                R.string.pro_point_themes,
+                R.string.pro_point_car,
+                R.string.pro_point_whatsapp,
+                R.string.pro_point_trip_cost.takeIf { TripCostFlags.ENABLED },
+                R.string.pro_point_once,
+            )
+            for (point in points) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                     Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = theme.ok, modifier = Modifier.size(24.dp))
                     Text(stringResource(point), fontSize = dims.t(2.6f, min = 15f), color = theme.text)

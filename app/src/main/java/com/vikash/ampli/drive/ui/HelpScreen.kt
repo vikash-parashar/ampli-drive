@@ -477,7 +477,7 @@ private fun SosCountdown(
 }
 
 @Composable
-private fun SosReady(
+internal fun SosReady(
     profile: EmergencyProfile,
     message: String,
     onSmsAgain: () -> Unit,

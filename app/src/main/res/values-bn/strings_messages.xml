@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp মেসেজ জোরে পড়ে শোনান</string>
+    <string name="disclosure_wa_body">গাড়ি চালানোর সময় আপনার WhatsApp ও WhatsApp Business মেসেজ জোরে পড়ে শোনাতে Car Hub সেগুলোর নোটিফিকেশন থেকে প্রেরকের নাম ও মেসেজের লেখা পড়ে। এর জন্য নোটিফিকেশন অ্যাক্সেস ব্যবহার করা হয়।</string>
+    <string name="disclosure_wa_uses">প্রতিটি মেসেজ একবার পড়ে শোনানো হয়, তারপর ভুলে যাওয়া হয়। এটি কখনও ড্রাইভিং স্ক্রিনে দেখানো হয় না এবং কোথাও সেভ হয় না। Car Hub কখনও উত্তর দেয় না, SMS পাঠায় না এবং চ্যাট খোলে না। আপনি অনুমতি না দিলে গ্রুপের মেসেজ বাদ দেওয়া হয়। নোটিফিকেশন অ্যাক্সেস চালু থাকলে Car Hub ব্যাকগ্রাউন্ডে থাকলেও এটি কাজ করে।</string>
+    <string name="disclosure_wa_stays">Car Hub কিছুই সেভ বা আপলোড করে না, এবং Ampli Studio বা অন্য কারও সঙ্গে কিছুই শেয়ার করে না। আপনার ডিভাইসের নিজস্ব স্পিচ ইঞ্জিন মেসেজটি পড়ে।</string>
+    <string name="disclosure_park_hint">এটি পড়তে ও চালু করতে গাড়ি থামান।</string>
+</resources>

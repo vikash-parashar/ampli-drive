@@ -67,8 +67,18 @@ class WhatsAppReader(private val app: DriveApp) {
         return true
     }
 
+    /** A call, Hey Ampli, a turn instruction, or a crash countdown / SOS just opened. */
     private fun busy(): Boolean =
-        app.speaker.inCall() || app.voice.busy.value || app.navPrompter.speaking.value
+        app.speaker.inCall() || app.voice.busy.value || app.navPrompter.speaking.value ||
+            app.car.crashAt.value != null || app.car.sosOpenedRecently()
+
+    /** A crash started: drop every waiting message and stop one being read. */
+    fun cancelAll() {
+        val q = queue ?: return
+        queue = null
+        q.cancel()
+        app.speaker.stop()
+    }
 
     private suspend fun speak(sender: String, text: String) {
         val hindi = app.speaker.hasVoice(HINDI)

@@ -13,5 +13,6 @@
     <string name="disclosure_wa_title">Read WhatsApp messages aloud</string>
     <string name="disclosure_wa_body">To read your WhatsApp and WhatsApp Business messages aloud while you drive, Car Hub reads the sender\'s name and the message text from their notifications. It uses notification access to do this.</string>
     <string name="disclosure_wa_uses">Each message is spoken once and then forgotten. It is never shown on the driving screen and never saved. Car Hub never replies, never sends SMS and never opens the chat. Group messages are skipped unless you allow them. This also works while Car Hub is in the background, as long as notification access is on.</string>
-    <string name="disclosure_wa_stays">Everything happens on this unit. Nothing is uploaded or shared with Ampli or anyone else.</string>
+    <string name="disclosure_wa_stays">Car Hub stores and uploads nothing, and shares nothing with Ampli Studio or anyone else. Your unit’s own speech engine speaks the message.</string>
+    <string name="disclosure_park_hint">Park to read this and switch it on.</string>
 </resources>

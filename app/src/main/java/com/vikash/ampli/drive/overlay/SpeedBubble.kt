@@ -43,6 +43,16 @@ class SpeedBubble(private val app: DriveApp) {
 
     val isShowing: Boolean get() = view != null
 
+    companion object {
+        /**
+         * True while a bubble window is on screen. Android 15+ lets an app with "Display over
+         * other apps" start activities from the background only while its overlay is visible.
+         */
+        @Volatile
+        var visible: Boolean = false
+            private set
+    }
+
     fun canShow(): Boolean = Settings.canDrawOverlays(app)
 
     fun show() {
@@ -73,6 +83,7 @@ class SpeedBubble(private val app: DriveApp) {
         }
         view = v
         params = p
+        visible = true
         job = scope.launch {
             combine(app.speedTracker.state, app.cameraAlerts.speedLimitKmh, app.cameraAlerts.current) { gps, limit, cam ->
                 BubbleLogic.model(gps.speedKmh, limit ?: cam?.limitKmh, cam?.distanceMeters)
@@ -157,6 +168,7 @@ class SpeedBubble(private val app: DriveApp) {
         }
         view = null
         params = null
+        visible = false
     }
 
     private fun openLauncher() {

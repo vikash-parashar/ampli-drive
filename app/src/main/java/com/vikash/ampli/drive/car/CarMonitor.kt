@@ -1,5 +1,6 @@
 package com.vikash.ampli.drive.car
 
+import com.vikash.ampli.drive.overlay.SpeedBubble
 import com.vikash.ampli.drive.voice.HaryanviLines
 
 import android.content.Context
@@ -307,6 +308,8 @@ class CarMonitor(private val app: DriveApp) {
         _crashAt.value = System.currentTimeMillis()
         _crashSos.value = null
         SosNotifier.cancel(app)
+        // No WhatsApp message may talk over the countdown or the SOS screen.
+        app.messages.cancelAll()
         // A fresh fix for the SOS message, whether or not the countdown screen is showing.
         crashFix = null
         crashFixSignal?.cancel()
@@ -363,6 +366,7 @@ class CarMonitor(private val app: DriveApp) {
         val profile = app.emergency.profile.value
         val message = Sos.buildMessage(profile, fix)
         _crashSos.value = message
+        sosOpenedAt = SystemClock.elapsedRealtime()
         // When the countdown timer is the caller, cancelling it here only stops it at its next
         // suspension point; the composer below still opens.
         clearCrash()
@@ -370,14 +374,24 @@ class CarMonitor(private val app: DriveApp) {
         // the composer opens directly only while Car Hub is in front (or may draw over other
         // apps). Otherwise, or when it fails, a full-screen alert brings the SOS screen forward
         // and that opens the composer. Either way, nothing is sent without a tap.
-        val canStart = MainActivity.inFront || Settings.canDrawOverlays(app)
+        // Android 15+: "Display over other apps" allows a background start only while an overlay
+        // is visible, and a blocked start throws nothing. So whenever Car Hub is not in front the
+        // alert is posted as well; it is cancelled once the SOS screen is in front.
+        val inFront = MainActivity.inFront
+        val canStart = inFront || (Settings.canDrawOverlays(app) && SpeedBubble.visible)
         val opened = canStart && Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
-        if (!opened) {
-            Log.i("CarMonitor", "Crash SOS composer not opened directly (canStart=$canStart); posting alert")
+        if (!inFront || !opened) {
+            Log.i("CarMonitor", "Crash SOS alert posted (inFront=$inFront, opened=$opened)")
             SosNotifier.postCrashSos(app)
         }
         return message
     }
+
+    private var sosOpenedAt = 0L
+
+    /** The crash SOS opened in the last two minutes: other voices (WhatsApp) stay quiet. */
+    fun sosOpenedRecently(): Boolean =
+        sosOpenedAt != 0L && SystemClock.elapsedRealtime() - sosOpenedAt < SOS_QUIET_MS
 
     /** Countdown cancelled or finished. */
     fun clearCrash() {
@@ -459,7 +473,8 @@ class CarMonitor(private val app: DriveApp) {
             // Haryanvi desi: "आगे धुंध सै भाई, फॉग लाइट जला ले अर धीरे चला।"
             fresh.forEach { (hz, _) -> app.desi.sayLater(desiHazard(hz)) }
         } else {
-            speak { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
+            // No phone voice on this unit: the recorded desi weather lines stand in.
+            speak(fresh.map { (hz, _) -> desiHazard(hz) }) { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
         }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_WEATHER, app.getString(R.string.weather_title), fresh.joinToString(" ") { (hz, km) -> hazardLine(app, hz, km) })
@@ -528,7 +543,9 @@ class CarMonitor(private val app: DriveApp) {
             if (plain.isNotEmpty()) speak { res -> plain.joinToString(" ") { engineWarningLine(res, it) } }
             return
         }
-        speak { res -> new.joinToString(" ") { engineWarningLine(res, it) } }
+        // No phone voice: the recorded desi lines stand in when every warning has one.
+        val standIns = new.map { desiWarning(it) }
+        speak(if (null in standIns) emptyList() else standIns.filterNotNull()) { res -> new.joinToString(" ") { engineWarningLine(res, it) } }
     }
 
     private fun desiWarning(w: EngineWarning): HaryanviLines.Event? = when (w) {
@@ -558,19 +575,25 @@ class CarMonitor(private val app: DriveApp) {
 
     private var speech: Job? = null
 
-    /** Speaks after any line already being spoken, unless the voice assistant is busy. */
-    private fun speak(text: (Context) -> String) {
+    /**
+     * Speaks after any line already being spoken, unless the voice assistant is busy. On a unit
+     * without a TTS engine the recorded lines of [standIns] play instead (when all are recorded);
+     * a line with no recording (tyres, fault codes) stays with the phone voice.
+     */
+    private fun speak(standIns: List<HaryanviLines.Event> = emptyList(), text: (Context) -> String) {
         val old = speech
         speech = scope.launch {
             old?.join()
             if (app.voice.busy.value) return@launch
             val lang = language()
-            app.speaker.say(text(localized(lang)), lang)
+            val clips = app.voicePlayer.standInClips(standIns.map { it to emptyArray<Any>() })
+            app.voicePlayer.say(Spoken(text(localized(lang)), lang, clips))
         }
     }
 
     companion object {
         const val CRASH_COUNTDOWN_S = 30
+        private const val SOS_QUIET_MS = 2 * 60_000L
 
         fun paperName(res: Context, kind: PaperKind): String = res.getString(
             when (kind) {

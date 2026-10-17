@@ -17,6 +17,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowSettings
 import java.time.Duration
 
 /**
@@ -33,6 +34,7 @@ class CrashHomeKeyTest {
     fun tearDown() {
         app?.car?.clearCrash()
         MainActivity.inFront = false
+        ShadowSettings.setCanDrawOverlays(false)
     }
 
     @Test
@@ -93,5 +95,27 @@ class CrashHomeKeyTest {
         // A new crash clears the old alert.
         app.car.triggerCrash()
         assertNull(shadowOf(nm).getNotification(SosNotifier.ID_CRASH_SOS))
+    }
+
+    /**
+     * Android 15+: "Display over other apps" no longer lets a hidden app start an activity unless
+     * its overlay is showing, and the blocked start fails silently. With Car Hub not in front the
+     * alert must be posted even though the permission is granted.
+     */
+    @Test
+    fun notInFrontWithOverlayPermissionStillPostsTheSosAlert() {
+        val app = org.robolectric.RuntimeEnvironment.getApplication() as DriveApp
+        this.app = app
+        MainActivity.inFront = false
+        ShadowSettings.setCanDrawOverlays(true)
+
+        app.car.triggerCrash()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(CarMonitor.CRASH_COUNTDOWN_S + 2L))
+
+        assertNotNull(app.car.crashSos.value)
+        val nm = app.getSystemService(NotificationManager::class.java)
+        val alert = shadowOf(nm).getNotification(SosNotifier.ID_CRASH_SOS)
+        assertNotNull("No crash SOS alert while Car Hub is not in front", alert)
+        assertNotNull("No full-screen intent", alert.fullScreenIntent)
     }
 }

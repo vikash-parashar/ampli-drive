@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp-Nachrichten vorlesen</string>
+    <string name="disclosure_wa_body">Um deine WhatsApp- und WhatsApp-Business-Nachrichten während der Fahrt vorzulesen, liest Car Hub den Namen des Absenders und den Nachrichtentext aus ihren Benachrichtigungen. Dafür wird der Benachrichtigungszugriff genutzt.</string>
+    <string name="disclosure_wa_uses">Jede Nachricht wird einmal vorgelesen und dann vergessen. Sie wird nie auf dem Fahrbildschirm angezeigt und nie gespeichert. Car Hub antwortet nie, sendet keine SMS und öffnet nie den Chat. Gruppennachrichten werden übersprungen, außer du erlaubst sie. Das funktioniert auch, während Car Hub im Hintergrund ist, solange der Benachrichtigungszugriff an ist.</string>
+    <string name="disclosure_wa_stays">Car Hub speichert und lädt nichts hoch und teilt nichts mit Ampli Studio oder anderen. Die Sprachausgabe deines Geräts liest die Nachricht vor.</string>
+    <string name="disclosure_park_hint">Halte an, um dies zu lesen und einzuschalten.</string>
+</resources>

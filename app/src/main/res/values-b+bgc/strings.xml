@@ -288,6 +288,8 @@
     <string name="action_refresh">रिफ्रेश</string>
     <string name="dock_car">गाड्डी</string>
     <string name="pro_point_car">गाड्डी के औजार: OBD-II इंजन डेटा अर फॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खरचे का CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp मैसेज बोल कै सुणावै, बस आवाज़ मैं</string>
+    <string name="pro_point_trip_cost">सफर का खरचा: रस्ते का तेल अर टोल</string>
     <string name="park_to_edit">बदलण खातर गाड्डी रोक्को</string>
     <string name="park_to_edit_hint">गाड्डी चाल्लती होए तो बदलाव रुक्या सै। इसकी जगां “Hey Ampli” तै बूज्झो।</string>
     <string name="car_distance_m">%1$d मी</string>
@@ -486,6 +488,15 @@
     <string name="crash_setting_hint">जोर की टक्कर या रफ्तार तै अचाणचक रुकण पै 30 सेकंड की SOS उल्टी गिणती शुरू हो सै</string>
     <string name="crash_no_sensor">कोए मोशन सेंसर कोनी मिल्या। बस GPS का अचाणचक रुकणा काम आवै सै।</string>
     <string name="crash_tap_note">आखरी आपातकालीन SMS भेज्जण खातर इब्बी एक बार दबाणा पड़ैगा।</string>
+    <!-- Crash/SOS text stays plain Hindi, not Haryanvi. -->
+    <string name="crash_overlay_title">SOS मैसेज को अपने-आप खुलने दें</string>
+    <string name="crash_overlay_body">Ampli Car Hub को “दूसरे ऐप के ऊपर दिखाएँ” की अनुमति दें। इससे दुर्घटना के बाद SOS मैसेज अपने-आप खुल जाएगा, भले ही स्क्रीन पर कोई दूसरा ऐप खुला हो।</string>
+    <string name="crash_overlay_allow">सेटिंग खोलें</string>
+    <string name="crash_overlay_later">अभी नहीं</string>
+    <string name="crash_overlay_status_title">दूसरे ऐप के ऊपर दिखाएँ</string>
+    <string name="crash_overlay_status_off">अभी अनुमति नहीं है। दुर्घटना के बाद SOS मैसेज अपने-आप खुले, इसके लिए यह ज़रूरी है।</string>
+    <string name="crash_fsi_status_title">पूरी स्क्रीन SOS अलर्ट</string>
+    <string name="crash_fsi_status_off">अभी अनुमति नहीं है। इसके बिना दुर्घटना का SOS अलर्ट सिर्फ़ नोटिफ़िकेशन की तरह दिखेगा।</string>
     <string name="monitor_setting">पाच्छै तै निगरानी</string>
     <string name="monitor_setting_hint">दूसरे ऐप खुले होण पै बी सूचना गेल्लां GPS चालू राक्खै सै</string>
     <string name="voice_service_unknown">इब्बै ताईं कोए सर्विस तारीख सेट कोनी। गाड्डी खोल्लो, फेर कागज अर सर्विस।</string>

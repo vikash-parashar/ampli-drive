@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp پیغامات بول کر سنائیں</string>
+    <string name="disclosure_wa_body">گاڑی چلاتے وقت آپ کے WhatsApp اور WhatsApp Business پیغامات بول کر سنانے کے لیے Car Hub ان کی اطلاعات سے بھیجنے والے کا نام اور پیغام کا متن پڑھتا ہے۔ اس کے لیے اطلاعات تک رسائی استعمال ہوتی ہے۔</string>
+    <string name="disclosure_wa_uses">ہر پیغام ایک بار بولا جاتا ہے اور پھر بھلا دیا جاتا ہے۔ وہ ڈرائیونگ اسکرین پر کبھی نہیں دکھایا جاتا اور کہیں محفوظ نہیں ہوتا۔ Car Hub کبھی جواب نہیں دیتا، SMS نہیں بھیجتا اور چیٹ نہیں کھولتا۔ جب تک آپ اجازت نہ دیں، گروپ کے پیغامات چھوڑ دیے جاتے ہیں۔ جب تک اطلاعات تک رسائی آن ہے، Car Hub کے پس منظر میں ہونے پر بھی یہ کام کرتا ہے۔</string>
+    <string name="disclosure_wa_stays">Car Hub کچھ بھی محفوظ یا اپ لوڈ نہیں کرتا، اور Ampli Studio یا کسی اور کے ساتھ کچھ بھی شیئر نہیں کرتا۔ پیغام آپ کے آلے کا اپنا بولنے والا انجن پڑھتا ہے۔</string>
+    <string name="disclosure_park_hint">اسے پڑھنے اور آن کرنے کے لیے گاڑی روکیں۔</string>
+</resources>

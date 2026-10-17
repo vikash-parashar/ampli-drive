@@ -25,6 +25,10 @@ jobs:
       WEATHER_URL: ${{ vars.WEATHER_URL }}
       # Remote config JSON. Empty = built-in defaults.
       REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
+      # Weather API key: a secret (Settings › Secrets › Actions), never a plain variable.
+      WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+      # Our own map style, tried when the theme's style fails to load. Empty = none.
+      MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -120,6 +124,8 @@ jobs:
       # Optional in a release: weather stays off and remote config uses defaults while empty.
       WEATHER_URL: ${{ vars.WEATHER_URL }}
       REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
+      WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+      MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
       # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
       # check R8 before the own servers exist. The AAB it makes is then for testing only.
       ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}

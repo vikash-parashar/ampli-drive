@@ -94,6 +94,27 @@ class VoicePlayer(private val app: DriveApp) {
         if (line == null) app.speaker.say(text, language, needFocus) else say(line, needFocus)
     }
 
+    /**
+     * Recorded stand-in clips for a standard-style line, for units without a TTS engine: the clips
+     * of each [events] line in turn (a camera alert gets its distance clip plus the tail, see
+     * [VoiceClips.clipsFor]). Empty when the phone voice works, or when any event has no recorded
+     * line; [say] then uses the phone voice as before.
+     */
+    suspend fun standInClips(events: List<Pair<HaryanviLines.Event, Array<out Any>>>): List<String> {
+        if (events.isEmpty() || ttsAvailable()) return emptyList()
+        val out = ArrayList<String>()
+        for ((event, args) in events) {
+            val clips = app.desi.line(event, *args, force = true)?.clips
+            if (clips.isNullOrEmpty()) return emptyList()
+            out += clips
+        }
+        return out
+    }
+
+    /** [standInClips] for one event. */
+    suspend fun standInClips(event: HaryanviLines.Event, vararg args: Any): List<String> =
+        standInClips(listOf(event to args))
+
     private enum class Result { Played, NoFocus, Failed }
 
     private suspend fun play(uris: List<Uri>, needFocus: Boolean): Result {
