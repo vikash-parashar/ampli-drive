@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Locale
+import com.vikash.ampli.drive.voice.Spoken
+import com.vikash.ampli.drive.voice.VoiceClips
 
 /**
  * The car features that watch the drive: break reminder, odometer, parking spot, crash
@@ -327,7 +329,11 @@ class CarMonitor(private val app: DriveApp) {
                 app.speaker.alertBeep()
                 // Seconds left until the SOS message opens (the string has a %1$d placeholder).
                 val secondsLeft = ((end - SystemClock.elapsedRealtime() + 999) / 1000).toInt().coerceAtLeast(1)
-                app.speaker.say(res.getString(R.string.crash_voice, secondsLeft), lang)
+                // Recorded Ampli voice clips when there are any (units with no TTS engine stay
+                // audible); otherwise the phone voice says the localized line.
+                app.voicePlayer.say(
+                    Spoken(res.getString(R.string.crash_voice, secondsLeft), lang, VoiceClips.crashClips(secondsLeft)),
+                )
                 delay(4000)
             }
         }
