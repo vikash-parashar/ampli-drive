@@ -19,6 +19,8 @@ jobs:
       OWNER_API_URL: ${{ vars.OWNER_API_URL }}
       # In-app navigation routing server (your own OSRM). Empty = OSRM's public demo server, testing only.
       ROUTING_BASE_URL: ${{ vars.ROUTING_BASE_URL }}
+      # Place search server (your own Photon). Empty = Photon's public demo server, testing only.
+      GEOCODER_URL: ${{ vars.GEOCODER_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -106,6 +108,14 @@ jobs:
   # upload key is added only when publishing. Missing keep rules show up as error annotations.
   release-bundle:
     runs-on: ubuntu-latest
+    env:
+      OWNER_API_URL: ${{ vars.OWNER_API_URL }}
+      # A release refuses to build without these two (no demo servers in Play builds).
+      ROUTING_BASE_URL: ${{ vars.ROUTING_BASE_URL }}
+      GEOCODER_URL: ${{ vars.GEOCODER_URL }}
+      # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
+      # check R8 before the own servers exist. The AAB it makes is then for testing only.
+      ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}
     steps:
       - uses: actions/checkout@v4
 
