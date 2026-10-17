@@ -17,10 +17,13 @@ class SafetyStringsLocaleTest {
 
     private val res: File = listOf(File("src/main/res"), File("app/src/main/res")).first { it.isDirectory }
 
+    private fun stringFiles(folder: File): List<File> =
+        folder.listFiles().orEmpty().filter { it.isFile && it.name.startsWith("strings") && it.name.endsWith(".xml") }
+
     private fun strings(folder: File): Map<String, String> {
         val out = linkedMapOf<String, String>()
         val factory = DocumentBuilderFactory.newInstance()
-        folder.listFiles { f -> f.name.startsWith("strings") && f.name.endsWith(".xml") }.orEmpty().sortedBy { it.name }.forEach { file ->
+        stringFiles(folder).sortedBy { it.name }.forEach { file ->
             val root = factory.newDocumentBuilder().parse(file).documentElement
             val nodes = root.childNodes
             for (i in 0 until nodes.length) {
@@ -33,8 +36,8 @@ class SafetyStringsLocaleTest {
     }
 
     private val locales: List<File> by lazy {
-        res.listFiles { f -> f.isDirectory && f.name.startsWith("values-") }.orEmpty()
-            .filter { dir -> dir.listFiles { f -> f.name.startsWith("strings") && f.name.endsWith(".xml") }.orEmpty().isNotEmpty() }
+        res.listFiles().orEmpty().filter { it.isDirectory && it.name.startsWith("values-") }
+            .filter { dir -> stringFiles(dir).isNotEmpty() }
             .sortedBy { it.name }
     }
 

@@ -52,9 +52,18 @@ jobs:
 
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
+        shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testDebugUnitTest
+          set +e
+          ./gradlew --no-daemon testDebugUnitTest 2>&1 | tee unit-tests.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" != 0 ]; then
+            # Job logs are not always readable; surface compiler errors and failed tests as one annotation.
+            summary=$(grep -E -A4 '^e: |FAILED$|What went wrong' unit-tests.log | head -80 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Unit tests failed::${summary}"
+          fi
+          exit $status
 
       # Fails on any API call newer than minSdk (26) that has no version check.
       - name: Lint (NewApi)
