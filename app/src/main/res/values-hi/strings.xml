@@ -491,6 +491,12 @@
     <string name="crash_setting_hint">तेज़ टक्कर या अचानक रुकने पर 30 सेकंड का SOS काउंटडाउन</string>
     <string name="crash_no_sensor">मोशन सेंसर नहीं मिला। केवल GPS से अचानक रुकना देखा जाता है।</string>
     <string name="crash_tap_note">आख़िरी आपातकालीन SMS भेजने के लिए एक टैप ज़रूरी है।</string>
+    <string name="crash_overlay_title">SOS मैसेज को अपने-आप खुलने दें</string>
+    <string name="crash_overlay_body">Ampli Car Hub को “दूसरे ऐप के ऊपर दिखाएँ” की अनुमति दें। इससे दुर्घटना के बाद SOS मैसेज अपने-आप खुल जाएगा, भले ही स्क्रीन पर कोई दूसरा ऐप खुला हो।</string>
+    <string name="crash_overlay_allow">सेटिंग खोलें</string>
+    <string name="crash_overlay_later">अभी नहीं</string>
+    <string name="crash_overlay_status_title">दूसरे ऐप के ऊपर दिखाएँ</string>
+    <string name="crash_overlay_status_off">अभी अनुमति नहीं है। दुर्घटना के बाद SOS मैसेज अपने-आप खुले, इसके लिए यह ज़रूरी है।</string>
     <string name="monitor_setting">बैकग्राउंड में निगरानी</string>
     <string name="monitor_setting_hint">दूसरी ऐप खुली होने पर भी GPS चालू रखता है, नोटिफ़िकेशन के साथ</string>
     <string name="voice_service_unknown">अभी कोई सर्विस तारीख सेट नहीं। कार, फिर कागज़ात और सर्विस खोलें।</string>
