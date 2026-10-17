@@ -166,3 +166,20 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+// On CI, each failing unit test becomes a check annotation (class, test, first line of the error),
+// so a red "Unit tests" step says which test broke without opening the log.
+if (System.getenv("GITHUB_ACTIONS") == "true") {
+    tasks.withType<Test>().configureEach {
+        addTestListener(object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) {}
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
+            override fun beforeTest(testDescriptor: TestDescriptor) {}
+            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
+                if (result.resultType != TestResult.ResultType.FAILURE) return
+                val why = result.exception?.toString()?.lineSequence()?.firstOrNull()?.take(300).orEmpty()
+                println("::error title=Test failed::${testDescriptor.className}.${testDescriptor.name}: $why")
+            }
+        })
+    }
+}
