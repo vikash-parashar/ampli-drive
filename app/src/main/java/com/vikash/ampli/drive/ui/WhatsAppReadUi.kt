@@ -121,7 +121,8 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
         moving = moving,
         onToggle = { on -> if (on) turnOn() else prefs.setEnabled(false) },
         onGroups = prefs::setAllowGroups,
-        onAllowAccess = { Launchers.openNotificationAccess(context) },
+        // Android's notification-access page is a settings form: not while moving.
+        onAllowAccess = { if (!moving) Launchers.openNotificationAccess(context) },
     )
 
     if (askDisclosure) {
@@ -205,7 +206,11 @@ fun WhatsAppReadCardContent(
                             fontSize = dims.t(2.4f),
                             modifier = Modifier.weight(1f),
                         )
-                        BigButton(text = stringResource(R.string.allow_access), onClick = onAllowAccess)
+                        BigButton(
+                            text = stringResource(if (moving) R.string.park_to_set else R.string.allow_access),
+                            onClick = { if (!moving) onAllowAccess() },
+                            primary = !moving,
+                        )
                     }
                 }
             }

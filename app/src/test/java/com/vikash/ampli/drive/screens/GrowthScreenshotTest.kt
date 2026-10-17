@@ -148,6 +148,23 @@ class GrowthScreenshotTest {
         assertEquals(listOf(false), calls)
     }
 
+    /** The notification-access button waits for a parked car too. */
+    @Test
+    fun whatsAppAccessButtonWaitsForParkedCar() {
+        var opened = 0
+        compose.setContent {
+            Frame {
+                WhatsAppReadCardContent(
+                    isPro = true, enabled = true, allowGroups = false, hasAccess = false,
+                    onToggle = {}, onGroups = {}, onAllowAccess = { opened++ }, moving = true,
+                )
+            }
+        }
+        compose.onNodeWithText(app.getString(R.string.park_to_set)).performClick()
+        compose.waitForIdle()
+        assertEquals(0, opened)
+    }
+
     private fun assertToggleLocked(ttsMissing: Boolean, moving: Boolean) {
         val calls = mutableListOf<Boolean>()
         compose.setContent {

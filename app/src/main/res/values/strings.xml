@@ -502,12 +502,12 @@
     <string name="crash_setting_hint">Hard impact or a sudden stop from speed starts a 30 second SOS countdown</string>
     <string name="crash_no_sensor">No motion sensor found. Uses sudden GPS stops only.</string>
     <string name="crash_tap_note">The final emergency SMS still needs one tap to send.</string>
-    <string name="crash_overlay_title">Let the SOS message open by itself</string>
-    <string name="crash_overlay_body">Allow “Display over other apps” for Ampli Car Hub. It lets the SOS message open by itself after a crash, even when another app is on screen.</string>
+    <string name="crash_overlay_title">Help the SOS message open faster</string>
+    <string name="crash_overlay_body">Allow “Display over other apps” for Ampli Car Hub. It helps the SOS message open faster after a crash when another app is on screen. Car Hub also shows an alert you can tap.</string>
     <string name="crash_overlay_allow">Open setting</string>
     <string name="crash_overlay_later">Not now</string>
     <string name="crash_overlay_status_title">Display over other apps</string>
-    <string name="crash_overlay_status_off">Not allowed yet. Needed for the SOS message to open by itself after a crash.</string>
+    <string name="crash_overlay_status_off">Not allowed yet. It helps the SOS message open faster; without it, Car Hub shows an alert you can tap.</string>
     <string name="crash_fsi_status_title">Full-screen SOS alert</string>
     <string name="crash_fsi_status_off">Not allowed yet. Without it, the crash SOS alert shows only as a notification.</string>
     <string name="monitor_setting">Monitor in background</string>
