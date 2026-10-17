@@ -19,10 +19,12 @@ val checkReleaseEndpoints by tasks.registering {
     val allow = releaseAllowUnconfigured
     doLast {
         if (missing.isNotEmpty() && !allow) {
-            throw GradleException(
-                "Release build needs your own servers: set ${missing.joinToString(" and ")} " +
-                    "(CI repository variables). See deploy/osrm-photon/README.md.",
-            )
+            val msg = "Release build needs your own servers: set ${missing.joinToString(" and ")} " +
+                "(CI repository variables), or ALLOW_UNCONFIGURED_SERVERS=true for a smoke-test-only " +
+                "build. See deploy/osrm-photon/README.md."
+            // Shows as a check annotation on GitHub, so the reason is visible without the log.
+            if (System.getenv("GITHUB_ACTIONS") == "true") println("::error title=Release servers::$msg")
+            throw GradleException(msg)
         }
     }
 }
