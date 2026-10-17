@@ -12,6 +12,9 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.vikash.ampli.drive.DriveApp
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
@@ -48,7 +51,10 @@ class VoicePlayer(private val app: DriveApp) {
      * audio focus (a call is on).
      */
     suspend fun say(spoken: Spoken, needFocus: Boolean = false) {
-        val v = voice
+        var v = voice
+        // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
+        // Ampli voice says it instead, rather than nothing at all.
+        if (!v.human && !ttsAvailable()) v = fallbackVoice()
         val clips = library.plan(v, spoken)
         if (clips != null && v.folder != null) {
             val uris = clips.map { Uri.parse("asset:///voice/${v.folder}/$it.ogg") }
@@ -58,6 +64,34 @@ class VoicePlayer(private val app: DriveApp) {
             }
         }
         app.speaker.say(spoken.text, spoken.language, needFocus)
+    }
+
+    private val _ttsMissing = MutableStateFlow(false)
+
+    /** True once we found that the unit has no working TTS engine (Settings › Voice says so). */
+    val ttsMissing: StateFlow<Boolean> = _ttsMissing.asStateFlow()
+
+    suspend fun ttsAvailable(): Boolean {
+        val ok = app.speaker.isAvailable()
+        _ttsMissing.value = !ok
+        return ok
+    }
+
+    /** The driver's recorded voice if they picked one, else Male. */
+    private fun fallbackVoice(): VoicePack = app.prefs.voicePack.value?.takeIf { it.human } ?: VoicePack.Male
+
+    /**
+     * A plain (standard style) line. With a TTS engine it is spoken as written; without one the
+     * recorded line for [standIn] plays (its stand-in clip when the line has a name or number),
+     * so the driver still hears something close.
+     */
+    suspend fun sayPlain(text: String, language: String, standIn: HaryanviLines.Event?, vararg args: Any, needFocus: Boolean = false) {
+        if (standIn == null || ttsAvailable()) {
+            app.speaker.say(text, language, needFocus)
+            return
+        }
+        val line = app.desi.line(standIn, *args, force = true)
+        if (line == null) app.speaker.say(text, language, needFocus) else say(line, needFocus)
     }
 
     private enum class Result { Played, NoFocus, Failed }

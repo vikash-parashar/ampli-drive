@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wa_title">WhatsApp मैसेज बोल कै सुणा</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">गाड्डी बतावैगी किसका मैसेज सै अर उस मैं के लिख्या सै, बस आवाज मैं।</string>
+    <string name="wa_hint_on">चालू सै। बस आवाज: मैसेज का टेक्स्ट स्क्रीन पै कदे ना दीखै।</string>
+    <string name="wa_hint_locked">यो Pro फ़ीचर सै। Pro देखण खातर दबा।</string>
+    <string name="wa_groups_title">ग्रुप के मैसेज भी सुणा</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चैट चुप रहवैं सैं। बस थमनै सीधे भेजे होए मैसेज सुणाए जावैं सैं।</string>
+    <string name="wa_rules">20 सेकंड मैं ज्यादा तै ज्यादा एक मैसेज। कॉल अर मोड़ की आवाज टैम चुप। Car Hub कदे जवाब ना देवै अर किमे ना भेजै।</string>
+    <string name="wa_needs_access">WhatsApp मैसेज सुणाण खातर नोटिफ़िकेशन एक्सेस चाहिए।</string>
+    <string name="disclosure_wa_title">WhatsApp मैसेज बोल कै सुणा</string>
+    <string name="disclosure_wa_body">गाड्डी चलांदे टैम थारे WhatsApp अर WhatsApp Business के मैसेज बोल कै सुणाण खातर Car Hub उनके नोटिफ़िकेशन तै भेजण आळे का नाम अर मैसेज का टेक्स्ट पढ़ै सै। इसकै खातर नोटिफ़िकेशन एक्सेस लागै सै।</string>
+    <string name="disclosure_wa_uses">हर मैसेज एक बार बोल्या जावै सै अर फेर भुला दिया जावै सै। वो ड्राइविंग स्क्रीन पै कदे ना दीखै अर कितै सेव ना होवै। Car Hub कदे जवाब ना देवै, कदे SMS ना भेजै अर चैट ना खोल्लै। ग्रुप के मैसेज छोड़ दिए जावैं सैं जद तक तू इजाजत ना दे। जद तक नोटिफ़िकेशन एक्सेस चालू सै, यो Car Hub पाछै चालदे होए भी काम करै सै।</string>
+    <string name="disclosure_wa_stays">सारा काम इसे यूनिट पै होवै सै। किमे भी अपलोड ना होंदा, ना Ampli गेल अर ना किसे और गेल शेयर होंदा।</string>
+</resources>

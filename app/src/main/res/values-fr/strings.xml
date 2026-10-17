@@ -129,7 +129,7 @@
     <string name="help_no_contacts">Aucun contact d\'urgence. Ajoutez-en dans Paramètres › Profil d\'urgence.</string>
     <string name="help_medical_info">Infos médicales</string>
     <string name="sos_button_hint">Ouvre un message avec votre position pour vos contacts d\'urgence</string>
-    <string name="sos_countdown_title">Envoi du SOS dans</string>
+    <string name="sos_countdown_title">Message SOS dans</string>
     <string name="sos_cancel">Annuler</string>
     <string name="sos_send_now">Envoyer maintenant</string>
     <string name="sos_location_ready">Position trouvée</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">En attente du GPS</string>
     <string name="weather_setting">Alertes météo et brouillard</string>
     <string name="weather_setting_hint">Vérifie ici, à 25 km et à 50 km devant toutes les 15 minutes</string>
-    <string name="crash_voice">Accident détecté. Alerte d’urgence envoyée dans %1$d secondes. Dites ou touchez « Ça va » pour annuler.</string>
+    <string name="crash_voice">Accident détecté. Dans %1$d secondes, un SMS SOS pour votre contact d’urgence sera prêt à envoyer. Dites ou touchez « Ça va » pour annuler.</string>
     <string name="crash_title">Accident possible détecté</string>
     <string name="crash_send_needs_tap">Android demande une touche pour envoyer le SMS.</string>
     <string name="crash_im_ok">Ça va</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">Vous n’avez encore rien envoyé.</string>
     <string name="feedback_waiting">%1$d en attente d’envoi</string>
     <string name="feedback_reply">Réponse : %1$s</string>
+    <string name="sos_limits_note">SOS ouvre votre appli de messages avec un texte et votre position pour ces contacts. Quelqu’un doit appuyer sur Envoyer : Ampli ne peut pas envoyer de SMS ni appeler tout seul. La détection d’accident peut manquer un accident ou se déclencher par erreur.</string>
+    <string name="nav_search_moving">La saisie est désactivée en roulant. Touchez « Say it » et dites où aller.</string>
+    <string name="payment_pending_title">Paiement en attente</string>
+    <string name="payment_pending_hint">Google Play attend la validation de votre paiement UPI ou autre. Validez-le dans votre appli de paiement ; inutile de payer à nouveau.</string>
+    <string name="voice_tts_missing_hint">Aucune voix du téléphone installée ; la voix d’Ampli parle.</string>
+    <string name="shell_open_settings">Ouvrir les réglages</string>
+    <string name="autostart_acc_note">Les signaux de contact (ACC) de l’autoradio ne sont reçus que si « Surveiller en arrière-plan » est activé.</string>
+    <string name="about_not_affiliated">Ampli Studio n’est pas affilié à NPCI, NHAI, Apple ou Google. FASTag, CarPlay, Android Auto et Google Maps sont cités seulement pour dire ce qui fonctionne avec Car Hub.</string>
+    <string name="shell_eq_pick_title">Choisir l’appli d’égaliseur</string>
 </resources>

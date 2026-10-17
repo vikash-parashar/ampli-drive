@@ -13,10 +13,14 @@ import android.location.Location
 import android.media.AudioManager
 import android.os.LocaleList
 import android.os.SystemClock
+import android.provider.Settings
+import android.util.Log
 import androidx.annotation.StringRes
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.emergency.Sos
+import com.vikash.ampli.drive.emergency.SosNotifier
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.obd.DtcCatalog
 import com.vikash.ampli.drive.obd.EngineWarning
@@ -36,6 +40,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Locale
+import com.vikash.ampli.drive.voice.Spoken
+import com.vikash.ampli.drive.voice.VoiceClips
 
 /**
  * The car features that watch the drive: break reminder, odometer, parking spot, crash
@@ -74,6 +80,10 @@ class CarMonitor(private val app: DriveApp) {
     private val _crashAt = MutableStateFlow<Long?>(null)
     /** Wall-clock time of a detected crash while its countdown runs, else null. */
     val crashAt: StateFlow<Long?> = _crashAt.asStateFlow()
+
+    private val _crashSos = MutableStateFlow<String?>(null)
+    /** The SOS message opened for the last crash (by the countdown or "Send now"); null until then. */
+    val crashSos: StateFlow<String?> = _crashSos.asStateFlow()
 
     private val _weather = MutableStateFlow<WeatherReport?>(null)
     val weather: StateFlow<WeatherReport?> = _weather.asStateFlow()
@@ -266,7 +276,7 @@ class CarMonitor(private val app: DriveApp) {
             if (app.desi.say(HaryanviLines.Event.BreakReminder, formatHours(app, hours))) return@launch
             val lang = language()
             val res = localized(lang)
-            app.speaker.say(res.getString(R.string.break_voice, formatHours(res, hours)), lang)
+            app.voicePlayer.sayPlain(res.getString(R.string.break_voice, formatHours(res, hours)), lang, HaryanviLines.Event.BreakReminder, formatHours(app, hours))
         }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_BREAK, app.getString(R.string.break_title), app.getString(R.string.break_body, formatHours(app, hours)))
@@ -287,11 +297,24 @@ class CarMonitor(private val app: DriveApp) {
     // ------------------------------------------------------------------ Crash
 
     private var crashJob: Job? = null
+    private var crashTimer: Job? = null
+    private var crashFixSignal: android.os.CancellationSignal? = null
+    @Volatile private var crashFix: Location? = null
     private var savedVolume: Int? = null
 
     fun triggerCrash() {
         if (_crashAt.value != null) return
         _crashAt.value = System.currentTimeMillis()
+        _crashSos.value = null
+        SosNotifier.cancel(app)
+        // A fresh fix for the SOS message, whether or not the countdown screen is showing.
+        crashFix = null
+        crashFixSignal?.cancel()
+        crashFixSignal = try {
+            Sos.requestFreshLocation(app) { crashFix = it }
+        } catch (_: Exception) {
+            null
+        }
         try {
             app.startActivity(
                 Intent(app, MainActivity::class.java)
@@ -308,17 +331,63 @@ class CarMonitor(private val app: DriveApp) {
             val end = SystemClock.elapsedRealtime() + CRASH_COUNTDOWN_S * 1000L
             while (_crashAt.value != null && SystemClock.elapsedRealtime() < end - 3000) {
                 app.speaker.alertBeep()
-                app.speaker.say(res.getString(R.string.crash_voice), lang)
+                // Seconds left until the SOS message opens (the string has a %1$d placeholder).
+                val secondsLeft = ((end - SystemClock.elapsedRealtime() + 999) / 1000).toInt().coerceAtLeast(1)
+                // Recorded Ampli voice clips when there are any (units with no TTS engine stay
+                // audible); otherwise the phone voice says the localized line.
+                app.voicePlayer.say(
+                    Spoken(res.getString(R.string.crash_voice, secondsLeft), lang, VoiceClips.crashClips(secondsLeft)),
+                )
                 delay(4000)
             }
         }
+        // The countdown ends here, not in the UI: the SOS message opens even when the countdown
+        // screen was left (HOME key, another app in front). Its own timer, so a slow or missing
+        // TTS engine in the voice loop above can never hold it up.
+        crashTimer?.cancel()
+        crashTimer = scope.launch {
+            delay(CRASH_COUNTDOWN_S * 1000L)
+            if (_crashAt.value != null) sendCrashSos(null)
+        }
+    }
+
+    /**
+     * Opens the SMS composer with the SOS message for the running crash countdown and ends it.
+     * [location] is the countdown screen's best fix, if it has one. Returns the message (also
+     * when the countdown had already opened it), or null when no crash is running.
+     */
+    fun sendCrashSos(location: Location?): String? {
+        if (_crashAt.value == null) return _crashSos.value
+        val fix = listOfNotNull(location, crashFix, Sos.lastKnownLocation(app, app.speedTracker.state.value.location))
+            .maxByOrNull { it.time }
+        val profile = app.emergency.profile.value
+        val message = Sos.buildMessage(profile, fix)
+        _crashSos.value = message
+        // When the countdown timer is the caller, cancelling it here only stops it at its next
+        // suspension point; the composer below still opens.
+        clearCrash()
+        // Android 10+ silently blocks activity starts from the background (no exception), so
+        // the composer opens directly only while Car Hub is in front (or may draw over other
+        // apps). Otherwise, or when it fails, a full-screen alert brings the SOS screen forward
+        // and that opens the composer. Either way, nothing is sent without a tap.
+        val canStart = MainActivity.inFront || Settings.canDrawOverlays(app)
+        val opened = canStart && Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
+        if (!opened) {
+            Log.i("CarMonitor", "Crash SOS composer not opened directly (canStart=$canStart); posting alert")
+            SosNotifier.postCrashSos(app)
+        }
+        return message
     }
 
     /** Countdown cancelled or finished. */
     fun clearCrash() {
         _crashAt.value = null
+        crashFixSignal?.cancel()
+        crashFixSignal = null
         crashJob?.cancel()
         crashJob = null
+        crashTimer?.cancel()
+        crashTimer = null
         app.speaker.stop()
         restoreVolume()
     }

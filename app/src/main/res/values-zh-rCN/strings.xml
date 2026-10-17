@@ -129,7 +129,7 @@
     <string name="help_no_contacts">还没有紧急联系人。请在“设置 › 紧急资料”中添加。</string>
     <string name="help_medical_info">医疗信息</string>
     <string name="sos_button_hint">打开带有你位置的短信，发给紧急联系人</string>
-    <string name="sos_countdown_title">SOS 即将发送</string>
+    <string name="sos_countdown_title">SOS 短信即将打开</string>
     <string name="sos_cancel">取消</string>
     <string name="sos_send_now">立即发送</string>
     <string name="sos_location_ready">已获取位置</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">正在等待 GPS</string>
     <string name="weather_setting">天气和雾警报</string>
     <string name="weather_setting_hint">每 15 分钟检查此处、前方 25 公里和 50 公里</string>
-    <string name="crash_voice">检测到碰撞。将在 %1$d 秒后发送紧急警报。说出或点按“我没事”以取消。</string>
+    <string name="crash_voice">检测到碰撞。%1$d 秒后将准备好发给紧急联系人的 SOS 短信。说出或点按“我没事”即可取消。</string>
     <string name="crash_title">检测到可能的碰撞</string>
     <string name="crash_send_needs_tap">Android 需要点按一次才能发送短信。</string>
     <string name="crash_im_ok">我没事</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">您还没有发送任何内容。</string>
     <string name="feedback_waiting">%1$d 条等待发送</string>
     <string name="feedback_reply">回复：%1$s</string>
+    <string name="sos_limits_note">SOS 会打开短信应用，并为这些联系人准备好文字和您的位置。必须有人按“发送”：Ampli 无法自己发短信或打电话。碰撞检测可能漏掉事故，也可能误触发。</string>
+    <string name="nav_search_moving">行驶中无法输入。点按“Say it”并说出目的地。</string>
+    <string name="payment_pending_title">付款待处理</string>
+    <string name="payment_pending_hint">Google Play 正在等待您的 UPI 或其他付款获批。请在付款应用中批准；无需再次付款。</string>
+    <string name="voice_tts_missing_hint">未安装手机语音 (TTS)；正在使用 Ampli 语音。</string>
+    <string name="shell_open_settings">打开设置</string>
+    <string name="autostart_acc_note">只有在“后台监测”开启时，才能收到车机的点火 (ACC) 信号。</string>
+    <string name="about_not_affiliated">Ampli Studio 与 NPCI、NHAI、Apple 或 Google 无关联。提及 FASTag、CarPlay、Android Auto 和 Google Maps 仅用于说明 Car Hub 可配合使用的产品。</string>
+    <string name="shell_eq_pick_title">选择均衡器应用</string>
 </resources>

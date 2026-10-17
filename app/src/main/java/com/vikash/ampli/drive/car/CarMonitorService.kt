@@ -63,7 +63,12 @@ class CarMonitorService : Service() {
             )
         } catch (_: Exception) {
             // Permission revoked or a background start refused: just don't monitor.
+            // (startForeground is always the first call, so there is no not-started-in-time crash.)
             running = false
+            try {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            } catch (_: Exception) {
+            }
             stopSelf()
             return
         }

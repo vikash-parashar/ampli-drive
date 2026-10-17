@@ -129,7 +129,7 @@
     <string name="help_no_contacts">एखन धरि कोनो आपातकालीन संपर्क नहि। सेटिंग्स › आपातकालीन प्रोफाइल मे जोड़ू।</string>
     <string name="help_medical_info">चिकित्सा जानकारी</string>
     <string name="sos_button_hint">अहाँक आपातकालीन संपर्क लेल अहाँक लोकेशन संग संदेश खोलैत अछि</string>
-    <string name="sos_countdown_title">SOS पठाओल जायत</string>
+    <string name="sos_countdown_title">SOS मैसेज खुजत</string>
     <string name="sos_cancel">रद्द करू</string>
     <string name="sos_send_now">एखने पठाउ</string>
     <string name="sos_location_ready">लोकेशन भेटल</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS केर प्रतीक्षा</string>
     <string name="weather_setting">मौसम आ कुहेस चेतावनी</string>
     <string name="weather_setting_hint">हर 15 मिनट पर एतय, 25 किमी आ 50 किमी आगाँ जाँचैत अछि</string>
-    <string name="crash_voice">दुर्घटना पकड़ल गेल। %1$d सेकंड मे आपातकालीन चेतावनी पठाओल जाएत। रद्द करबाक लेल ‘हम ठीक छी’ बाजू वा दबाउ।</string>
+    <string name="crash_voice">दुर्घटना पता चलल। %1$d सेकंड मे अहाँक इमरजेंसी संपर्क लेल SOS मैसेज पठेबा लेल तैयार भ जायत। रद्द करबाक लेल ‘हम ठीक छी’ बाजू वा दबाउ।</string>
     <string name="crash_title">संभव दुर्घटना पकड़ल गेल</string>
     <string name="crash_send_needs_tap">SMS पठेबाक लेल Android केँ एक बेर दबाबय पड़ैत अछि।</string>
     <string name="crash_im_ok">हम ठीक छी</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">अहाँ एखन धरि किछु नहि पठेलहुँ।</string>
     <string name="feedback_waiting">%1$d पठेबाक प्रतीक्षा मे</string>
     <string name="feedback_reply">जवाब: %1$s</string>
+    <string name="sos_limits_note">SOS एहि संपर्क सभक लेल अहाँक लोकेशनक संग मैसेज ऐप खोलैत अछि। केओ के पठाउ दबाबय पड़त: Ampli अपने SMS वा कॉल नहि क’ सकैत अछि। दुर्घटना पहचान कोनो दुर्घटना छोड़ि सकैत अछि वा गलती सँ शुरू भ’ सकैत अछि।</string>
+    <string name="nav_search_moving">गाड़ी चलबैत काल टाइपिंग बंद अछि। “Say it” दबाउ आ कहू कतय जेबाक अछि।</string>
+    <string name="payment_pending_title">पेमेंट बाकी अछि</string>
+    <string name="payment_pending_hint">Google Play अहाँक UPI वा आन पेमेंटक मंजूरीक प्रतीक्षा क’ रहल अछि। अपन पेमेंट ऐप मे मंजूरी दिअ; फेर सँ पाइ देबाक जरूरी नहि।</string>
+    <string name="voice_tts_missing_hint">फोनक आवाज (TTS) इंस्टॉल नहि अछि; Ampli क आवाज बाजत।</string>
+    <string name="shell_open_settings">सेटिंग खोलू</string>
+    <string name="autostart_acc_note">हेड यूनिटक इग्निशन (ACC) सिग्नल तखने भेटैत अछि जखन “पाछाँ सँ निगरानी” चालू हो।</string>
+    <string name="about_not_affiliated">Ampli Studio क NPCI, NHAI, Apple वा Google सँ कोनो संबंध नहि अछि। FASTag, CarPlay, Android Auto आ Google Maps क नाम मात्र ई बतेबाक लेल अछि जे Car Hub ककरा संग चलैत अछि।</string>
+    <string name="shell_eq_pick_title">अपन इक्वलाइज़र ऐप चुनू</string>
 </resources>

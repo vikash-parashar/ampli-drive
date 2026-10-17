@@ -107,7 +107,14 @@ fun Pill(
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
-    val clickMod = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+    if (onClick != null) {
+        // A tappable pill gets a full 64 dp touch area around the slimmer visible pill.
+        Box(modifier.heightIn(min = MinTouch).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+            Pill(text, Modifier, icon, dotColor, iconTint, background, onClick = null)
+        }
+        return
+    }
+    val clickMod = Modifier
     Row(
         modifier = modifier
             .clip(shape)
@@ -132,7 +139,7 @@ fun Pill(
         }
         Text(
             text,
-            fontSize = dims.t(2.4f, min = 13f),
+            fontSize = dims.t(2.4f, min = 16f),
             color = theme.text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

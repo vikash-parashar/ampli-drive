@@ -60,10 +60,16 @@ class DriveApp : Application() {
     /** Ampli Shell: full screen, startup animation, the Ampli app list and its PIN. */
     val shell: com.vikash.ampli.drive.prefs.ShellPrefs by lazy { com.vikash.ampli.drive.prefs.ShellPrefs(this) }
     val fastag: FastagStore by lazy { FastagStore(this) }
+
+    /** Pro: WhatsApp messages read aloud (Settings, off by default). */
+    val messages: com.vikash.ampli.drive.messages.WhatsAppReader by lazy { com.vikash.ampli.drive.messages.WhatsAppReader(this) }
     val emergency: EmergencyStore by lazy { EmergencyStore(this) }
 
     /** Car owner features: break reminder, papers, parking, crash detection, weather, expenses. */
     val car: CarMonitor by lazy { CarMonitor(this) }
+
+    /** Papers (and FASTag pass) reminders spoken at car start. */
+    val paperVoice: com.vikash.ampli.drive.car.PaperVoice by lazy { com.vikash.ampli.drive.car.PaperVoice(this) }
 
     /** OBD-II dongle (Pro) and BLE tyre sensors (Pro). */
     val obd: ObdClient by lazy { ObdClient(this) }
@@ -73,11 +79,16 @@ class DriveApp : Application() {
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }
     val wakeModel: WakeModel by lazy { WakeModel(this) }
 
+    /** Optional offline Hindi command model (~42 MB), downloaded only when the driver asks. */
+    val hindiModel: WakeModel by lazy { WakeModel(this, com.vikash.ampli.drive.voice.VoskModelSpec.Hindi) }
+
     /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
     val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
 
     override fun onCreate() {
         super.onCreate()
+        // Server endpoints: cached remote config over BuildConfig (one small GET at most every 12 h).
+        com.vikash.ampli.drive.config.RemoteConfig.init(this)
         // A fresh install starts in Hindi (FirstRunDefaults). Runs before the first activity, so
         // MainActivity already opens in it. A per-app language set in system Settings wins.
         prefs.takeFirstRunLanguage()?.let { tag ->

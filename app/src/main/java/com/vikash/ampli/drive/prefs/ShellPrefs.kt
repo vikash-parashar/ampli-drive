@@ -55,6 +55,13 @@ class ShellPrefs(context: Context) {
 
     fun checkPin(pin: String): Boolean = sp.getString(KEY_PIN_HASH, null)?.let { it == hash(pin) } ?: true
 
+    /** Quick controls › Equalizer (long press): the EQ app the driver picked, "package/activity"; null = automatic. */
+    var eqComponent: String?
+        get() = sp.getString(KEY_EQ_COMPONENT, null)
+        set(value) {
+            if (value == null) sp.edit().remove(KEY_EQ_COMPONENT).apply() else sp.edit().putString(KEY_EQ_COMPONENT, value).apply()
+        }
+
     /** "Not now" on the Home card; Settings still shows its card until Ampli is the home app. */
     var homeCardDismissed: Boolean
         get() = sp.getBoolean(KEY_HOME_CARD_DISMISSED, false)
@@ -69,6 +76,7 @@ class ShellPrefs(context: Context) {
         private const val KEY_DRAWER_APPS = "drawer_apps"
         private const val KEY_PIN_HASH = "drawer_pin"
         private const val KEY_HOME_CARD_DISMISSED = "home_card_dismissed"
+        private const val KEY_EQ_COMPONENT = "eq_component"
 
         /** A PIN is exactly four digits. */
         fun validPin(pin: String): Boolean = pin.length == 4 && pin.all { it in '0'..'9' }

@@ -148,7 +148,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!listener.isAvailable()) {
             // Neither a system recogniser nor the offline model: start the model download so
             // the next try works, and point at Settings › Voice › Check voice.
-            app.wakeModel.ensure()
+            app.wakeModel.ensure(automatic = true)
             say(res, lang, R.string.voice_unavailable)
             return
         }
@@ -519,7 +519,9 @@ class VoiceAssistant(private val app: DriveApp) {
     private suspend fun styled(res: Context, lang: String, event: HaryanviLines.Event, standard: String, vararg args: Any) {
         val desi = app.desi.line(event, *args)
         if (desi == null) {
-            say(res, lang, standard)
+            _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = standard) }
+            // Without a TTS engine the recorded line for the same moment plays instead.
+            app.voicePlayer.sayPlain(standard, lang, event, *args)
             return
         }
         speakDesi(desi)

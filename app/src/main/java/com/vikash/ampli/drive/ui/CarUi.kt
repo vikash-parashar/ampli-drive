@@ -82,10 +82,41 @@ import kotlin.math.roundToInt
 /** Data-entry screens lock above this speed. */
 const val PARK_TO_EDIT_KMH = 10f
 
+/**
+ * Whether the text-entry lock is on. A missing speed (GPS lost in a tunnel or under a flyover)
+ * counts as moving for [DriveLock.STALE_MS] after the car was last seen moving: the lock fails
+ * closed. A unit that has never had a moving fix (garage, no GPS) stays editable.
+ */
+object DriveLock {
+    const val STALE_MS = 2 * 60_000L
+
+    /** elapsedRealtime of the last fix above [PARK_TO_EDIT_KMH]; 0 = never. */
+    @Volatile var lastMovingAtMs = 0L
+
+    fun moving(speedKmh: Float?, lastMovingAtMs: Long, nowMs: Long): Boolean = when {
+        speedKmh != null -> speedKmh > PARK_TO_EDIT_KMH
+        else -> lastMovingAtMs > 0L && nowMs - lastMovingAtMs in 0 until STALE_MS
+    }
+
+    /** [moving] for code outside Compose (car start, receivers), from the current GPS speed. */
+    fun movingNow(speedKmh: Float?): Boolean = moving(speedKmh, lastMovingAtMs, android.os.SystemClock.elapsedRealtime())
+}
+
 @Composable
 fun isMoving(app: DriveApp): Boolean {
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
-    return (gps.speedKmh ?: 0f) > PARK_TO_EDIT_KMH
+    val speed = gps.speedKmh
+    // SpeedTracker stamps every moving fix; this also covers a speed set by other means (tests).
+    if (speed != null && speed > PARK_TO_EDIT_KMH) DriveLock.lastMovingAtMs = android.os.SystemClock.elapsedRealtime()
+    if (gps.lastMovingElapsedMs > DriveLock.lastMovingAtMs) DriveLock.lastMovingAtMs = gps.lastMovingElapsedMs
+    // Re-checks every few seconds while there is no speed, so the lock lifts after STALE_MS.
+    val now by androidx.compose.runtime.produceState(android.os.SystemClock.elapsedRealtime(), speed == null) {
+        while (speed == null) {
+            kotlinx.coroutines.delay(5_000L)
+            value = android.os.SystemClock.elapsedRealtime()
+        }
+    }
+    return DriveLock.moving(speed, DriveLock.lastMovingAtMs, now)
 }
 
 /** Shows [content] only while parked; otherwise a big "Park to edit" message. Both fill [modifier]. */
@@ -199,14 +230,14 @@ fun CarChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
     val bg = if (danger) theme.danger else theme.warning
     val fg = if (danger) theme.onDanger else Color(0xFF111111)
-    Box(modifier.heightIn(min = 56.dp).widthIn(max = 280.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+    Box(modifier.heightIn(min = MinTouch).widthIn(max = 280.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
         Row(
             Modifier.clip(shape).background(bg).padding(horizontal = dims.d(1.8f), vertical = dims.d(0.9f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
         ) {
             Icon(Icons.Filled.Warning, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(2.8f)))
-            Text(text, fontSize = dims.t(2.4f, min = 13f), color = fg, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text, fontSize = dims.t(2.4f, min = 16f), color = fg, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

@@ -52,7 +52,11 @@ TAG_BY_GROUP = {
     "Car": "[concerned]",
     "Music": "[cheerfully]",
 }
-NO_TAG_EVENTS = {"Distance", "NavSoonTail", "CameraAheadTail", "NavNow", "NavSoon"}
+# Numbers, paper names and the tails stitched after them are fragments too.
+NO_TAG_EVENTS = {"Distance", "NavSoonTail", "CameraAheadTail", "NavNow", "NavSoon",
+                 "Number", "PaperName", "PaperDueTail", "PaperExpiredTail", "PassTripsTail",
+                 # Crash / SOS prompts: plain and calm, no delivery tag.
+                 "Safety"}
 
 
 def key():
@@ -318,6 +322,7 @@ def generate(args):
     except Exception:
         before = None
 
+    planned_total = [0]
     for voice in [v.strip() for v in args.voices.split(",") if v.strip()]:
         if voice not in ("male", "female"):
             annotate("error", "Voice pack", f"unknown voice '{voice}' (use male, female)"); sys.exit(1)
@@ -339,6 +344,18 @@ def generate(args):
             if name.endswith(".ogg") and name[:-4] not in ids:
                 os.remove(os.path.join(folder, name))
         clips = {k: v for k, v in clips.items() if k in ids}
+
+        todo = [e for e in entries
+                if not (args.only_missing and os.path.exists(os.path.join(folder, e["id"] + ".ogg")) and clips.get(e["id"]) == e["hash"])]
+        planned = sum(len(tagged(e)) for e in todo)
+        print(f"{voice}: {len(todo)} clips to record, about {planned} characters")
+        if args.max_chars and planned_total[0] + planned > args.max_chars:
+            annotate("error", "Voice pack budget",
+                     f"{voice}: this run would send about {planned_total[0] + planned} characters, over the --max-chars "
+                     f"budget of {args.max_chars}. Nothing more was recorded. Raise VOICE_MAX_CHARS or record fewer lines.")
+            save_index(index_path, vid, settings, clips)
+            break
+        planned_total[0] += planned
 
         chars = billed = done = skipped = failed = 0
         with tempfile.TemporaryDirectory() as tmp:
@@ -417,6 +434,8 @@ def main():
     g = sub.add_parser("generate")
     g.add_argument("--voices", default="male,female")
     g.add_argument("--only-missing", action="store_true")
+    g.add_argument("--max-chars", type=int, default=int(os.environ.get("VOICE_MAX_CHARS") or 0),
+                   help="Stop before a voice whose clips would push the run over this many characters (0 = no limit)")
     args = p.parse_args()
     {"list-voices": cmd_list_voices, "generate": cmd_generate}[args.cmd](args)
 

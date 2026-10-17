@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ఇంకా అత్యవసర కాంటాక్ట్‌లు లేవు. సెట్టింగ్‌లు › అత్యవసర ప్రొఫైల్‌లో జోడించండి.</string>
     <string name="help_medical_info">వైద్య సమాచారం</string>
     <string name="sos_button_hint">మీ అత్యవసర కాంటాక్ట్‌ల కోసం మీ లొకేషన్‌తో మెసేజ్ తెరుస్తుంది</string>
-    <string name="sos_countdown_title">SOS పంపబడుతుంది</string>
+    <string name="sos_countdown_title">SOS సందేశం తెరుచుకుంటుంది</string>
     <string name="sos_cancel">రద్దు చేయి</string>
     <string name="sos_send_now">ఇప్పుడే పంపు</string>
     <string name="sos_location_ready">లొకేషన్ దొరికింది</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS కోసం వేచి ఉంది</string>
     <string name="weather_setting">వాతావరణం మరియు పొగమంచు హెచ్చరికలు</string>
     <string name="weather_setting_hint">ప్రతి 15 నిమిషాలకు ఇక్కడ, 25 కిమీ మరియు 50 కిమీ ముందు తనిఖీ చేస్తుంది</string>
-    <string name="crash_voice">ప్రమాదం గుర్తించబడింది. %1$d సెకన్లలో అత్యవసర హెచ్చరిక పంపబడుతుంది. రద్దు చేయడానికి ‘నేను బాగున్నాను’ అని చెప్పండి లేదా ట్యాప్ చేయండి.</string>
+    <string name="crash_voice">ప్రమాదం గుర్తించబడింది. %1$d సెకన్లలో మీ అత్యవసర పరిచయానికి పంపడానికి SOS సందేశం సిద్ధమవుతుంది. రద్దు చేయడానికి ‘నేను బాగున్నాను’ అని చెప్పండి లేదా నొక్కండి.</string>
     <string name="crash_title">ప్రమాదం జరిగి ఉండవచ్చు</string>
     <string name="crash_send_needs_tap">SMS పంపడానికి Android కి ఒక ట్యాప్ కావాలి.</string>
     <string name="crash_im_ok">నేను బాగున్నాను</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">మీరు ఇంకా ఏమీ పంపలేదు.</string>
     <string name="feedback_waiting">%1$d పంపడానికి వేచి ఉన్నాయి</string>
     <string name="feedback_reply">సమాధానం: %1$s</string>
+    <string name="sos_limits_note">SOS ఈ కాంటాక్ట్‌ల కోసం మీ లొకేషన్‌తో మెసేజ్ యాప్‌ను తెరుస్తుంది. ఎవరైనా పంపు నొక్కాలి: Ampli స్వయంగా SMS పంపలేదు లేదా కాల్ చేయలేదు. ప్రమాద గుర్తింపు ఏదైనా ప్రమాదాన్ని గుర్తించకపోవచ్చు లేదా పొరపాటున మొదలవ్వచ్చు.</string>
+    <string name="nav_search_moving">డ్రైవ్ చేస్తున్నప్పుడు టైపింగ్ ఆఫ్‌లో ఉంది. “Say it” నొక్కి ఎక్కడికి వెళ్లాలో చెప్పండి.</string>
+    <string name="payment_pending_title">చెల్లింపు పెండింగ్‌లో ఉంది</string>
+    <string name="payment_pending_hint">మీ UPI లేదా ఇతర చెల్లింపు ఆమోదం కోసం Google Play ఎదురుచూస్తోంది. మీ చెల్లింపు యాప్‌లో ఆమోదించండి; మళ్లీ చెల్లించాల్సిన అవసరం లేదు.</string>
+    <string name="voice_tts_missing_hint">ఫోన్ వాయిస్ (TTS) ఇన్‌స్టాల్ కాలేదు; Ampli వాయిస్ వాడుతోంది.</string>
+    <string name="shell_open_settings">సెట్టింగ్‌లు తెరవండి</string>
+    <string name="autostart_acc_note">“బ్యాక్‌గ్రౌండ్‌లో పర్యవేక్షణ” ఆన్‌లో ఉన్నప్పుడే హెడ్ యూనిట్ ఇగ్నిషన్ (ACC) సంకేతాలు అందుతాయి.</string>
+    <string name="about_not_affiliated">Ampli Studio కి NPCI, NHAI, Apple లేదా Google తో ఎలాంటి సంబంధం లేదు. FASTag, CarPlay, Android Auto, Google Maps పేర్లు Car Hub వేటితో పనిచేస్తుందో చెప్పడానికే.</string>
+    <string name="shell_eq_pick_title">మీ ఈక్వలైజర్ యాప్‌ను ఎంచుకోండి</string>
 </resources>

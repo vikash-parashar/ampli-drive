@@ -212,7 +212,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     WakeModel.State.Missing -> "not downloaded"
                     is WakeModel.State.Downloading -> "downloading ${m.percent}%"
                     WakeModel.State.Unpacking -> "unpacking"
-                    WakeModel.State.Ready -> "ready (${WakeModel.MODEL_NAME})"
+                    WakeModel.State.Ready -> "ready (${app.wakeModel.spec.dirName})"
                     is WakeModel.State.Failed -> "FAILED: ${m.message}"
                 }
                 DiagRow(
@@ -225,6 +225,18 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         stringResource(R.string.vcheck_download)
                     },
                     onAction = { app.wakeModel.ensure() },
+                )
+                val hindi by app.hindiModel.state.collectAsStateWithLifecycle()
+                DiagRow(
+                    "Offline Hindi commands (Vosk)",
+                    when (val m = hindi) {
+                        WakeModel.State.Missing -> "not downloaded (optional, Settings › Voice)"
+                        is WakeModel.State.Downloading -> "downloading ${m.percent}%"
+                        WakeModel.State.Unpacking -> "unpacking"
+                        WakeModel.State.Ready -> "ready (${app.hindiModel.spec.dirName})"
+                        is WakeModel.State.Failed -> "FAILED: ${m.message}"
+                    } + (app.hindiModel.loadError?.let { " · load error: $it" } ?: ""),
+                    if (hindi == WakeModel.State.Ready) true else null,
                 )
             }
             DiagSection("Speech recognition") {
@@ -329,8 +341,8 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
     var net by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var netRun by remember { mutableIntStateOf(0) }
     LaunchedEffect(netRun) {
-        net = NET_HOSTS.map { it to "testing…" }
-        net = NET_HOSTS.map { url -> url to withContext(Dispatchers.IO) { probe(url) } }
+        net = netHosts().map { it to "testing…" }
+        net = netHosts().map { url -> url to withContext(Dispatchers.IO) { probe(url) } }
     }
     val ramGb = remember {
         val mi = ActivityManager.MemoryInfo()
@@ -361,7 +373,7 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
             }
             DiagSection("Map") {
                 DiagRow("Style", map.styleUrl ?: "(not started)", null)
-                DiagRow("State", map.phase.name + if (map.basic) " · BASIC raster fallback" else "", map.phase == com.vikash.ampli.drive.map.MapStatus.Phase.MapLoaded)
+                DiagRow("State", map.phase.name + (if (map.basic) " · own fallback style" else "") + (if (map.unavailable) " · TILES UNAVAILABLE" else ""), map.phase == com.vikash.ampli.drive.map.MapStatus.Phase.MapLoaded)
                 DiagRow("Frame drawn", yes(map.drewFrame), map.drewFrame)
                 DiagRow(
                     "Drawing surface",
@@ -444,13 +456,18 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
     }
 }
 
-private val NET_HOSTS = listOf(
-    "https://tiles.openfreemap.org/styles/liberty",
-    "https://tile.openstreetmap.org/0/0/0.png",
-    "https://alphacephei.com/vosk/models/",
-    // In-app navigation routing (a tiny route in Delhi).
-    BuildConfig.ROUTING_BASE_URL.trimEnd('/') + "/route/v1/driving/77.2090,28.6139;77.2167,28.6200?overview=false",
-)
+/** The servers this build talks to (RemoteConfig over BuildConfig); unconfigured ones are skipped. */
+private fun netHosts(): List<String> {
+    val cfg = com.vikash.ampli.drive.config.RemoteConfig.current()
+    return listOfNotNull(
+        "https://tiles.openfreemap.org/styles/liberty",
+        cfg.mapFallbackStyleUrl.takeIf { it.isNotBlank() },
+        "https://alphacephei.com/vosk/models/",
+        // In-app navigation routing (a tiny route in Delhi).
+        cfg.routingBaseUrl.takeIf { it.isNotBlank() }?.let { it.trimEnd('/') + "/route/v1/driving/77.2090,28.6139;77.2167,28.6200?overview=false" },
+        cfg.geocoderUrl.takeIf { it.isNotBlank() }?.let { it + (if (it.contains('?')) "&" else "?") + "q=Rohtak&limit=1" },
+    )
+}
 
 /** One HTTPS request, so TLS (old CA store) and DNS problems show by name. */
 private fun probe(url: String): String {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro trip cost card (ui/TripCostCard), behind TripCostFlags.ENABLED (off). -->
+<resources>
+    <string name="trip_cost_title">Trip cost</string>
+    <string name="trip_cost_example">EXAMPLE</string>
+    <string name="trip_cost_route">Planned route · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d tolls</string>
+    <string name="trip_cost_fuel">Fuel</string>
+    <string name="trip_cost_fuel_unknown">Add a fill-up</string>
+    <string name="trip_cost_pass_saves">Annual Pass saves</string>
+    <string name="trip_cost_pass_would_save">Annual Pass would save</string>
+    <string name="trip_cost_pass_trips">%1$d pass trips</string>
+    <string name="trip_cost_total">Tolls + fuel</string>
+    <string name="trip_cost_note">Estimate. Fuel uses your own mileage and last fill-up price. Toll rates can change.</string>
+    <string name="trip_cost_example_note">Sample numbers for a preview, not a real route.</string>
+</resources>

@@ -129,7 +129,7 @@
     <string name="help_no_contacts">Noch keine Notfallkontakte. Füge sie unter Einstellungen › Notfallprofil hinzu.</string>
     <string name="help_medical_info">Medizinische Infos</string>
     <string name="sos_button_hint">Öffnet eine Nachricht mit deinem Standort an deine Notfallkontakte</string>
-    <string name="sos_countdown_title">SOS wird gesendet in</string>
+    <string name="sos_countdown_title">SOS-Nachricht öffnet in</string>
     <string name="sos_cancel">Abbrechen</string>
     <string name="sos_send_now">Jetzt senden</string>
     <string name="sos_location_ready">Standort gefunden</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">Warte auf GPS</string>
     <string name="weather_setting">Wetter- und Nebelwarnungen</string>
     <string name="weather_setting_hint">Prüft alle 15 Minuten hier, 25 km und 50 km voraus</string>
-    <string name="crash_voice">Unfall erkannt. Notruf wird in %1$d Sekunden gesendet. Sag oder tippe „Mir geht es gut“, um abzubrechen.</string>
+    <string name="crash_voice">Unfall erkannt. In %1$d Sekunden ist eine SOS-SMS an deinen Notfallkontakt zum Senden bereit. Sag oder tippe „Mir geht es gut“, um abzubrechen.</string>
     <string name="crash_title">Möglicher Unfall erkannt</string>
     <string name="crash_send_needs_tap">Android braucht einen Tipp, um die SMS zu senden.</string>
     <string name="crash_im_ok">Mir geht es gut</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">Du hast noch nichts gesendet.</string>
     <string name="feedback_waiting">%1$d warten auf das Senden</string>
     <string name="feedback_reply">Antwort: %1$s</string>
+    <string name="sos_limits_note">SOS öffnet Ihre Nachrichten-App mit einem Text und Ihrem Standort für diese Kontakte. Jemand muss auf Senden tippen: Ampli kann nicht selbst SMS senden oder anrufen. Die Unfallerkennung kann einen Unfall übersehen oder versehentlich starten.</string>
+    <string name="nav_search_moving">Tippen ist während der Fahrt aus. Tippen Sie auf „Say it“ und sagen Sie das Ziel.</string>
+    <string name="payment_pending_title">Zahlung ausstehend</string>
+    <string name="payment_pending_hint">Google Play wartet auf die Freigabe Ihrer UPI- oder anderen Zahlung. Geben Sie sie in Ihrer Zahlungs-App frei; Sie müssen nicht erneut zahlen.</string>
+    <string name="voice_tts_missing_hint">Keine Telefonstimme installiert; die Ampli-Stimme spricht.</string>
+    <string name="shell_open_settings">Einstellungen öffnen</string>
+    <string name="autostart_acc_note">Zündungssignale (ACC) des Geräts kommen nur an, solange „Im Hintergrund überwachen“ an ist.</string>
+    <string name="about_not_affiliated">Ampli Studio steht in keiner Verbindung zu NPCI, NHAI, Apple oder Google. FASTag, CarPlay, Android Auto und Google Maps werden nur genannt, um zu sagen, womit Car Hub funktioniert.</string>
+    <string name="shell_eq_pick_title">Equalizer-App wählen</string>
 </resources>

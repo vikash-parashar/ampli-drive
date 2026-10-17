@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.3"
+agp = "8.9.1"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
 activityCompose = "1.9.3"
@@ -8,8 +8,8 @@ composeBom = "2024.12.01"
 coroutines = "1.9.0"
 # MapLibre Native for Android, OpenGL ES build. Last 11.8.x patch; built with Kotlin 2.0.20.
 maplibre = "11.8.8"
-# Google Play Billing for the one-time Ampli Drive Pro unlock (same version as the Ampli music app).
-billing = "7.1.1"
+# Google Play Billing 8 (Play requires 8+ for uploads since 31 Aug 2026): Pro unlock and tips.
+billing = "8.0.0"
 # ExoPlayer for the recorded voice pack (Opus in Ogg; works on Android 8 through its own Ogg reader).
 media3 = "1.5.1"
 junit = "4.13.2"

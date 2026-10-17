@@ -114,10 +114,16 @@ fun EmergencyProfileScreen(app: DriveApp, onBack: () -> Unit) {
             }
             BigButton(text = stringResource(R.string.em_save), onClick = onBack)
         }
+        // No typing while the car moves (Play driver-distraction rules).
+        ParkToEdit(app, Modifier.fillMaxWidth().weight(1f)) {
         Column(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
+            // What SOS can and can't do, said plainly.
+            SettingCard {
+                Text(stringResource(R.string.sos_limits_note), fontSize = dims.t(2.4f, min = 14f), color = theme.warning)
+            }
             SettingCard {
                 Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                     CardTitle(stringResource(R.string.help_your_contacts), stringResource(R.string.em_contacts_hint))
@@ -201,6 +207,7 @@ fun EmergencyProfileScreen(app: DriveApp, onBack: () -> Unit) {
                     ProfileField(insurance, { insurance = it }, stringResource(R.string.em_insurance), KeyboardCapitalization.Sentences)
                 }
             }
+        }
         }
     }
 }

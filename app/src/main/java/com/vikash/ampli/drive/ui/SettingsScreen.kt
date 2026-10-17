@@ -142,6 +142,8 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
+            // A Pro or tip payment still waiting for UPI approval.
+            PaymentPendingNote(app = app)
             // Ampli Shell: shown until Ampli is the head unit's home app.
             if (!isHome) DefaultHomeCard(onMake = makeHome, onLater = null, modifier = Modifier.fillMaxWidth())
             ThemePicker(
@@ -249,6 +251,7 @@ fun SettingsScreen(
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
+            PapersReminderCard(app = app)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)
@@ -256,6 +259,7 @@ fun SettingsScreen(
             WelcomeSettingsCard(app = app)
             NavigateWithCard(app = app)
             NavPromptsCard(app = app)
+            WhatsAppReadCard(app = app, isPro = pro.isPro, resumeTick = resumeTick, onLocked = { showProSheet = true })
             CarStartCard(app = app)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             // Settings › Display: Ampli as the whole screen.
@@ -296,6 +300,7 @@ fun SettingsScreen(
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
                     stringResource(R.string.weather_attribution),
+                    stringResource(R.string.about_not_affiliated),
                 ),
             )
             // Settings › About › Diagnostics: real Android version, map, GPS, network, for support photos.
@@ -414,11 +419,11 @@ internal fun SettingRow(
     }
 }
 
-/** Privacy policy, published from docs/privacy-policy.html with GitHub Pages. */
 /** Ampli's website (Settings › About, Help & feedback, privacy policy). */
 const val WEBSITE_URL = "https://ampliapps.in"
 
-const val PRIVACY_POLICY_URL = "https://vikash-parashar.github.io/ampli-drive/privacy-policy.html"
+/** Car Hub privacy policy on the Ampli website (source: docs/privacy-policy.html). */
+const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
 
 @Composable
 private fun LinkRow(icon: ImageVector, title: String, hint: String, action: String, onClick: () -> Unit) {

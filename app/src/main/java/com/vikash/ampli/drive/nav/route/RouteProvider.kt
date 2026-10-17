@@ -39,23 +39,27 @@ interface RouteProvider {
 }
 
 /**
- * OSRM HTTP API (`/route/v1/driving`). [baseUrl] comes from BuildConfig.ROUTING_BASE_URL.
+ * OSRM HTTP API (`/route/v1/driving`). [baseUrl] comes from RemoteConfig (BuildConfig.ROUTING_BASE_URL
+ * underneath). Release builds fail to compile without our own server (see deploy/osrm-photon).
  *
- * IMPORTANT: the default, https://router.project-osrm.org, is the OSRM project's public DEMO
+ * IMPORTANT: debug builds default to https://router.project-osrm.org, the OSRM project's public DEMO
  * server. It is for testing only: no SLA, about one request per second, and its usage policy does
  * not allow production apps. Before release, point ROUTING_BASE_URL (a CI repository variable) at
  * our own OSRM server (osrm-backend in Docker with an India extract from Geofabrik).
  */
 class OsrmRouteProvider(
-    baseUrl: String,
+    /** Read on every request, so a remote-config change applies without a restart. */
+    private val baseUrl: () -> String,
     private val userAgent: String,
     private val timeoutMs: Int = 12_000,
 ) : RouteProvider {
-    private val base = baseUrl.trim().trimEnd('/')
+    private val base: String get() = baseUrl().trim().trimEnd('/')
 
-    override val serverLabel: String get() = base
+    override val serverLabel: String get() = base.ifEmpty { "not configured" }
 
     override fun route(from: LatLon, to: LatLon, bearing: Float?): RouteResult {
+        // Release builds never fall back to a public server: no URL, no route.
+        if (base.isEmpty()) return RouteResult.Failed(RouteResult.Reason.Server, "Routing server not configured")
         // Try the richest request first. Some OSRM builds reject the maxspeed annotation or a
         // bearing that doesn't fit the nearest road with HTTP 400; then ask again with less.
         val attempts = buildList {

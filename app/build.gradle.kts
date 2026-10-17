@@ -4,32 +4,60 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+/** A CI repository variable (environment), trimmed and without quotes; "" when unset. */
+fun env(name: String): String = (System.getenv(name) ?: "").trim().replace("\"", "")
+
+// Release builds must use our own routing and place-search servers (deploy/osrm-photon).
+// ALLOW_UNCONFIGURED_SERVERS=true lets a CI smoke test build a release (R8 check) anyway: the app
+// then has routing and search switched off, never a public demo server.
+val releaseMissing = listOf("ROUTING_BASE_URL", "GEOCODER_URL").filter { env(it).isEmpty() }
+val releaseAllowUnconfigured = env("ALLOW_UNCONFIGURED_SERVERS") == "true"
+val checkReleaseEndpoints by tasks.registering {
+    group = "verification"
+    description = "Fails release builds that would use public demo servers."
+    val missing = releaseMissing
+    val allow = releaseAllowUnconfigured
+    doLast {
+        if (missing.isNotEmpty() && !allow) {
+            val msg = "Release build needs your own servers: set ${missing.joinToString(" and ")} " +
+                "(CI repository variables), or ALLOW_UNCONFIGURED_SERVERS=true for a smoke-test-only " +
+                "build. See deploy/osrm-photon/README.md."
+            // Shows as a check annotation on GitHub, so the reason is visible without the log.
+            if (System.getenv("GITHUB_ACTIONS") == "true") println("::error title=Release servers::$msg")
+            throw GradleException(msg)
+        }
+    }
+}
+tasks.matching { it.name.startsWith("pre") && it.name.endsWith("ReleaseBuild") }.configureEach {
+    dependsOn(checkReleaseEndpoints)
+}
+
 android {
     namespace = "com.vikash.ampli.drive"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.vikash.ampli.drive"
         // 26 (Android 8.0): many head units report "Android 12+" in About but really run Android 8 to 11.
         // Newer APIs are guarded with SDK_INT checks or androidx compat; lint fails the build on NewApi.
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // CI passes the run number so each test build installs as an update over the last one.
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
         versionName = "0.1.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
 
         // Ampli owner server for Help & feedback. CI fills it from the OWNER_API_URL repository
         // variable; empty means "no server yet" and the app falls back to an email.
-        val ownerApi = (System.getenv("OWNER_API_URL") ?: "").trim().replace("\"", "")
-        buildConfigField("String", "OWNER_API_URL", "\"$ownerApi\"")
+        buildConfigField("String", "OWNER_API_URL", "\"${env("OWNER_API_URL")}\"")
 
-        // In-app navigation routes (OSRM HTTP API). CI fills it from the ROUTING_BASE_URL
-        // repository variable. Without it, the OSRM project's public demo server is used, which is
-        // for TESTING ONLY (no SLA, ~1 request/s, not allowed for production apps): point this at
-        // your own OSRM server before release.
-        val routingBase = (System.getenv("ROUTING_BASE_URL") ?: "").trim().replace("\"", "")
-            .ifEmpty { "https://router.project-osrm.org" }
-        buildConfigField("String", "ROUTING_BASE_URL", "\"$routingBase\"")
+        // Servers (see deploy/osrm-photon/README.md). CI fills them from repository variables.
+        // Release builds get ONLY these values (the build fails without routing and place search);
+        // debug builds fall back to the public demo servers below, which are for testing only.
+        buildConfigField("String", "WEATHER_API_KEY", "\"${env("WEATHER_API_KEY")}\"")
+        // Our own map style (e.g. PMTiles on S3/CloudFront) tried when the theme's style fails.
+        buildConfigField("String", "MAP_FALLBACK_STYLE_URL", "\"${env("MAP_FALLBACK_STYLE_URL")}\"")
+        // Small JSON on our own server that can move the servers above without an update (RemoteConfig).
+        buildConfigField("String", "REMOTE_CONFIG_URL", "\"${env("REMOTE_CONFIG_URL")}\"")
 
         // Head units are ARM. Dropping the x86 MapLibre libraries keeps the APK much smaller.
         ndk {
@@ -52,8 +80,17 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
+            // Public demo servers for test builds only: OSRM demo, komoot Photon, Open-Meteo free API.
+            buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
+            buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
+            buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL").ifEmpty { "https://api.open-meteo.com/v1/forecast" }}\"")
         }
         release {
+            // Never a public demo server in a paid app: checkReleaseEndpoints fails the build when
+            // routing or place search is missing. Weather stays off until WEATHER_URL is set.
+            buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL")}\"")
+            buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL")}\"")
+            buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL")}\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -128,4 +165,21 @@ dependencies {
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// On CI, each failing unit test becomes a check annotation (class, test, first line of the error),
+// so a red "Unit tests" step says which test broke without opening the log.
+if (System.getenv("GITHUB_ACTIONS") == "true") {
+    tasks.withType<Test>().configureEach {
+        addTestListener(object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) {}
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
+            override fun beforeTest(testDescriptor: TestDescriptor) {}
+            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
+                if (result.resultType != TestResult.ResultType.FAILURE) return
+                val why = result.exception?.toString()?.lineSequence()?.firstOrNull()?.take(300).orEmpty()
+                println("::error title=Test failed::${testDescriptor.className}.${testDescriptor.name}: $why")
+            }
+        })
+    }
 }

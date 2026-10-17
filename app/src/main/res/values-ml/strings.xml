@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ഇതുവരെ അടിയന്തര കോൺടാക്റ്റുകളില്ല. ക്രമീകരണങ്ങൾ › അടിയന്തര പ്രൊഫൈലിൽ ചേർക്കുക.</string>
     <string name="help_medical_info">മെഡിക്കൽ വിവരം</string>
     <string name="sos_button_hint">അടിയന്തര കോൺടാക്റ്റുകൾക്കായി നിങ്ങളുടെ ലൊക്കേഷനോടെ സന്ദേശം തുറക്കുന്നു</string>
-    <string name="sos_countdown_title">SOS അയയ്ക്കും</string>
+    <string name="sos_countdown_title">SOS സന്ദേശം തുറക്കും</string>
     <string name="sos_cancel">റദ്ദാക്കുക</string>
     <string name="sos_send_now">ഇപ്പോൾ അയയ്ക്കുക</string>
     <string name="sos_location_ready">ലൊക്കേഷൻ കിട്ടി</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS നായി കാത്തിരിക്കുന്നു</string>
     <string name="weather_setting">കാലാവസ്ഥ, മൂടൽമഞ്ഞ് മുന്നറിയിപ്പുകൾ</string>
     <string name="weather_setting_hint">ഓരോ 15 മിനിറ്റിലും ഇവിടെയും 25 കിമീ, 50 കിമീ മുന്നിലും പരിശോധിക്കുന്നു</string>
-    <string name="crash_voice">അപകടം കണ്ടെത്തി. %1$d സെക്കൻഡിനുള്ളിൽ അടിയന്തര മുന്നറിയിപ്പ് അയയ്ക്കും. റദ്ദാക്കാൻ ‘എനിക്ക് കുഴപ്പമില്ല’ എന്ന് പറയുക അല്ലെങ്കിൽ ടാപ്പ് ചെയ്യുക.</string>
+    <string name="crash_voice">അപകടം കണ്ടെത്തി. %1$d സെക്കൻഡിനുള്ളിൽ നിങ്ങളുടെ അടിയന്തര കോൺടാക്റ്റിന് അയയ്ക്കാൻ SOS സന്ദേശം തയ്യാറാകും. റദ്ദാക്കാൻ ‘എനിക്ക് കുഴപ്പമില്ല’ എന്ന് പറയുക അല്ലെങ്കിൽ അമർത്തുക.</string>
     <string name="crash_title">അപകടം സംഭവിച്ചിരിക്കാം</string>
     <string name="crash_send_needs_tap">SMS അയയ്ക്കാൻ Android ന് ഒരു ടാപ്പ് വേണം.</string>
     <string name="crash_im_ok">എനിക്ക് കുഴപ്പമില്ല</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">നിങ്ങൾ ഇതുവരെ ഒന്നും അയച്ചിട്ടില്ല.</string>
     <string name="feedback_waiting">%1$d എണ്ണം അയയ്ക്കാൻ കാത്തിരിക്കുന്നു</string>
     <string name="feedback_reply">മറുപടി: %1$s</string>
+    <string name="sos_limits_note">SOS ഈ കോൺടാക്റ്റുകൾക്കായി നിങ്ങളുടെ ലൊക്കേഷനോടെ മെസേജ് ആപ്പ് തുറക്കുന്നു. ആരെങ്കിലും അയയ്ക്കുക അമർത്തണം: Ampli-ക്ക് സ്വയം SMS അയയ്ക്കാനോ വിളിക്കാനോ കഴിയില്ല. അപകടം കണ്ടെത്തൽ ഒരു അപകടം വിട്ടുപോകാം അല്ലെങ്കിൽ അബദ്ധത്തിൽ തുടങ്ങാം.</string>
+    <string name="nav_search_moving">ഡ്രൈവ് ചെയ്യുമ്പോൾ ടൈപ്പിംഗ് ഓഫാണ്. “Say it” അമർത്തി എവിടേക്ക് പോകണമെന്ന് പറയൂ.</string>
+    <string name="payment_pending_title">പേയ്‌മെന്റ് ബാക്കിയാണ്</string>
+    <string name="payment_pending_hint">നിങ്ങളുടെ UPI അല്ലെങ്കിൽ മറ്റ് പേയ്‌മെന്റിന്റെ അംഗീകാരത്തിനായി Google Play കാത്തിരിക്കുന്നു. പേയ്‌മെന്റ് ആപ്പിൽ അംഗീകരിക്കൂ; വീണ്ടും പണം നൽകേണ്ടതില്ല.</string>
+    <string name="voice_tts_missing_hint">ഫോൺ ശബ്ദം (TTS) ഇൻസ്റ്റാൾ ചെയ്തിട്ടില്ല; Ampli ശബ്ദം ഉപയോഗിക്കുന്നു.</string>
+    <string name="shell_open_settings">ക്രമീകരണങ്ങൾ തുറക്കുക</string>
+    <string name="autostart_acc_note">“പശ്ചാത്തലത്തിൽ നിരീക്ഷിക്കുക” ഓണായിരിക്കുമ്പോൾ മാത്രമേ ഹെഡ് യൂണിറ്റിന്റെ ഇഗ്നിഷൻ (ACC) സിഗ്നലുകൾ ലഭിക്കൂ.</string>
+    <string name="about_not_affiliated">Ampli Studio-ക്ക് NPCI, NHAI, Apple, Google എന്നിവയുമായി ബന്ധമില്ല. FASTag, CarPlay, Android Auto, Google Maps എന്നീ പേരുകൾ Car Hub എന്തിനൊപ്പം പ്രവർത്തിക്കുന്നു എന്ന് പറയാൻ മാത്രം.</string>
+    <string name="shell_eq_pick_title">നിങ്ങളുടെ ഇക്വലൈസർ ആപ്പ് തിരഞ്ഞെടുക്കുക</string>
 </resources>

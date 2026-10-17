@@ -129,7 +129,7 @@
     <string name="help_no_contacts">এতিয়াও কোনো জৰুৰীকালীন সম্পৰ্ক নাই। ছেটিংছ › জৰুৰীকালীন প্ৰফাইলত যোগ কৰক।</string>
     <string name="help_medical_info">চিকিৎসা তথ্য</string>
     <string name="sos_button_hint">আপোনাৰ জৰুৰীকালীন সম্পৰ্কৰ বাবে আপোনাৰ অৱস্থানসহ বাৰ্তা খোলে</string>
-    <string name="sos_countdown_title">SOS পঠোৱা হ\'ব</string>
+    <string name="sos_countdown_title">SOS বাৰ্তা খোল খাব</string>
     <string name="sos_cancel">বাতিল কৰক</string>
     <string name="sos_send_now">এতিয়াই পঠিয়াওক</string>
     <string name="sos_location_ready">অৱস্থান পোৱা গ\'ল</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPSৰ বাবে অপেক্ষা</string>
     <string name="weather_setting">বতৰ আৰু কুঁৱলীৰ সতৰ্কবাণী</string>
     <string name="weather_setting_hint">প্ৰতি ১৫ মিনিটত ইয়াত, ২৫ কিমি আৰু ৫০ কিমি আগত পৰীক্ষা কৰে</string>
-    <string name="crash_voice">দুৰ্ঘটনা চিনাক্ত হৈছে। %1$d ছেকেণ্ডত জৰুৰী সতৰ্কবাণী পঠোৱা হ\'ব। বাতিল কৰিবলৈ ‘মই ঠিকে আছোঁ’ কওক বা টিপক।</string>
+    <string name="crash_voice">দুৰ্ঘটনা ধৰা পৰিছে। %1$d ছেকেণ্ডত আপোনাৰ জৰুৰী যোগাযোগৰ বাবে SOS বাৰ্তা পঠিয়াবলৈ সাজু হ\'ব। বাতিল কৰিবলৈ ‘মই ঠিকে আছোঁ’ কওক বা টিপক।</string>
     <string name="crash_title">সম্ভাৱ্য দুৰ্ঘটনা চিনাক্ত হৈছে</string>
     <string name="crash_send_needs_tap">SMS পঠাবলৈ Androidক এবাৰ টিপা লাগে।</string>
     <string name="crash_im_ok">মই ঠিকে আছোঁ</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">আপুনি এতিয়াও একো পঠোৱা নাই।</string>
     <string name="feedback_waiting">%1$dটা পঠোৱাৰ অপেক্ষাত</string>
     <string name="feedback_reply">উত্তৰ: %1$s</string>
+    <string name="sos_limits_note">SOS-এ এই সম্পৰ্কসমূহৰ বাবে আপোনাৰ অৱস্থানসহ বাৰ্তা এপ খোলে। কোনোবাই পঠিয়াওক টিপিব লাগিব: Ampli-এ নিজে SMS বা কল কৰিব নোৱাৰে। দুৰ্ঘটনা চিনাক্তকৰণে কোনো দুৰ্ঘটনা এৰি যাব পাৰে বা ভুলতে আৰম্ভ হ’ব পাৰে।</string>
+    <string name="nav_search_moving">গাড়ী চলাই থাকোঁতে টাইপিং বন্ধ। “Say it” টিপক আৰু ক’লৈ যাব কওক।</string>
+    <string name="payment_pending_title">পেমেণ্ট বাকী আছে</string>
+    <string name="payment_pending_hint">Google Play-এ আপোনাৰ UPI বা আন পেমেণ্টৰ অনুমোদনৰ বাবে অপেক্ষা কৰিছে। আপোনাৰ পেমেণ্ট এপত অনুমোদন দিয়ক; পুনৰ পইচা দিব নালাগে।</string>
+    <string name="voice_tts_missing_hint">ফোনৰ মাত (TTS) ইনষ্টল কৰা নাই; Ampli-ৰ মাত ব্যৱহাৰ হৈছে।</string>
+    <string name="shell_open_settings">ছেটিংছ খোলক</string>
+    <string name="autostart_acc_note">হেড ইউনিটৰ ইগনিশ্বন (ACC) সংকেত কেৱল “বেকগ্ৰাউণ্ডত নিৰীক্ষণ” অন থাকিলেহে পোৱা যায়।</string>
+    <string name="about_not_affiliated">Ampli Studio NPCI, NHAI, Apple বা Google-ৰ সৈতে জড়িত নহয়। FASTag, CarPlay, Android Auto আৰু Google Maps-ৰ নাম কেৱল Car Hub-ৰ সৈতে কি চলে বুজাবলৈ।</string>
+    <string name="shell_eq_pick_title">আপোনাৰ ইকুৱেলাইজাৰ এপ বাছক</string>
 </resources>

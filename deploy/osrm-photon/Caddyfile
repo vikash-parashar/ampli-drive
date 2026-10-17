@@ -1,0 +1,56 @@
+# TLS (Let's Encrypt) in front of OSRM and Photon. Only the endpoints the app uses are exposed.
+{
+	email {$ACME_EMAIL}
+}
+
+{$ROUTE_HOST} {
+	encode gzip
+	@route path /route/v1/driving/*
+	handle @route {
+		reverse_proxy osrm:5000
+	}
+	# Remote config for the app (RemoteConfig.kt): https://ROUTE_HOST/config/carhub.json
+	handle /config/* {
+		root * /srv/public
+		header Cache-Control "public, max-age=3600"
+		file_server
+	}
+	handle {
+		respond 404
+	}
+	log {
+		# No coordinates and no IPs in the access log: coordinates (path and query) and client address are dropped.
+		format filter {
+			wrap console
+			fields {
+				request>uri regexp "^(/route/v1/driving|/api|/reverse|/config)?.*$" "${1}"
+				request>remote_ip delete
+				request>client_ip delete
+				request>headers delete
+			}
+		}
+	}
+}
+
+{$GEO_HOST} {
+	encode gzip
+	@api path /api /api/ /reverse /reverse/
+	handle @api {
+		reverse_proxy photon:2322
+	}
+	handle {
+		respond 404
+	}
+	log {
+		# No coordinates and no IPs in the access log: coordinates (path and query) and client address are dropped.
+		format filter {
+			wrap console
+			fields {
+				request>uri regexp "^(/route/v1/driving|/api|/reverse|/config)?.*$" "${1}"
+				request>remote_ip delete
+				request>client_ip delete
+				request>headers delete
+			}
+		}
+	}
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wa_title">WhatsApp मैसेज बोलकर सुनाएँ</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">गाड़ी बताएगी किसका मैसेज है और उसमें क्या लिखा है, सिर्फ़ आवाज़ में।</string>
+    <string name="wa_hint_on">चालू। सिर्फ़ आवाज़: मैसेज का टेक्स्ट स्क्रीन पर कभी नहीं दिखता।</string>
+    <string name="wa_hint_locked">यह Pro फ़ीचर है। Pro देखने के लिए दबाएँ।</string>
+    <string name="wa_groups_title">ग्रुप के मैसेज भी सुनाएँ</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चैट चुप रहती हैं। सिर्फ़ आपको सीधे भेजे गए मैसेज सुनाए जाते हैं।</string>
+    <string name="wa_rules">20 सेकंड में ज़्यादा से ज़्यादा एक मैसेज। कॉल और मोड़ की आवाज़ के दौरान चुप। Car Hub कभी जवाब नहीं देता और कुछ नहीं भेजता।</string>
+    <string name="wa_needs_access">WhatsApp मैसेज सुनाने के लिए नोटिफ़िकेशन एक्सेस चाहिए।</string>
+    <string name="disclosure_wa_title">WhatsApp मैसेज बोलकर सुनाएँ</string>
+    <string name="disclosure_wa_body">गाड़ी चलाते समय आपके WhatsApp और WhatsApp Business मैसेज बोलकर सुनाने के लिए Car Hub उनके नोटिफ़िकेशन से भेजने वाले का नाम और मैसेज का टेक्स्ट पढ़ता है। इसके लिए नोटिफ़िकेशन एक्सेस का इस्तेमाल होता है।</string>
+    <string name="disclosure_wa_uses">हर मैसेज एक बार बोला जाता है और फिर भुला दिया जाता है। वह ड्राइविंग स्क्रीन पर कभी नहीं दिखता और कहीं सेव नहीं होता। Car Hub कभी जवाब नहीं देता, कभी SMS नहीं भेजता और चैट नहीं खोलता। ग्रुप के मैसेज तब तक छोड़ दिए जाते हैं जब तक आप अनुमति न दें। जब तक नोटिफ़िकेशन एक्सेस चालू है, यह Car Hub के बैकग्राउंड में रहने पर भी काम करता है।</string>
+    <string name="disclosure_wa_stays">सब कुछ इसी यूनिट पर होता है। कुछ भी अपलोड नहीं होता, न Ampli के साथ और न किसी और के साथ शेयर होता है।</string>
+</resources>

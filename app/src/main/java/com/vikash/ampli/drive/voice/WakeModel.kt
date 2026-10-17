@@ -18,11 +18,36 @@ import java.net.URL
 import java.util.zip.ZipInputStream
 
 /**
- * The small offline Vosk model used only to spot "Hey Ampli". It is about 36 MB, so it is not
- * in the APK: it downloads once, the first time the driver switches the wake word on, into
- * filesDir/vosk/. Progress shows in Settings › Voice.
+ * One downloadable Vosk model (Apache-2.0, alphacephei.com). [sha256]: lowercase hex of the zip;
+ * when set, a download that does not match is thrown away. Null skips the check (until the
+ * owner supplies the hashes).
  */
-class WakeModel(context: Context) {
+enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: Long, val sha256: String? = null) {
+    /** Wake word + English command fallback. */
+    EnglishIndia(
+        "vosk-model-small-en-in-0.4",
+        "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip",
+        36L * 1024 * 1024,
+    ),
+
+    /**
+     * Hindi commands (and Haryanvi said with Hindi words) on head units without Google speech.
+     * ~42 MB zipped, so it is never bundled: Settings › Voice downloads it when the driver asks.
+     */
+    Hindi(
+        "vosk-model-small-hi-0.22",
+        "https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip",
+        42L * 1024 * 1024,
+    ),
+}
+
+/**
+ * A small offline Vosk model, downloaded once into filesDir/vosk/<model>/ (never in the APK).
+ * [VoskModelSpec.EnglishIndia] spots "Hey Ampli" and is fetched the first time the driver switches
+ * the wake word on; [VoskModelSpec.Hindi] hears Hindi/Haryanvi commands and is fetched on demand.
+ * Progress shows in Settings › Voice.
+ */
+class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.EnglishIndia) {
     private val appContext = context.applicationContext
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var job: Job? = null
@@ -38,27 +63,48 @@ class WakeModel(context: Context) {
     private val root = File(appContext.filesDir, "vosk")
 
     /** Folder handed to org.vosk.Model. */
-    val modelDir = File(root, MODEL_NAME)
+    val modelDir = File(root, spec.dirName)
 
     private val _state = MutableStateFlow(if (isInstalled()) State.Ready else State.Missing)
     val state: StateFlow<State> = _state.asStateFlow()
 
     fun isInstalled(): Boolean = File(modelDir, READY_MARKER).exists()
 
-    /** Starts the download unless it is installed or already running. */
-    fun ensure() {
+    private val prefs = appContext.getSharedPreferences("wake_model", Context.MODE_PRIVATE)
+    private val failedKey = "${spec.dirName}.failedAt"
+
+    private fun markFailed() {
+        prefs.edit().putLong(failedKey, System.currentTimeMillis()).apply()
+    }
+
+    /** True while an [automatic] retry should wait after a failed download or load. */
+    private fun backingOff(now: Long = System.currentTimeMillis()): Boolean {
+        val at = prefs.getLong(failedKey, 0L)
+        return at > 0L && now - at in 0 until RETRY_BACKOFF_MS
+    }
+
+    /**
+     * Starts the download unless it is installed or already running. [automatic] (app start,
+     * every return home, a voice attempt): skipped for [RETRY_BACKOFF_MS] after a failure, so a
+     * model that will not download or load is not fetched again on every onResume. A tap in
+     * Settings passes false and always retries.
+     */
+    fun ensure(automatic: Boolean = false) {
         if (isInstalled()) {
             _state.value = State.Ready
             return
         }
         if (job?.isActive == true) return
+        if (automatic && backingOff()) return
         job = scope.launch {
             try {
                 download()
+                prefs.edit().remove(failedKey).apply()
                 _state.value = State.Ready
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                markFailed()
                 _state.value = State.Failed(e.message ?: e.javaClass.simpleName)
             }
         }
@@ -66,14 +112,14 @@ class WakeModel(context: Context) {
 
     private suspend fun download() {
         root.mkdirs()
-        val zip = File(appContext.cacheDir, "$MODEL_NAME.zip")
+        val zip = File(appContext.cacheDir, "${spec.dirName}.zip")
         _state.value = State.Downloading(0)
-        val conn = URL(MODEL_URL).openConnection() as HttpURLConnection
+        val conn = URL(spec.url).openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 15_000
             conn.readTimeout = 30_000
             if (conn.responseCode !in 200..299) throw IOException("HTTP ${conn.responseCode}")
-            val total = conn.contentLengthLong.takeIf { it > 0 } ?: APPROX_BYTES
+            val total = conn.contentLengthLong.takeIf { it > 0 } ?: spec.approxBytes
             conn.inputStream.use { input ->
                 zip.outputStream().use { out ->
                     val buf = ByteArray(64 * 1024)
@@ -96,9 +142,16 @@ class WakeModel(context: Context) {
         } finally {
             conn.disconnect()
         }
+        spec.sha256?.let { want ->
+            val got = sha256Hex(zip)
+            if (!got.equals(want, ignoreCase = true)) {
+                zip.delete()
+                throw IOException("Checksum mismatch")
+            }
+        }
 
         _state.value = State.Unpacking
-        val tmp = File(root, "$MODEL_NAME.tmp")
+        val tmp = File(root, "${spec.dirName}.tmp")
         tmp.deleteRecursively()
         tmp.mkdirs()
         val base = tmp.canonicalPath + File.separator
@@ -126,14 +179,15 @@ class WakeModel(context: Context) {
         File(modelDir, READY_MARKER).writeText("ok")
     }
 
-    /** Frees the 36 MB, for example when the driver switches the wake word off for good. */
+    /** Frees this model's space (the other model stays). */
     fun delete() {
         job?.cancel()
         synchronized(this) {
             loaded?.close()
             loaded = null
         }
-        root.deleteRecursively()
+        modelDir.deleteRecursively()
+        File(root, "${spec.dirName}.tmp").deleteRecursively()
         _state.value = State.Missing
     }
 
@@ -162,7 +216,9 @@ class WakeModel(context: Context) {
                     }
                 } catch (t: Throwable) {
                     loadError = t.message ?: t.javaClass.simpleName
-                    // A broken unpack: remove it so the next ensure() fetches a fresh copy.
+                    // A broken unpack: remove it so the next ensure() fetches a fresh copy, but
+                    // only after the back-off for automatic retries (no download loop).
+                    markFailed()
                     File(modelDir, READY_MARKER).delete()
                     _state.value = State.Failed(loadError ?: "load failed")
                     null
@@ -181,9 +237,22 @@ class WakeModel(context: Context) {
     }
 
     companion object {
-        const val MODEL_NAME = "vosk-model-small-en-in-0.4"
-        const val MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip"
-        private const val APPROX_BYTES = 36L * 1024 * 1024
         private const val READY_MARKER = ".ampli-ready"
+
+        /** Wait before an automatic retry after a failed download or load. */
+        const val RETRY_BACKOFF_MS = 6 * 60 * 60_000L
+
+        fun sha256Hex(file: File): String {
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val buf = ByteArray(64 * 1024)
+                while (true) {
+                    val n = input.read(buf)
+                    if (n < 0) break
+                    md.update(buf, 0, n)
+                }
+            }
+            return md.digest().joinToString("") { "%02x".format(it) }
+        }
     }
 }

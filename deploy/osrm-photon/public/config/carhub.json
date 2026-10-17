@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "routing_base_url": "https://route.ampliapps.in",
+  "geocoder_url": "https://geo.ampliapps.in/api/",
+  "weather_url": "",
+  "weather_api_key": "",
+  "map_fallback_style_url": ""
+}

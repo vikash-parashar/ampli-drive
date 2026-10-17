@@ -100,6 +100,8 @@ fun HomeScreen(
     onOpenNavSearch: () -> Unit = {},
     /** Ampli Shell quick controls (pull down on the status row, or its button). */
     onOpenQuick: () -> Unit = {},
+    /** Shown under the status row; pushes the panes down instead of covering them. */
+    banner: @Composable () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -197,6 +199,7 @@ fun HomeScreen(
                     )
                 },
         )
+        banner()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,7 +378,7 @@ private fun StatusRow(
         Text(
             theme.label(now.format(dateFmt)),
             style = theme.labelStyle(),
-            fontSize = dims.t(2.6f),
+            fontSize = dims.t(2.6f, min = 16f),
         )
         // Saffron family: a "have a safe trip" line in an Indian script, as in the designs.
         theme.greeting?.let {
@@ -558,9 +561,11 @@ private fun DockButton(
         Text(
             theme.label(label),
             style = theme.labelStyle(labelColor),
-            fontSize = dims.t(2.2f),
+            fontSize = dims.t(2.2f, min = 16f),
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.SemiBold,
-            maxLines = 1,
+            // 16 sp minimum on the driving screen: a long label ("HEY AMPLI") wraps instead of "…".
+            maxLines = 2,
+            lineHeight = dims.t(2.4f, min = 18f),
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 4.dp),

@@ -102,7 +102,7 @@ fun openFastagRecharge(context: Context, userUrl: String) {
 
 /**
  * Status-row chip: FASTag balance and when it was last updated. Red below the low-balance
- * threshold. The whole row height is the tap target (at least 56 dp).
+ * threshold. The whole row height is the tap target (at least 64 dp).
  */
 @Composable
 fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -116,11 +116,16 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
     val isLow = balance != null && balance < low
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
     val fg = if (isLow) theme.onDanger else theme.text
+    val passText = passChipText(app)
 
     val text = buildString {
         append(stringResource(R.string.fastag_title))
         append(" · ")
         append(if (balance != null) rupees(balance) else "—")
+        if (passText != null) {
+            append(" · ")
+            append(passText)
+        }
         if (latest != null && !dims.compact) {
             append(" · ")
             append(ago(latest.time, now))
@@ -128,7 +133,7 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
     }
     Box(
         modifier = modifier
-            .heightIn(min = 56.dp)
+            .heightIn(min = MinTouch)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -149,7 +154,7 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
             )
             Text(
                 text,
-                fontSize = dims.t(2.4f, min = 13f),
+                fontSize = dims.t(2.4f, min = 16f),
                 color = fg,
                 fontWeight = if (isLow) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
@@ -264,12 +269,13 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
             Column(
                 Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+                verticalArrangement = Arrangement.spacedBy(dims.d(1.2f)),
             ) {
                 val balance = latest?.balance
                 val isLow = balance != null && balance < low
+                // Compact enough that the Annual Pass −1 / +1 buttons fit on a 600 px screen.
                 Pane(Modifier.fillMaxWidth(), fill = if (isLow) theme.danger else null) {
-                    Column(Modifier.padding(dims.d(2.6f))) {
+                    Column(Modifier.padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f))) {
                         Text(
                             theme.label(stringResource(if (isLow) R.string.fastag_low else R.string.fastag_balance)),
                             style = theme.labelStyle(if (isLow) theme.onDanger else theme.muted),
@@ -278,7 +284,7 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
                         Text(
                             if (balance != null) rupees(balance) else "—",
                             style = theme.numberStyle(if (isLow) theme.onDanger else theme.text),
-                            fontSize = dims.t(9f, min = 36f),
+                            fontSize = dims.t(7.4f, min = 34f),
                         )
                         val info = listOfNotNull(latest?.vehicle, latest?.bank)
                         if (info.isNotEmpty()) {
@@ -295,12 +301,17 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
                     TotalTile(stringResource(R.string.fastag_today), totals.today, Modifier.weight(1f))
                     TotalTile(stringResource(R.string.fastag_month), totals.month, Modifier.weight(1f))
                 }
-                BigButton(
-                    text = stringResource(R.string.fastag_recharge),
-                    onClick = { openFastagRecharge(context, url) },
-                    icon = Icons.Filled.Payment,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                AnnualPassCard(app, Modifier.fillMaxWidth())
+                Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                    BigButton(
+                        text = stringResource(R.string.fastag_recharge),
+                        onClick = { openFastagRecharge(context, url) },
+                        icon = Icons.Filled.Payment,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // Without SMS reading (or a bank that sends none), the balance by hand.
+                    ManualBalanceButton(app, Modifier.weight(1f))
+                }
             }
             Pane(Modifier.weight(1.3f).fillMaxHeight()) {
                 if (events.isEmpty()) {
@@ -408,6 +419,7 @@ internal fun FastagSettingsCard(app: DriveApp, onOpenFastag: () -> Unit) {
                 ThemedSwitch(enabled) { app.fastag.setEnabled(it) }
             }
             if (enabled) {
+                FastagSmsRow(app)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
@@ -417,7 +429,10 @@ internal fun FastagSettingsCard(app: DriveApp, onOpenFastag: () -> Unit) {
                         Chip(rupees(v.toDouble()), v == low, { app.fastag.setLowBalance(v) })
                     }
                 }
-                Row(
+                // No typing while the car moves.
+                if (isMoving(app)) {
+                    Text(stringResource(R.string.park_to_edit_hint), fontSize = dims.t(2.4f), color = theme.warning)
+                } else Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
                 ) {

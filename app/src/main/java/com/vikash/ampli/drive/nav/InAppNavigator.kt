@@ -85,7 +85,7 @@ class InAppNavigator(private val app: DriveApp) {
     private val scope = MainScope()
 
     val provider: RouteProvider = OsrmRouteProvider(
-        baseUrl = BuildConfig.ROUTING_BASE_URL.ifBlank { OsrmRouteProvider.DEMO_URL },
+        baseUrl = { com.vikash.ampli.drive.config.RemoteConfig.current().routingBaseUrl },
         userAgent = "AmpliCarHub/${BuildConfig.VERSION_NAME} (Android head-unit launcher)",
     )
 

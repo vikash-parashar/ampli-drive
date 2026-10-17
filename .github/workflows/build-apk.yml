@@ -19,6 +19,12 @@ jobs:
       OWNER_API_URL: ${{ vars.OWNER_API_URL }}
       # In-app navigation routing server (your own OSRM). Empty = OSRM's public demo server, testing only.
       ROUTING_BASE_URL: ${{ vars.ROUTING_BASE_URL }}
+      # Place search server (your own Photon). Empty = Photon's public demo server, testing only.
+      GEOCODER_URL: ${{ vars.GEOCODER_URL }}
+      # Route weather server. Empty = Open-Meteo's public API in debug builds.
+      WEATHER_URL: ${{ vars.WEATHER_URL }}
+      # Remote config JSON. Empty = built-in defaults.
+      REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -101,3 +107,51 @@ jobs:
           files: |
             AmpliCarHub-pr-*.apk
             app/build/outputs/roborazzi/*.png
+
+  # Release build with R8 (minify + shrink resources), as Play gets it. Unsigned here: the
+  # upload key is added only when publishing. Missing keep rules show up as error annotations.
+  release-bundle:
+    runs-on: ubuntu-latest
+    env:
+      OWNER_API_URL: ${{ vars.OWNER_API_URL }}
+      # A release refuses to build without these two (no demo servers in Play builds).
+      ROUTING_BASE_URL: ${{ vars.ROUTING_BASE_URL }}
+      GEOCODER_URL: ${{ vars.GEOCODER_URL }}
+      # Optional in a release: weather stays off and remote config uses defaults while empty.
+      WEATHER_URL: ${{ vars.WEATHER_URL }}
+      REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
+      # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
+      # check R8 before the own servers exist. The AAB it makes is then for testing only.
+      ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Write local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Release bundle (R8)
+        # bash -eo pipefail: a failing gradlew fails the step even though its output goes through tee.
+        shell: bash
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease 2>&1 | tee release.log || {
+            for f in $(find app/build/outputs/mapping -name missing_rules.txt 2>/dev/null); do
+              grep -v '^#' "$f" | grep . | head -40 | sed 's/^/::error title=R8 missing rule::/'
+            done
+            grep -E "^e: |ERROR:|Missing class|R8: " release.log | head -40 | sed 's/^/::error::/'
+            exit 1
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AmpliCarHub-release-aab
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error

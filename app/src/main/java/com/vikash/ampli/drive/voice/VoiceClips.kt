@@ -87,6 +87,67 @@ object VoiceClips {
         Distance(10000, "दस किलोमीटर"),
     )
 
+    /**
+     * Recorded numbers one to ten: the FASTag pass "N trips left" and a countdown
+     * ([countdownClip]). Words, not digits, so the voice reads them in Hindi.
+     */
+    val NUMBERS: List<String> = listOf("एक", "दो", "तीन", "चार", "पाँच", "छह", "सात", "आठ", "नौ", "दस")
+
+    fun numberId(n: Int): String = "num_$n"
+
+    /** The clip for [n] (1..10), or null outside that range (the phone voice speaks then). */
+    fun countdownClip(n: Int): String? = if (n in 1..NUMBERS.size) numberId(n) else null
+
+    /**
+     * Recorded paper names, stitched in front of a [HaryanviLines.Event.PaperDueTail] /
+     * [HaryanviLines.Event.PaperExpiredTail] clip. Keys match car.PaperKind names in lower case,
+     * plus "fastag_pass".
+     */
+    val PAPER_NAMES: Map<String, String> = linkedMapOf(
+        "insurance" to "बीमा",
+        "puc" to "पीयूसी",
+        "rc" to "आरसी",
+        "licence" to "ड्राइविंग लाइसेंस",
+        "fastagkyc" to "फास्टैग केवाईसी",
+        "fastag_pass" to "फास्टैग पास",
+    )
+
+    fun paperId(key: String): String = "paper_$key"
+
+    /**
+     * Safety prompts in the recorded voices, for units without a TTS engine (else they only beep).
+     * Plain, clear Hindi, never Haryanvi slang and never from the playful bank; the texts follow
+     * the app's Hindi strings (crash_voice, sos_ready_*, voice_sos) with the number taken out.
+     */
+    val SAFETY: Map<String, String> = linkedMapOf(
+        SAFETY_CRASH to "दुर्घटना का पता चला। कुछ सेकंड में आपके इमरजेंसी संपर्क के लिए SOS मैसेज भेजने को तैयार होगा। रद्द करने के लिए ‘मैं ठीक हूँ’ बोलें या दबाएँ।",
+        SAFETY_SECONDS_LEFT to "सेकंड बाकी।",
+        SAFETY_SOS_READY to "SOS संदेश तैयार है। मैसेज ऐप में भेजें दबाएँ, फिर यह स्क्रीन बचाव दल को दिखाएँ।",
+        SAFETY_HELP_PANEL to "मदद पैनल खुल रहा है। आपकी पुष्टि के बिना कुछ नहीं भेजा जाएगा।",
+    )
+
+    const val SAFETY_CRASH = "safety_crash"
+    const val SAFETY_SECONDS_LEFT = "safety_seconds_left"
+    const val SAFETY_SOS_READY = "safety_sos_ready"
+    const val SAFETY_HELP_PANEL = "safety_help_panel"
+
+    /**
+     * Pro "read WhatsApp messages aloud": the recorded opener said before the phone voice reads
+     * the sender and the text (messages.WhatsAppReader). Without the clip, TTS says it all.
+     */
+    val MESSAGES: Map<String, String> = linkedMapOf(
+        "msg_whatsapp" to "व्हाट्सऐप पै मैसेज आया सै।",
+    )
+
+    const val MESSAGE_WHATSAPP = "msg_whatsapp"
+
+    /**
+     * The crash countdown without TTS: the full warning while more than ten seconds are left,
+     * then "<number> सेकंड बाकी।" for the last ten.
+     */
+    fun crashClips(secondsLeft: Int): List<String> =
+        countdownClip(secondsLeft)?.let { listOf(it, SAFETY_SECONDS_LEFT) } ?: listOf(SAFETY_CRASH)
+
     /** The recorded distance nearest to [meters]; on a tie the shorter one (better early than late). */
     fun bucket(meters: Int): Distance = DISTANCES.minWith(compareBy<Distance> { kotlin.math.abs(it.meters - meters) }.thenBy { it.meters })
 
@@ -137,6 +198,21 @@ object VoiceClips {
                 listOf(bucket(meters).id, tail.id)
             }
             HaryanviLines.Event.NavSoon -> emptyList() // NavPhrases stitches the distance itself.
+            // "<paper name>" + tail; args = (shown name, PAPER_NAMES key).
+            HaryanviLines.Event.PaperDue, HaryanviLines.Event.PaperExpired -> {
+                val key = args.getOrNull(1) as? String ?: return emptyList()
+                if (key !in PAPER_NAMES) return emptyList()
+                val tailEvent = if (event == HaryanviLines.Event.PaperDue) HaryanviLines.Event.PaperDueTail else HaryanviLines.Event.PaperExpiredTail
+                val tail = pick(tailEvent) ?: return emptyList()
+                listOf(paperId(key), tail.id)
+            }
+            // "<number>" + tail, only up to ten.
+            HaryanviLines.Event.PassTripsLow -> {
+                val n = (args.firstOrNull() as? Number)?.toInt() ?: return emptyList()
+                val num = countdownClip(n) ?: return emptyList()
+                val tail = pick(HaryanviLines.Event.PassTripsTail) ?: return emptyList()
+                listOf(num, tail.id)
+            }
             else -> {
                 val stand = recordedEvent(event)
                 when {
@@ -181,6 +257,10 @@ object VoiceClips {
             }
         }
         for (d in DISTANCES) out += Entry(d.id, "Distance", "Distance", d.deva)
+        NUMBERS.forEachIndexed { i, w -> out += Entry(numberId(i + 1), "Number", "Number", w) }
+        for ((key, name) in PAPER_NAMES) out += Entry(paperId(key), "PaperName", "Papers", name)
+        for ((id, text) in SAFETY) out += Entry(id, "Safety", "Safety", text)
+        for ((id, text) in MESSAGES) out += Entry(id, "Message", "Messages", text)
         return out
     }
 

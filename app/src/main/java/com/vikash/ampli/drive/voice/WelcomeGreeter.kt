@@ -42,17 +42,17 @@ class WelcomeGreeter(private val app: DriveApp) {
         _card.value = null
     }
 
-    /** Picks, shows and speaks the welcome. Main thread (Speaker's rule). */
-    suspend fun play() {
+    /** Picks, shows and speaks the welcome. Main thread (Speaker's rule). [showCard] false: voice only. */
+    suspend fun play(showCard: Boolean = true) {
         busy = true
         try {
-            playNow()
+            playNow(showCard)
         } finally {
             busy = false
         }
     }
 
-    private suspend fun playNow() {
+    private suspend fun playNow(showCard: Boolean) {
         val prefs = app.prefs
         val speaker = app.speaker
         val voice = app.voicePlayer.voice
@@ -69,7 +69,7 @@ class WelcomeGreeter(private val app: DriveApp) {
             hour = LocalTime.now().hour,
         )
         prefs.welcomeCount = count + 1
-        _card.value = Card(welcome.card, welcome.text, System.nanoTime())
+        if (showCard) _card.value = Card(welcome.card, welcome.text, System.nanoTime())
         if (speaker.inCall()) return
         val recorded = app.voicePlayer.library.plan(voice, welcome.spoken) != null
         if (!ready && !recorded) return

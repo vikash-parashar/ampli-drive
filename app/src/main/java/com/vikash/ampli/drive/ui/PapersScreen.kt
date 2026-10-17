@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
@@ -124,6 +125,14 @@ fun PapersScreen(app: DriveApp, onBack: () -> Unit) {
                         )
                     }
                     BigButton(stringResource(R.string.papers_digilocker), { openDigiLocker(context) }, Modifier.fillMaxWidth(), icon = Icons.Filled.Folder, primary = false)
+                    // Official Parivahan e-Challan site in the browser (vehicle number copied); no scraping.
+                    BigButton(
+                        stringResource(R.string.challan_check),
+                        { openChallanCheck(context, app.fastag.events.value.firstNotNullOfOrNull { it.vehicle }) },
+                        Modifier.fillMaxWidth(),
+                        icon = Icons.Filled.Gavel,
+                        primary = false,
+                    )
                 }
                 Column(
                     Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),

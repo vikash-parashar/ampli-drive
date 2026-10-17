@@ -129,7 +129,7 @@
     <string name="help_no_contacts">अजून आपत्कालीन संपर्क नात. सेटिंग्स › आपत्कालीन प्रोफायलांत जोडात.</string>
     <string name="help_medical_info">वैजकी म्हायती</string>
     <string name="sos_button_hint">तुमच्या आपत्कालीन संपर्कां खातीर तुमच्या लोकेशना वांगडा संदेश उगडटा</string>
-    <string name="sos_countdown_title">SOS धाडटले</string>
+    <string name="sos_countdown_title">SOS संदेश उगडटलो</string>
     <string name="sos_cancel">रद्द करात</string>
     <string name="sos_send_now">आतां धाडात</string>
     <string name="sos_location_ready">लोकेशन मेळ्ळें</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ची वाट</string>
     <string name="weather_setting">हवामान आनी धुक्याच्यो शिटकावण्यो</string>
     <string name="weather_setting_hint">दर 15 मिणटांनी हांगा, 25 किमी आनी 50 किमी फुडें तपासता</string>
-    <string name="crash_voice">अपघात वळखलो. %1$d सेकंदांनी आपत्कालीन शिटकावणी धाडटले. रद्द करपाक ‘हांव बरो आसां’ म्हणात वा टॅप करात.</string>
+    <string name="crash_voice">अपघात सोदलो. %1$d सेकंदांनी तुमच्या आपत्कालीन संपर्का खातीर SOS संदेश धाडपाक तयार जातलो. रद्द करपाक ‘हांव बरो आसां’ म्हणात वा दाबात.</string>
     <string name="crash_title">अपघात जाला आसूं येता</string>
     <string name="crash_send_needs_tap">SMS धाडपाक Android क एक टॅप जाय.</string>
     <string name="crash_im_ok">हांव बरो आसां</string>
@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">तुमी अजून कांयच धाडूंक ना.</string>
     <string name="feedback_waiting">%1$d धाडपाची वाट पळयतात</string>
     <string name="feedback_reply">जाप: %1$s</string>
+    <string name="sos_limits_note">SOS ह्या संपर्कां खातीर तुमच्या लोकेशना सयत मेसेज ॲप उगडटा. कोणेंय धाडात दाबपाक जाय: Ampli आपसूक SMS वा कॉल करूंक शकना. अपघात वळखप एखादो अपघात चुकोवंक शकता वा चुकीन सुरू जावंक शकता.</string>
+    <string name="nav_search_moving">गाडी चलयतना टायपिंग बंद आसा. “Say it” दाबात आनी खंय वचपाचें तें सांगात.</string>
+    <string name="payment_pending_title">पेमेंट उरलां</string>
+    <string name="payment_pending_hint">Google Play तुमच्या UPI वा हेर पेमेंटाच्या मान्यतायेची वाट पळयता. तुमच्या पेमेंट ॲपांत मान्यताय दियात; परत पयशे दिवपाची गरज ना.</string>
+    <string name="voice_tts_missing_hint">फोनाचो आवाज (TTS) इन्स्टॉल ना; Ampli चो आवाज वापरता.</string>
+    <string name="shell_open_settings">सेटिंग्ज उगडात</string>
+    <string name="autostart_acc_note">“फाटभूंयेंत नदर” चालू आसतनाच हेड युनिटाचे इग्निशन (ACC) सिग्नल मेळटात.</string>
+    <string name="about_not_affiliated">Ampli Studio चो NPCI, NHAI, Apple वा Google कडेन कसलोच संबंद ना. FASTag, CarPlay, Android Auto आनी Google Maps हीं नांवां फकत Car Hub कशा वांगडा चलता तें सांगपाक.</string>
+    <string name="shell_eq_pick_title">तुमचें इक्वलायझर ॲप वेंचात</string>
 </resources>

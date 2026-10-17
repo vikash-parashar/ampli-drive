@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -25,7 +26,7 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
 /** Which Google Play "prominent disclosure" to show. */
-enum class Disclosure { BackgroundLocation, Microphone }
+enum class Disclosure { BackgroundLocation, Microphone, FastagSms }
 
 /**
  * Google Play's prominent disclosure, shown in the app before the data access starts (and
@@ -45,6 +46,15 @@ fun DisclosureDialog(kind: Disclosure, onAgree: () -> Unit, onDecline: () -> Uni
                 stringResource(R.string.disclosure_location_body),
                 stringResource(R.string.disclosure_location_uses),
                 stringResource(R.string.disclosure_location_stays),
+            ),
+        )
+        Disclosure.FastagSms -> Triple(
+            Icons.Filled.Sms,
+            stringResource(R.string.disclosure_fastag_title),
+            listOf(
+                stringResource(R.string.disclosure_fastag_body),
+                stringResource(R.string.disclosure_fastag_uses),
+                stringResource(R.string.disclosure_fastag_stays),
             ),
         )
         Disclosure.Microphone -> Triple(
