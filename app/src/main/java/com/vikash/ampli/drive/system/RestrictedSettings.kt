@@ -27,9 +27,25 @@ object RestrictedSettings {
     fun hasNotificationAccess(context: Context): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
 
-    /** Called when the notification-access screen is opened. */
+    private const val PLAY_STORE = "com.android.vending"
+
+    /** True when Google Play installed (or last updated) this app: Android does not restrict those installs. */
+    @Suppress("DEPRECATION")
+    fun installedFromPlay(context: Context): Boolean = try {
+        val pm = context.packageManager
+        val installer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            pm.getInstallSourceInfo(context.packageName).let { it.installingPackageName ?: it.initiatingPackageName }
+        } else {
+            pm.getInstallerPackageName(context.packageName)
+        }
+        installer == PLAY_STORE
+    } catch (_: Exception) {
+        false
+    }
+
+    /** Called when the notification-access screen is opened. Play installs never need the guide. */
     fun arm(context: Context) {
-        if (applies && !hasNotificationAccess(context)) _armed.value = true
+        if (applies && !installedFromPlay(context) && !hasNotificationAccess(context)) _armed.value = true
     }
 
     fun disarm() {

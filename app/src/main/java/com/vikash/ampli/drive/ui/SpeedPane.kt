@@ -88,7 +88,7 @@ fun SpeedPane(gps: GpsState, cameraAlerts: CameraAlerts, modifier: Modifier = Mo
                 stringResource(R.string.speed_avg, gps.avgKmh?.roundToInt()?.toString() ?: "--") + "  ·  " +
                     (rpm?.let { stringResource(R.string.speed_rpm, it.roundToInt()) } ?: stringResource(R.string.speed_rpm_connect)),
                 style = theme.labelStyle(theme.paneMuted),
-                fontSize = dims.t(2.1f, min = 12f),
+                fontSize = dims.t(2.1f, min = 16f),
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -150,13 +150,13 @@ private fun LimitCaption(speed: Float?, limit: Int?, theme: DriveTheme) {
             } else {
                 stringResource(R.string.speed_limit)
             },
-            fontSize = dims.t(2.6f),
+            fontSize = dims.t(2.6f, min = 16f),
             fontWeight = FontWeight.SemiBold,
             color = if (isOver(speed, limit)) theme.limitRing else theme.paneText,
         )
         Text(
             if (limit == null) stringResource(R.string.speed_limit_unknown) else stringResource(R.string.speed_zone, limit),
-            fontSize = dims.t(2.3f, min = 12f),
+            fontSize = dims.t(2.3f, min = 16f),
             color = theme.paneMuted,
         )
     }
@@ -226,7 +226,7 @@ private fun SpeedGauge(speedKmh: Float?, limitKmh: Int?, size: Dp) {
             Text(
                 theme.label(stringResource(R.string.speed_unit)),
                 style = theme.labelStyle(theme.paneMuted),
-                fontSize = dims.t(2.6f, min = 12f),
+                fontSize = dims.t(2.6f, min = 16f),
             )
         }
     }
@@ -246,7 +246,7 @@ private fun NumberSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
             Text(
                 theme.label(stringResource(R.string.speed_label)),
                 style = theme.labelStyle(theme.paneMuted),
-                fontSize = dims.t(2.2f, min = 12f),
+                fontSize = dims.t(2.2f, min = 16f),
             )
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
@@ -259,7 +259,7 @@ private fun NumberSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
                 Text(
                     theme.label(stringResource(R.string.speed_unit)),
                     style = theme.labelStyle(theme.paneMuted).copy(shadow = null),
-                    fontSize = dims.t(3f, min = 14f),
+                    fontSize = dims.t(3f, min = 16f),
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.padding(bottom = dims.d(2f)),
                 )
@@ -269,7 +269,7 @@ private fun NumberSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
                     stringResource(R.string.speed_over_limit, (speed!! - limit!!).roundToInt()),
                     color = Color(0xFFB91C1C),
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = dims.t(2.6f),
+                    fontSize = dims.t(2.6f, min = 16f),
                     modifier = Modifier
                         .clip(theme.buttonShape(dims))
                         .background(Color(0xFFFDE8E8))
@@ -279,7 +279,7 @@ private fun NumberSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
                 Text(
                     if (limit == null) stringResource(R.string.speed_limit_unknown) else stringResource(R.string.speed_zone, limit),
                     style = theme.labelStyle(theme.paneMuted),
-                    fontSize = dims.t(2.3f, min = 12f),
+                    fontSize = dims.t(2.3f, min = 16f),
                 )
             }
         }
@@ -301,7 +301,7 @@ private fun GiantSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
             Text(
                 theme.label(stringResource(R.string.speed_label)),
                 style = theme.labelStyle(),
-                fontSize = dims.t(2.2f, min = 12f),
+                fontSize = dims.t(2.2f, min = 16f),
             )
             Spacer(Modifier.weight(1f))
             Row(verticalAlignment = Alignment.Bottom) {
@@ -387,7 +387,7 @@ private fun TachSpeed(speed: Float?, limit: Int?, maxWidth: Dp, maxHeight: Dp) {
                 Text(
                     theme.label(stringResource(R.string.speed_unit)),
                     style = theme.labelStyle().copy(letterSpacing = 0.3f.em),
-                    fontSize = dims.t(2.6f, min = 12f),
+                    fontSize = dims.t(2.6f, min = 16f),
                 )
             }
         }
@@ -478,7 +478,7 @@ private fun TapeSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
             Text(
                 theme.label(stringResource(R.string.speed_unit)),
                 style = theme.labelStyle(theme.muted),
-                fontSize = dims.t(2.2f, min = 12f),
+                fontSize = dims.t(2.2f, min = 16f),
             )
         }
     }
@@ -550,9 +550,9 @@ private fun CameraBanner(alert: CameraAlert, modifier: Modifier = Modifier) {
     ) {
         Icon(Icons.Filled.Warning, contentDescription = null, tint = ink, modifier = Modifier.size(28.dp))
         Column(Modifier.weight(1f)) {
-            Text(title, color = ink, fontWeight = FontWeight.Bold, fontSize = dims.t(2.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title, color = ink, fontWeight = FontWeight.Bold, fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (detail.isNotBlank()) {
-                Text(detail, color = ink.copy(alpha = 0.85f), fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(detail, color = ink.copy(alpha = 0.85f), fontSize = dims.t(2.1f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

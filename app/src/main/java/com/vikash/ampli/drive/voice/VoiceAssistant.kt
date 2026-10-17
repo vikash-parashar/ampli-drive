@@ -148,7 +148,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!listener.isAvailable()) {
             // Neither a system recogniser nor the offline model: start the model download so
             // the next try works, and point at Settings › Voice › Check voice.
-            app.wakeModel.ensure()
+            app.wakeModel.ensure(automatic = true)
             say(res, lang, R.string.voice_unavailable)
             return
         }

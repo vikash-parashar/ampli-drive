@@ -2,9 +2,9 @@
 
 _Last updated: 17 October 2026_
 
-Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by **Ampli Tech** ("we"). This policy explains what the app does with your data.
+Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by **Ampli Studio** ("we"). This policy explains what the app does with your data.
 
-**Contact:** Ampli Tech, support@ampliapps.in · Website: https://ampliapps.in
+**Contact:** Ampli Studio, support@ampliapps.in · Website: https://ampliapps.in
 
 ## The short version
 
@@ -71,7 +71,7 @@ When you send a bug report, feature request or support message from Settings ›
 - a random **install id** created by the app (not the Android ID or advertising id), so you can see your own requests and their replies;
 - a screenshot or the app's own recent log lines, only if you add them (logs are off by default).
 
-These go to Ampli Tech's support server (or, until it is live, open in your email app addressed to our support address). We use them only to answer you and improve the app, and we don't sell or share them. Reports waiting to be sent while offline are kept on the unit until they go out.
+These go to Ampli Studio's support server (or, until it is live, open in your email app addressed to our support address). We use them only to answer you and improve the app, and we don't sell or share them. Reports waiting to be sent while offline are kept on the unit until they go out.
 
 ## Other network use
 

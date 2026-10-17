@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">Vous n’avez encore rien envoyé.</string>
     <string name="feedback_waiting">%1$d en attente d’envoi</string>
     <string name="feedback_reply">Réponse : %1$s</string>
+    <string name="sos_limits_note">SOS ouvre votre appli de messages avec un texte et votre position pour ces contacts. Quelqu’un doit appuyer sur Envoyer : Ampli ne peut pas envoyer de SMS ni appeler tout seul. La détection d’accident peut manquer un accident ou se déclencher par erreur.</string>
+    <string name="nav_search_moving">La saisie est désactivée en roulant. Touchez « Say it » et dites où aller.</string>
+    <string name="payment_pending_title">Paiement en attente</string>
+    <string name="payment_pending_hint">Google Play attend la validation de votre paiement UPI ou autre. Validez-le dans votre appli de paiement ; inutile de payer à nouveau.</string>
+    <string name="voice_tts_missing_hint">Aucune voix du téléphone installée ; la voix d’Ampli parle.</string>
+    <string name="shell_open_settings">Ouvrir les réglages</string>
+    <string name="autostart_acc_note">Les signaux de contact (ACC) de l’autoradio ne sont reçus que si « Surveiller en arrière-plan » est activé.</string>
+    <string name="about_not_affiliated">Ampli Studio n’est pas affilié à NPCI, NHAI, Apple ou Google. FASTag, CarPlay, Android Auto et Google Maps sont cités seulement pour dire ce qui fonctionne avec Car Hub.</string>
+    <string name="shell_eq_pick_title">Choisir l’appli d’égaliseur</string>
 </resources>

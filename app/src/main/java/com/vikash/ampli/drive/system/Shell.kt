@@ -108,10 +108,11 @@ object Shell {
         }
     }
 
-    /** The head unit's own EQ app: its launch intent and name, or null. */
+    /** The head unit's own EQ app: its launch intent and name, or null. The driver's pick comes first. */
     @Suppress("DEPRECATION")
     fun findEqualizer(context: Context): Pair<Intent, String>? {
         val pm = context.packageManager
+        chosenEqualizer(context)?.let { return it }
         for (pkg in EQ_PACKAGES) {
             val launch = try { pm.getLaunchIntentForPackage(pkg) } catch (_: Exception) { null } ?: continue
             val name = try { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString() } catch (_: Exception) { pkg }
@@ -127,6 +128,25 @@ object Shell {
         } catch (_: Exception) {
             null
         }
+    }
+
+    /** The EQ app picked with a long press on the Equalizer tile, while it is still installed. */
+    private fun chosenEqualizer(context: Context): Pair<Intent, String>? {
+        val app = context.applicationContext as? com.vikash.ampli.drive.DriveApp ?: return null
+        val comp = app.shell.eqComponent?.let { ComponentName.unflattenFromString(it) } ?: return null
+        return try {
+            val info = context.packageManager.getActivityInfo(comp, 0)
+            Intent(Intent.ACTION_MAIN).setComponent(comp).addCategory(Intent.CATEGORY_LAUNCHER) to
+                info.loadLabel(context.packageManager).toString()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Saves the driver's EQ app ("package/activity", or null for automatic) and drops the cached lookup. */
+    fun chooseEqualizer(context: Context, component: String?) {
+        (context.applicationContext as? com.vikash.ampli.drive.DriveApp)?.shell?.eqComponent = component
+        eqCacheSeq = -1
     }
 
     @Volatile private var eqCache: Pair<Intent, String>? = null

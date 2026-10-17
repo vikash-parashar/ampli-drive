@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">ਤੁਸੀਂ ਹਾਲੇ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ।</string>
     <string name="feedback_waiting">%1$d ਭੇਜਣ ਦੀ ਉਡੀਕ ਵਿੱਚ</string>
     <string name="feedback_reply">ਜਵਾਬ: %1$s</string>
+    <string name="sos_limits_note">SOS ਇਨ੍ਹਾਂ ਸੰਪਰਕਾਂ ਲਈ ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਨਾਲ ਮੈਸੇਜ ਐਪ ਖੋਲ੍ਹਦਾ ਹੈ। ਕਿਸੇ ਨੂੰ ਭੇਜੋ ਦਬਾਉਣਾ ਪਵੇਗਾ: Ampli ਆਪ SMS ਜਾਂ ਕਾਲ ਨਹੀਂ ਕਰ ਸਕਦਾ। ਹਾਦਸਾ ਪਛਾਣ ਕੋਈ ਹਾਦਸਾ ਛੱਡ ਸਕਦੀ ਹੈ ਜਾਂ ਗਲਤੀ ਨਾਲ ਸ਼ੁਰੂ ਹੋ ਸਕਦੀ ਹੈ।</string>
+    <string name="nav_search_moving">ਗੱਡੀ ਚਲਾਉਂਦੇ ਸਮੇਂ ਟਾਈਪਿੰਗ ਬੰਦ ਹੈ। “Say it” ਦਬਾਓ ਅਤੇ ਦੱਸੋ ਕਿੱਥੇ ਜਾਣਾ ਹੈ।</string>
+    <string name="payment_pending_title">ਭੁਗਤਾਨ ਬਾਕੀ ਹੈ</string>
+    <string name="payment_pending_hint">Google Play ਤੁਹਾਡੇ UPI ਜਾਂ ਹੋਰ ਭੁਗਤਾਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰ ਰਿਹਾ ਹੈ। ਆਪਣੀ ਭੁਗਤਾਨ ਐਪ ਵਿੱਚ ਮਨਜ਼ੂਰੀ ਦਿਓ; ਦੁਬਾਰਾ ਪੈਸੇ ਦੇਣ ਦੀ ਲੋੜ ਨਹੀਂ।</string>
+    <string name="voice_tts_missing_hint">ਫ਼ੋਨ ਦੀ ਆਵਾਜ਼ (TTS) ਇੰਸਟਾਲ ਨਹੀਂ; Ampli ਦੀ ਆਵਾਜ਼ ਵਰਤੀ ਜਾ ਰਹੀ ਹੈ।</string>
+    <string name="shell_open_settings">ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ</string>
+    <string name="autostart_acc_note">ਹੈੱਡ ਯੂਨਿਟ ਦੇ ਇਗਨੀਸ਼ਨ (ACC) ਸਿਗਨਲ ਤਾਂ ਹੀ ਮਿਲਦੇ ਹਨ ਜਦੋਂ “ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਨਿਗਰਾਨੀ” ਚਾਲੂ ਹੋਵੇ।</string>
+    <string name="about_not_affiliated">Ampli Studio ਦਾ NPCI, NHAI, Apple ਜਾਂ Google ਨਾਲ ਕੋਈ ਸਬੰਧ ਨਹੀਂ। FASTag, CarPlay, Android Auto ਅਤੇ Google Maps ਦੇ ਨਾਮ ਸਿਰਫ਼ ਇਹ ਦੱਸਣ ਲਈ ਹਨ ਕਿ Car Hub ਕਿਸ ਨਾਲ ਚੱਲਦਾ ਹੈ।</string>
+    <string name="shell_eq_pick_title">ਆਪਣੀ ਇਕੁਅਲਾਈਜ਼ਰ ਐਪ ਚੁਣੋ</string>
 </resources>

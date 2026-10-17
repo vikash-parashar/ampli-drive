@@ -113,7 +113,7 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
                             if (sub.isNotEmpty()) {
                                 Text(
                                     sub,
-                                    fontSize = dims.t(2.4f),
+                                    fontSize = dims.t(2.4f, min = 16f),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -145,7 +145,7 @@ private fun AccessNeeded(onAllow: () -> Unit) {
     val theme = LocalDriveTheme.current
     val density = LocalDensity.current
     val gap = dims.d(2f)
-    val textSize = dims.t(2.5f)
+    val textSize = dims.t(2.5f, min = 16f)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // The button keeps a full touch target; the icon goes first and then text lines when the
         // card is short (e.g. while the default-home banner takes space), ending with "…".
@@ -209,7 +209,7 @@ private fun NothingPlaying(onOpen: () -> Unit) {
         )
         Text(
             stringResource(R.string.music_nothing_hint),
-            fontSize = dims.t(2.3f),
+            fontSize = dims.t(2.3f, min = 16f),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
@@ -385,7 +385,7 @@ private fun SourceChips(sources: List<MediaSource>, selected: String?, onSelect:
             ) {
                 Text(
                     source.label,
-                    fontSize = dims.t(2.1f, min = 14f),
+                    fontSize = dims.t(2.1f, min = 16f),
                     color = if (on) theme.accentSoft else theme.muted,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
                     maxLines = 1,

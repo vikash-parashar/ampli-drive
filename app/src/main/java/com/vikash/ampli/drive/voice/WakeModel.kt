@@ -17,8 +17,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.ZipInputStream
 
-/** One downloadable Vosk model (Apache-2.0, alphacephei.com). */
-enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: Long) {
+/**
+ * One downloadable Vosk model (Apache-2.0, alphacephei.com). [sha256]: lowercase hex of the zip;
+ * when set, a download that does not match is thrown away. Null skips the check (until the
+ * owner supplies the hashes).
+ */
+enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: Long, val sha256: String? = null) {
     /** Wake word + English command fallback. */
     EnglishIndia(
         "vosk-model-small-en-in-0.4",
@@ -66,20 +70,41 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
 
     fun isInstalled(): Boolean = File(modelDir, READY_MARKER).exists()
 
-    /** Starts the download unless it is installed or already running. */
-    fun ensure() {
+    private val prefs = appContext.getSharedPreferences("wake_model", Context.MODE_PRIVATE)
+    private val failedKey = "${spec.dirName}.failedAt"
+
+    private fun markFailed() {
+        prefs.edit().putLong(failedKey, System.currentTimeMillis()).apply()
+    }
+
+    /** True while an [automatic] retry should wait after a failed download or load. */
+    private fun backingOff(now: Long = System.currentTimeMillis()): Boolean {
+        val at = prefs.getLong(failedKey, 0L)
+        return at > 0L && now - at in 0 until RETRY_BACKOFF_MS
+    }
+
+    /**
+     * Starts the download unless it is installed or already running. [automatic] (app start,
+     * every return home, a voice attempt): skipped for [RETRY_BACKOFF_MS] after a failure, so a
+     * model that will not download or load is not fetched again on every onResume. A tap in
+     * Settings passes false and always retries.
+     */
+    fun ensure(automatic: Boolean = false) {
         if (isInstalled()) {
             _state.value = State.Ready
             return
         }
         if (job?.isActive == true) return
+        if (automatic && backingOff()) return
         job = scope.launch {
             try {
                 download()
+                prefs.edit().remove(failedKey).apply()
                 _state.value = State.Ready
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                markFailed()
                 _state.value = State.Failed(e.message ?: e.javaClass.simpleName)
             }
         }
@@ -116,6 +141,13 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
             }
         } finally {
             conn.disconnect()
+        }
+        spec.sha256?.let { want ->
+            val got = sha256Hex(zip)
+            if (!got.equals(want, ignoreCase = true)) {
+                zip.delete()
+                throw IOException("Checksum mismatch")
+            }
         }
 
         _state.value = State.Unpacking
@@ -184,7 +216,9 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
                     }
                 } catch (t: Throwable) {
                     loadError = t.message ?: t.javaClass.simpleName
-                    // A broken unpack: remove it so the next ensure() fetches a fresh copy.
+                    // A broken unpack: remove it so the next ensure() fetches a fresh copy, but
+                    // only after the back-off for automatic retries (no download loop).
+                    markFailed()
                     File(modelDir, READY_MARKER).delete()
                     _state.value = State.Failed(loadError ?: "load failed")
                     null
@@ -204,5 +238,21 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
 
     companion object {
         private const val READY_MARKER = ".ampli-ready"
+
+        /** Wait before an automatic retry after a failed download or load. */
+        const val RETRY_BACKOFF_MS = 6 * 60 * 60_000L
+
+        fun sha256Hex(file: File): String {
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val buf = ByteArray(64 * 1024)
+                while (true) {
+                    val n = input.read(buf)
+                    if (n < 0) break
+                    md.update(buf, 0, n)
+                }
+            }
+            return md.digest().joinToString("") { "%02x".format(it) }
+        }
     }
 }

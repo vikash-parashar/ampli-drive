@@ -378,7 +378,7 @@ private fun StatusRow(
         Text(
             theme.label(now.format(dateFmt)),
             style = theme.labelStyle(),
-            fontSize = dims.t(2.6f),
+            fontSize = dims.t(2.6f, min = 16f),
         )
         // Saffron family: a "have a safe trip" line in an Indian script, as in the designs.
         theme.greeting?.let {
@@ -561,7 +561,7 @@ private fun DockButton(
         Text(
             theme.label(label),
             style = theme.labelStyle(labelColor),
-            fontSize = dims.t(2.2f),
+            fontSize = dims.t(2.2f, min = 16f),
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.SemiBold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

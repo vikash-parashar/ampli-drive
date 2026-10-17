@@ -26,6 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -230,12 +232,24 @@ fun QuickControlsHost(app: DriveApp, open: Boolean, onClose: () -> Unit) {
             delay(2_000L)
         }
     }
+    var pickEq by remember { mutableStateOf(false) }
     QuickControlsPanel(
         visible = open,
         tiles = quickTiles(status ?: Shell.Status(null, false, null, null, null), btSupported = bt.supported, btOn = bt.enabled, btDevice = bt.connectedName),
         onTile = { Shell.open(context, it) },
         onClose = onClose,
+        // Long press on Equalizer: pick the unit's EQ app by hand when the automatic guess is wrong.
+        onTileLong = { if (it == Shell.Control.Equalizer) pickEq = true },
     )
+    if (pickEq) {
+        EqChooserDialog(
+            onPick = { component ->
+                Shell.chooseEqualizer(context, component)
+                pickEq = false
+            },
+            onDismiss = { pickEq = false },
+        )
+    }
 }
 
 @Composable
@@ -263,7 +277,13 @@ internal fun quickTiles(status: Shell.Status, btSupported: Boolean, btOn: Boolea
 }
 
 @Composable
-internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile: (Shell.Control) -> Unit, onClose: () -> Unit) {
+internal fun QuickControlsPanel(
+    visible: Boolean,
+    tiles: List<QuickTile>,
+    onTile: (Shell.Control) -> Unit,
+    onClose: () -> Unit,
+    onTileLong: ((Shell.Control) -> Unit)? = null,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shown = remember { MutableTransitionState(false) }
@@ -317,7 +337,13 @@ internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile
                 tiles.chunked(4).forEachIndexed { row, chunk ->
                     Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                         chunk.forEachIndexed { col, tile ->
-                            QuickTileView(tile, index = row * 4 + col, onClick = { onTile(tile.control) }, modifier = Modifier.weight(1f))
+                            QuickTileView(
+                                tile,
+                                index = row * 4 + col,
+                                onClick = { onTile(tile.control) },
+                                modifier = Modifier.weight(1f),
+                                onLongClick = onTileLong?.let { long -> { long(tile.control) } },
+                            )
                         }
                     }
                 }
@@ -327,7 +353,8 @@ internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile
 }
 
 @Composable
-private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier) {
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier, onLongClick: (() -> Unit)? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     // Tiles pop in one after another as the panel lands.
@@ -348,7 +375,7 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
             .clip(shape)
             .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
             .border(1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(dims.d(1.8f)),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -381,6 +408,46 @@ internal fun PhoneLinkMissingDialog(onOpenApps: () -> Unit, onDismiss: () -> Uni
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
         dismissButton = { TextButton(onClick = onOpenApps) { Text(stringResource(R.string.shell_link_open_apps)) } },
     )
+}
+
+/** Every launchable app, EQ-looking ones first, plus "Automatic"; [onPick] gets "package/activity" or null. */
+@Composable
+private fun EqChooserDialog(onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val (bg, fg) = dialogColors()
+    val theme = LocalDriveTheme.current
+    val apps by produceState<List<com.vikash.ampli.drive.system.AppEntry>?>(null) {
+        value = com.vikash.ampli.drive.system.InstalledApps.load(context)
+            .filter { it.packageName != context.packageName }
+            .sortedWith(compareByDescending<com.vikash.ampli.drive.system.AppEntry> { Shell.isEqLabel(it.label) }.thenBy { it.label.lowercase() })
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = bg, titleContentColor = fg, textContentColor = fg,
+        title = { Text(stringResource(R.string.shell_eq_pick_title), fontWeight = FontWeight.Bold) },
+        text = {
+            val list = apps
+            if (list == null) {
+                Box(Modifier.fillMaxWidth().heightIn(min = 96.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = theme.accent) }
+            } else {
+                androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                    item { EqRow(stringResource(R.string.chooser_automatic)) { onPick(null) } }
+                    items(list.size) { i ->
+                        val e = list[i]
+                        EqRow(e.label) { onPick(e.packageName + "/" + e.activityName) }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+    )
+}
+
+@Composable
+private fun EqRow(label: String, onClick: () -> Unit) {
+    Box(Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable(onClick = onClick), contentAlignment = Alignment.CenterStart) {
+        Text(label, fontSize = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 8.dp))
+    }
 }
 
 // ------------------------------------------------------------------------ PIN

@@ -842,4 +842,7 @@
     <string name="nav_search_moving">गाड़ी चलते समय टाइपिंग बंद है। “बोलें” दबाएँ और जगह का नाम बोलें।</string>
     <string name="shell_open_settings">सेटिंग खोलें</string>
     <string name="voice_tts_missing_hint">फ़ोन की आवाज़ (TTS) इंस्टॉल नहीं है; Ampli की आवाज़ बोलेगी।</string>
+    <string name="autostart_acc_note">हेड यूनिट के इग्निशन (ACC) सिग्नल तभी मिलते हैं जब “बैकग्राउंड में निगरानी” चालू हो।</string>
+    <string name="about_not_affiliated">Ampli Studio का NPCI, NHAI, Apple या Google से कोई संबंध नहीं है। FASTag, CarPlay, Android Auto और Google Maps के नाम सिर्फ़ यह बताने के लिए हैं कि Car Hub किसके साथ चलता है।</string>
+    <string name="shell_eq_pick_title">अपना इक्वलाइज़र ऐप चुनें</string>
 </resources>

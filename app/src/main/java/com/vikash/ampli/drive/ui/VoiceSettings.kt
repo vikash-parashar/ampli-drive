@@ -74,7 +74,7 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
 
     // Start listening as soon as the model is in place (the switch may have been flipped mid-download).
     LaunchedEffect(always, model) {
-        if (always && model == WakeModel.State.Missing) app.wakeModel.ensure()
+        if (always && model == WakeModel.State.Missing) app.wakeModel.ensure(automatic = true)
         if (always && model == WakeModel.State.Ready) VoiceService.start(context)
     }
 

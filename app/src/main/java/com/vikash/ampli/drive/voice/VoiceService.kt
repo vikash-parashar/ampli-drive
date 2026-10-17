@@ -97,18 +97,25 @@ class VoiceService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            setStatus(Status.Failed("no microphone permission"))
-            stopSelf()
-            return START_NOT_STICKY
-        }
-        try {
+        // startForeground always comes first: a service started with startForegroundService that
+        // stops before calling it crashes the app (ForegroundServiceDidNotStartInTimeException).
+        val foreground = try {
             // The type is only passed on Android 10+; older versions have no service types.
             ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+            true
         } catch (e: Exception) {
-            // Android refused (for example started from the background on 14+).
+            // Android refused (for example started from the background on 14+, or the
+            // microphone permission was taken away after start()).
             setStatus(Status.Failed("foreground start refused: ${e.javaClass.simpleName}"))
-            stopSelf()
+            false
+        }
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            setStatus(Status.Failed("no microphone permission"))
+            stopForegroundAndSelf()
+            return START_NOT_STICKY
+        }
+        if (!foreground) {
+            stopForegroundAndSelf()
             return START_NOT_STICKY
         }
         if (!initialised) setStatus(Status.Starting)
@@ -117,6 +124,14 @@ class VoiceService : Service() {
             init()
         }
         return START_NOT_STICKY
+    }
+
+    private fun stopForegroundAndSelf() {
+        try {
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        } catch (_: Exception) {
+        }
+        stopSelf()
     }
 
     private fun init() {
@@ -133,7 +148,7 @@ class VoiceService : Service() {
                 assistantBusy = busy
                 enabled = on
                 if (!on) {
-                    stopSelf()
+                    stopForegroundAndSelf()
                     return@collect
                 }
                 // Short gap after a session so the end of Ampli's own reply isn't heard as speech.
@@ -155,7 +170,7 @@ class VoiceService : Service() {
             val loaded = app.wakeModel.loadModel()
             if (loaded == null) {
                 setStatus(Status.Failed("model: " + (app.wakeModel.loadError ?: "missing")))
-                stopSelf()
+                stopForegroundAndSelf()
                 return@launch
             }
             model = loaded
@@ -325,7 +340,7 @@ class VoiceService : Service() {
             if (!app.wakeModel.isInstalled()) {
                 // A download that failed (or never ran) is retried here, so the wake word comes
                 // up by itself after boot instead of waiting for Settings to be opened.
-                app.wakeModel.ensure()
+                app.wakeModel.ensure(automatic = true)
                 setStatus(Status.Failed("model not downloaded yet"))
                 return false
             }
