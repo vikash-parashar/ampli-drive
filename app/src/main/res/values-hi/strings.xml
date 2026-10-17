@@ -149,6 +149,11 @@
     <string name="sos_send_again">SMS फिर से खोलें</string>
     <string name="sos_share">WhatsApp या अन्य से भेजें</string>
     <string name="sos_share_title">SOS शेयर करें</string>
+    <string name="sos_channel_name">दुर्घटना SOS</string>
+    <string name="sos_channel_description">दूसरा ऐप सामने होने पर संभावित दुर्घटना के बाद SOS स्क्रीन खोलता है</string>
+    <string name="sos_notif_title">संभावित दुर्घटना: SOS संदेश तैयार है</string>
+    <string name="sos_notif_text">अपने आपातकालीन संपर्कों के लिए SOS संदेश खोलने के लिए टैप करें। Send दबाने तक कुछ नहीं भेजा जाता।</string>
+    <string name="sos_notif_action">SOS खोलें</string>
     <string name="med_title">बचाव दल के लिए</string>
     <string name="med_blood">ब्लड ग्रुप</string>
     <string name="med_notes">चिकित्सा नोट</string>

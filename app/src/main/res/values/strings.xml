@@ -155,6 +155,11 @@
     <string name="sos_send_again">Open SMS again</string>
     <string name="sos_share">Share via WhatsApp or other</string>
     <string name="sos_share_title">Share SOS</string>
+    <string name="sos_channel_name">Crash SOS</string>
+    <string name="sos_channel_description">Opens the SOS screen after a possible crash when another app is in front</string>
+    <string name="sos_notif_title">Possible crash: SOS message ready</string>
+    <string name="sos_notif_text">Tap to open the SOS message for your emergency contacts. Nothing is sent until you press Send.</string>
+    <string name="sos_notif_action">Open SOS</string>
     <string name="med_title">For responders</string>
     <string name="med_blood">Blood group</string>
     <string name="med_notes">Medical notes</string>

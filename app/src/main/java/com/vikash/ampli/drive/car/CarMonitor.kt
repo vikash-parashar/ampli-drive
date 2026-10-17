@@ -13,11 +13,14 @@ import android.location.Location
 import android.media.AudioManager
 import android.os.LocaleList
 import android.os.SystemClock
+import android.provider.Settings
+import android.util.Log
 import androidx.annotation.StringRes
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.emergency.Sos
+import com.vikash.ampli.drive.emergency.SosNotifier
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.obd.DtcCatalog
 import com.vikash.ampli.drive.obd.EngineWarning
@@ -303,6 +306,7 @@ class CarMonitor(private val app: DriveApp) {
         if (_crashAt.value != null) return
         _crashAt.value = System.currentTimeMillis()
         _crashSos.value = null
+        SosNotifier.cancel(app)
         // A fresh fix for the SOS message, whether or not the countdown screen is showing.
         crashFix = null
         crashFixSignal?.cancel()
@@ -362,7 +366,16 @@ class CarMonitor(private val app: DriveApp) {
         // When the countdown timer is the caller, cancelling it here only stops it at its next
         // suspension point; the composer below still opens.
         clearCrash()
-        Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
+        // Android 10+ silently blocks activity starts from the background (no exception), so
+        // the composer opens directly only while Car Hub is in front (or may draw over other
+        // apps). Otherwise, or when it fails, a full-screen alert brings the SOS screen forward
+        // and that opens the composer. Either way, nothing is sent without a tap.
+        val canStart = MainActivity.inFront || Settings.canDrawOverlays(app)
+        val opened = canStart && Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
+        if (!opened) {
+            Log.i("CarMonitor", "Crash SOS composer not opened directly (canStart=$canStart); posting alert")
+            SosNotifier.postCrashSos(app)
+        }
         return message
     }
 

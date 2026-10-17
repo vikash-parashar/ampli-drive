@@ -36,6 +36,10 @@
     <!-- Optional floating speed bubble over Google Maps. Asked for only when the driver switches
          the bubble on in Settings › Car. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Crash SOS: when the countdown ends while another app is in front, a full-screen alert
+         brings the SOS screen forward (Android 10+ blocks starting it from the background).
+         On Android 14+ it falls back to a heads-up alert unless the permission is granted. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <!-- "Play <song> from my storage" (MediaStore, USB and SD included). -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission
