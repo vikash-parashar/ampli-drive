@@ -751,17 +751,14 @@
     <string name="more_title">More from Ampli</string>
     <string name="more_hint">Other apps from the makers of Car Hub</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>
-    <string name="more_mp3_line">Pay once, play forever music player</string>
+    <string name="more_mp3_line">Your music, no monthly fee</string>
     <string name="more_naukri_name">Ampli Naukri</string>
-    <string name="more_naukri_line">Free government job alerts with eligibility match</string>
+    <string name="more_naukri_line">Free sarkari job alerts</string>
     <string name="more_coming_soon">Coming soon</string>
-    <string name="more_open_play">Open in Play</string>
-    <string name="more_learn_more">Learn more</string>
     <!-- Settings › Help the developer grow (Play Billing tips, unlock nothing) -->
-    <string name="support_title">Help the developer grow</string>
-    <string name="support_hint">Enjoying Car Hub? Buy me a coffee. It\'s a tip and unlocks nothing.</string>
-    <string name="support_tip_small">Coffee %1$s</string>
-    <string name="support_tip_big">Coffee and snack %1$s</string>
+    <string name="support_title">Buy the developer a chai ☕</string>
+    <string name="support_hint">Enjoying Car Hub? A small tip helps it grow. It unlocks nothing; every feature stays the same.</string>
     <string name="support_unavailable">Available after Play launch</string>
     <string name="support_thanks">Thank you so much! Your support keeps Car Hub growing. 🙏</string>
+    <string name="more_get">Get</string>
 </resources>

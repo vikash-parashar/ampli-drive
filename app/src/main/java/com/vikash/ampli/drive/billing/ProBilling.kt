@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * launch, so a refund turns Pro off again. Sideloaded test builds can't reach Play Billing:
  * they use the debug-only "Test build: unlock Pro" switch in Settings instead.
  *
- * Also sells the Settings › "Help the developer grow" tips ([TIP_IDS]): consumable one-time
+ * Also sells the Settings › "Buy the developer a chai" tips ([TIP_IDS]): consumable one-time
  * products, consumed right after payment so they can be given again. They unlock nothing.
  *
  * TODO(before launch): verify purchase tokens on a server (Play Developer API) rather than
@@ -181,9 +181,13 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
     companion object {
         const val PRODUCT_ID = "ampli_drive_pro"
 
-        /** Consumable tips (Settings › Help the developer grow). Create them in Play Console. */
-        const val TIP_SMALL = "ampli_carhub_tip_49"
-        const val TIP_BIG = "ampli_carhub_tip_99"
-        val TIP_IDS = listOf(TIP_SMALL, TIP_BIG)
+        /**
+         * Consumable tips (Settings › Buy the developer a chai), the same ids in every Ampli app
+         * (in-app-hook-spec v1 §5). Create them in Play Console.
+         */
+        const val TIP_49 = "ampli_tip_49"
+        const val TIP_99 = "ampli_tip_99"
+        const val TIP_199 = "ampli_tip_199"
+        val TIP_IDS = listOf(TIP_49, TIP_99, TIP_199)
     }
 }

@@ -142,7 +142,7 @@ class ScreenshotTest {
     /** Left: tips on sale (Play build). Right: just after a tip, and a sideloaded build. */
     @Test
     fun settingsSupport() {
-        val prices = mapOf(ProBilling.TIP_SMALL to "₹49.00", ProBilling.TIP_BIG to "₹99.00")
+        val prices = mapOf(ProBilling.TIP_49 to "₹49.00", ProBilling.TIP_99 to "₹99.00", ProBilling.TIP_199 to "₹199.00")
         compose.setContent {
             Frame {
                 Row(Modifier.fillMaxSize().padding(16.dpCompat()), horizontalArrangement = Arrangement.spacedBy(16.dpCompat())) {
