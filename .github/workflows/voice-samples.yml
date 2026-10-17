@@ -1,0 +1,22 @@
+name: Voice samples
+on:
+  push:
+    branches: [voice-samples]
+permissions:
+  contents: write
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record greeting in 5 male + 5 female voices
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 tools/voice_samples.py
+      - name: Publish as a prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=voice-samples-${{ github.run_number }}
+          gh release create "$tag" out/* --prerelease --target voice-samples \
+            --title "Haryanvi voice samples $tag" --notes-file out/README.md
