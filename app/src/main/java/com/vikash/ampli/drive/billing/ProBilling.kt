@@ -8,6 +8,7 @@ import com.android.billingclient.api.BillingClient.ProductType
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ConsumeParams
 import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
@@ -28,6 +29,9 @@ import kotlinx.coroutines.flow.asStateFlow
  * launch, so a refund turns Pro off again. Sideloaded test builds can't reach Play Billing:
  * they use the debug-only "Test build: unlock Pro" switch in Settings instead.
  *
+ * Also sells the Settings › "Help the developer grow" tips ([TIP_IDS]): consumable one-time
+ * products, consumed right after payment so they can be given again. They unlock nothing.
+ *
  * TODO(before launch): verify purchase tokens on a server (Play Developer API) rather than
  *  trusting the client, and handle PENDING purchases with a "payment pending" message.
  */
@@ -38,6 +42,16 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
     val price: StateFlow<String?> = _price.asStateFlow()
 
     private var productDetails: ProductDetails? = null
+
+    /** Tip product id to its localised price; empty while Play has no tips to sell (sideloaded, not created yet). */
+    private val _tipPrices = MutableStateFlow<Map<String, String>>(emptyMap())
+    val tipPrices: StateFlow<Map<String, String>> = _tipPrices.asStateFlow()
+
+    /** Goes up by one after each tip is paid and consumed, for the thank-you. */
+    private val _tipsThanked = MutableStateFlow(0)
+    val tipsThanked: StateFlow<Int> = _tipsThanked.asStateFlow()
+
+    private val details = java.util.concurrent.ConcurrentHashMap<String, ProductDetails>()
 
     private val client = BillingClient.newBuilder(context.applicationContext)
         .setListener(this)
@@ -77,6 +91,19 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
         return client.launchBillingFlow(activity, params).responseCode == BillingClient.BillingResponseCode.OK
     }
 
+    /** Opens Google Play's payment sheet for a tip. Returns false when Play can't sell it (yet). */
+    fun tip(activity: Activity, productId: String): Boolean {
+        val d = details[productId] ?: run { start(); return false }
+        val params = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(d).build()))
+            .build()
+        return try {
+            client.launchBillingFlow(activity, params).responseCode == BillingClient.BillingResponseCode.OK
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     /** "Restore purchase": asks Play again which products this account owns. */
     fun restore(): Boolean {
         if (!client.isReady) {
@@ -98,18 +125,22 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
     private fun queryProduct() {
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(
-                listOf(
+                (listOf(PRODUCT_ID) + TIP_IDS).map {
                     QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(PRODUCT_ID)
+                        .setProductId(it)
                         .setProductType(ProductType.INAPP)
-                        .build(),
-                ),
+                        .build()
+                },
             )
             .build()
         client.queryProductDetailsAsync(params) { result, list ->
             if (result.responseCode != BillingClient.BillingResponseCode.OK) return@queryProductDetailsAsync
-            productDetails = list.firstOrNull()
+            list.forEach { details[it.productId] = it }
+            productDetails = details[PRODUCT_ID]
             _price.value = productDetails?.oneTimePurchaseOfferDetails?.formattedPrice
+            _tipPrices.value = TIP_IDS.mapNotNull { id ->
+                details[id]?.oneTimePurchaseOfferDetails?.formattedPrice?.let { id to it }
+            }.toMap()
         }
     }
 
@@ -124,6 +155,17 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
     }
 
     private fun handlePurchase(purchase: Purchase) {
+        if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) return
+        val tip = purchase.products.firstOrNull { it in TIP_IDS }
+        if (tip != null) {
+            // Consumed so the same tip can be given again; also catches a tip paid just before
+            // the app was closed (found again by refreshPurchases).
+            val params = ConsumeParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()
+            client.consumeAsync(params) { result, _ ->
+                if (result.responseCode == BillingClient.BillingResponseCode.OK) _tipsThanked.value += 1
+            }
+            return
+        }
         if (!purchase.ownsPro()) return
         prefs.setProPurchased(true)
         // Purchases not acknowledged within 3 days are refunded automatically by Play.
@@ -138,5 +180,10 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
 
     companion object {
         const val PRODUCT_ID = "ampli_drive_pro"
+
+        /** Consumable tips (Settings › Help the developer grow). Create them in Play Console. */
+        const val TIP_SMALL = "ampli_carhub_tip_49"
+        const val TIP_BIG = "ampli_carhub_tip_99"
+        val TIP_IDS = listOf(TIP_SMALL, TIP_BIG)
     }
 }

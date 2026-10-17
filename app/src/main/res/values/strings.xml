@@ -746,4 +746,22 @@
     <string name="restricted_play_note">This block goes away once the app is installed from Play.</string>
     <string name="restricted_open_app_info">Open App info</string>
     <string name="restricted_open_access">Open notification access</string>
+
+    <!-- Settings › More from Ampli -->
+    <string name="more_title">More from Ampli</string>
+    <string name="more_hint">Other apps from the makers of Car Hub</string>
+    <string name="more_mp3_name">Ampli MP3 Player</string>
+    <string name="more_mp3_line">Pay once, play forever music player</string>
+    <string name="more_naukri_name">Ampli Naukri</string>
+    <string name="more_naukri_line">Free government job alerts with eligibility match</string>
+    <string name="more_coming_soon">Coming soon</string>
+    <string name="more_open_play">Open in Play</string>
+    <string name="more_learn_more">Learn more</string>
+    <!-- Settings › Help the developer grow (Play Billing tips, unlock nothing) -->
+    <string name="support_title">Help the developer grow</string>
+    <string name="support_hint">Enjoying Car Hub? Buy me a coffee. It\'s a tip and unlocks nothing.</string>
+    <string name="support_tip_small">Coffee %1$s</string>
+    <string name="support_tip_big">Coffee and snack %1$s</string>
+    <string name="support_unavailable">Available after Play launch</string>
+    <string name="support_thanks">Thank you so much! Your support keeps Car Hub growing. 🙏</string>
 </resources>

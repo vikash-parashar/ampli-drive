@@ -18,6 +18,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.billing.ProBilling
 import com.vikash.ampli.drive.nav.Maneuver
 import com.vikash.ampli.drive.nav.NavDestination
 import com.vikash.ampli.drive.nav.NavSession
@@ -31,6 +32,8 @@ import com.vikash.ampli.drive.ui.Dims
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.FirstRunNameHost
 import com.vikash.ampli.drive.ui.LocalDims
+import com.vikash.ampli.drive.ui.MoreFromAmpliCard
+import com.vikash.ampli.drive.ui.SupportCardContent
 import com.vikash.ampli.drive.ui.RestrictedSettingsGuide
 import com.vikash.ampli.drive.ui.Screen
 import com.vikash.ampli.drive.ui.VoiceStyleCard
@@ -122,6 +125,38 @@ class ScreenshotTest {
         }
         compose.mainClock.advanceTimeBy(1_500L)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/welcome-card.png")
+    }
+
+    @Test
+    fun settingsMoreFromAmpli() {
+        compose.setContent {
+            Frame {
+                Column(Modifier.fillMaxSize().padding(16.dpCompat()).verticalScroll(rememberScrollState())) {
+                    MoreFromAmpliCard()
+                }
+            }
+        }
+        shot("settings-more-from-ampli")
+    }
+
+    /** Left: tips on sale (Play build). Right: just after a tip, and a sideloaded build. */
+    @Test
+    fun settingsSupport() {
+        val prices = mapOf(ProBilling.TIP_SMALL to "₹49.00", ProBilling.TIP_BIG to "₹99.00")
+        compose.setContent {
+            Frame {
+                Row(Modifier.fillMaxSize().padding(16.dpCompat()), horizontalArrangement = Arrangement.spacedBy(16.dpCompat())) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dpCompat())) {
+                        SupportCardContent(prices = prices, thanked = false, onTip = {})
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dpCompat())) {
+                        SupportCardContent(prices = prices, thanked = true, onTip = {})
+                        SupportCardContent(prices = emptyMap(), thanked = false, onTip = {})
+                    }
+                }
+            }
+        }
+        shot("settings-support")
     }
 
     /** Android 13+ guide shown when notification access is still off (sideloaded APK). */

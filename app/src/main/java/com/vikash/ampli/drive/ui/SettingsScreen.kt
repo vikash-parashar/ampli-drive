@@ -258,6 +258,9 @@ fun SettingsScreen(
                 checked = keepScreenOn,
                 onChange = app.prefs::setKeepScreenOn,
             )
+            // Settings only: never on the driving screens.
+            MoreFromAmpliCard()
+            SupportCard(app = app)
             LinkRow(
                 icon = Icons.Filled.Feedback,
                 title = stringResource(R.string.feedback_title),
