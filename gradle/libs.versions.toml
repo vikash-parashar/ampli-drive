@@ -15,6 +15,9 @@ junit = "4.13.2"
 haze = "1.2.2"
 # Offline "Hey Ampli" wake-word spotting (Apache-2.0). Needs JNA as an AAR (see app/build.gradle.kts).
 vosk = "0.3.47"
+# JVM screenshot tests (no emulator): Robolectric native graphics + Roborazzi.
+robolectric = "4.14.1"
+roborazzi = "1.40.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +34,11 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 
 [plugins]

@@ -40,6 +40,7 @@ jobs:
         timeout-minutes: 8
         run: python3 scripts/fetch_cameras.py
 
+      # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
         run: |
           chmod +x gradlew
@@ -69,6 +70,14 @@ jobs:
           name: AmpliCarHub-apk
           path: AmpliCarHub-*.apk
 
+      # Screen previews to look at without installing the APK.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: AmpliCarHub-screens
+          path: app/build/outputs/roborazzi/*.png
+          if-no-files-found: warn
+
       # A release gives a direct download link that opens in the head unit's browser.
       - uses: softprops/action-gh-release@v2
         if: github.event_name != 'pull_request'
@@ -76,7 +85,9 @@ jobs:
           tag_name: build-${{ github.run_number }}
           name: Ampli Car Hub test build ${{ github.run_number }}
           prerelease: true
-          files: AmpliCarHub-*.apk
+          files: |
+            AmpliCarHub-*.apk
+            app/build/outputs/roborazzi/*.png
 
       # PR test builds get their own pr-test-N prerelease so they can be sideloaded the
       # same way. Forks have a read-only token, so they only get the artifact.
@@ -87,4 +98,6 @@ jobs:
           target_commitish: ${{ github.event.pull_request.head.sha }}
           name: "Ampli Car Hub PR #${{ github.event.pull_request.number }} test build ${{ github.run_number }}"
           prerelease: true
-          files: AmpliCarHub-pr-*.apk
+          files: |
+            AmpliCarHub-pr-*.apk
+            app/build/outputs/roborazzi/*.png

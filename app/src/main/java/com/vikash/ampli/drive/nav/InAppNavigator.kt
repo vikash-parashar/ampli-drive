@@ -116,6 +116,13 @@ class InAppNavigator(private val app: DriveApp) {
         _muted.value = value
     }
 
+    /** Screenshot tests only: shows [session] without routing or GPS. */
+    @androidx.annotation.VisibleForTesting
+    internal fun showPreview(session: NavSession) {
+        reset()
+        _state.value = session
+    }
+
     fun consumeOpenRequest() {
         _openRequest.value = 0
     }
