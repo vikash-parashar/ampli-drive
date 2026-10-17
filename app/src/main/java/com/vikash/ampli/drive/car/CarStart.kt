@@ -13,7 +13,6 @@ import com.vikash.ampli.drive.prefs.AutoStartMode
 import com.vikash.ampli.drive.system.AppResolver
 import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.system.Launchers
-import com.vikash.ampli.drive.voice.HaryanviLines
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -47,7 +46,7 @@ object StartPolicy {
  * start other apps. A signal that arrives while Car Hub is hidden is kept as pending and runs the
  * next time the launcher shows.
  *
- * Actions: the Haryanvi greeting (when that voice style is on) and Settings › When the car
+ * Actions: the welcome message (WelcomeGreeter) and Settings › When the car
  * starts (open the phone-mirroring app, or start music and open the map).
  */
 object CarStart {
@@ -101,8 +100,8 @@ object CarStart {
         if (trigger == StartTrigger.PhoneConnected && settings.mode == AutoStartMode.Off) return
         prefs.lastCarStartAt = now
 
-        // "Ram Ram bhai! Kit chalna sai aaj?" (Haryanvi desi voice style only).
-        if (StartPolicy.greets(trigger)) app.desi.say(HaryanviLines.Event.Greeting)
+        // Welcome audio: "Ram Ram {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
+        if (StartPolicy.greets(trigger)) app.welcome.play()
 
         if (settings.mode == AutoStartMode.Off) return
         delay(settings.delaySec.coerceIn(0, 120) * 1000L)

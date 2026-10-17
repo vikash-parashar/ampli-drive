@@ -694,4 +694,19 @@
     <string name="nav_search_speak">बोलें</string>
     <string name="nav_go">चलें</string>
     <string name="nav_routing_attribution">रास्ते: OSRM, © OpenStreetMap contributors</string>
+    <!-- Welcome message on car start, and the owner's name for it. -->
+    <string name="name_title">थारा नाम के सै?</string>
+    <string name="name_hint">गाड़ी स्टार्ट होते ही Ampli आपको नाम से राम राम करेगा: “राम राम {नाम} जी”।</string>
+    <string name="name_field">आपका नाम</string>
+    <string name="name_skip">छोड़ें</string>
+    <string name="name_mic">अपना नाम बोलें</string>
+    <string name="name_listening">सुन रहा हूं… अपना नाम बोलें</string>
+    <string name="name_not_heard">सुनाई नहीं दिया। नाम लिख दीजिए।</string>
+    <string name="name_mic_denied">माइक की अनुमति नहीं है। नाम लिख दीजिए।</string>
+    <string name="name_settings_title">आपका नाम</string>
+    <string name="name_settings_empty">नाम नहीं है: Ampli “राम राम ताई आले” बोलेगा</string>
+    <string name="welcome_title">स्वागत संदेश</string>
+    <string name="welcome_hint">हर बार गाड़ी स्टार्ट होने पर एक बार बजता है (बूट या इग्निशन ऑन)</string>
+    <string name="welcome_play">अभी स्वागत सुनें</string>
+    <string name="website_title">वेबसाइट</string>
 </resources>

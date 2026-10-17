@@ -22,6 +22,7 @@ import com.vikash.ampli.drive.tpms.TpmsMonitor
 import com.vikash.ampli.drive.voice.DesiVoice
 import com.vikash.ampli.drive.voice.Speaker
 import com.vikash.ampli.drive.voice.VoiceAssistant
+import com.vikash.ampli.drive.voice.WelcomeGreeter
 import com.vikash.ampli.drive.voice.WakeModel
 
 /** Holds the few long-lived objects. Nothing starts here; MainActivity starts them when visible. */
@@ -37,6 +38,9 @@ class DriveApp : Application() {
 
     /** Settings › Voice style "Haryanvi desi": playful lines for greetings, alerts and replies. */
     val desi: DesiVoice by lazy { DesiVoice(this) }
+
+    /** "Ram Ram {name} Ji, aaj kit ka plan hai?" once per car start (CarStart). */
+    val welcome: WelcomeGreeter by lazy { WelcomeGreeter(this) }
 
     /** Speaks navigation turns: Car Hub's own, and Google Maps' (Settings › Haryanvi navigation prompts). */
     val navPrompter: NavPrompter by lazy { NavPrompter(this) }
@@ -64,6 +68,15 @@ class DriveApp : Application() {
 
     /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
     val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        // A fresh install starts in Hindi (FirstRunDefaults). Runs before the first activity, so
+        // MainActivity already opens in it. A per-app language set in system Settings wins.
+        prefs.takeFirstRunLanguage()?.let { tag ->
+            if (AppLanguages.current(this, "").isEmpty()) AppLanguages.apply(this, tag)
+        }
+    }
 
     /** Android 12: strings fetched through the app context follow the in-app language too. */
     override fun attachBaseContext(base: Context) {

@@ -705,4 +705,19 @@
     <string name="nav_search_speak">Say it</string>
     <string name="nav_go">Go</string>
     <string name="nav_routing_attribution">Routes: OSRM, © OpenStreetMap contributors</string>
+    <!-- Welcome message on car start, and the owner's name for it. -->
+    <string name="name_title">Thara naam ke sai?</string>
+    <string name="name_hint">Ampli greets you by name every time the car starts: “Ram Ram {name} Ji”.</string>
+    <string name="name_field">Your name</string>
+    <string name="name_skip">Skip</string>
+    <string name="name_mic">Say your name</string>
+    <string name="name_listening">Listening… say your name</string>
+    <string name="name_not_heard">Didn\'t catch that. Type your name instead.</string>
+    <string name="name_mic_denied">Microphone not allowed. Type your name instead.</string>
+    <string name="name_settings_title">Your name</string>
+    <string name="name_settings_empty">Not set: Ampli says “Ram Ram Tai Aale”</string>
+    <string name="welcome_title">Welcome message</string>
+    <string name="welcome_hint">Plays once each time the car starts (boot or ignition on)</string>
+    <string name="welcome_play">Play welcome now</string>
+    <string name="website_title">Website</string>
 </resources>

@@ -569,4 +569,19 @@
     <string name="feedback_none_yet">थमनै इब्बै ताईं किमे कोनी भेज्या।</string>
     <string name="feedback_waiting">%1$d भेज्जण की बाट म्हं</string>
     <string name="feedback_reply">जवाब: %1$s</string>
+    <!-- Welcome message on car start, and the owner's name for it. -->
+    <string name="name_title">थारा नाम के सै?</string>
+    <string name="name_hint">गाड्डी स्टार्ट होंदे ए Ampli थारे नाम तै राम राम करैगा: “राम राम {नाम} जी”।</string>
+    <string name="name_field">थारा नाम</string>
+    <string name="name_skip">रहण दे</string>
+    <string name="name_mic">अपणा नाम बोल</string>
+    <string name="name_listening">सुण रह्या सूं… अपणा नाम बोल</string>
+    <string name="name_not_heard">सुण्या कोनी। नाम लिख दे।</string>
+    <string name="name_mic_denied">माइक की इजाजत कोनी। नाम लिख दे।</string>
+    <string name="name_settings_title">थारा नाम</string>
+    <string name="name_settings_empty">नाम कोनी: Ampli “राम राम ताई आले” बोलैगा</string>
+    <string name="welcome_title">स्वागत संदेस</string>
+    <string name="welcome_hint">हर बार गाड्डी स्टार्ट होण पै एक बार बाजै (बूट या इग्निसन ऑन)</string>
+    <string name="welcome_play">इब्बे स्वागत सुण</string>
+    <string name="website_title">वेबसाइट</string>
 </resources>

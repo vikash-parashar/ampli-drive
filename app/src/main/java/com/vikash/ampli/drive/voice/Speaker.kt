@@ -81,13 +81,34 @@ class Speaker(context: Context) {
     /** False when no TTS engine answered; the caller can then keep text on screen longer. */
     suspend fun isAvailable(): Boolean = engine(localeFor ?: "") != null
 
+    /**
+     * Gets the engine ready right after boot, when the TTS service may still be starting: waits
+     * for onInit (up to [INIT_TIMEOUT_MS]), and if it failed or never answered, frees it, waits
+     * [BOOT_RETRY_MS] and starts a fresh one once more. True when an engine is ready.
+     */
+    suspend fun warmUp(): Boolean {
+        if (isAvailable()) return true
+        shutdown()
+        delay(BOOT_RETRY_MS)
+        return isAvailable()
+    }
+
+    /** A phone call is ringing or in progress (also Bluetooth calls through the head unit). */
+    fun inCall(): Boolean = when (audio?.mode) {
+        AudioManager.MODE_IN_CALL, AudioManager.MODE_IN_COMMUNICATION, AudioManager.MODE_RINGTONE -> true
+        else -> false
+    }
+
     private fun finish(id: String?) {
         // Called on a TTS binder thread; CompletableDeferred is thread-safe.
         synchronized(pending) { pending.remove(id ?: return) }?.complete(Unit)
     }
 
-    /** Speaks [text] and returns when it has finished (or after a safety timeout). */
-    suspend fun say(text: String, appLanguage: String) {
+    /**
+     * Speaks [text] and returns when it has finished (or after a safety timeout). With
+     * [needFocus], nothing is said when Android refuses audio focus (a call is on).
+     */
+    suspend fun say(text: String, appLanguage: String, needFocus: Boolean = false) {
         if (text.isBlank()) return
         val engine = engine(appLanguage) ?: run {
             // No TTS engine on this unit: leave the reply on screen long enough to read it.
@@ -97,7 +118,11 @@ class Speaker(context: Context) {
         val id = UUID.randomUUID().toString()
         val done = CompletableDeferred<Unit>()
         synchronized(pending) { pending[id] = done }
-        audio?.requestAudioFocus(duckFocus)
+        val focus = audio?.requestAudioFocus(duckFocus)
+        if (needFocus && focus == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+            synchronized(pending) { pending.remove(id) }
+            return
+        }
         try {
             val params = Bundle().apply { putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1f) }
             if (engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, id) != TextToSpeech.SUCCESS) return
@@ -156,5 +181,6 @@ class Speaker(context: Context) {
 
     private companion object {
         const val INIT_TIMEOUT_MS = 5_000L
+        const val BOOT_RETRY_MS = 5_000L
     }
 }

@@ -289,7 +289,15 @@ fun DriveRoot(
                             onDismiss = { AppChooser.done() },
                         )
                     }
-                    BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
+                    // First run: "Thara naam ke sai?" over Home; the location disclosure waits for it.
+                    val nameAsked by app.prefs.nameAsked.collectAsStateWithLifecycle()
+                    if (!nameAsked && screen == Screen.Home) {
+                        FirstRunNameHost(app = app)
+                    } else {
+                        BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
+                    }
+                    // "Ram Ram {name} Ji 🙏" while the car-start welcome plays.
+                    WelcomeCardHost(app = app)
                     // A trip started (voice, search, retry): show the navigation screen, unless the
                     // SOS countdown is up.
                     val navOpen by app.navigator.openRequest.collectAsStateWithLifecycle()

@@ -1,10 +1,10 @@
 # Ampli Car Hub privacy policy
 
-_Last updated: 14 October 2026_
+_Last updated: 17 October 2026_
 
 Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by **Ampli Tech** ("we"). This policy explains what the app does with your data.
 
-**Contact:** Ampli Tech, support@ampli.example _(placeholder: replace with the real support address before publishing)_
+**Contact:** Ampli Tech, support@ampliapps.in · Website: https://ampliapps.in
 
 ## The short version
 
@@ -25,6 +25,7 @@ The app stores these in its private storage on the head unit. Uninstalling the a
 | Emergency contacts, blood group, medical notes | The SOS message you can send from the Help panel |
 | Paired tyre-sensor ids, OBD-II dongle address | Tyre pressure and engine readings (Pro) |
 | Settings, theme, language, wake-word model | Your preferences; the 36 MB offline speech model for "Hey Ampli" |
+| Your name, if you enter it | The spoken welcome when the car starts ("Ram Ram {name} Ji"). Optional; if you say it with the mic, the audio goes to your device's own speech recognition service like a "Hey Ampli" command |
 | A random install id | Only used to link your Help & feedback reports (see below) |
 
 ## Location, including while the app is closed
