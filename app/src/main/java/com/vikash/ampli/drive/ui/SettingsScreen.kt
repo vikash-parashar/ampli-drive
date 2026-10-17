@@ -444,7 +444,11 @@ private fun LinkRow(icon: ImageVector, title: String, hint: String, action: Stri
 }
 
 @Composable
-internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit, enabled: Boolean = true) {
+internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) = ThemedSwitch(checked, enabled = true, onChange = onChange)
+
+/** [ThemedSwitch] that can be greyed out (for example "park to switch on"). */
+@Composable
+internal fun ThemedSwitch(checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val theme = LocalDriveTheme.current
     Switch(
         checked = checked,

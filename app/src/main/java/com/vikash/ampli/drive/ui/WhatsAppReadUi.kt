@@ -178,7 +178,7 @@ fun WhatsAppReadCardContent(
                     )
                 }
                 ProTag(locked = !isPro)
-                ThemedSwitch(enabled, onToggle, enabled = canToggle)
+                ThemedSwitch(checked = enabled, enabled = canToggle, onChange = onToggle)
             }
             if (ttsMissing) {
                 Text(stringResource(R.string.wa_tts_missing), color = theme.warning, fontSize = dims.t(2.4f, min = 16f))
