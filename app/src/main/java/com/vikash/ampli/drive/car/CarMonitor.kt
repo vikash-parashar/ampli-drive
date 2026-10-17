@@ -17,6 +17,7 @@ import androidx.annotation.StringRes
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.emergency.Sos
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.obd.DtcCatalog
 import com.vikash.ampli.drive.obd.EngineWarning
@@ -74,6 +75,10 @@ class CarMonitor(private val app: DriveApp) {
     private val _crashAt = MutableStateFlow<Long?>(null)
     /** Wall-clock time of a detected crash while its countdown runs, else null. */
     val crashAt: StateFlow<Long?> = _crashAt.asStateFlow()
+
+    private val _crashSos = MutableStateFlow<String?>(null)
+    /** The SOS message opened for the last crash (by the countdown or "Send now"); null until then. */
+    val crashSos: StateFlow<String?> = _crashSos.asStateFlow()
 
     private val _weather = MutableStateFlow<WeatherReport?>(null)
     val weather: StateFlow<WeatherReport?> = _weather.asStateFlow()
@@ -287,11 +292,22 @@ class CarMonitor(private val app: DriveApp) {
     // ------------------------------------------------------------------ Crash
 
     private var crashJob: Job? = null
+    private var crashFixSignal: android.os.CancellationSignal? = null
+    @Volatile private var crashFix: Location? = null
     private var savedVolume: Int? = null
 
     fun triggerCrash() {
         if (_crashAt.value != null) return
         _crashAt.value = System.currentTimeMillis()
+        _crashSos.value = null
+        // A fresh fix for the SOS message, whether or not the countdown screen is showing.
+        crashFix = null
+        crashFixSignal?.cancel()
+        crashFixSignal = try {
+            Sos.requestFreshLocation(app) { crashFix = it }
+        } catch (_: Exception) {
+            null
+        }
         try {
             app.startActivity(
                 Intent(app, MainActivity::class.java)
@@ -313,12 +329,38 @@ class CarMonitor(private val app: DriveApp) {
                 app.speaker.say(res.getString(R.string.crash_voice, secondsLeft), lang)
                 delay(4000)
             }
+            // The countdown ends here, not in the UI: the SOS message opens even when the
+            // countdown screen was left (HOME key, another app in front).
+            val wait = end - SystemClock.elapsedRealtime()
+            if (wait > 0) delay(wait)
+            if (_crashAt.value != null) sendCrashSos(null)
         }
+    }
+
+    /**
+     * Opens the SMS composer with the SOS message for the running crash countdown and ends it.
+     * [location] is the countdown screen's best fix, if it has one. Returns the message (also
+     * when the countdown had already opened it), or null when no crash is running.
+     */
+    fun sendCrashSos(location: Location?): String? {
+        if (_crashAt.value == null) return _crashSos.value
+        val fix = listOfNotNull(location, crashFix, Sos.lastKnownLocation(app, app.speedTracker.state.value.location))
+            .maxByOrNull { it.time }
+        val profile = app.emergency.profile.value
+        val message = Sos.buildMessage(profile, fix)
+        _crashSos.value = message
+        // When the countdown job is the caller, cancelling it here only stops it at its next
+        // suspension point; the composer below still opens.
+        clearCrash()
+        Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
+        return message
     }
 
     /** Countdown cancelled or finished. */
     fun clearCrash() {
         _crashAt.value = null
+        crashFixSignal?.cancel()
+        crashFixSignal = null
         crashJob?.cancel()
         crashJob = null
         app.speaker.stop()

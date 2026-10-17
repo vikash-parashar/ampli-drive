@@ -129,8 +129,25 @@ object Shell {
         }
     }
 
+    @Volatile private var eqCache: Pair<Intent, String>? = null
+    @Volatile private var eqCacheSeq = -1
+
+    /**
+     * [findEqualizer], scanned once per session and again only after an app is installed,
+     * updated or removed (PackageManager's change sequence), as the full scan is slow on 2 GB units.
+     */
+    fun equalizer(context: Context): Pair<Intent, String>? {
+        val seq = eqCacheSeq
+        val changes = try { context.packageManager.getChangedPackages(seq.coerceAtLeast(0)) } catch (_: Exception) { null }
+        if (seq < 0 || changes != null) {
+            eqCache = findEqualizer(context)
+            eqCacheSeq = changes?.sequenceNumber ?: seq.coerceAtLeast(0)
+        }
+        return eqCache
+    }
+
     private fun openEqualizer(context: Context): Boolean {
-        findEqualizer(context)?.let { (intent, _) -> if (start(context, intent)) return true }
+        equalizer(context)?.let { (intent, _) -> if (start(context, intent)) return true }
         val panel = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
             .putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
             .putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
@@ -185,7 +202,7 @@ object Shell {
         } catch (_: Exception) {
             null
         }
-        val eq = try { findEqualizer(context)?.second } catch (_: Exception) { null }
+        val eq = try { equalizer(context)?.second } catch (_: Exception) { null }
         return Status(wifiOn, connected, ssid, brightness?.coerceIn(0, 100), volume, eq)
     }
 
