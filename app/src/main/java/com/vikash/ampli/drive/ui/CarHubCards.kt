@@ -104,7 +104,7 @@ fun AnnualPassCard(app: DriveApp, modifier: Modifier = Modifier, today: LocalDat
     var pickStart by remember { mutableStateOf(false) }
 
     Pane(modifier) {
-        Column(Modifier.padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+        Column(Modifier.padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(0.8f))) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
                 Icon(Icons.Filled.Toll, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(28.dp))
                 Box(Modifier.weight(1f)) {
@@ -139,7 +139,7 @@ fun AnnualPassCard(app: DriveApp, modifier: Modifier = Modifier, today: LocalDat
                     else -> theme.accent
                 }
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
-                    Text(shown.toString(), style = theme.numberStyle(color), fontSize = dims.t(9f, min = 36f))
+                    Text(shown.toString(), style = theme.numberStyle(color), fontSize = dims.t(7.4f, min = 34f))
                     Text(
                         stringResource(R.string.pass_trips_left) + " / " + AnnualPass.TRIPS,
                         color = theme.muted,

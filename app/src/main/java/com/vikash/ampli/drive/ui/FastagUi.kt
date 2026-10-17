@@ -269,12 +269,13 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
             Column(
                 Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+                verticalArrangement = Arrangement.spacedBy(dims.d(1.2f)),
             ) {
                 val balance = latest?.balance
                 val isLow = balance != null && balance < low
+                // Compact enough that the Annual Pass −1 / +1 buttons fit on a 600 px screen.
                 Pane(Modifier.fillMaxWidth(), fill = if (isLow) theme.danger else null) {
-                    Column(Modifier.padding(dims.d(2.6f))) {
+                    Column(Modifier.padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f))) {
                         Text(
                             theme.label(stringResource(if (isLow) R.string.fastag_low else R.string.fastag_balance)),
                             style = theme.labelStyle(if (isLow) theme.onDanger else theme.muted),
@@ -283,7 +284,7 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
                         Text(
                             if (balance != null) rupees(balance) else "—",
                             style = theme.numberStyle(if (isLow) theme.onDanger else theme.text),
-                            fontSize = dims.t(9f, min = 36f),
+                            fontSize = dims.t(7.4f, min = 34f),
                         )
                         val info = listOfNotNull(latest?.vehicle, latest?.bank)
                         if (info.isNotEmpty()) {
