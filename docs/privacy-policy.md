@@ -6,6 +6,8 @@ Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, 
 
 **Contact:** Ampli Studio, support@ampliapps.in · Website: https://ampliapps.in
 
+**Online copy:** https://ampliapps.in/privacy/carhub/
+
 ## The short version
 
 - The app has **no account** and **no ads**, and contains no analytics or tracking SDK.
