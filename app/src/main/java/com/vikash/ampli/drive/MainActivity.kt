@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -294,7 +295,7 @@ class MainActivity : ComponentActivity() {
         /** True while this activity is started (visible), so activity starts are allowed. */
         @Volatile
         var inFront: Boolean = false
-            private set
+            @VisibleForTesting internal set
 
         const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
         const val VOICE_OPEN_HELP = "help"

@@ -1,9 +1,11 @@
 package com.vikash.ampli.drive.car
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Looper
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
+import com.vikash.ampli.drive.emergency.SosNotifier
 import com.vikash.ampli.drive.ui.Screen
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -30,6 +32,7 @@ class CrashHomeKeyTest {
     @After
     fun tearDown() {
         app?.car?.clearCrash()
+        MainActivity.inFront = false
     }
 
     @Test
@@ -39,9 +42,10 @@ class CrashHomeKeyTest {
     }
 
     @Test
-    fun countdownOpensTheSosMessageWithoutTheScreen() {
+    fun countdownOpensTheSosMessageWhileCarHubIsInFront() {
         val app = org.robolectric.RuntimeEnvironment.getApplication() as DriveApp
         this.app = app
+        MainActivity.inFront = true
 
         app.car.triggerCrash()
         assertNotNull(app.car.crashAt.value)
@@ -58,5 +62,36 @@ class CrashHomeKeyTest {
         app.car.triggerCrash()
         assertNotNull(app.car.crashAt.value)
         assertNull(app.car.crashSos.value)
+    }
+
+    /** Android 10+ blocks the composer from the background: a full-screen alert opens the SOS screen. */
+    @Test
+    fun countdownInTheBackgroundPostsTheSosAlert() {
+        val app = org.robolectric.RuntimeEnvironment.getApplication() as DriveApp
+        this.app = app
+        MainActivity.inFront = false
+
+        app.car.triggerCrash()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(CarMonitor.CRASH_COUNTDOWN_S + 2L))
+
+        assertNotNull(app.car.crashSos.value)
+        val opened = generateSequence { shadowOf(app).nextStartedActivity }.toList()
+        assertTrue("Composer started from the background: $opened", opened.none { it.action == Intent.ACTION_SENDTO })
+        val nm = app.getSystemService(NotificationManager::class.java)
+        val alert = shadowOf(nm).getNotification(SosNotifier.ID_CRASH_SOS)
+        assertNotNull("No crash SOS alert", alert)
+        assertEquals(SosNotifier.CHANNEL_SOS, alert.channelId)
+        assertNotNull("No full-screen intent", alert.fullScreenIntent)
+        val target = shadowOf(alert.fullScreenIntent).savedIntent
+        assertEquals(MainActivity.VOICE_CRASH, target.getStringExtra(MainActivity.EXTRA_VOICE_ACTION))
+        assertTrue(target.getBooleanExtra(SosNotifier.EXTRA_OPEN_SMS, false))
+        assertEquals(
+            NotificationManager.IMPORTANCE_HIGH,
+            nm.getNotificationChannel(SosNotifier.CHANNEL_SOS).importance,
+        )
+
+        // A new crash clears the old alert.
+        app.car.triggerCrash()
+        assertNull(shadowOf(nm).getNotification(SosNotifier.ID_CRASH_SOS))
     }
 }
