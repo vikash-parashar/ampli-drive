@@ -321,7 +321,7 @@ fun WelcomeCardHost(app: DriveApp) {
 }
 
 @Composable
-private fun WelcomeCard(app: DriveApp, shown: WelcomeGreeter.Card) {
+internal fun WelcomeCard(app: DriveApp, shown: WelcomeGreeter.Card) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = RoundedCornerShape(24.dp)

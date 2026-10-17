@@ -71,10 +71,10 @@ import java.util.Locale
  * another, and the row that is speaking glows and shows moving sound bars.
  */
 @Composable
-internal fun DesiSamplesCard(app: DriveApp) {
+internal fun DesiSamplesCard(app: DriveApp, initiallyOpen: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    var open by rememberSaveable { mutableStateOf(false) }
+    var open by rememberSaveable { mutableStateOf(initiallyOpen) }
     val playing by app.desi.sampling.collectAsStateWithLifecycle()
     val arrow by animateFloatAsState(if (open) 180f else 0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow), label = "arrow")
     val groups = remember {
