@@ -120,7 +120,10 @@ jobs:
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Release bundle (R8)
+        # bash -eo pipefail: a failing gradlew fails the step even though its output goes through tee.
+        shell: bash
         run: |
+          set -o pipefail
           chmod +x gradlew
           ./gradlew --no-daemon bundleRelease 2>&1 | tee release.log || {
             for f in $(find app/build/outputs/mapping -name missing_rules.txt 2>/dev/null); do
@@ -134,3 +137,4 @@ jobs:
         with:
           name: AmpliCarHub-release-aab
           path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error

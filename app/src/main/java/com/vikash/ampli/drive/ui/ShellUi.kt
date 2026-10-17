@@ -95,6 +95,8 @@ import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.Shell
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -181,26 +183,34 @@ internal fun DefaultHomeCard(onMake: () -> Unit, onLater: (() -> Unit)?, modifie
     }
 }
 
-/** Home banner while Ampli is not the default home app, until "Not now". It slides open and pushes the panes down. */
+/**
+ * One-time Home prompt while Ampli is not the default home app. It appears only while parked
+ * (the speed lock says not moving), is spent as soon as it shows, and hides when the car moves.
+ * The permanent entry is Settings › Default home. It slides open and pushes the panes down.
+ */
 @Composable
 fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
     val context = LocalContext.current
-    var dismissed by remember { mutableStateOf(app.shell.homeCardDismissed) }
+    val moving = isMoving(app)
     var tick by remember { mutableStateOf(0) }
     val isHome = remember(resumeTick, tick) { Launchers.isDefaultHome(context) }
     val makeHome = rememberMakeHome { tick++ }
+    var showing by remember { mutableStateOf(false) }
+    LaunchedEffect(isHome, moving) {
+        when {
+            moving -> showing = false
+            !isHome && !showing && !app.shell.homeCardDismissed -> {
+                showing = true
+                app.shell.homeCardDismissed = true
+            }
+        }
+    }
     AnimatedVisibility(
-        visible = !isHome && !dismissed,
+        visible = showing && !moving && !isHome,
         enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
         exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
     ) {
-        DefaultHomeBanner(
-            onMake = makeHome,
-            onLater = {
-                app.shell.homeCardDismissed = true
-                dismissed = true
-            },
-        )
+        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false })
     }
 }
 
@@ -213,15 +223,16 @@ data class QuickTile(val control: Shell.Control, val icon: ImageVector, val labe
 fun QuickControlsHost(app: DriveApp, open: Boolean, onClose: () -> Unit) {
     val context = LocalContext.current
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
-    val status by produceState(Shell.status(context), open) {
+    // Read off the main thread, and only while the panel is open (the EQ lookup scans every app).
+    val status by produceState<Shell.Status?>(null, open) {
         while (open) {
-            value = Shell.status(context)
+            value = withContext(Dispatchers.IO) { Shell.status(context) }
             delay(2_000L)
         }
     }
     QuickControlsPanel(
         visible = open,
-        tiles = quickTiles(status, btSupported = bt.supported, btOn = bt.enabled, btDevice = bt.connectedName),
+        tiles = quickTiles(status ?: Shell.Status(null, false, null, null, null), btSupported = bt.supported, btOn = bt.enabled, btDevice = bt.connectedName),
         onTile = { Shell.open(context, it) },
         onClose = onClose,
     )
@@ -374,9 +385,12 @@ internal fun PhoneLinkMissingDialog(onOpenApps: () -> Unit, onDismiss: () -> Uni
 
 // ------------------------------------------------------------------------ PIN
 
-/** Four-digit PIN for "More apps": [onPin] gets it once four digits are typed and OK pressed. */
+/**
+ * Four-digit PIN for "More apps": [onPin] gets it once four digits are typed and OK pressed.
+ * While [moving] there is no keyboard: the dialog asks the driver to park first.
+ */
 @Composable
-internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, onDismiss: () -> Unit, moving: Boolean = false) {
     val (bg, fg) = dialogColors()
     val theme = LocalDriveTheme.current
     var pin by remember { mutableStateOf("") }
@@ -390,7 +404,9 @@ internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, o
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (moving) {
+                Text(stringResource(R.string.park_to_edit_hint))
+            } else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { v -> pin = v.filter { it.isDigit() }.take(4) },
@@ -403,7 +419,7 @@ internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, o
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (ShellPrefs.validPin(pin)) onPin(pin) }, enabled = ShellPrefs.validPin(pin)) {
+            TextButton(onClick = { if (!moving && ShellPrefs.validPin(pin)) onPin(pin) }, enabled = !moving && ShellPrefs.validPin(pin)) {
                 Text(stringResource(R.string.action_save))
             }
         },

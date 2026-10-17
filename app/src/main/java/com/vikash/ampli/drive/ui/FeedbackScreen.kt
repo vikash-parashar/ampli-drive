@@ -71,7 +71,9 @@ private enum class FeedbackTab { Bug, Feature, Support, Mine }
 fun FeedbackScreen(app: DriveApp, onBack: () -> Unit) {
     val dims = LocalDims.current
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
-    val moving = (gps.speedKmh ?: 0f) >= FEEDBACK_MAX_KMH
+    // Fails closed like every typing screen (no speed just after moving counts as moving),
+    // with the stricter 5 km/h limit for this form.
+    val moving = isMoving(app) || (gps.speedKmh ?: 0f) >= FEEDBACK_MAX_KMH
     var tab by rememberSaveable { mutableStateOf(FeedbackTab.Bug) }
 
     Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(2f))) {

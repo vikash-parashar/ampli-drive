@@ -157,8 +157,16 @@ private fun AccessNeeded(onAllow: () -> Unit) {
             fontSize = dims.t(2.5f),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            // The text gives way first, so the button keeps a full touch target.
+            modifier = Modifier.weight(1f, fill = false),
         )
-        BigButton(text = stringResource(R.string.allow_access), onClick = onAllow, modifier = Modifier.fillMaxWidth())
+        BigButton(
+            text = stringResource(R.string.allow_access),
+            onClick = onAllow,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        )
     }
 }
 

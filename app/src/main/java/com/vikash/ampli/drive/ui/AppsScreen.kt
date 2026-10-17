@@ -188,6 +188,7 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
                 }
             },
             onDismiss = { askPin = null },
+            moving = isMoving(app),
         )
     }
 }

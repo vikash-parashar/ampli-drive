@@ -101,7 +101,8 @@ fun DriveRoot(
     var showQuick by remember { mutableStateOf(false) }
     // A detected crash opens the SOS countdown over whatever is showing.
     val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
-    LaunchedEffect(crashAt) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
+    // Keyed on the screen too: anything that leaves the countdown while it runs comes back to it.
+    LaunchedEffect(crashAt, screen) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
 
     // Dark status-bar icons on the light themes.
     val view = LocalView.current

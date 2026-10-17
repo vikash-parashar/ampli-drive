@@ -103,7 +103,9 @@ object DriveLock {
 fun isMoving(app: DriveApp): Boolean {
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val speed = gps.speedKmh
+    // SpeedTracker stamps every moving fix; this also covers a speed set by other means (tests).
     if (speed != null && speed > PARK_TO_EDIT_KMH) DriveLock.lastMovingAtMs = android.os.SystemClock.elapsedRealtime()
+    if (gps.lastMovingElapsedMs > DriveLock.lastMovingAtMs) DriveLock.lastMovingAtMs = gps.lastMovingElapsedMs
     // Re-checks every few seconds while there is no speed, so the lock lifts after STALE_MS.
     val now by androidx.compose.runtime.produceState(android.os.SystemClock.elapsedRealtime(), speed == null) {
         while (speed == null) {

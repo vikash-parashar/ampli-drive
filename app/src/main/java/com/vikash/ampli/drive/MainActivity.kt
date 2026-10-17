@@ -164,12 +164,18 @@ class MainActivity : ComponentActivity() {
         super.onStop()
     }
 
-    /** Pressing Home while the launcher is open returns to the main screen. */
+    /**
+     * Pressing Home while the launcher is open returns to the main screen, except during a crash
+     * countdown: a brushed Home key or a vendor ignition event must not hide the SOS countdown.
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.hasCategory(Intent.CATEGORY_HOME)) screen.value = Screen.Home
+        if (intent.hasCategory(Intent.CATEGORY_HOME)) screen.value = screenAfterHome(app.car.crashAt.value != null)
         handleVoiceIntent(intent)
     }
+
+    /** The screen in front, for tests. */
+    internal val currentScreen: Screen get() = screen.value
 
     /** The assistant brings the launcher forward for the place list or the Help panel. */
     private fun handleVoiceIntent(intent: Intent?) {
@@ -267,6 +273,9 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        /** Where the HOME key leads: the main screen, or the crash countdown while one runs. */
+        fun screenAfterHome(crashRunning: Boolean): Screen = if (crashRunning) Screen.Crash else Screen.Home
+
         const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
         const val VOICE_OPEN_HELP = "help"
         const val VOICE_CRASH = "crash"
