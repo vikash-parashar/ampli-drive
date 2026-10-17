@@ -508,6 +508,8 @@
     <string name="crash_overlay_later">Not now</string>
     <string name="crash_overlay_status_title">Display over other apps</string>
     <string name="crash_overlay_status_off">Not allowed yet. Needed for the SOS message to open by itself after a crash.</string>
+    <string name="crash_fsi_status_title">Full-screen SOS alert</string>
+    <string name="crash_fsi_status_off">Not allowed yet. Without it, the crash SOS alert shows only as a notification.</string>
     <string name="monitor_setting">Monitor in background</string>
     <string name="monitor_setting_hint">Keeps GPS on while other apps are open, with a notification</string>
     <string name="voice_service_unknown">No service dates are set yet. Open Car, then Papers and service.</string>

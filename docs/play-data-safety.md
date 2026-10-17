@@ -50,7 +50,10 @@ If Play review asks for the background-location declaration anyway:
 Declared core use: **car launcher / media and navigation display**. The listener shows now-playing music and controls, Google Maps' next turn, and reads FASTag toll SMS notifications (debit, recharge, balance) on the unit. Optional (Pro, off by default, behind an in-app prominent disclosure): WhatsApp / WhatsApp Business message notifications read aloud while driving, never shown, stored or replied to. No notification content leaves the unit. Before release, re-check the declaration form for this use and record the disclosure + Settings toggle for the review video. The user grants it in Android's notification access settings, from Settings in the app.
 
 ### Display over other apps (`SYSTEM_ALERT_WINDOW`)
-Used only for the optional **speed bubble** (current speed, speed limit, next camera) over Google Maps. Off by default; the app opens Android's "Display over other apps" page only when the driver switches the bubble on.
+Used for the optional **speed bubble** (current speed, speed limit, next camera) over Google Maps, and so the **crash SOS** message can open by itself after a crash while another app is in front. The app opens Android's "Display over other apps" page only when the driver switches the bubble on, or from the explanation card / status row in Settings › Car while crash detection is on.
+
+### Full-screen intent (`USE_FULL_SCREEN_INTENT`, Android 14+)
+Used only for the **crash SOS alarm**: when a crash countdown runs out while Car Hub is not in front, a full-screen alert brings the SOS screen forward (nothing is sent without a tap). Fill in the Play Console "Full-screen intent" declaration on the App content page as a safety alert. On Android 14+ the driver can also grant it from the status row in Settings › Car (opens Android's full-screen notification setting); without it the alert is a heads-up notification.
 
 ### Microphone (`RECORD_AUDIO`)
 "Hey Ampli" wake word and voice commands, only after the driver turns them on and agrees to the in-app disclosure.

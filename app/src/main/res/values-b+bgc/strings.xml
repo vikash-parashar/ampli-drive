@@ -495,6 +495,8 @@
     <string name="crash_overlay_later">अभी नहीं</string>
     <string name="crash_overlay_status_title">दूसरे ऐप के ऊपर दिखाएँ</string>
     <string name="crash_overlay_status_off">अभी अनुमति नहीं है। दुर्घटना के बाद SOS मैसेज अपने-आप खुले, इसके लिए यह ज़रूरी है।</string>
+    <string name="crash_fsi_status_title">पूरी स्क्रीन SOS अलर्ट</string>
+    <string name="crash_fsi_status_off">अभी अनुमति नहीं है। इसके बिना दुर्घटना का SOS अलर्ट सिर्फ़ नोटिफ़िकेशन की तरह दिखेगा।</string>
     <string name="monitor_setting">पाच्छै तै निगरानी</string>
     <string name="monitor_setting_hint">दूसरे ऐप खुले होण पै बी सूचना गेल्लां GPS चालू राक्खै सै</string>
     <string name="voice_service_unknown">इब्बै ताईं कोए सर्विस तारीख सेट कोनी। गाड्डी खोल्लो, फेर कागज अर सर्विस।</string>

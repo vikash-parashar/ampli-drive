@@ -1,8 +1,10 @@
 package com.vikash.ampli.drive.ui
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.NotificationImportant
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,9 +75,47 @@ fun CrashOverlayCard(onAllow: () -> Unit, onLater: () -> Unit, modifier: Modifie
     }
 }
 
+/**
+ * Android 14+: false when the crash SOS alert may not show full screen (Play grants it by default
+ * only to calling and alarm apps; the driver can allow it in Android's settings).
+ */
+internal fun canUseFullScreenAlert(context: Context): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return true
+    val nm = context.getSystemService(NotificationManager::class.java) ?: return true
+    return nm.canUseFullScreenIntent()
+}
+
+/** Android 14+ page "Full-screen notifications" for this app. */
+internal fun openFullScreenAlertSettings(context: Context): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+        startSafely(context, Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:" + context.packageName)))
+
 /** Settings › Car status row, kept until "Display over other apps" is allowed. */
 @Composable
 fun CrashOverlayStatusRow(onAllow: () -> Unit, modifier: Modifier = Modifier) {
+    PermissionStatusRow(
+        icon = Icons.Filled.Layers,
+        title = stringResource(R.string.crash_overlay_status_title),
+        status = stringResource(R.string.crash_overlay_status_off),
+        onAllow = onAllow,
+        modifier = modifier,
+    )
+}
+
+/** Settings › Car status row (Android 14+), kept until full-screen SOS alerts are allowed. */
+@Composable
+fun CrashFullScreenStatusRow(onAllow: () -> Unit, modifier: Modifier = Modifier) {
+    PermissionStatusRow(
+        icon = Icons.Filled.NotificationImportant,
+        title = stringResource(R.string.crash_fsi_status_title),
+        status = stringResource(R.string.crash_fsi_status_off),
+        onAllow = onAllow,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun PermissionStatusRow(icon: ImageVector, title: String, status: String, onAllow: () -> Unit, modifier: Modifier = Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Row(
@@ -81,15 +123,15 @@ fun CrashOverlayStatusRow(onAllow: () -> Unit, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
-        Icon(Icons.Filled.Layers, contentDescription = null, tint = theme.warning, modifier = Modifier.size(28.dp))
+        Icon(icon, contentDescription = null, tint = theme.warning, modifier = Modifier.size(28.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                stringResource(R.string.crash_overlay_status_title),
+                title,
                 fontSize = dims.t(2.8f, min = 17f),
                 fontWeight = FontWeight.SemiBold,
                 color = theme.text,
             )
-            Text(stringResource(R.string.crash_overlay_status_off), fontSize = dims.t(2.4f, min = 16f), color = theme.warning)
+            Text(status, fontSize = dims.t(2.4f, min = 16f), color = theme.warning)
         }
         BigButton(stringResource(R.string.crash_overlay_allow), onAllow, primary = false)
     }

@@ -45,6 +45,7 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
     val s by app.car.store.settings.collectAsStateWithLifecycle()
     val bubble by app.prefs.bubble.collectAsStateWithLifecycle()
     val canOverlay = remember(resumeTick) { Settings.canDrawOverlays(context) }
+    val canFullScreen = remember(resumeTick) { canUseFullScreenAlert(context) }
     var askDisclosure by remember { mutableStateOf(false) }
     // Crash detection was just switched on without "Display over other apps": explain why it helps.
     var explainOverlay by remember { mutableStateOf(false) }
@@ -113,6 +114,14 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
                 exit = shrinkVertically() + fadeOut(),
             ) {
                 CrashOverlayStatusRow(onAllow = { openOverlaySettings(context) })
+            }
+            // Android 14+: without this the crash SOS alert is only a heads-up notification.
+            AnimatedVisibility(
+                visible = s.crashDetection && !canFullScreen,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                CrashFullScreenStatusRow(onAllow = { openFullScreenAlertSettings(context) })
             }
             CarSwitch(stringResource(R.string.weather_setting), stringResource(R.string.weather_setting_hint), s.weatherAlerts) { v -> update { it.copy(weatherAlerts = v) } }
             CarSwitch(stringResource(R.string.monitor_setting), stringResource(R.string.monitor_setting_hint), s.backgroundMonitor) { v ->
