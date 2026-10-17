@@ -47,6 +47,7 @@ class CarMonitor(private val app: DriveApp) {
     private val scope = MainScope()
 
     private val fatigue = FatigueTimer()
+    private val seatBelt = SeatBeltReminder()
     private val odometer = OdometerAccumulator()
     private val parking = ParkingDetector()
     private val crash = CrashDetector()
@@ -177,6 +178,8 @@ class CarMonitor(private val app: DriveApp) {
         if (fatigue.onSample(now, kmh) && s.breakReminder) remindBreak()
         _drivingMs.value = fatigue.drivingMs(now)
         if (!fatigue.driving && _breakDue.value) _breakDue.value = false
+        // Haryanvi desi only, once per trip on first movement: "भाई सीट बेल्ट पहन ले।"
+        if (seatBelt.onSample(now, fatigue.driving)) app.desi.sayLater(HaryanviLines.Event.SeatBelt)
 
         // Odometer.
         store.addDistance(odometer.onFix(location.latitude, location.longitude, if (location.hasAccuracy()) location.accuracy else null, kmh, location.elapsedRealtimeNanos / 1_000_000L))
@@ -227,6 +230,7 @@ class CarMonitor(private val app: DriveApp) {
             IgnitionEvent.On -> {
                 // A new trip for the average speed, then greeting / auto start (CarStart).
                 app.speedTracker.resetTrip()
+                seatBelt.newTrip()
                 CarStart.signal(app, StartTrigger.Ignition)
             }
         }

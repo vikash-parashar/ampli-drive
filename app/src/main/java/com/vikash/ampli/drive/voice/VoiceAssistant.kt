@@ -83,7 +83,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 // A failing engine must never leave the mic or the overlay stuck.
             } finally {
                 listener.cancel()
-                speaker.stop()
+                app.voicePlayer.stop()
                 _state.value = VoiceUiState()
                 _busy.value = false
             }
@@ -472,7 +472,7 @@ class VoiceAssistant(private val app: DriveApp) {
             return
         }
         val time = app.desi.line(HaryanviLines.timeOfDay(LocalTime.now().hour))
-        speakDesi(if (time == null) desi else desi.copy(text = desi.text + " " + time.text))
+        speakDesi(if (time == null) desi else desi + time)
     }
 
     /**
@@ -505,9 +505,9 @@ class VoiceAssistant(private val app: DriveApp) {
         speakDesi(desi)
     }
 
-    private suspend fun speakDesi(desi: DesiVoice.Spoken) {
+    private suspend fun speakDesi(desi: Spoken) {
         _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = desi.text) }
-        speaker.say(desi.text, desi.language)
+        app.voicePlayer.say(desi)
     }
 
     private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, res.getString(id))

@@ -11,6 +11,8 @@ import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.prefs.VoiceStyle
 import com.vikash.ampli.drive.voice.HaryanviLines
 import com.vikash.ampli.drive.voice.LinePicker
+import com.vikash.ampli.drive.voice.Spoken
+import com.vikash.ampli.drive.voice.VoiceClips
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -163,8 +165,6 @@ class NavPrompter(private val app: DriveApp) {
         say { haryanvi -> if (haryanvi) desiLine(HaryanviLines.Event.Farewell) else null }
     }
 
-    private data class Spoken(val text: String, val language: String)
-
     /** Speaks one line after the previous one, and shows it under the bubble. */
     private fun say(build: suspend (haryanvi: Boolean) -> Spoken?) {
         val old = speech
@@ -179,7 +179,7 @@ class NavPrompter(private val app: DriveApp) {
             } ?: return@launch
             _debug.value = _debug.value?.copy(lastSpoken = spoken.text)
             showCaption(spoken.text)
-            app.speaker.say(spoken.text, spoken.language)
+            app.voicePlayer.say(spoken)
         }
     }
 
@@ -196,20 +196,21 @@ class NavPrompter(private val app: DriveApp) {
 
     private suspend fun desiText(prompt: NavPrompt): Spoken? {
         val hindi = hindiVoice()
-        val text = NavPhrases.desi(prompt, picker, roman = !hindi) ?: return null
-        return Spoken(text, if (hindi) "hi" else "en-IN")
+        val phrase = NavPhrases.desiPhrase(prompt, picker, roman = !hindi) ?: return null
+        return Spoken(phrase.text, if (hindi) "hi" else "en-IN", phrase.clips)
     }
 
     private suspend fun desiLine(event: HaryanviLines.Event, vararg args: Any): Spoken? {
         val hindi = hindiVoice()
-        val line = picker.pick(event) ?: return null
-        val template = if (hindi) line.deva else line.roman
+        val picked = picker.pickIndexed(event) ?: return null
+        val template = if (hindi) picked.line.deva else picked.line.roman
         val text = try {
             String.format(Locale.US, template, *args)
         } catch (_: Exception) {
             template
         }
-        return Spoken(text, if (hindi) "hi" else "en-IN")
+        val clips = VoiceClips.clipsFor(picked, args) { picker.pickIndexed(it) }
+        return Spoken(text, if (hindi) "hi" else "en-IN", clips)
     }
 
     /** Plain prompt in the app language (English and Hindi strings; others fall back to English). */

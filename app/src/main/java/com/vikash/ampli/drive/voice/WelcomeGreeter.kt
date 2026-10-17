@@ -10,8 +10,8 @@ import java.time.LocalTime
 import java.util.Locale
 
 /**
- * The welcome audio message when the car starts: "Ram Ram {name} Ji, aaj kit ka plan hai?" (see
- * [WelcomeLines]). CarStart calls [play] once per ignition cycle (boot, ACC on, or the launcher
+ * The welcome audio message when the car starts: "राम राम भाई, आज कित का प्लान सै?" (see
+ * [WelcomeLines]; the name shows on the card, never spoken). CarStart calls [play] once per ignition cycle (boot, ACC on, or the launcher
  * showing after a reboot, with its 3-minute dedupe); Settings › Voice › Play welcome now calls it
  * any time.
  *
@@ -55,6 +55,7 @@ class WelcomeGreeter(private val app: DriveApp) {
     private suspend fun playNow() {
         val prefs = app.prefs
         val speaker = app.speaker
+        val voice = app.voicePlayer.voice
         val ready = speaker.warmUp()
         val hindiVoice = ready && speaker.hasVoice(HINDI)
         val screenTag = prefs.language.value.ifEmpty { Locale.getDefault().toLanguageTag() }
@@ -69,8 +70,10 @@ class WelcomeGreeter(private val app: DriveApp) {
         )
         prefs.welcomeCount = count + 1
         _card.value = Card(welcome.card, welcome.text, System.nanoTime())
-        if (!ready || speaker.inCall()) return
-        speaker.say(welcome.text, welcome.language, needFocus = true)
+        if (speaker.inCall()) return
+        val recorded = app.voicePlayer.library.plan(voice, welcome.spoken) != null
+        if (!ready && !recorded) return
+        app.voicePlayer.say(welcome.spoken, needFocus = true)
     }
 
     companion object {

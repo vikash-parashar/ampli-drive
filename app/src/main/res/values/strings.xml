@@ -633,6 +633,14 @@
     <string name="voice_style_hint">How Car Hub talks. Haryanvi desi is playful; SOS and crash prompts always stay plain.</string>
     <string name="voice_style_standard">Standard</string>
     <string name="voice_style_haryanvi">Haryanvi desi</string>
+    <string name="voice_pack_title">Voice</string>
+    <string name="voice_pack_hint">Who speaks the Haryanvi lines. Male and Female are recorded voices that work offline; lines without a recording use the phone voice.</string>
+    <string name="voice_pack_male">Male (Ampli Bhai)</string>
+    <string name="voice_pack_female">Female (Ampli Behen)</string>
+    <string name="voice_pack_tts">Phone voice (TTS)</string>
+    <string name="voice_pack_status">%1$d of %2$d lines recorded</string>
+    <string name="voice_pack_missing">Not in this build yet: the phone voice speaks for now</string>
+    <string name="voice_pack_name_note">The car greets without saying your name; the welcome card shows it.</string>
     <string name="autostart_title">When the car starts</string>
     <string name="autostart_hint">After boot or ignition on, open an app for you</string>
     <string name="autostart_off">Off</string>
@@ -714,7 +722,7 @@
     <string name="nav_routing_attribution">Routes: OSRM, © OpenStreetMap contributors</string>
     <!-- Welcome message on car start, and the owner's name for it. -->
     <string name="name_title">Thara naam ke sai?</string>
-    <string name="name_hint">Ampli greets you by name every time the car starts: “Ram Ram {name} Ji”.</string>
+    <string name="name_hint">Your name shows on the welcome card every time the car starts: “Ram Ram {name} Ji 🙏”.</string>
     <string name="name_field">Your name</string>
     <string name="name_skip">Skip</string>
     <string name="name_mic">Say your name</string>
@@ -722,7 +730,7 @@
     <string name="name_not_heard">Didn\'t catch that. Type your name instead.</string>
     <string name="name_mic_denied">Microphone not allowed. Type your name instead.</string>
     <string name="name_settings_title">Your name</string>
-    <string name="name_settings_empty">Not set: Ampli says “Ram Ram Tai Aale”</string>
+    <string name="name_settings_empty">Not set: the welcome card says “Ram Ram”</string>
     <string name="welcome_title">Welcome message</string>
     <string name="welcome_hint">Plays once each time the car starts (boot or ignition on)</string>
     <string name="welcome_play">Play welcome now</string>

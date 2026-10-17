@@ -5,81 +5,78 @@ import java.util.Locale
 
 /**
  * The welcome message spoken once per car start (boot, ignition on, or the launcher showing
- * after a reboot). The Haryanvi lines live in [HaryanviLines] (events Welcome, WelcomeNamed and
- * the four time-of-day events); the owner's own wording is the first line of each.
+ * after a reboot). The Haryanvi lines live in [HaryanviLines] (event Welcome and the four
+ * time-of-day events).
  *
- * - Haryanvi style: an opener, then a time-of-day line ("सवेरे सवेरे कित चाल पड़े ताऊ?",
- *   "रात हो री सै, आराम तै चलाइए।"). With a name set, every other start greets by name
- *   ("Ram Ram {name} Ji, aaj kit ka plan hai?" first). Openers and time lines rotate with the
- *   stored welcome count, so the same line never plays on two starts in a row, across reboots too.
+ * The car never says the owner's name (the owner's choice): every welcome is a no-name one, and
+ * the name, when set, shows only on the welcome card ("Ram Ram Vikash Ji 🙏"). That also lets the
+ * recorded voice pack say every welcome.
+ *
+ * - Haryanvi style: an opener ("राम राम भाई, आज कित का प्लान सै?"), then a time-of-day line
+ *   ("सवेरे सवेरे कित चाल पड़े ताऊ?"). Openers and time lines rotate with the stored welcome
+ *   count, so the same line never plays on two starts in a row, across reboots too.
  * - Standard style: a plain Hindi (Hindi screen language and a Hindi voice) or English welcome.
  *
  * [Welcome.text] is Devanagari for the hi-IN voice; without a Hindi voice the Latin line is
  * spoken with en-IN instead. Plain Kotlin, unit-tested.
  */
 object WelcomeLines {
-    const val STANDARD_HI_NAMED = "नमस्ते %1\$s जी, एम्पली कार हब में आपका स्वागत है। सुरक्षित चलाइए।"
     const val STANDARD_HI = "नमस्ते जी, एम्पली कार हब में आपका स्वागत है। सुरक्षित चलाइए।"
-    const val STANDARD_EN_NAMED = "Welcome, %1\$s. Have a safe drive."
     const val STANDARD_EN = "Welcome to Ampli Car Hub. Have a safe drive."
 
-    /** What to say and show. [language] is the app-language tag Speaker should use ("hi" or "en-IN"). */
-    data class Welcome(val text: String, val language: String, val card: String, val named: Boolean)
+    /**
+     * What to say and show. [language] is the app-language tag Speaker should use ("hi" or
+     * "en-IN"); [clips] the recorded-voice clips (opener + time of day) in the Haryanvi style.
+     */
+    data class Welcome(
+        val text: String,
+        val language: String,
+        val card: String,
+        val clips: List<String> = emptyList(),
+    ) {
+        val spoken: Spoken get() = Spoken(text, language, clips)
+    }
 
     /**
      * Picks the welcome. [count] is how many welcomes played before (stored, so the rotation
      * carries across reboots); [hindiVoice] whether the TTS engine has hi-IN; [hindiScreen]
      * whether the screen language is Hindi (or a language Hindi stands in for); [hour] the local
-     * hour (0..23) for the time-of-day line.
+     * hour (0..23) for the time-of-day line. [name] only goes on the card.
      */
     fun select(style: VoiceStyle, name: String?, count: Int, hindiVoice: Boolean, hindiScreen: Boolean, hour: Int = 9): Welcome {
         val who = OwnerName.clean(name)
         val n = count.coerceAtLeast(0)
         return when (style) {
             VoiceStyle.Haryanvi -> {
-                val named = who.isNotEmpty() && n % 2 == 0
-                val lang = if (hindiVoice) "hi" else "en-IN"
-                val opener = if (named) {
-                    rotate(HaryanviLines.Event.WelcomeNamed, n / 2)
-                } else {
-                    rotate(HaryanviLines.Event.Welcome, if (who.isNotEmpty()) n / 2 else n)
-                }
+                val opener = rotate(HaryanviLines.Event.Welcome, n)
                 val time = rotate(HaryanviLines.timeOfDay(hour), n)
-                fun text(l: HaryanviLines.Line) = if (hindiVoice) l.deva else l.roman
-                val first = if (named) fill(text(opener), who) else text(opener)
-                Welcome("$first ${text(time)}", lang, if (named) "Ram Ram $who Ji 🙏" else "Ram Ram 🙏", named)
+                fun text(p: Picked) = if (hindiVoice) p.line.deva else p.line.roman
+                val card = if (who.isNotEmpty()) "Ram Ram $who Ji 🙏" else "Ram Ram 🙏"
+                Welcome("${text(opener)} ${text(time)}", if (hindiVoice) "hi" else "en-IN", card, listOf(opener.id, time.id))
             }
             VoiceStyle.Standard -> {
                 val hindi = hindiVoice && hindiScreen
-                val named = who.isNotEmpty()
-                val text = when {
-                    hindi && named -> fill(STANDARD_HI_NAMED, who)
-                    hindi -> STANDARD_HI
-                    named -> fill(STANDARD_EN_NAMED, who)
-                    else -> STANDARD_EN
-                }
                 val card = when {
-                    hindi && named -> "नमस्ते $who जी 🙏"
+                    hindi && who.isNotEmpty() -> "नमस्ते $who जी 🙏"
                     hindi -> "नमस्ते जी 🙏"
-                    named -> "Welcome, $who 🙏"
+                    who.isNotEmpty() -> "Welcome, $who 🙏"
                     else -> "Welcome 🙏"
                 }
-                Welcome(text, if (hindi) "hi" else "en-IN", card, named)
+                Welcome(if (hindi) STANDARD_HI else STANDARD_EN, if (hindi) "hi" else "en-IN", card)
             }
         }
     }
 
     /** The [i]th line of [event], wrapping: consecutive [i] never give the same line. */
-    private fun rotate(event: HaryanviLines.Event, i: Int): HaryanviLines.Line {
+    private fun rotate(event: HaryanviLines.Event, i: Int): Picked {
         val lines = HaryanviLines.forEvent(event)!!
-        return lines[i % lines.size]
+        val index = i % lines.size
+        return Picked(event, index, lines[index])
     }
 
     /** Screen languages whose speech uses the Hindi voice (see VoiceLocales). */
     fun isHindiScreen(languageTag: String): Boolean =
         Locale.forLanguageTag(languageTag).language in setOf("hi", "bgc", "bho", "mai")
-
-    private fun fill(template: String, name: String): String = String.format(Locale.US, template, name)
 }
 
 /** The car owner's name for the welcome (Settings › Voice › Your name). Plain Kotlin, unit-tested. */

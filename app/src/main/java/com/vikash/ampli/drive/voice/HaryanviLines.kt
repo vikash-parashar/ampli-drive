@@ -40,15 +40,15 @@ object HaryanviLines {
         Car("Car health (OBD, Pro)"),
         Music("Music"),
         Talk("Small talk"),
+
+        /** Recorded human voice only: stand-ins for lines with a name or number in them. */
+        HumanVoice("Human voice only (no names or numbers)"),
         Safety("Safety (always plain Hindi)"),
     }
 
     enum class Event(val group: Group, val title: String, val safety: Boolean = false) {
-        /** Car start (boot / ACC on), no name or on alternate starts. */
+        /** Car start (boot / ACC on). Never with the owner's name: that shows on the card only. */
         Welcome(Group.Welcome, "Welcome on car start"),
-
-        /** Car start with the owner's name: %1$s is the name. */
-        WelcomeNamed(Group.Welcome, "Welcome by name"),
 
         // Time-of-day line said after the welcome (and after the Hey Ampli greeting).
         WelcomeMorning(Group.Welcome, "Morning (4 to 11)"),
@@ -139,6 +139,9 @@ object HaryanviLines {
         /** "Save spot here" on the parked-car screen. */
         ParkingSaved(Group.Road, "Parking spot saved"),
 
+        /** Once per trip when the car first moves (no belt sensor on head units). */
+        SeatBelt(Group.Road, "Seat belt reminder"),
+
         /** Said before the answer to "where is my car". */
         WhereParked(Group.Road, "Where's my car"),
         WeatherRain(Group.Road, "Heavy rain ahead"),
@@ -162,6 +165,34 @@ object HaryanviLines {
         TalkWhoAreYou(Group.Talk, "\"कौन सै तू?\""),
         TalkJoke(Group.Talk, "\"चुटकला सुणा\""),
 
+        // Recorded human voice only (Settings › Voice: Male / Female). A recorded clip can't say
+        // the place, a song or a rupee amount, so the voice pack says these instead and
+        // the screen shows the detail. VoiceClips.recordedEvent maps each event to its stand-in.
+
+        /** Instead of Searching (no place name). */
+        SearchingPlain(Group.HumanVoice, "Searching (human voice)"),
+
+        /** Instead of StartingNav (no place name). */
+        StartingNavPlain(Group.HumanVoice, "Starting navigation (human voice)"),
+
+        /** Instead of RouteFound (kilometres and minutes are on screen). */
+        RouteFoundPlain(Group.HumanVoice, "Route found (human voice)"),
+
+        /** Said right after a recorded distance clip ("चार सौ मीटर" + "आगे,"), before the turn. */
+        NavSoonTail(Group.HumanVoice, "After a distance (human voice)"),
+
+        /** Instead of SpeedLimit (the limit is on the speed pane). */
+        SpeedLimitPlain(Group.HumanVoice, "Over the limit (human voice)"),
+
+        /** Said right after a recorded distance clip: "तीन सौ मीटर" + "पै कैमरा सै…". */
+        CameraAheadTail(Group.HumanVoice, "Camera after a distance (human voice)"),
+
+        /** Instead of TollPaid / TollPaidNoBalance (the amount shows on the toll card). */
+        TollPaidPlain(Group.HumanVoice, "Toll deducted (human voice)"),
+
+        /** Instead of BreakReminder (no hours). */
+        BreakReminderPlain(Group.HumanVoice, "Break reminder (human voice)"),
+
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
         Crash(Group.Safety, "Crash countdown", safety = true),
@@ -175,12 +206,9 @@ object HaryanviLines {
             Line("और तैयारे? सुणा दे, के हाल सै?", "Aur taiyaare? Suna de, ke haal sai?", "So, all set? Tell me, how are things?"),
             Line("राम राम ताई आले, आज कित की तैयारी सै?", "Ram Ram Tai Aale, aaj kit ki taiyaari hai?", "Ram Ram, dear friend! What are we ready for today?"),
             Line("राम राम भाई! गाड्डी त्यार सै, बोल कित चालां?", "Ram Ram bhai! Gaadi tyaar sai, bol kit chaalaan?", "Ram Ram! The car is ready, say where we go."),
-        ),
-        Event.WelcomeNamed to listOf(
-            Line("राम राम %1\$s जी, आज कित का प्लान सै?", "Ram Ram %1\$s Ji, aaj kit ka plan hai?", "Ram Ram {name} ji, what's the plan today?"),
-            Line("राम राम %1\$s जी, आज कित जाणा सै?", "Ram Ram %1\$s Ji, aaj kit jaana sai?", "Ram Ram {name} ji, where are we going today?"),
-            Line("आ ग्या %1\$s भाई? सुणा दे, के हाल सै?", "Aa gaya %1\$s bhai? Suna de, ke haal sai?", "Here you are, {name}! Tell me, how are you?"),
-            Line("राम राम %1\$s जी! गाड्डी भी त्यार, मैं भी त्यार।", "Ram Ram %1\$s Ji! Gaadi bhi tyaar, main bhi tyaar.", "Ram Ram {name} ji! The car is ready, and so am I."),
+            Line("भाई कित जाणा सै आज?", "Bhai kit jaana sai aaj?", "Brother, where are we going today?"),
+            Line("आज कित की तैयारी सै?", "Aaj kit ki taiyaari sai?", "What are we ready for today?"),
+            Line("आज कित का प्लान बणैगा?", "Aaj kit ka plan banega?", "What's the plan going to be today?"),
         ),
         Event.WelcomeMorning to listOf(
             Line("सवेरे सवेरे कित चाल पड़े ताऊ?", "Savere savere kit chaal pade tau?", "Off somewhere so early in the morning, Tau?"),
@@ -221,6 +249,7 @@ object HaryanviLines {
             Line("राम राम! बेल्ट ला ले, फेर चालांगे।", "Ram Ram! Belt laga le, phir chalange.", "Ram Ram! Put on your belt, then we go."),
             Line("आ ग्या भाई? चाल, आज कित की सैर करणी सै?", "Aa gaya bhai? Chal, aaj kit ki sair karni sai?", "You're here? Come on, where shall we ride today?"),
             Line("राम राम जी! गाड्डी भी रेडी, मैं भी रेडी।", "Ram Ram ji! Gaadi bhi ready, main bhi ready.", "Ram Ram! The car is ready, and so am I."),
+            Line("भाई कैसा सै, सब राजी खुशी? परिवार में सब ठीक?", "Bhai kaisa sai, sab raazi khushi? Parivaar mein sab theek?", "How are you, brother, all well? Everyone fine at home?"),
         ),
         Event.WakeReply to listOf(
             Line("हाँ भाई, बोल।", "Haan bhai, bol.", "Yes brother, go ahead."),
@@ -305,6 +334,7 @@ object HaryanviLines {
             Line("बाएं मुड़ ज्या, आराम तै।", "baayen mud jya, aaram te.", "turn left, easy."),
             Line("लेफ्ट ले ले भाई।", "left le le bhai.", "take a left, brother."),
             Line("उल्टे हाथ कान्ही मुड़ ले भाई।", "ulte haath kaanhi mud le bhai.", "turn towards the left, brother."),
+            Line("भाई उल्टे हाथ न ले ले।", "bhai ulte haath na le le.", "brother, take the left."),
         ),
         Event.NavRight to listOf(
             Line("सुल्टे हाथ ले ले।", "sulte haath le le.", "take the right."),
@@ -313,6 +343,7 @@ object HaryanviLines {
             Line("दाएं मुड़ ज्या, आराम तै।", "daayen mud jya, aaram te.", "turn right, easy."),
             Line("राइट ले ले भाई।", "right le le bhai.", "take a right, brother."),
             Line("सुल्टे हाथ कान्ही मुड़ ले भाई।", "sulte haath kaanhi mud le bhai.", "turn towards the right, brother."),
+            Line("सुल्टे हाथ न ले ले।", "sulte haath na le le.", "take the right."),
         ),
         Event.NavSlightLeft to listOf(
             Line("हल्का सा बाएं नै हो ले।", "halka sa baayen nai ho le.", "bear slightly left."),
@@ -392,6 +423,7 @@ object HaryanviLines {
             Line("सीधा चालता रह भाई।", "Seedha chalta reh bhai.", "Keep going straight, brother."),
             Line("सीधे सीधे चाल, कित मुड़णा कोनी।", "Seedhe seedhe chal, kit mudna koni.", "Straight on, no turns for now."),
             Line("सीधा रास्ता सै, मौज तै चला।", "Seedha rasta sai, mauj te chala.", "Straight road, enjoy the drive."),
+            Line("भाई सीधा चाल।", "Bhai seedha chal.", "Go straight, brother."),
         ),
         Event.NavArrive to listOf(
             Line("पहुँच गए ताऊ!", "Pahunch gaye tau!", "We've arrived, Tau!"),
@@ -414,6 +446,8 @@ object HaryanviLines {
             Line("रेस ना सै भाई, आराम तै चला।", "Race na sai bhai, aaram te chala.", "It's not a race, brother, drive easy."),
             Line("पैर हटा ले एक्सीलेटर तै, भाई।", "Pair hata le accelerator te, bhai.", "Ease off the accelerator, brother."),
             Line("इतनी जल्दी के सै भाई, घरां सब बाट देखैं सैं।", "Itni jaldi ke sai bhai, ghara sab baat dekhe sai.", "Why the hurry, brother? Everyone at home is waiting for you."),
+            Line("भाई मंदा कर ले।", "Bhai manda kar le.", "Brother, slow down."),
+            Line("भाई आराम तै चाल।", "Bhai aaram te chal.", "Brother, go easy."),
         ),
         Event.SpeedBackUnder to listOf(
             Line("शाबाश, न्यू ए चला।", "Shaabaash, nyu e chala.", "Well done, drive just like this."),
@@ -439,6 +473,8 @@ object HaryanviLines {
             Line("ताऊ, गाड्डी मंदी कर ले।", "Tau, gaddi mandi kar le.", "Tau, slow the car down."),
             Line("अरे धीरे भाई, चालान कट ज्यागा!", "Arre dheere bhai, chalaan kat jyaga!", "Hey, slowly, brother, you'll get a fine!"),
             Line("घरां कोए बाट देख रया सै, धीरे चला।", "Ghara koi baat dekh reya sai, dheere chala.", "Someone at home is waiting for you, drive slowly."),
+            Line("भाई आगे कैमरे लाग रे सैं, मंदा कर ले।", "Bhai aage camere laag re sain, manda kar le.", "Brother, cameras ahead, slow down."),
+            Line("भाई आगे ब्रेक कर ले।", "Bhai aage brake kar le.", "Brother, brake ahead."),
         ),
 
         // ------------------------------------------------------------------ Toll, breaks, parking, weather
@@ -466,6 +502,12 @@ object HaryanviLines {
             Line("ठीक सै, गाड्डी याड़े खड़ी सै, मन्नै बेरा सै।", "Theek sai, gaadi yaade khadi sai, manne bera sai.", "OK, the car is parked here, I know it."),
             Line("पार्किंग सेव कर दी, भूल ज्यावै तो मन्नै पूछ लिए।", "Parking save kar di, bhool jyaave to manne poochh liye.", "Parking saved; if you forget, ask me."),
             Line("जगह नोट कर ली भाई, गाड्डी ना गुमैगी।", "Jagah note kar li bhai, gaadi na gumegi.", "Spot noted, brother, the car won't get lost."),
+        ),
+        Event.SeatBelt to listOf(
+            Line("भाई सीट बेल्ट पहन ले।", "Bhai seat belt pehan le.", "Brother, put on your seat belt."),
+            Line("बेल्ट ला ले भाई, फेर चालांगे।", "Belt la le bhai, pher chaalaange.", "Buckle up, brother, then we go."),
+            Line("सीट बेल्ट पहन ले, सफर बढ़िया रहवैगा।", "Seat belt pehan le, safar badhiya rahvega.", "Put on the seat belt, the trip will go well."),
+            Line("पहलां बेल्ट, फेर गाड्डी। पहन ले भाई।", "Pehlaan belt, pher gaadi. Pehan le bhai.", "Belt first, then the car. Put it on, brother."),
         ),
         Event.WhereParked to listOf(
             Line("रुक, देखूं गाड्डी कित खड़ी सै।", "Ruk, dekhun gaadi kit khadi sai.", "Wait, let me see where the car is."),
@@ -590,6 +632,57 @@ object HaryanviLines {
                 "Seeing a speed breaker, Tau said: even the road got tired and sat down!",
             ),
         ),
+
+        // ------------------------------------------------------------------ Human voice only
+        Event.SearchingPlain to listOf(
+            Line("ढूंढ रया सूं, रुक जा एक मिनट।", "Dhoond reya sun, ruk ja ek minute.", "Looking it up, wait a minute."),
+            Line("ठहर जा भाई, देख रया सूं।", "Thahar ja bhai, dekh reya sun.", "Hold on, brother, I'm looking."),
+            Line("इबे तलाश करूं।", "Ibe talash karun.", "Searching right away."),
+            Line("चाल, पता करूं सूं कित सै।", "Chaal, pata karun sun kit sai.", "OK, finding out where it is."),
+        ),
+        Event.StartingNavPlain to listOf(
+            Line("चाल भाई, चालांगे। रास्ता मैं बताऊंगा।", "Chal bhai, chalange. Rasta main bataunga.", "Come on, let's go. I'll show the way."),
+            Line("रास्ता लाग ग्या, आराम तै चालियो।", "Rasta laag gaya, aaram te chaliyo.", "Route is set, drive easy."),
+            Line("ठीक सै, चाल पड़ां। ध्यान तै चलाणा भाई।", "Theek sai, chaal padaan. Dhyan te chalana bhai.", "OK, let's go. Drive carefully, brother."),
+            Line("चाल पड़े, बेल्ट ला ले।", "Chaal pade, belt la le.", "We're off, buckle up."),
+        ),
+        Event.RouteFoundPlain to listOf(
+            Line("चाल, रास्ता मिल गया, चाल पड़।", "Chaal, rasta mil gaya, chaal pad.", "Come on, got the route, let's go."),
+            Line("रास्ता मिल ग्या भाई, दूरी स्क्रीन पै देख ले।", "Rasta mil gaya bhai, doori screen pe dekh le.", "Got the route, brother, the distance is on the screen."),
+            Line("लै, रास्ता त्यार सै, चाल पड़।", "Lai, rasta tyaar sai, chaal pad.", "Here, the route is ready, let's go."),
+            Line("बढ़िया, रास्ता लाग ग्या।", "Badhiya, rasta laag gaya.", "Great, the route is set."),
+        ),
+        Event.NavSoonTail to listOf(
+            Line("आगे,", "aage,", "ahead,"),
+            Line("आगे जा कै,", "aage ja ke,", "further on,"),
+            Line("बाद,", "baad,", "after that,"),
+            Line("पै,", "pe,", "at that point,"),
+        ),
+        Event.SpeedLimitPlain to listOf(
+            Line("स्पीड घटा ले भाई, लिमिट तै ऊपर सै।", "Speed ghata le bhai, limit te upar sai.", "Reduce speed, brother, you're over the limit."),
+            Line("धीरे कर ले, आड़े लिमिट कम सै।", "Dheere kar le, aade limit kam sai.", "Slow down, the limit here is lower."),
+            Line("लिमिट तै ऊपर ना, चालान कट ज्यागा।", "Limit te upar na, chalaan kat jyaga.", "Not above the limit, or you'll get a fine."),
+            Line("भाई, स्पीड घणी सै, लिमिट स्क्रीन पै देख ले।", "Bhai, speed ghani sai, limit screen pe dekh le.", "Brother, too fast; the limit is on the screen."),
+            Line("भाई मंदा कर ले, लिमिट तै ऊपर सै।", "Bhai manda kar le, limit te upar sai.", "Brother, slow down, you're over the limit."),
+        ),
+        Event.CameraAheadTail to listOf(
+            Line("पै कैमरा सै, स्पीड कम कर ले!", "pe camera sai, speed kam kar le!", "{distance}: camera there, slow down!"),
+            Line("पै कैमरा आ रया सै, ध्यान तै।", "pe camera aa reya sai, dhyan te.", "{distance}: a camera is coming, careful."),
+            Line("पै कैमरा खड़्या सै, लिमिट तै ऊपर मत जाइयो।", "pe camera khadya sai, limit te upar mat jaiyo.", "{distance}: a camera stands there, don't go over the limit."),
+            Line("पै कैमरा सै, आराम तै।", "pe camera sai, aaram te.", "{distance}: camera there, take it easy."),
+        ),
+        Event.TollPaidPlain to listOf(
+            Line("टोल कट गया भाई, स्क्रीन पै देख ले कितणे कटे।", "Toll kat gaya bhai, screen pe dekh le kitne kate.", "Toll deducted, brother; see on screen how much."),
+            Line("फास्टैग तै टोल कट ग्या, चाल आगे।", "FASTag te toll kat gaya, chaal aage.", "The toll went from FASTag, let's move on."),
+            Line("टोल पार! पैसे कट गए।", "Toll paar! Paise kat gaye.", "Past the toll! Money deducted."),
+            Line("टोल का पैसा कट ग्या, बैलेंस स्क्रीन पै सै।", "Toll ka paisa kat gaya, balance screen pe sai.", "Toll paid; the balance is on the screen."),
+        ),
+        Event.BreakReminderPlain to listOf(
+            Line("घणी देर हो ली चलाते, थक ग्या होगा भाई, एक चाय हो जाए?", "Ghani der ho li chalaate, thak gaya hoga bhai, ek chai ho jaye?", "You've been driving a long time, tired? A cup of tea?"),
+            Line("थोड़ा रुक कै कमर सीधी कर ले भाई।", "Thoda ruk ke kamar seedhi kar le bhai.", "Stop a bit and stretch your back, brother."),
+            Line("भाई घणी देर हो गी, ढाबा आवै तै रुक लियो।", "Bhai ghani der ho gi, dhaba aave te ruk liyo.", "Brother, it's been a while; stop at the next dhaba."),
+            Line("स्टीयरिंग घणी देर तै पकड़ राख्या सै, पाँच मिनट टांग सीधी कर ले।", "Steering ghani der te pakad raakhya sai, paanch minute taang seedhi kar le.", "You've held the wheel a long time; stretch your legs for five minutes."),
+        ),
     )
 
     /** The lines for [event], or null for safety events and events with no desi lines. */
@@ -608,7 +701,6 @@ object HaryanviLines {
 
     /** Example values for an event's placeholders: Settings › Voice › Hear samples and tests. */
     fun sampleArgs(event: Event): Array<Any> = when (event) {
-        Event.WelcomeNamed -> arrayOf("Vikash")
         Event.Searching, Event.StartingNav -> arrayOf("Rohtak")
         Event.RouteFound -> arrayOf("42", 55)
         Event.NavSoon -> arrayOf("400 मीटर")
@@ -631,7 +723,10 @@ object HaryanviLines {
 class LinePicker(private val random: Random = Random.Default) {
     private val last = HashMap<HaryanviLines.Event, Int>()
 
-    fun pick(event: HaryanviLines.Event): HaryanviLines.Line? {
+    fun pick(event: HaryanviLines.Event): HaryanviLines.Line? = pickIndexed(event)?.line
+
+    /** Like [pick], with the variant's clip id ([Picked.id]) for the recorded voice. */
+    fun pickIndexed(event: HaryanviLines.Event): Picked? {
         val lines = HaryanviLines.forEvent(event) ?: return null
         if (lines.isEmpty()) return null
         val prev = last[event]
@@ -645,6 +740,6 @@ class LinePicker(private val random: Random = Random.Default) {
             i
         }
         last[event] = index
-        return lines[index]
+        return Picked(event, index, lines[index])
     }
 }

@@ -245,6 +245,7 @@ fun SettingsScreen(
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
             VoiceStyleCard(app = app)
+            VoicePackCard(app = app)
             DesiSamplesCard(app = app)
             WelcomeSettingsCard(app = app)
             NavigateWithCard(app = app)
