@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">ਸਫ਼ਰ ਦਾ ਖ਼ਰਚਾ</string>
+    <string name="trip_cost_example">ਉਦਾਹਰਨ</string>
+    <string name="trip_cost_route">ਚੁਣਿਆ ਰਸਤਾ · %1$s ਕਿਮੀ</string>
+    <string name="trip_cost_tolls">%1$d ਟੋਲ</string>
+    <string name="trip_cost_fuel">ਤੇਲ</string>
+    <string name="trip_cost_fuel_unknown">ਇੱਕ ਵਾਰ ਤੇਲ ਭਰਵਾਉਣਾ ਜੋੜੋ</string>
+    <string name="trip_cost_pass_saves">Annual Pass ਨਾਲ ਬਚਤ</string>
+    <string name="trip_cost_pass_would_save">Annual Pass ਹੁੰਦਾ ਤਾਂ ਬਚਤ</string>
+    <string name="trip_cost_pass_trips">ਪਾਸ ਦੇ %1$d ਟ੍ਰਿੱਪ</string>
+    <string name="trip_cost_total">ਟੋਲ + ਤੇਲ</string>
+    <string name="trip_cost_note">ਅੰਦਾਜ਼ਾ। ਤੇਲ ਤੁਹਾਡੀ ਆਪਣੀ ਮਾਈਲੇਜ ਅਤੇ ਪਿਛਲੀ ਭਰਾਈ ਦੇ ਭਾਅ ਤੋਂ। ਟੋਲ ਦਰਾਂ ਬਦਲ ਸਕਦੀਆਂ ਹਨ।</string>
+    <string name="trip_cost_example_note">ਪ੍ਰੀਵਿਊ ਲਈ ਨਮੂਨੇ ਦੇ ਅੰਕੜੇ, ਅਸਲ ਰਸਤਾ ਨਹੀਂ।</string>
+</resources>

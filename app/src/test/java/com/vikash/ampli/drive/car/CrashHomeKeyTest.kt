@@ -9,6 +9,7 @@ import com.vikash.ampli.drive.emergency.SosNotifier
 import com.vikash.ampli.drive.ui.Screen
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -87,6 +88,12 @@ class CrashHomeKeyTest {
         val target = shadowOf(alert.fullScreenIntent).savedIntent
         assertEquals(MainActivity.VOICE_CRASH, target.getStringExtra(MainActivity.EXTRA_VOICE_ACTION))
         assertTrue(target.getBooleanExtra(SosNotifier.EXTRA_OPEN_SMS, false))
+        // A stale alert must not linger: it times out with the composer window.
+        assertEquals(SosNotifier.ALERT_TTL_MS, alert.timeoutAfter)
+        assertTrue(app.car.crashSosFresh())
+        val crashAt = app.car.lastCrashElapsed!!
+        assertTrue(app.car.crashSosFresh(now = crashAt + SosNotifier.ALERT_TTL_MS - 1))
+        assertFalse("Composer may not open 15 min after the crash", app.car.crashSosFresh(now = crashAt + SosNotifier.ALERT_TTL_MS))
         assertEquals(
             NotificationManager.IMPORTANCE_HIGH,
             nm.getNotificationChannel(SosNotifier.CHANNEL_SOS).importance,
@@ -117,5 +124,16 @@ class CrashHomeKeyTest {
         val alert = shadowOf(nm).getNotification(SosNotifier.ID_CRASH_SOS)
         assertNotNull("No crash SOS alert while Car Hub is not in front", alert)
         assertNotNull("No full-screen intent", alert.fullScreenIntent)
+    }
+
+    @Test
+    fun sosAlertIsFreshForFifteenMinutesOnly() {
+        assertFalse(SosNotifier.isFresh(null, 1_000L))
+        assertTrue(SosNotifier.isFresh(1_000L, 1_000L))
+        assertTrue(SosNotifier.isFresh(1_000L, 1_000L + 14 * 60_000L))
+        assertFalse(SosNotifier.isFresh(1_000L, 1_000L + 15 * 60_000L))
+        assertFalse(SosNotifier.isFresh(1_000L, 1_000L + 3 * 60 * 60_000L))
+        // A clock that went backwards (reboot) is never fresh.
+        assertFalse(SosNotifier.isFresh(10_000L, 5_000L))
     }
 }

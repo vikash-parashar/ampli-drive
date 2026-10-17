@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">ಪ್ರಯಾಣದ ವೆಚ್ಚ</string>
+    <string name="trip_cost_example">ಉದಾಹರಣೆ</string>
+    <string name="trip_cost_route">ಯೋಜಿತ ಮಾರ್ಗ · %1$s ಕಿಮೀ</string>
+    <string name="trip_cost_tolls">%1$d ಟೋಲ್‌ಗಳು</string>
+    <string name="trip_cost_fuel">ಇಂಧನ</string>
+    <string name="trip_cost_fuel_unknown">ಒಮ್ಮೆ ಇಂಧನ ತುಂಬಿಸಿದ್ದನ್ನು ಸೇರಿಸಿ</string>
+    <string name="trip_cost_pass_saves">Annual Pass ಉಳಿತಾಯ</string>
+    <string name="trip_cost_pass_would_save">Annual Pass ಇದ್ದರೆ ಉಳಿತಾಯ</string>
+    <string name="trip_cost_pass_trips">ಪಾಸ್‌ನ %1$d ಪ್ರಯಾಣಗಳು</string>
+    <string name="trip_cost_total">ಟೋಲ್ + ಇಂಧನ</string>
+    <string name="trip_cost_note">ಅಂದಾಜು. ಇಂಧನ ನಿಮ್ಮ ಸ್ವಂತ ಮೈಲೇಜ್ ಮತ್ತು ಕೊನೆಯ ತುಂಬಿಸಿದ ಬೆಲೆಯಿಂದ. ಟೋಲ್ ದರಗಳು ಬದಲಾಗಬಹುದು.</string>
+    <string name="trip_cost_example_note">ಮುನ್ನೋಟಕ್ಕಾಗಿ ಮಾದರಿ ಅಂಕಿಗಳು, ನಿಜವಾದ ಮಾರ್ಗವಲ್ಲ.</string>
+</resources>

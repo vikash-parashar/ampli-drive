@@ -6,4 +6,15 @@
     <string name="disclosure_wa_uses">প্রতিটি মেসেজ একবার পড়ে শোনানো হয়, তারপর ভুলে যাওয়া হয়। এটি কখনও ড্রাইভিং স্ক্রিনে দেখানো হয় না এবং কোথাও সেভ হয় না। Car Hub কখনও উত্তর দেয় না, SMS পাঠায় না এবং চ্যাট খোলে না। আপনি অনুমতি না দিলে গ্রুপের মেসেজ বাদ দেওয়া হয়। নোটিফিকেশন অ্যাক্সেস চালু থাকলে Car Hub ব্যাকগ্রাউন্ডে থাকলেও এটি কাজ করে।</string>
     <string name="disclosure_wa_stays">Car Hub কিছুই সেভ বা আপলোড করে না, এবং Ampli Studio বা অন্য কারও সঙ্গে কিছুই শেয়ার করে না। আপনার ডিভাইসের নিজস্ব স্পিচ ইঞ্জিন মেসেজটি পড়ে।</string>
     <string name="disclosure_park_hint">এটি পড়তে ও চালু করতে গাড়ি থামান।</string>
+    <string name="wa_title">WhatsApp মেসেজ জোরে পড়ে শোনান</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">কে লিখেছে আর মেসেজে কী আছে, গাড়ি তা বলে, শুধু কণ্ঠে।</string>
+    <string name="wa_hint_on">চালু। শুধু কণ্ঠ: মেসেজের লেখা কখনও স্ক্রিনে দেখানো হয় না।</string>
+    <string name="wa_hint_locked">এটি Pro ফিচার। Pro দেখতে ট্যাপ করুন।</string>
+    <string name="wa_groups_title">গ্রুপের মেসেজও পড়ুন</string>
+    <string name="wa_groups_hint">বন্ধ: গ্রুপ চ্যাট চুপ থাকে। শুধু সরাসরি আপনাকে পাঠানো মেসেজ পড়া হয়।</string>
+    <string name="wa_rules">20 সেকেন্ডে বড়জোর একটি মেসেজ। কল আর বাঁকের নির্দেশের সময় চুপ। Car Hub কখনও উত্তর দেয় না, কিছু পাঠায়ও না।</string>
+    <string name="wa_needs_access">WhatsApp মেসেজ শুনতে নোটিফিকেশন অ্যাক্সেস দরকার।</string>
+    <string name="wa_tts_missing">এই ইউনিটে স্পিচ ইঞ্জিন নেই, তাই মেসেজ পড়ে শোনানো যাবে না। ভয়েস দেখুন-এ গিয়ে একটি ইঞ্জিন ইনস্টল করুন।</string>
+    <string name="wa_park_to_turn_on">চালু করতে গাড়ি থামান।</string>
 </resources>

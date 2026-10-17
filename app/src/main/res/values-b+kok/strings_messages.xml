@@ -6,4 +6,15 @@
     <string name="disclosure_wa_uses">दरेक संदेश एकदांच वाचतात आनी उपरांत विसरतात. तो ड्रायव्हिंग स्क्रीनार केन्नाच दिसना आनी खंयच सेव्ह जायना. Car Hub केन्नाच जाप दिना, SMS धाडिना आनी चॅट उगडिना. तुमी परवानगी दिना मेरेन ग्रुपांतले संदेश सोडटात. नोटिफिकेशन एक्सेस चालू आसा मेरेन Car Hub फाटल्यान आसतनाय हें चलता.</string>
     <string name="disclosure_wa_stays">Car Hub कांयच सेव्ह वा अपलोड करिना, आनी Ampli Studio वा हेर कोणाकूय कांयच शेअर करिना. संदेश तुमच्या उपकरणाचें आपलेंच उलोवपाचें इंजिन वाचता.</string>
     <string name="disclosure_park_hint">हें वाचपाक आनी चालू करपाक गाडी राबयात.</string>
+    <string name="wa_title">WhatsApp संदेश वाचून दाखयात</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">कोणें बरयलें आनी संदेशांत कितें आसा तें गाडी सांगता, फकत आवाजांत.</string>
+    <string name="wa_hint_on">सुरू. फकत आवाज: संदेशाचो मजकूर स्क्रीनाचेर केन्नाच दिसना.</string>
+    <string name="wa_hint_locked">हें Pro फीचर. Pro पळोवंक टॅप करात.</string>
+    <string name="wa_groups_title">ग्रुपाचे संदेशय वाचात</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चॅट शांत उरतात. फकत तुमकां थेट धाडिल्ले संदेश वाचतात.</string>
+    <string name="wa_rules">20 सेकंदांत चडांत चड एक संदेश. कॉल आनी वळणाच्या सुचोवण्यांवेळार शांत. Car Hub केन्नाच जाप दिना आनी कांयच धाडना.</string>
+    <string name="wa_needs_access">WhatsApp संदेश आयकुपाक नोटिफिकेशन ॲक्सेस जाय.</string>
+    <string name="wa_tts_missing">ह्या युनिटांत उलोवपाचें इंजिन ना, देखून संदेश वाचून दाखोवंक जायना. आवाज तपासात हांगा एक इंजिन घालात.</string>
+    <string name="wa_park_to_turn_on">सुरू करपाक गाडी राबयात.</string>
 </resources>

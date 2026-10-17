@@ -58,6 +58,8 @@ android {
         buildConfigField("String", "MAP_FALLBACK_STYLE_URL", "\"${env("MAP_FALLBACK_STYLE_URL")}\"")
         // Small JSON on our own server that can move the servers above without an update (RemoteConfig).
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"${env("REMOTE_CONFIG_URL")}\"")
+        // Pro launch offer line ("Launch price ₹1,499, later ₹2,500"). Set LAUNCH_OFFER=false when it ends.
+        buildConfigField("boolean", "LAUNCH_OFFER", "${env("LAUNCH_OFFER") != "false"}")
 
         // Head units are ARM. Dropping the x86 MapLibre libraries keeps the APK much smaller.
         ndk {

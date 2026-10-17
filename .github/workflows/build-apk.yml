@@ -29,6 +29,8 @@ jobs:
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       # Our own map style, tried when the theme's style fails to load. Empty = none.
       MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
+      # Pro launch-offer line in the Pro sheet. Empty = on; set to false when the offer ends.
+      LAUNCH_OFFER: ${{ vars.LAUNCH_OFFER }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,9 +54,18 @@ jobs:
 
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
+        shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testDebugUnitTest
+          set +e
+          ./gradlew --no-daemon testDebugUnitTest 2>&1 | tee unit-tests.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" != 0 ]; then
+            # Job logs are not always readable; surface compiler errors and failed tests as one annotation.
+            summary=$(grep -E -A4 '^e: |FAILED$|What went wrong' unit-tests.log | head -80 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Unit tests failed::${summary}"
+          fi
+          exit $status
 
       # Fails on any API call newer than minSdk (26) that has no version check.
       - name: Lint (NewApi)
@@ -126,6 +137,8 @@ jobs:
       REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
+      # Pro launch-offer line in the Pro sheet. Empty = on; set to false when the offer ends.
+      LAUNCH_OFFER: ${{ vars.LAUNCH_OFFER }}
       # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
       # check R8 before the own servers exist. The AAB it makes is then for testing only.
       ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">प्रवासाचो खर्च</string>
+    <string name="trip_cost_example">उदाहरण</string>
+    <string name="trip_cost_route">थारायल्ली वाट · %1$s किमी</string>
+    <string name="trip_cost_tolls">%1$d टोल</string>
+    <string name="trip_cost_fuel">इंधन</string>
+    <string name="trip_cost_fuel_unknown">एक फावट इंधन भरिल्लें जोडात</string>
+    <string name="trip_cost_pass_saves">Annual Pass वरवीं वाचप</string>
+    <string name="trip_cost_pass_would_save">Annual Pass आसलो जाल्यार वाचप</string>
+    <string name="trip_cost_pass_trips">पासाचे %1$d फेरे</string>
+    <string name="trip_cost_total">टोल + इंधन</string>
+    <string name="trip_cost_note">अदमास. इंधन तुमच्या स्वताच्या मायलेज आनी निमाण्या भरणाच्या दरा प्रमाण. टोल दर बदलूं येतात.</string>
+    <string name="trip_cost_example_note">प्रिव्ह्यू खातीर नमुनो आंकडे, खरी वाट न्हय.</string>
+</resources>

@@ -6,4 +6,15 @@
     <string name="disclosure_wa_uses">ਹਰ ਸੁਨੇਹਾ ਇੱਕ ਵਾਰ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ ਅਤੇ ਫਿਰ ਭੁਲਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਇਹ ਡਰਾਈਵਿੰਗ ਸਕ੍ਰੀਨ \'ਤੇ ਕਦੇ ਨਹੀਂ ਦਿਖਦਾ ਅਤੇ ਕਿਤੇ ਸੇਵ ਨਹੀਂ ਹੁੰਦਾ। Car Hub ਕਦੇ ਜਵਾਬ ਨਹੀਂ ਦਿੰਦਾ, SMS ਨਹੀਂ ਭੇਜਦਾ ਅਤੇ ਚੈਟ ਨਹੀਂ ਖੋਲ੍ਹਦਾ। ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ, ਗਰੁੱਪ ਦੇ ਸੁਨੇਹੇ ਛੱਡ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ। ਜਦੋਂ ਤੱਕ ਸੂਚਨਾ ਪਹੁੰਚ ਚਾਲੂ ਹੈ, Car Hub ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਹੋਣ \'ਤੇ ਵੀ ਇਹ ਕੰਮ ਕਰਦਾ ਹੈ।</string>
     <string name="disclosure_wa_stays">Car Hub ਕੁਝ ਵੀ ਸੇਵ ਜਾਂ ਅੱਪਲੋਡ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ Ampli Studio ਜਾਂ ਕਿਸੇ ਹੋਰ ਨਾਲ ਕੁਝ ਵੀ ਸਾਂਝਾ ਨਹੀਂ ਕਰਦਾ। ਸੁਨੇਹਾ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਦਾ ਆਪਣਾ ਬੋਲਣ ਵਾਲਾ ਇੰਜਣ ਪੜ੍ਹਦਾ ਹੈ।</string>
     <string name="disclosure_park_hint">ਇਹ ਪੜ੍ਹਨ ਅਤੇ ਚਾਲੂ ਕਰਨ ਲਈ ਗੱਡੀ ਰੋਕੋ।</string>
+    <string name="wa_title">WhatsApp ਸੁਨੇਹੇ ਬੋਲ ਕੇ ਸੁਣਾਓ</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">ਕਿਸ ਨੇ ਲਿਖਿਆ ਅਤੇ ਸੁਨੇਹੇ ਵਿੱਚ ਕੀ ਹੈ, ਕਾਰ ਦੱਸਦੀ ਹੈ, ਸਿਰਫ਼ ਆਵਾਜ਼ ਵਿੱਚ।</string>
+    <string name="wa_hint_on">ਚਾਲੂ। ਸਿਰਫ਼ ਆਵਾਜ਼: ਸੁਨੇਹੇ ਦੀ ਲਿਖਤ ਸਕ੍ਰੀਨ \'ਤੇ ਕਦੇ ਨਹੀਂ ਦਿਸਦੀ।</string>
+    <string name="wa_hint_locked">ਇਹ Pro ਫ਼ੀਚਰ ਹੈ। Pro ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।</string>
+    <string name="wa_groups_title">ਗਰੁੱਪ ਦੇ ਸੁਨੇਹੇ ਵੀ ਸੁਣਾਓ</string>
+    <string name="wa_groups_hint">ਬੰਦ: ਗਰੁੱਪ ਚੈਟ ਚੁੱਪ ਰਹਿੰਦੀਆਂ ਹਨ। ਸਿਰਫ਼ ਸਿੱਧੇ ਤੁਹਾਨੂੰ ਭੇਜੇ ਸੁਨੇਹੇ ਸੁਣਾਏ ਜਾਂਦੇ ਹਨ।</string>
+    <string name="wa_rules">20 ਸਕਿੰਟਾਂ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ ਇੱਕ ਸੁਨੇਹਾ। ਕਾਲ ਅਤੇ ਮੋੜ ਦੀਆਂ ਹਦਾਇਤਾਂ ਵੇਲੇ ਚੁੱਪ। Car Hub ਕਦੇ ਜਵਾਬ ਨਹੀਂ ਦਿੰਦਾ ਅਤੇ ਕੁਝ ਨਹੀਂ ਭੇਜਦਾ।</string>
+    <string name="wa_needs_access">WhatsApp ਸੁਨੇਹੇ ਸੁਣਨ ਲਈ ਨੋਟੀਫ਼ਿਕੇਸ਼ਨ ਪਹੁੰਚ ਚਾਹੀਦੀ ਹੈ।</string>
+    <string name="wa_tts_missing">ਇਸ ਯੂਨਿਟ ਵਿੱਚ ਸਪੀਚ ਇੰਜਣ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਸੁਨੇਹੇ ਬੋਲ ਕੇ ਨਹੀਂ ਸੁਣਾਏ ਜਾ ਸਕਦੇ। ਆਵਾਜ਼ ਜਾਂਚੋ ਵਿੱਚ ਜਾ ਕੇ ਇੱਕ ਇੰਜਣ ਇੰਸਟਾਲ ਕਰੋ।</string>
+    <string name="wa_park_to_turn_on">ਚਾਲੂ ਕਰਨ ਲਈ ਗੱਡੀ ਰੋਕੋ।</string>
 </resources>

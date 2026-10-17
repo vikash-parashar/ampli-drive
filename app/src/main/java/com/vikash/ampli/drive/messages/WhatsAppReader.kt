@@ -7,10 +7,8 @@ import androidx.core.app.NotificationCompat
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.voice.Spoken
 import com.vikash.ampli.drive.voice.VoiceClips
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
@@ -27,13 +25,14 @@ import java.util.Locale
 class WhatsAppReader(private val app: DriveApp) {
     val prefs: MessagePrefs by lazy { MessagePrefs(app) }
     private val gate = MessageGate()
-    private val scope = MainScope()
-    private var queue: Job? = null
+    private val queue = MessageQueue(Dispatchers.Main)
 
     /** Called on the main thread by the notification listener for every posted notification. */
     fun onNotification(sbn: StatusBarNotification) {
         if (sbn.packageName !in PACKAGES) return
         if (!prefs.enabled.value) return // Cheap exit before anything is read.
+        // No speech engine: only the opener clip could play, never who wrote or what.
+        if (app.voicePlayer.ttsMissing.value) return
         val msg = extract(sbn) ?: return
         val settings = GateSettings(
             enabled = prefs.enabled.value,
@@ -48,10 +47,8 @@ class WhatsAppReader(private val app: DriveApp) {
     }
 
     private fun enqueue(sender: String, text: String) {
-        val old = queue
-        queue = scope.launch {
-            old?.join()
-            if (!waitForQuiet()) return@launch
+        queue.enqueue {
+            if (!waitForQuiet()) return@enqueue
             speak(sender, text)
         }
     }
@@ -74,10 +71,8 @@ class WhatsAppReader(private val app: DriveApp) {
 
     /** A crash started: drop every waiting message and stop one being read. */
     fun cancelAll() {
-        val q = queue ?: return
-        queue = null
-        q.cancel()
-        app.speaker.stop()
+        // Every waiting message goes, not just the newest; TTS is cut only if one was queued.
+        if (queue.cancelAll()) app.speaker.stop()
     }
 
     private suspend fun speak(sender: String, text: String) {

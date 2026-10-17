@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">Fahrtkosten</string>
+    <string name="trip_cost_example">BEISPIEL</string>
+    <string name="trip_cost_route">Geplante Route · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d Mautstellen</string>
+    <string name="trip_cost_fuel">Kraftstoff</string>
+    <string name="trip_cost_fuel_unknown">Tankfüllung hinzufügen</string>
+    <string name="trip_cost_pass_saves">Annual Pass spart</string>
+    <string name="trip_cost_pass_would_save">Annual Pass würde sparen</string>
+    <string name="trip_cost_pass_trips">%1$d Pass-Fahrten</string>
+    <string name="trip_cost_total">Maut + Kraftstoff</string>
+    <string name="trip_cost_note">Schätzung. Kraftstoff nach deinem eigenen Verbrauch und letzten Tankpreis. Mautsätze können sich ändern.</string>
+    <string name="trip_cost_example_note">Beispielzahlen für eine Vorschau, keine echte Route.</string>
+</resources>

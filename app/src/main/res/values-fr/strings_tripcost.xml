@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">Coût du trajet</string>
+    <string name="trip_cost_example">EXEMPLE</string>
+    <string name="trip_cost_route">Itinéraire prévu · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d péages</string>
+    <string name="trip_cost_fuel">Carburant</string>
+    <string name="trip_cost_fuel_unknown">Ajouter un plein</string>
+    <string name="trip_cost_pass_saves">Économie Annual Pass</string>
+    <string name="trip_cost_pass_would_save">Économie possible avec Annual Pass</string>
+    <string name="trip_cost_pass_trips">%1$d trajets du pass</string>
+    <string name="trip_cost_total">Péages + carburant</string>
+    <string name="trip_cost_note">Estimation. Le carburant utilise votre consommation et le prix du dernier plein. Les tarifs de péage peuvent changer.</string>
+    <string name="trip_cost_example_note">Chiffres d\'exemple pour un aperçu, pas un vrai trajet.</string>
+</resources>

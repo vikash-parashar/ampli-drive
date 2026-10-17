@@ -493,12 +493,12 @@
     <string name="crash_setting_hint">तेज़ टक्कर या अचानक रुकने पर 30 सेकंड का SOS काउंटडाउन</string>
     <string name="crash_no_sensor">मोशन सेंसर नहीं मिला। केवल GPS से अचानक रुकना देखा जाता है।</string>
     <string name="crash_tap_note">आख़िरी आपातकालीन SMS भेजने के लिए एक टैप ज़रूरी है।</string>
-    <string name="crash_overlay_title">SOS मैसेज को अपने-आप खुलने दें</string>
-    <string name="crash_overlay_body">Ampli Car Hub को “दूसरे ऐप के ऊपर दिखाएँ” की अनुमति दें। इससे दुर्घटना के बाद SOS मैसेज अपने-आप खुल जाएगा, भले ही स्क्रीन पर कोई दूसरा ऐप खुला हो।</string>
+    <string name="crash_overlay_title">SOS मैसेज जल्दी खुलने में मदद करें</string>
+    <string name="crash_overlay_body">Ampli Car Hub को “दूसरे ऐप के ऊपर दिखाएँ” की अनुमति दें। इससे दुर्घटना के बाद, स्क्रीन पर दूसरा ऐप होने पर भी, SOS मैसेज जल्दी खुलने में मदद मिलती है। Car Hub एक अलर्ट भी दिखाता है जिसे आप दबा सकते हैं।</string>
     <string name="crash_overlay_allow">सेटिंग खोलें</string>
     <string name="crash_overlay_later">अभी नहीं</string>
     <string name="crash_overlay_status_title">दूसरे ऐप के ऊपर दिखाएँ</string>
-    <string name="crash_overlay_status_off">अभी अनुमति नहीं है। दुर्घटना के बाद SOS मैसेज अपने-आप खुले, इसके लिए यह ज़रूरी है।</string>
+    <string name="crash_overlay_status_off">अभी अनुमति नहीं है। इससे SOS मैसेज जल्दी खुलता है; इसके बिना Car Hub एक अलर्ट दिखाता है जिसे आप दबा सकते हैं।</string>
     <string name="crash_fsi_status_title">पूरी स्क्रीन SOS अलर्ट</string>
     <string name="crash_fsi_status_off">अभी अनुमति नहीं है। इसके बिना दुर्घटना का SOS अलर्ट सिर्फ़ नोटिफ़िकेशन की तरह दिखेगा।</string>
     <string name="monitor_setting">बैकग्राउंड में निगरानी</string>
@@ -860,4 +860,5 @@
     <string name="autostart_acc_note">हेड यूनिट के इग्निशन (ACC) सिग्नल तभी मिलते हैं जब “बैकग्राउंड में निगरानी” चालू हो।</string>
     <string name="about_not_affiliated">Ampli Studio का NPCI, NHAI, Apple या Google से कोई संबंध नहीं है। FASTag, CarPlay, Android Auto और Google Maps के नाम सिर्फ़ यह बताने के लिए हैं कि Car Hub किसके साथ चलता है।</string>
     <string name="shell_eq_pick_title">अपना इक्वलाइज़र ऐप चुनें</string>
+    <string name="pro_launch_line">लॉन्च कीमत %1$s (बाद में %2$s)</string>
 </resources>

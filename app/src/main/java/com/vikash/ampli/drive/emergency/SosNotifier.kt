@@ -24,6 +24,17 @@ object SosNotifier {
     const val CHANNEL_SOS = "crash_sos"
     const val ID_CRASH_SOS = 5201
 
+    /**
+     * The alert and its "open the SMS composer" action are only good for this long after the
+     * crash: later, the location in the message is stale, so the alert times out and a late tap
+     * shows the Help screen instead.
+     */
+    const val ALERT_TTL_MS = 15 * 60_000L
+
+    /** True while a crash detected at [crashElapsedMs] (elapsedRealtime) may still open the composer. */
+    fun isFresh(crashElapsedMs: Long?, nowElapsedMs: Long): Boolean =
+        crashElapsedMs != null && nowElapsedMs >= crashElapsedMs && nowElapsedMs - crashElapsedMs < ALERT_TTL_MS
+
     /** Extra on the SOS intent: open the SMS composer once the activity is in front. */
     const val EXTRA_OPEN_SMS = "com.vikash.ampli.drive.SOS_OPEN_SMS"
 
@@ -72,6 +83,7 @@ object SosNotifier {
             .setPriority(Notification.PRIORITY_HIGH)
             .setContentIntent(open)
             .setAutoCancel(true)
+            .setTimeoutAfter(ALERT_TTL_MS)
             .addAction(
                 Notification.Action.Builder(null as Icon?, context.getString(R.string.sos_notif_action), open).build(),
             )

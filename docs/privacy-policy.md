@@ -53,9 +53,9 @@ With your permission (Android's notification access), the app reads:
 - notifications from your SMS app that mention FASTag, to pick out toll debits, recharges and the balance. Other SMS are ignored and not stored. The app has no SMS permission and cannot read your inbox;
 - the media player's now-playing information, to show and control music;
 - Google Maps' navigation notification, to show the next turn;
-- only if you switch on **Read WhatsApp messages aloud** (Pro, off by default, after its own explanation screen): WhatsApp and WhatsApp Business message notifications, to say the sender's name and the message out loud while you drive. The message is spoken only: it is never shown on screen, never stored and never sent anywhere, and the app never replies or acts on the notification. Group messages are skipped unless you also switch on group messages. You can switch it off in Settings at any time.
+- only if you switch on **Read WhatsApp messages aloud** (Pro, off by default, after its own explanation screen): WhatsApp and WhatsApp Business message notifications, to say the sender's name and the message out loud while you drive. The message is spoken only: it is never shown on screen and never stored, Ampli Car Hub never sends it to us or anyone else, and the app never replies or acts on the notification. It is spoken by your unit's text-to-speech engine. Most engines work on the unit; if yours is an online engine, the text is sent to that engine's provider to be turned into speech, under that provider's own privacy policy. Group messages are skipped unless you also switch on group messages. You can switch it off in Settings at any time.
 
-All of this stays on the unit.
+Ampli Car Hub keeps all of this on the unit (apart from what an online speech engine you chose may process, as above).
 
 ## SOS sharing
 
