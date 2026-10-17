@@ -217,8 +217,12 @@ internal fun NameEntry(
 
     Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            // While moving the keyboard is off; the mic still works.
+            val moving = isMoving(app)
             OutlinedTextField(
                 value = text,
+                enabled = !moving,
+                supportingText = if (moving) ({ Text(stringResource(R.string.park_to_edit_hint)) }) else null,
                 onValueChange = { text = it.take(OwnerName.MAX_LENGTH) },
                 label = { Text(stringResource(R.string.name_field)) },
                 singleLine = true,

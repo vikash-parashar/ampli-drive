@@ -129,7 +129,7 @@
     <string name="help_no_contacts">अजून आपत्कालीन संपर्क नाहीत. सेटिंग्ज › आपत्कालीन प्रोफाइलमध्ये जोडा.</string>
     <string name="help_medical_info">वैद्यकीय माहिती</string>
     <string name="sos_button_hint">तुमच्या आपत्कालीन संपर्कांसाठी तुमच्या लोकेशनसह संदेश उघडतो</string>
-    <string name="sos_countdown_title">SOS पाठवले जाईल</string>
+    <string name="sos_countdown_title">SOS संदेश उघडेल</string>
     <string name="sos_cancel">रद्द करा</string>
     <string name="sos_send_now">आता पाठवा</string>
     <string name="sos_location_ready">लोकेशन मिळाले</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ची वाट पाहत आहे</string>
     <string name="weather_setting">हवामान आणि धुके अलर्ट</string>
     <string name="weather_setting_hint">दर 15 मिनिटांनी इथे, 25 किमी आणि 50 किमी पुढे तपासते</string>
-    <string name="crash_voice">अपघात आढळला. %1$d सेकंदात आपत्कालीन अलर्ट पाठवला जाईल. रद्द करण्यासाठी ‘मी ठीक आहे’ म्हणा किंवा टॅप करा.</string>
+    <string name="crash_voice">अपघात आढळला. %1$d सेकंदांत तुमच्या आपत्कालीन संपर्कासाठी SOS संदेश पाठवण्यास तयार होईल. रद्द करण्यासाठी ‘मी ठीक आहे’ म्हणा किंवा दाबा.</string>
     <string name="crash_title">संभाव्य अपघात आढळला</string>
     <string name="crash_send_needs_tap">SMS पाठवण्यासाठी Android ला एक टॅप लागतो.</string>
     <string name="crash_im_ok">मी ठीक आहे</string>

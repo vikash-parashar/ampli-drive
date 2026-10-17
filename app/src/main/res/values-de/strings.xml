@@ -129,7 +129,7 @@
     <string name="help_no_contacts">Noch keine Notfallkontakte. Füge sie unter Einstellungen › Notfallprofil hinzu.</string>
     <string name="help_medical_info">Medizinische Infos</string>
     <string name="sos_button_hint">Öffnet eine Nachricht mit deinem Standort an deine Notfallkontakte</string>
-    <string name="sos_countdown_title">SOS wird gesendet in</string>
+    <string name="sos_countdown_title">SOS-Nachricht öffnet in</string>
     <string name="sos_cancel">Abbrechen</string>
     <string name="sos_send_now">Jetzt senden</string>
     <string name="sos_location_ready">Standort gefunden</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">Warte auf GPS</string>
     <string name="weather_setting">Wetter- und Nebelwarnungen</string>
     <string name="weather_setting_hint">Prüft alle 15 Minuten hier, 25 km und 50 km voraus</string>
-    <string name="crash_voice">Unfall erkannt. Notruf wird in %1$d Sekunden gesendet. Sag oder tippe „Mir geht es gut“, um abzubrechen.</string>
+    <string name="crash_voice">Unfall erkannt. In %1$d Sekunden ist eine SOS-SMS an deinen Notfallkontakt zum Senden bereit. Sag oder tippe „Mir geht es gut“, um abzubrechen.</string>
     <string name="crash_title">Möglicher Unfall erkannt</string>
     <string name="crash_send_needs_tap">Android braucht einen Tipp, um die SMS zu senden.</string>
     <string name="crash_im_ok">Mir geht es gut</string>

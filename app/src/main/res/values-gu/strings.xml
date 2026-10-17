@@ -129,7 +129,7 @@
     <string name="help_no_contacts">હજી કોઈ કટોકટી સંપર્ક નથી. સેટિંગ્સ › કટોકટી પ્રોફાઇલમાં ઉમેરો.</string>
     <string name="help_medical_info">તબીબી માહિતી</string>
     <string name="sos_button_hint">તમારા કટોકટી સંપર્કો માટે તમારા લોકેશન સાથે સંદેશ ખોલે છે</string>
-    <string name="sos_countdown_title">SOS મોકલાશે</string>
+    <string name="sos_countdown_title">SOS મેસેજ ખુલશે</string>
     <string name="sos_cancel">રદ કરો</string>
     <string name="sos_send_now">હમણાં મોકલો</string>
     <string name="sos_location_ready">લોકેશન મળ્યું</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ની રાહ જોઈ રહ્યું છે</string>
     <string name="weather_setting">હવામાન અને ધુમ્મસ અલર્ટ</string>
     <string name="weather_setting_hint">દર 15 મિનિટે અહીં, 25 કિમી અને 50 કિમી આગળ તપાસે છે</string>
-    <string name="crash_voice">અકસ્માત ઓળખાયો. %1$d સેકન્ડમાં ઇમરજન્સી અલર્ટ મોકલાશે. રદ કરવા ‘હું ઠીક છું’ બોલો અથવા ટૅપ કરો.</string>
+    <string name="crash_voice">અકસ્માત જણાયો. %1$d સેકન્ડમાં તમારા ઇમરજન્સી સંપર્ક માટે SOS મેસેજ મોકલવા તૈયાર થશે. રદ કરવા ‘હું ઠીક છું’ બોલો અથવા દબાવો.</string>
     <string name="crash_title">સંભવિત અકસ્માત ઓળખાયો</string>
     <string name="crash_send_needs_tap">SMS મોકલવા Android ને એક ટૅપ જોઈએ.</string>
     <string name="crash_im_ok">હું ઠીક છું</string>

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -190,7 +191,7 @@ internal fun SupportCardContent(prices: Map<String, String>, thanked: Boolean, o
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)), modifier = Modifier.fillMaxWidth()) {
                     tiers.forEachIndexed { i, (id, price) ->
                         BigButton(
-                            text = price,
+                            text = wholePrice(price),
                             onClick = { onTip(id) },
                             icon = if (i == tiers.lastIndex) Icons.Filled.Favorite else Icons.Filled.Coffee,
                             primary = i == tiers.lastIndex,
@@ -218,6 +219,27 @@ internal fun SupportCardContent(prices: Map<String, String>, thanked: Boolean, o
                         .padding(horizontal = dims.d(2f), vertical = dims.d(1.4f)),
                 )
             }
+        }
+    }
+}
+
+/**
+ * "₹49.00" → "₹49" for display only; anything that isn't a whole amount ("₹49.50", "US$0.99")
+ * stays exactly as Play formatted it.
+ */
+fun wholePrice(formatted: String): String = formatted.replace(Regex("(\\d)[.,]00(?=\\D*$)"), "$1")
+
+/** UPI (or another slow method) not approved yet: say so, so the driver doesn't pay twice. */
+@Composable
+internal fun PaymentPendingNote(app: DriveApp) {
+    val pending by app.billing.paymentPending.collectAsStateWithLifecycle()
+    if (!pending) return
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    SettingCard {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            Icon(Icons.Filled.HourglassTop, contentDescription = null, tint = theme.warning, modifier = Modifier.size(32.dp))
+            CardTitle(stringResource(R.string.payment_pending_title), stringResource(R.string.payment_pending_hint))
         }
     }
 }

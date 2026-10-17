@@ -100,21 +100,37 @@ object Shell {
     )
     val EQ_LABELS = listOf("equalizer", "equaliser", "eq", "dsp", "sound effect", "audio effect", "音效", "均衡器", "इक्वलाइज़र")
 
-    private fun openEqualizer(context: Context): Boolean {
+    /** "EQ" or "DSP" only as a whole word, so "Sequence" or "Request" never match. */
+    fun isEqLabel(label: String): Boolean {
+        val l = label.lowercase()
+        return EQ_LABELS.any { word ->
+            if (word.length <= 3) Regex("(^|[^\\p{L}])" + Regex.escape(word) + "($|[^\\p{L}])").containsMatchIn(l) else l.contains(word)
+        }
+    }
+
+    /** The head unit's own EQ app: its launch intent and name, or null. */
+    @Suppress("DEPRECATION")
+    fun findEqualizer(context: Context): Pair<Intent, String>? {
         val pm = context.packageManager
         for (pkg in EQ_PACKAGES) {
             val launch = try { pm.getLaunchIntentForPackage(pkg) } catch (_: Exception) { null } ?: continue
-            if (start(context, launch)) return true
+            val name = try { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString() } catch (_: Exception) { pkg }
+            return launch to name
         }
-        val byLabel = try {
-            pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0).firstOrNull { ri ->
-                val l = ri.loadLabel(pm)?.toString()?.lowercase().orEmpty()
-                EQ_LABELS.any { label -> l == label || l.contains("$label ") || l.contains(" $label") || (label.length > 3 && l.contains(label)) }
-            }
+        return try {
+            pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+                .firstOrNull { ri -> ri.activityInfo.packageName != context.packageName && isEqLabel(ri.loadLabel(pm)?.toString().orEmpty()) }
+                ?.let { ri ->
+                    Intent(Intent.ACTION_MAIN).setComponent(ComponentName(ri.activityInfo.packageName, ri.activityInfo.name)) to
+                        ri.loadLabel(pm).toString()
+                }
         } catch (_: Exception) {
             null
         }
-        if (byLabel != null && start(context, Intent(Intent.ACTION_MAIN).setComponent(ComponentName(byLabel.activityInfo.packageName, byLabel.activityInfo.name)))) return true
+    }
+
+    private fun openEqualizer(context: Context): Boolean {
+        findEqualizer(context)?.let { (intent, _) -> if (start(context, intent)) return true }
         val panel = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
             .putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
             .putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
@@ -138,6 +154,8 @@ object Shell {
         val ssid: String?,
         val brightnessPct: Int?,
         val volumePct: Int?,
+        /** The vendor EQ app's name, when the unit has one. */
+        val eqApp: String? = null,
     )
 
     @Suppress("DEPRECATION")
@@ -167,7 +185,8 @@ object Shell {
         } catch (_: Exception) {
             null
         }
-        return Status(wifiOn, connected, ssid, brightness?.coerceIn(0, 100), volume)
+        val eq = try { findEqualizer(context)?.second } catch (_: Exception) { null }
+        return Status(wifiOn, connected, ssid, brightness?.coerceIn(0, 100), volume, eq)
     }
 
     // ------------------------------------------------------------------ Ampli app drawer

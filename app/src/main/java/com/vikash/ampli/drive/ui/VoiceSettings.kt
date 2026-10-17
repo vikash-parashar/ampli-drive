@@ -312,6 +312,15 @@ internal fun VoicePackCard(app: DriveApp) {
                 Chip(stringResource(R.string.voice_pack_female), voice == VoicePack.Female, { app.prefs.setVoicePack(VoicePack.Female) })
                 Chip(stringResource(R.string.voice_pack_tts), voice == VoicePack.Tts, { app.prefs.setVoicePack(VoicePack.Tts) })
             }
+            // One-time hint: no TTS engine on this unit, so the recorded voice speaks every line.
+            val ttsMissing by app.voicePlayer.ttsMissing.collectAsStateWithLifecycle()
+            LaunchedEffect(Unit) { app.voicePlayer.ttsAvailable() }
+            val hints = remember { app.getSharedPreferences("voice_hints", android.content.Context.MODE_PRIVATE) }
+            val seenBefore = remember { hints.getBoolean("tts_missing_seen", false) }
+            if (ttsMissing && !seenBefore) {
+                Text(stringResource(R.string.voice_tts_missing_hint), color = theme.warning, fontSize = dims.t(2.3f, min = 13f))
+                LaunchedEffect(Unit) { hints.edit().putBoolean("tts_missing_seen", true).apply() }
+            }
             if (voice.human) {
                 val have = library.count(voice)
                 Text(

@@ -156,6 +156,8 @@ fun DriveRoot(
                                 onOpenNavScreen = { onNavigate(Screen.Navigation) },
                                 onOpenNavSearch = { onNavigate(Screen.NavSearch) },
                                 onOpenQuick = { showQuick = true },
+                                // Ampli Shell: "Make Ampli your home screen" (until done or "Not now").
+                                banner = { DefaultHomeBannerHost(app = app, resumeTick = resumeTick) },
                             )
                             TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                             CarAlertHost(app = app)
@@ -298,8 +300,6 @@ fun DriveRoot(
                     } else {
                         BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
                     }
-                    // Ampli Shell: "Make Ampli your home screen" (first run, until done or "Not now").
-                    if (nameAsked && screen == Screen.Home) DefaultHomeCardHost(app = app, resumeTick = resumeTick)
                     // Quick controls, pulled down from Home's status row.
                     if (showQuick) BackHandler(enabled = true) { showQuick = false }
                     LaunchedEffect(screen) { if (screen != Screen.Home) showQuick = false }

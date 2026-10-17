@@ -101,3 +101,36 @@ jobs:
           files: |
             AmpliCarHub-pr-*.apk
             app/build/outputs/roborazzi/*.png
+
+  # Release build with R8 (minify + shrink resources), as Play gets it. Unsigned here: the
+  # upload key is added only when publishing. Missing keep rules show up as error annotations.
+  release-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Write local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Release bundle (R8)
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease 2>&1 | tee release.log || {
+            for f in $(find app/build/outputs/mapping -name missing_rules.txt 2>/dev/null); do
+              grep -v '^#' "$f" | grep . | head -40 | sed 's/^/::error title=R8 missing rule::/'
+            done
+            grep -E "^e: |ERROR:|Missing class|R8: " release.log | head -40 | sed 's/^/::error::/'
+            exit 1
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AmpliCarHub-release-aab
+          path: app/build/outputs/bundle/release/*.aab

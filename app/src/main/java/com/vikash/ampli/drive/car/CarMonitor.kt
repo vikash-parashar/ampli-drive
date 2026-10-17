@@ -266,7 +266,7 @@ class CarMonitor(private val app: DriveApp) {
             if (app.desi.say(HaryanviLines.Event.BreakReminder, formatHours(app, hours))) return@launch
             val lang = language()
             val res = localized(lang)
-            app.speaker.say(res.getString(R.string.break_voice, formatHours(res, hours)), lang)
+            app.voicePlayer.sayPlain(res.getString(R.string.break_voice, formatHours(res, hours)), lang, HaryanviLines.Event.BreakReminder, formatHours(app, hours))
         }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_BREAK, app.getString(R.string.break_title), app.getString(R.string.break_body, formatHours(app, hours)))
@@ -308,7 +308,9 @@ class CarMonitor(private val app: DriveApp) {
             val end = SystemClock.elapsedRealtime() + CRASH_COUNTDOWN_S * 1000L
             while (_crashAt.value != null && SystemClock.elapsedRealtime() < end - 3000) {
                 app.speaker.alertBeep()
-                app.speaker.say(res.getString(R.string.crash_voice), lang)
+                // Seconds left until the SOS message opens (the string has a %1$d placeholder).
+                val secondsLeft = ((end - SystemClock.elapsedRealtime() + 999) / 1000).toInt().coerceAtLeast(1)
+                app.speaker.say(res.getString(R.string.crash_voice, secondsLeft), lang)
                 delay(4000)
             }
         }

@@ -10,12 +10,19 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -112,6 +119,36 @@ internal fun rememberMakeHome(onDone: () -> Unit = {}): () -> Unit {
     }
 }
 
+/** Home: one row under the status bar that pushes the panes down, so nothing is covered. */
+@Composable
+internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Row(
+        modifier
+            .fillMaxWidth()
+            .themedCard(
+                theme,
+                RoundedCornerShape(20.dp),
+                fill = Brush.horizontalGradient(listOf(theme.surfaceHigh, theme.surface)),
+                border = theme.accent.copy(alpha = 0.5f),
+                accentEdge = false,
+                blur = false,
+            )
+            .padding(horizontal = dims.d(2.2f), vertical = dims.d(1f)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+    ) {
+        Icon(Icons.Filled.Home, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(30.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (!dims.compact) Text(stringResource(R.string.shell_home_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        BigButton(text = stringResource(R.string.shell_home_later), onClick = onLater, primary = false)
+        BigButton(text = stringResource(R.string.shell_home_action), onClick = onMake, icon = Icons.Filled.Home)
+    }
+}
+
 @Composable
 internal fun DefaultHomeCard(onMake: () -> Unit, onLater: (() -> Unit)?, modifier: Modifier = Modifier) {
     val dims = LocalDims.current
@@ -144,31 +181,26 @@ internal fun DefaultHomeCard(onMake: () -> Unit, onLater: (() -> Unit)?, modifie
     }
 }
 
-/** Home: the card springs in from the top while Ampli is not the default home app, until "Not now". */
+/** Home banner while Ampli is not the default home app, until "Not now". It slides open and pushes the panes down. */
 @Composable
-fun DefaultHomeCardHost(app: DriveApp, resumeTick: Int) {
+fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
     val context = LocalContext.current
     var dismissed by remember { mutableStateOf(app.shell.homeCardDismissed) }
     var tick by remember { mutableStateOf(0) }
     val isHome = remember(resumeTick, tick) { Launchers.isDefaultHome(context) }
     val makeHome = rememberMakeHome { tick++ }
-    val dims = LocalDims.current
-    Box(Modifier.fillMaxSize().padding(top = dims.d(12f)), contentAlignment = Alignment.TopCenter) {
-        AnimatedVisibility(
-            visible = !isHome && !dismissed,
-            enter = slideInVertically(spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow)) { -it } +
-                scaleIn(spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow), initialScale = 0.92f) + fadeIn(tween(220)),
-            exit = slideOutVertically(tween(260)) { -it / 2 } + fadeOut(tween(200)),
-        ) {
-            DefaultHomeCard(
-                onMake = makeHome,
-                onLater = {
-                    app.shell.homeCardDismissed = true
-                    dismissed = true
-                },
-                modifier = Modifier.padding(horizontal = dims.d(3f)),
-            )
-        }
+    AnimatedVisibility(
+        visible = !isHome && !dismissed,
+        enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+        exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
+    ) {
+        DefaultHomeBanner(
+            onMake = makeHome,
+            onLater = {
+                app.shell.homeCardDismissed = true
+                dismissed = true
+            },
+        )
     }
 }
 
@@ -198,6 +230,7 @@ fun QuickControlsHost(app: DriveApp, open: Boolean, onClose: () -> Unit) {
 @Composable
 internal fun quickTiles(status: Shell.Status, btSupported: Boolean, btOn: Boolean, btDevice: String?): List<QuickTile> {
     val on = stringResource(R.string.shell_on)
+    val openSettings = stringResource(R.string.shell_open_settings)
     val off = stringResource(R.string.shell_off)
     val wifiState = when {
         status.ssid != null -> status.ssid
@@ -207,14 +240,14 @@ internal fun quickTiles(status: Shell.Status, btSupported: Boolean, btOn: Boolea
         else -> null
     }
     return listOf(
-        QuickTile(Shell.Control.Bluetooth, Icons.Filled.Bluetooth, stringResource(R.string.bt_label), if (!btSupported) null else btDevice ?: if (btOn) on else off, btSupported && btOn),
-        QuickTile(Shell.Control.Wifi, Icons.Filled.Wifi, stringResource(R.string.shell_wifi), wifiState, status.wifiOn == true || status.wifiConnected),
-        QuickTile(Shell.Control.Hotspot, Icons.Filled.WifiTethering, stringResource(R.string.shell_hotspot), null, false),
-        QuickTile(Shell.Control.Equalizer, Icons.Filled.Equalizer, stringResource(R.string.shell_equalizer), null, false),
-        QuickTile(Shell.Control.Brightness, Icons.Filled.BrightnessMedium, stringResource(R.string.shell_brightness), status.brightnessPct?.let { "$it%" }, false),
-        QuickTile(Shell.Control.Volume, Icons.Filled.VolumeUp, stringResource(R.string.shell_volume), status.volumePct?.let { "$it%" }, false),
-        QuickTile(Shell.Control.Display, Icons.Filled.Tv, stringResource(R.string.shell_display), null, false),
-        QuickTile(Shell.Control.Sound, Icons.Filled.Settings, stringResource(R.string.shell_sound), null, false),
+        QuickTile(Shell.Control.Bluetooth, Icons.Filled.Bluetooth, stringResource(R.string.bt_label), if (!btSupported) openSettings else btDevice ?: if (btOn) on else off, btSupported && btOn),
+        QuickTile(Shell.Control.Wifi, Icons.Filled.Wifi, stringResource(R.string.shell_wifi), wifiState ?: openSettings, status.wifiOn == true || status.wifiConnected),
+        QuickTile(Shell.Control.Hotspot, Icons.Filled.WifiTethering, stringResource(R.string.shell_hotspot), openSettings, false),
+        QuickTile(Shell.Control.Equalizer, Icons.Filled.Equalizer, stringResource(R.string.shell_equalizer), status.eqApp ?: openSettings, false),
+        QuickTile(Shell.Control.Brightness, Icons.Filled.BrightnessMedium, stringResource(R.string.shell_brightness), status.brightnessPct?.let { "$it%" } ?: openSettings, false),
+        QuickTile(Shell.Control.Volume, Icons.Filled.VolumeUp, stringResource(R.string.shell_volume), status.volumePct?.let { "$it%" } ?: openSettings, false),
+        QuickTile(Shell.Control.Display, Icons.Filled.Tv, stringResource(R.string.shell_display), openSettings, false),
+        QuickTile(Shell.Control.Sound, Icons.Filled.Settings, stringResource(R.string.shell_sound), openSettings, false),
     )
 }
 
@@ -419,7 +452,7 @@ fun BootSplash(t: Float) {
     val sweep = phase(0.15f, 0.7f)
     val nameIn = phase(0.5f, 0.8f)
     val tagIn = phase(0.62f, 0.92f)
-    Box(
+    BoxWithConstraints(
         Modifier
             .fillMaxSize()
             .background(Brush.radialGradient(listOf(SplashTeal, SplashDeep)))
@@ -427,37 +460,42 @@ fun BootSplash(t: Float) {
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
         contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        // Sized from the screen height like a real boot screen: the knob tile is about a third of it.
+        val h = maxHeight
+        val tile = h * 0.34f
+        val density = LocalDensity.current
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(h * 0.035f)) {
             Box(
                 Modifier
-                    .size(196.dp)
+                    .size(tile)
                     .graphicsLayer {
                         alpha = tileIn
                         scaleX = 0.82f + 0.18f * tileIn
                         scaleY = 0.82f + 0.18f * tileIn
                     }
-                    .clip(RoundedCornerShape(48.dp))
+                    .clip(RoundedCornerShape(tile * 0.24f))
                     .background(Brush.linearGradient(listOf(TileTop, TileBottom))),
                 contentAlignment = Alignment.Center,
             ) {
-                Knob(turn = turn, sweep = sweep, modifier = Modifier.size(132.dp))
+                Knob(turn = turn, sweep = sweep, modifier = Modifier.size(tile * 0.86f))
             }
-            Text(
-                "Ampli",
-                color = Color.White,
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.graphicsLayer {
-                    alpha = nameIn
-                    translationY = (1f - nameIn) * 24.dp.toPx()
-                },
+            // The brand wordmark (Sora, outlined in the logo files).
+            Image(
+                painterResource(R.drawable.ampli_wordmark),
+                contentDescription = "Ampli",
+                modifier = Modifier
+                    .height(h * 0.13f)
+                    .graphicsLayer {
+                        alpha = nameIn
+                        translationY = (1f - nameIn) * 24.dp.toPx()
+                    },
             )
             Text(
                 "CAR HUB",
                 color = TileTop,
-                fontSize = 20.sp,
+                fontSize = with(density) { (h * 0.04f).toSp() },
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 3.sp,
+                letterSpacing = with(density) { (h * 0.006f).toSp() },
                 modifier = Modifier
                     .graphicsLayer {
                         alpha = tagIn
@@ -466,7 +504,7 @@ fun BootSplash(t: Float) {
                     }
                     .clip(RoundedCornerShape(50))
                     .background(Color.White)
-                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                    .padding(horizontal = h * 0.035f, vertical = h * 0.01f),
             )
         }
     }
@@ -477,7 +515,7 @@ fun BootSplash(t: Float) {
 private fun Knob(turn: Float, sweep: Float, modifier: Modifier) {
     Canvas(modifier) {
         val c = Offset(size.width / 2f, size.height * 0.56f)
-        val r = size.minDimension * 0.27f
+        val r = size.minDimension * 0.25f
         val tickIn = r * 1.32f
         val tickOut = r * 1.62f
         // Ticks fan over the top, from -150° to -30° (0° = 3 o'clock).

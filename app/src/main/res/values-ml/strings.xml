@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ഇതുവരെ അടിയന്തര കോൺടാക്റ്റുകളില്ല. ക്രമീകരണങ്ങൾ › അടിയന്തര പ്രൊഫൈലിൽ ചേർക്കുക.</string>
     <string name="help_medical_info">മെഡിക്കൽ വിവരം</string>
     <string name="sos_button_hint">അടിയന്തര കോൺടാക്റ്റുകൾക്കായി നിങ്ങളുടെ ലൊക്കേഷനോടെ സന്ദേശം തുറക്കുന്നു</string>
-    <string name="sos_countdown_title">SOS അയയ്ക്കും</string>
+    <string name="sos_countdown_title">SOS സന്ദേശം തുറക്കും</string>
     <string name="sos_cancel">റദ്ദാക്കുക</string>
     <string name="sos_send_now">ഇപ്പോൾ അയയ്ക്കുക</string>
     <string name="sos_location_ready">ലൊക്കേഷൻ കിട്ടി</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS നായി കാത്തിരിക്കുന്നു</string>
     <string name="weather_setting">കാലാവസ്ഥ, മൂടൽമഞ്ഞ് മുന്നറിയിപ്പുകൾ</string>
     <string name="weather_setting_hint">ഓരോ 15 മിനിറ്റിലും ഇവിടെയും 25 കിമീ, 50 കിമീ മുന്നിലും പരിശോധിക്കുന്നു</string>
-    <string name="crash_voice">അപകടം കണ്ടെത്തി. %1$d സെക്കൻഡിനുള്ളിൽ അടിയന്തര മുന്നറിയിപ്പ് അയയ്ക്കും. റദ്ദാക്കാൻ ‘എനിക്ക് കുഴപ്പമില്ല’ എന്ന് പറയുക അല്ലെങ്കിൽ ടാപ്പ് ചെയ്യുക.</string>
+    <string name="crash_voice">അപകടം കണ്ടെത്തി. %1$d സെക്കൻഡിനുള്ളിൽ നിങ്ങളുടെ അടിയന്തര കോൺടാക്റ്റിന് അയയ്ക്കാൻ SOS സന്ദേശം തയ്യാറാകും. റദ്ദാക്കാൻ ‘എനിക്ക് കുഴപ്പമില്ല’ എന്ന് പറയുക അല്ലെങ്കിൽ അമർത്തുക.</string>
     <string name="crash_title">അപകടം സംഭവിച്ചിരിക്കാം</string>
     <string name="crash_send_needs_tap">SMS അയയ്ക്കാൻ Android ന് ഒരു ടാപ്പ് വേണം.</string>
     <string name="crash_im_ok">എനിക്ക് കുഴപ്പമില്ല</string>

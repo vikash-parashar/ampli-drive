@@ -428,7 +428,10 @@ internal fun FastagSettingsCard(app: DriveApp, onOpenFastag: () -> Unit) {
                         Chip(rupees(v.toDouble()), v == low, { app.fastag.setLowBalance(v) })
                     }
                 }
-                Row(
+                // No typing while the car moves.
+                if (isMoving(app)) {
+                    Text(stringResource(R.string.park_to_edit_hint), fontSize = dims.t(2.4f), color = theme.warning)
+                } else Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
                 ) {

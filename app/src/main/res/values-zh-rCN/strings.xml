@@ -129,7 +129,7 @@
     <string name="help_no_contacts">还没有紧急联系人。请在“设置 › 紧急资料”中添加。</string>
     <string name="help_medical_info">医疗信息</string>
     <string name="sos_button_hint">打开带有你位置的短信，发给紧急联系人</string>
-    <string name="sos_countdown_title">SOS 即将发送</string>
+    <string name="sos_countdown_title">SOS 短信即将打开</string>
     <string name="sos_cancel">取消</string>
     <string name="sos_send_now">立即发送</string>
     <string name="sos_location_ready">已获取位置</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">正在等待 GPS</string>
     <string name="weather_setting">天气和雾警报</string>
     <string name="weather_setting_hint">每 15 分钟检查此处、前方 25 公里和 50 公里</string>
-    <string name="crash_voice">检测到碰撞。将在 %1$d 秒后发送紧急警报。说出或点按“我没事”以取消。</string>
+    <string name="crash_voice">检测到碰撞。%1$d 秒后将准备好发给紧急联系人的 SOS 短信。说出或点按“我没事”即可取消。</string>
     <string name="crash_title">检测到可能的碰撞</string>
     <string name="crash_send_needs_tap">Android 需要点按一次才能发送短信。</string>
     <string name="crash_im_ok">我没事</string>

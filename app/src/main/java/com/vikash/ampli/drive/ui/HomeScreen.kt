@@ -100,6 +100,8 @@ fun HomeScreen(
     onOpenNavSearch: () -> Unit = {},
     /** Ampli Shell quick controls (pull down on the status row, or its button). */
     onOpenQuick: () -> Unit = {},
+    /** Shown under the status row; pushes the panes down instead of covering them. */
+    banner: @Composable () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -197,6 +199,7 @@ fun HomeScreen(
                     )
                 },
         )
+        banner()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
