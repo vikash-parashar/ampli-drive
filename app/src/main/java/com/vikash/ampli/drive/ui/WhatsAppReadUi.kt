@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,6 +83,10 @@ fun WhatsAppDisclosureDialog(onAgree: () -> Unit, onDecline: () -> Unit, moving:
  * Settings › Read WhatsApp messages aloud (Pro, off by default). Switching on shows
  * [WhatsAppDisclosureDialog] first, then opens notification access if it is missing. The card
  * itself never shows any message text.
+ *
+ * Switching on needs a parked car (switching off works any time). On a unit without a TTS
+ * engine only the recorded opener clip could be heard, never the sender or the text, so the
+ * toggle stays off and disabled there and the card says why.
  */
 @Composable
 fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: () -> Unit) {
@@ -92,8 +97,11 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
     val hasAccess = remember(resumeTick) { app.mediaHub.hasAccess() }
     var askDisclosure by rememberSaveable { mutableStateOf(false) }
     val moving = isMoving(app)
+    val ttsMissing by app.voicePlayer.ttsMissing.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { app.voicePlayer.ttsAvailable() }
 
     fun turnOn() {
+        if (moving || ttsMissing) return
         if (!isPro) {
             onLocked()
         } else if (!prefs.disclosureAccepted.value) {
@@ -106,9 +114,11 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
 
     WhatsAppReadCardContent(
         isPro = isPro,
-        enabled = enabled && isPro,
+        enabled = enabled && isPro && !ttsMissing,
         allowGroups = groups,
         hasAccess = hasAccess,
+        ttsMissing = ttsMissing,
+        moving = moving,
         onToggle = { on -> if (on) turnOn() else prefs.setEnabled(false) },
         onGroups = prefs::setAllowGroups,
         onAllowAccess = { Launchers.openNotificationAccess(context) },
@@ -139,13 +149,17 @@ fun WhatsAppReadCardContent(
     onToggle: (Boolean) -> Unit,
     onGroups: (Boolean) -> Unit,
     onAllowAccess: () -> Unit,
+    ttsMissing: Boolean = false,
+    moving: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
+    // Off can always be chosen; on needs a speech engine and a parked car.
+    val canToggle = enabled || (!ttsMissing && !moving)
     SettingCard {
         Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable { onToggle(!enabled) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable(enabled = canToggle) { onToggle(!enabled) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
             ) {
@@ -163,7 +177,12 @@ fun WhatsAppReadCardContent(
                     )
                 }
                 ProTag(locked = !isPro)
-                ThemedSwitch(enabled, onToggle)
+                ThemedSwitch(enabled, onToggle, enabled = canToggle)
+            }
+            if (ttsMissing) {
+                Text(stringResource(R.string.wa_tts_missing), color = theme.warning, fontSize = dims.t(2.4f, min = 16f))
+            } else if (moving && !enabled) {
+                Text(stringResource(R.string.wa_park_to_turn_on), color = theme.warning, fontSize = dims.t(2.4f, min = 16f))
             }
             if (enabled) {
                 Row(

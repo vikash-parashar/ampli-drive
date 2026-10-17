@@ -34,6 +34,8 @@ class WhatsAppReader(private val app: DriveApp) {
     fun onNotification(sbn: StatusBarNotification) {
         if (sbn.packageName !in PACKAGES) return
         if (!prefs.enabled.value) return // Cheap exit before anything is read.
+        // No speech engine: only the opener clip could play, never who wrote or what.
+        if (app.voicePlayer.ttsMissing.value) return
         val msg = extract(sbn) ?: return
         val settings = GateSettings(
             enabled = prefs.enabled.value,

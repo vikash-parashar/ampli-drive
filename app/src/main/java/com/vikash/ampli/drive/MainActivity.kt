@@ -192,11 +192,16 @@ class MainActivity : ComponentActivity() {
                 screen.value = Screen.Crash
                 // From the crash SOS alert: the countdown ended while another app was in front.
                 // Now Car Hub is in front, so the composer may open (the driver still taps Send).
+                // Only within 15 minutes of the crash: an older alert would send a stale location,
+                // so a late tap just shows the Help screen.
                 if (intent?.getBooleanExtra(SosNotifier.EXTRA_OPEN_SMS, false) == true) {
                     intent.removeExtra(SosNotifier.EXTRA_OPEN_SMS)
                     SosNotifier.cancel(this)
-                    app.car.crashSos.value?.let { message ->
+                    val message = app.car.crashSos.value
+                    if (message != null && app.car.crashSosFresh()) {
                         Sos.openSmsComposer(this, app.emergency.profile.value.contacts.map { it.phone }, message)
+                    } else if (app.car.crashAt.value == null) {
+                        screen.value = Screen.Help
                     }
                 }
             }

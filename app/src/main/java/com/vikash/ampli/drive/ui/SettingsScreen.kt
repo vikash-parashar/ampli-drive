@@ -444,11 +444,12 @@ private fun LinkRow(icon: ImageVector, title: String, hint: String, action: Stri
 }
 
 @Composable
-internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit, enabled: Boolean = true) {
     val theme = LocalDriveTheme.current
     Switch(
         checked = checked,
         onCheckedChange = onChange,
+        enabled = enabled,
         colors = SwitchDefaults.colors(
             checkedThumbColor = theme.onAccent,
             checkedTrackColor = theme.accent,

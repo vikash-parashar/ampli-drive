@@ -306,6 +306,7 @@ class CarMonitor(private val app: DriveApp) {
     fun triggerCrash() {
         if (_crashAt.value != null) return
         _crashAt.value = System.currentTimeMillis()
+        lastCrashElapsed = SystemClock.elapsedRealtime()
         _crashSos.value = null
         SosNotifier.cancel(app)
         // No WhatsApp message may talk over the countdown or the SOS screen.
@@ -388,6 +389,14 @@ class CarMonitor(private val app: DriveApp) {
     }
 
     private var sosOpenedAt = 0L
+
+    /** elapsedRealtime of the last detected crash, or null if none since the app started. */
+    @Volatile var lastCrashElapsed: Long? = null
+        private set
+
+    /** The last crash was less than [SosNotifier.ALERT_TTL_MS] ago, so its SOS message may still open. */
+    fun crashSosFresh(now: Long = SystemClock.elapsedRealtime()): Boolean =
+        _crashSos.value != null && SosNotifier.isFresh(lastCrashElapsed, now)
 
     /** The crash SOS opened in the last two minutes: other voices (WhatsApp) stay quiet. */
     fun sosOpenedRecently(): Boolean =

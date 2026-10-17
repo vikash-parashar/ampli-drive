@@ -10,6 +10,8 @@
     <string name="wa_groups_hint">Off: group chats stay silent. Only messages sent to you directly are read.</string>
     <string name="wa_rules">At most one message every 20 seconds. Quiet during calls and turn instructions. Car Hub never replies and never sends anything.</string>
     <string name="wa_needs_access">Needs notification access to hear WhatsApp messages.</string>
+    <string name="wa_tts_missing">This unit has no speech engine, so messages can\'t be read aloud. Install one in Check voice.</string>
+    <string name="wa_park_to_turn_on">Park to switch on.</string>
     <string name="disclosure_wa_title">Read WhatsApp messages aloud</string>
     <string name="disclosure_wa_body">To read your WhatsApp and WhatsApp Business messages aloud while you drive, Car Hub reads the sender\'s name and the message text from their notifications. It uses notification access to do this.</string>
     <string name="disclosure_wa_uses">Each message is spoken once and then forgotten. It is never shown on the driving screen and never saved. Car Hub never replies, never sends SMS and never opens the chat. Group messages are skipped unless you allow them. This also works while Car Hub is in the background, as long as notification access is on.</string>
