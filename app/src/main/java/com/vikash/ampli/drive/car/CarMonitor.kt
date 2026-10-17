@@ -1,5 +1,6 @@
 package com.vikash.ampli.drive.car
 
+import com.vikash.ampli.drive.overlay.SpeedBubble
 import com.vikash.ampli.drive.voice.HaryanviLines
 
 import android.content.Context
@@ -307,6 +308,8 @@ class CarMonitor(private val app: DriveApp) {
         _crashAt.value = System.currentTimeMillis()
         _crashSos.value = null
         SosNotifier.cancel(app)
+        // No WhatsApp message may talk over the countdown or the SOS screen.
+        app.messages.cancelAll()
         // A fresh fix for the SOS message, whether or not the countdown screen is showing.
         crashFix = null
         crashFixSignal?.cancel()
@@ -363,6 +366,7 @@ class CarMonitor(private val app: DriveApp) {
         val profile = app.emergency.profile.value
         val message = Sos.buildMessage(profile, fix)
         _crashSos.value = message
+        sosOpenedAt = SystemClock.elapsedRealtime()
         // When the countdown timer is the caller, cancelling it here only stops it at its next
         // suspension point; the composer below still opens.
         clearCrash()
@@ -370,14 +374,24 @@ class CarMonitor(private val app: DriveApp) {
         // the composer opens directly only while Car Hub is in front (or may draw over other
         // apps). Otherwise, or when it fails, a full-screen alert brings the SOS screen forward
         // and that opens the composer. Either way, nothing is sent without a tap.
-        val canStart = MainActivity.inFront || Settings.canDrawOverlays(app)
+        // Android 15+: "Display over other apps" allows a background start only while an overlay
+        // is visible, and a blocked start throws nothing. So whenever Car Hub is not in front the
+        // alert is posted as well; it is cancelled once the SOS screen is in front.
+        val inFront = MainActivity.inFront
+        val canStart = inFront || (Settings.canDrawOverlays(app) && SpeedBubble.visible)
         val opened = canStart && Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
-        if (!opened) {
-            Log.i("CarMonitor", "Crash SOS composer not opened directly (canStart=$canStart); posting alert")
+        if (!inFront || !opened) {
+            Log.i("CarMonitor", "Crash SOS alert posted (inFront=$inFront, opened=$opened)")
             SosNotifier.postCrashSos(app)
         }
         return message
     }
+
+    private var sosOpenedAt = 0L
+
+    /** The crash SOS opened in the last two minutes: other voices (WhatsApp) stay quiet. */
+    fun sosOpenedRecently(): Boolean =
+        sosOpenedAt != 0L && SystemClock.elapsedRealtime() - sosOpenedAt < SOS_QUIET_MS
 
     /** Countdown cancelled or finished. */
     fun clearCrash() {
@@ -579,6 +593,7 @@ class CarMonitor(private val app: DriveApp) {
 
     companion object {
         const val CRASH_COUNTDOWN_S = 30
+        private const val SOS_QUIET_MS = 2 * 60_000L
 
         fun paperName(res: Context, kind: PaperKind): String = res.getString(
             when (kind) {

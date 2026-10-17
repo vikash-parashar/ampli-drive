@@ -144,6 +144,8 @@ class MainActivity : ComponentActivity() {
         // Notification access may have just been granted in Settings.
         app.mediaHub.start()
         resumeTick.intValue++
+        // The crash SOS screen is in front now: its alert has done its job.
+        if (screen.value == Screen.Crash || screen.value == Screen.Sos) SosNotifier.cancel(this)
         // "Hey Ampli" wake word. A microphone service may only start while we are in front,
         // which as the HOME app includes right after boot (see VoiceService). A missing model
         // starts downloading here too, so a failed download is retried on every return home.
