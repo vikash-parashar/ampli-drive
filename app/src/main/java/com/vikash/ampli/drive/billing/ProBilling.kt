@@ -43,9 +43,13 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpdatedListener {
 
-    /** Localised price such as "₹149.00", or null until Play answers. */
+    /** Localised price such as "₹1,499.00", or null until Play answers. */
     private val _price = MutableStateFlow<String?>(null)
     val price: StateFlow<String?> = _price.asStateFlow()
+
+    /** Play charges the launch price right now ([ProPricing]); false until Play answers. */
+    private val _isLaunchPrice = MutableStateFlow(false)
+    val isLaunchPrice: StateFlow<Boolean> = _isLaunchPrice.asStateFlow()
 
     private var productDetails: ProductDetails? = null
 
@@ -153,7 +157,9 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
             if (result.responseCode != BillingClient.BillingResponseCode.OK) return@queryProductDetailsAsync
             reply.productDetailsList.forEach { details[it.productId] = it }
             productDetails = details[PRODUCT_ID]
-            _price.value = productDetails?.oneTimePurchaseOfferDetails?.formattedPrice
+            val offer = productDetails?.oneTimePurchaseOfferDetails
+            _price.value = offer?.formattedPrice
+            _isLaunchPrice.value = ProPricing.isLaunchPrice(offer?.priceAmountMicros, offer?.priceCurrencyCode)
             _tipPrices.value = TIP_IDS.mapNotNull { id ->
                 details[id]?.oneTimePurchaseOfferDetails?.formattedPrice?.let { id to it }
             }.toMap()

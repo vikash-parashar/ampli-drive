@@ -29,6 +29,8 @@ jobs:
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       # Our own map style, tried when the theme's style fails to load. Empty = none.
       MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
+      # Pro launch-offer line in the Pro sheet. Empty = on; set to false when the offer ends.
+      LAUNCH_OFFER: ${{ vars.LAUNCH_OFFER }}
     steps:
       - uses: actions/checkout@v4
 
@@ -135,6 +137,8 @@ jobs:
       REMOTE_CONFIG_URL: ${{ vars.REMOTE_CONFIG_URL }}
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
+      # Pro launch-offer line in the Pro sheet. Empty = on; set to false when the offer ends.
+      LAUNCH_OFFER: ${{ vars.LAUNCH_OFFER }}
       # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
       # check R8 before the own servers exist. The AAB it makes is then for testing only.
       ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}

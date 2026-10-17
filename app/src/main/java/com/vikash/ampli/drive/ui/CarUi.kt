@@ -606,8 +606,10 @@ fun ProLocked(title: String, points: List<String>, onUnlock: () -> Unit, modifie
 fun ProUnlockSheet(app: DriveApp, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val price by app.billing.price.collectAsStateWithLifecycle()
+    val isLaunchPrice by app.billing.isLaunchPrice.collectAsStateWithLifecycle()
     ProSheet(
         price = price,
+        isLaunchPrice = isLaunchPrice,
         onBuy = {
             val activity = context.findActivity()
             if (activity == null || !app.billing.purchase(activity)) {

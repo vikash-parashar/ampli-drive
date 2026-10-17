@@ -72,6 +72,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.BuildConfig
+import com.vikash.ampli.drive.billing.ProPricing
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.i18n.AppLanguages
@@ -332,8 +333,10 @@ fun SettingsScreen(
     }
 
     if (showProSheet) {
+        val isLaunchPrice by app.billing.isLaunchPrice.collectAsStateWithLifecycle()
         ProSheet(
             price = price,
+            isLaunchPrice = isLaunchPrice,
             onBuy = {
                 val activity = context.findActivity()
                 if (activity == null || !app.billing.purchase(activity)) {
@@ -874,7 +877,14 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, onDismiss: () -> Unit) {
+internal fun ProSheet(
+    price: String?,
+    onBuy: () -> Unit,
+    onRestore: () -> Unit,
+    onDismiss: () -> Unit,
+    isLaunchPrice: Boolean = false,
+    launchOffer: Boolean = BuildConfig.LAUNCH_OFFER,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     ModalBottomSheet(
@@ -924,12 +934,26 @@ internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, 
                     Text(stringResource(point), fontSize = dims.t(2.6f, min = 15f), color = theme.text)
                 }
             }
+            // Only while the offer runs and Play really charges the launch price: never a fake discount.
+            if (launchOffer && isLaunchPrice) {
+                Text(
+                    stringResource(
+                        R.string.pro_launch_line,
+                        ProPricing.rupees(ProPricing.LAUNCH_PRICE_INR),
+                        ProPricing.rupees(ProPricing.REGULAR_PRICE_INR),
+                    ),
+                    fontSize = dims.t(2.6f, min = 16f),
+                    fontWeight = FontWeight.SemiBold,
+                    color = theme.accentSoft,
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = dims.d(1f), bottom = dims.d(3f)),
                 horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
             ) {
                 BigButton(
-                    text = if (price != null) stringResource(R.string.pro_buy_price, price) else stringResource(R.string.pro_buy),
+                    // Play's price whenever it has answered; the Console price as a fallback before that.
+                    text = stringResource(R.string.pro_buy_price, price ?: ProPricing.fallbackPrice(launchOffer)),
                     onClick = onBuy,
                     modifier = Modifier.weight(1.4f),
                 )

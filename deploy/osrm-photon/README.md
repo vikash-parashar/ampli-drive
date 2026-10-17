@@ -56,8 +56,9 @@ The instance cannot preprocess India in 16 GB without help. Either:
 | One-off graph build on a spot r6a.2xlarge | < US$1 per build |
 | **Total** | **~US$90–110 on-demand, ~US$65–75 with a Savings Plan** (≈ ₹5,500–9,200) |
 
-The business plan budgeted ~US$78/month, which matches the Savings Plan figure. At ₹299 per Pro
-sale (₹254 after Play's 15%), roughly 25–35 sales a month cover the server.
+The business plan budgeted ~US$78/month, which matches the Savings Plan figure. At the ₹1,499 launch price per Pro
+sale (about ₹1,274 after Play's 15%), roughly 5–8 sales a month cover the server (4–7 at the
+later ₹2,500, about ₹2,125 after Play's cut).
 
 Cheaper later: a Hetzner/OVH dedicated box with 32–64 GB RAM runs both for €40–60/month, but
 latency from India is worse (EU) and it's outside AWS.

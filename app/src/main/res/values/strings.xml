@@ -111,6 +111,7 @@
     <string name="pro_point_once">One payment, no subscription</string>
     <string name="pro_buy_price">Buy for %1$s</string>
     <string name="pro_buy">Buy Pro</string>
+    <string name="pro_launch_line">Launch price %1$s (later %2$s)</string>
     <string name="pro_restore">Restore purchase</string>
     <string name="pro_not_now">Not now</string>
     <string name="pro_unavailable">Google Play isn\'t available on this unit. Try again later.</string>
