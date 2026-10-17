@@ -1,7 +1,7 @@
 {
   "version": 1,
   "note": "Generated from HaryanviLines.kt by VoiceManifestTest. Do not edit by hand.",
-  "characters": 9683,
+  "characters": 9709,
   "lines": [
     {"id": "welcome_01", "event": "Welcome", "group": "Welcome", "text": "राम राम जी, आज कित जाणा सै?", "hash": "087ffcdb4254"},
     {"id": "welcome_02", "event": "Welcome", "group": "Welcome", "text": "राम राम भाई, आज कित का प्लान सै?", "hash": "2d75a86dcf53"},
@@ -332,6 +332,7 @@
     {"id": "safety_crash", "event": "Safety", "group": "Safety", "text": "दुर्घटना का पता चला। कुछ सेकंड में आपके इमरजेंसी संपर्क के लिए SOS मैसेज भेजने को तैयार होगा। रद्द करने के लिए ‘मैं ठीक हूँ’ बोलें या दबाएँ।", "hash": "24ab37143be2"},
     {"id": "safety_seconds_left", "event": "Safety", "group": "Safety", "text": "सेकंड बाकी।", "hash": "1597c67f2752"},
     {"id": "safety_sos_ready", "event": "Safety", "group": "Safety", "text": "SOS संदेश तैयार है। मैसेज ऐप में भेजें दबाएँ, फिर यह स्क्रीन बचाव दल को दिखाएँ।", "hash": "e4efbde2602a"},
-    {"id": "safety_help_panel", "event": "Safety", "group": "Safety", "text": "मदद पैनल खुल रहा है। आपकी पुष्टि के बिना कुछ नहीं भेजा जाएगा।", "hash": "4236c3ed530a"}
+    {"id": "safety_help_panel", "event": "Safety", "group": "Safety", "text": "मदद पैनल खुल रहा है। आपकी पुष्टि के बिना कुछ नहीं भेजा जाएगा।", "hash": "4236c3ed530a"},
+    {"id": "msg_whatsapp", "event": "Message", "group": "Messages", "text": "व्हाट्सऐप पै मैसेज आया सै।", "hash": "767942582b25"}
   ]
 }

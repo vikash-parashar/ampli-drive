@@ -23,6 +23,7 @@ Google counts data as "collected" when it leaves the device. Data that only stay
 | Financial info › Purchase history | No | — | — | — | Play Billing is handled by Google; the app only asks Play whether Pro is owned. |
 | Audio › Voice or sound recordings | No | — | — | — | The wake word is spotted offline; the command goes to the device's speech recognition service (Google's or the OEM's), not to us. If Play review asks, explain that the app uses Android's `SpeechRecognizer`. |
 | Messages › SMS | No | — | — | — | FASTag SMS notifications are parsed on the unit; nothing is sent. |
+| Messages › Other in-app messages (WhatsApp) | No | — | — | — | WhatsApp read-aloud (Pro, off by default) speaks the notification text on the unit; it is never stored or sent. |
 | Contacts | No | — | — | — | Emergency contacts are typed in by the user and stay on the unit; SOS opens the SMS app. |
 
 **Security practices:** data encrypted in transit: yes. Users can request deletion: yes. Committed to the Families policy: no (not for children). Independent security review: no.
@@ -46,7 +47,7 @@ If Play review asks for the background-location declaration anyway:
 | `voice.VoiceService` | `microphone` | `FOREGROUND_SERVICE_MICROPHONE` | Ongoing "Hey Ampli is listening" notification | Hands-free wake word while driving; only after the driver turns it on and agrees to the disclosure |
 
 ### Notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`)
-Declared core use: **car launcher / media and navigation display**. The listener shows now-playing music and controls, Google Maps' next turn, and reads FASTag toll SMS notifications (debit, recharge, balance) on the unit. No notification content leaves the unit. The user grants it in Android's notification access settings, from Settings in the app.
+Declared core use: **car launcher / media and navigation display**. The listener shows now-playing music and controls, Google Maps' next turn, and reads FASTag toll SMS notifications (debit, recharge, balance) on the unit. Optional (Pro, off by default, behind an in-app prominent disclosure): WhatsApp / WhatsApp Business message notifications read aloud while driving, never shown, stored or replied to. No notification content leaves the unit. Before release, re-check the declaration form for this use and record the disclosure + Settings toggle for the review video. The user grants it in Android's notification access settings, from Settings in the app.
 
 ### Display over other apps (`SYSTEM_ALERT_WINDOW`)
 Used only for the optional **speed bubble** (current speed, speed limit, next camera) over Google Maps. Off by default; the app opens Android's "Display over other apps" page only when the driver switches the bubble on.

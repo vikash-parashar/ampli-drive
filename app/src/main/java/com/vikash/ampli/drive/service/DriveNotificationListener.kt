@@ -9,6 +9,7 @@ import android.service.notification.StatusBarNotification
 import androidx.core.graphics.drawable.toBitmap
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.fastag.FastagParser
+import com.vikash.ampli.drive.messages.WhatsAppReader
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
 
@@ -19,6 +20,8 @@ import com.vikash.ampli.drive.nav.NextTurn
  * 2. It reads Google Maps' ongoing navigation notification to fill the next-turn card.
  * 3. It reads SMS notifications (Google Messages, Samsung, AOSP, the default SMS app, phone-link
  *    apps) for FASTag toll debits. No READ_SMS permission: only what the notification shows.
+ * 4. Pro, off by default, after its own disclosure: WhatsApp / WhatsApp Business message
+ *    notifications, read aloud and never shown or stored ([WhatsAppReader]).
  */
 class DriveNotificationListener : NotificationListenerService() {
 
@@ -47,6 +50,9 @@ class DriveNotificationListener : NotificationListenerService() {
             handle(sbn)
         } else if (isSmsNotification(sbn)) {
             handleSms(sbn, announce = true)
+        } else if (sbn.packageName in WhatsAppReader.PACKAGES) {
+            // Pro, off by default, voice only: see WhatsAppReader.
+            (application as? DriveApp)?.messages?.onNotification(sbn)
         }
     }
 

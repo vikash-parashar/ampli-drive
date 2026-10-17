@@ -46,13 +46,14 @@ Location is used on the unit. It is sent off the unit only in these cases:
 
 If you switch on **Always listen for "Hey Ampli"**, the app uses the microphone to listen for the wake word, **including when the app is closed or not in use**. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.
 
-## Notification access (FASTag SMS, music and navigation)
+## Notification access (FASTag SMS, music, navigation and WhatsApp read-aloud)
 
 With your permission (Android's notification access), the app reads:
 
 - notifications from your SMS app that mention FASTag, to pick out toll debits, recharges and the balance. Other SMS are ignored and not stored. The app has no SMS permission and cannot read your inbox;
 - the media player's now-playing information, to show and control music;
-- Google Maps' navigation notification, to show the next turn.
+- Google Maps' navigation notification, to show the next turn;
+- only if you switch on **Read WhatsApp messages aloud** (Pro, off by default, after its own explanation screen): WhatsApp and WhatsApp Business message notifications, to say the sender's name and the message out loud while you drive. The message is spoken only: it is never shown on screen, never stored and never sent anywhere, and the app never replies or acts on the notification. Group messages are skipped unless you also switch on group messages. You can switch it off in Settings at any time.
 
 All of this stays on the unit.
 

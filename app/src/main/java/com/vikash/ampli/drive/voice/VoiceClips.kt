@@ -132,6 +132,16 @@ object VoiceClips {
     const val SAFETY_HELP_PANEL = "safety_help_panel"
 
     /**
+     * Pro "read WhatsApp messages aloud": the recorded opener said before the phone voice reads
+     * the sender and the text (messages.WhatsAppReader). Without the clip, TTS says it all.
+     */
+    val MESSAGES: Map<String, String> = linkedMapOf(
+        "msg_whatsapp" to "व्हाट्सऐप पै मैसेज आया सै।",
+    )
+
+    const val MESSAGE_WHATSAPP = "msg_whatsapp"
+
+    /**
      * The crash countdown without TTS: the full warning while more than ten seconds are left,
      * then "<number> सेकंड बाकी।" for the last ten.
      */
@@ -250,6 +260,7 @@ object VoiceClips {
         NUMBERS.forEachIndexed { i, w -> out += Entry(numberId(i + 1), "Number", "Number", w) }
         for ((key, name) in PAPER_NAMES) out += Entry(paperId(key), "PaperName", "Papers", name)
         for ((id, text) in SAFETY) out += Entry(id, "Safety", "Safety", text)
+        for ((id, text) in MESSAGES) out += Entry(id, "Message", "Messages", text)
         return out
     }
 
