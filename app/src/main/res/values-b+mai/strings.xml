@@ -129,7 +129,7 @@
     <string name="help_no_contacts">एखन धरि कोनो आपातकालीन संपर्क नहि। सेटिंग्स › आपातकालीन प्रोफाइल मे जोड़ू।</string>
     <string name="help_medical_info">चिकित्सा जानकारी</string>
     <string name="sos_button_hint">अहाँक आपातकालीन संपर्क लेल अहाँक लोकेशन संग संदेश खोलैत अछि</string>
-    <string name="sos_countdown_title">SOS पठाओल जायत</string>
+    <string name="sos_countdown_title">SOS मैसेज खुजत</string>
     <string name="sos_cancel">रद्द करू</string>
     <string name="sos_send_now">एखने पठाउ</string>
     <string name="sos_location_ready">लोकेशन भेटल</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS केर प्रतीक्षा</string>
     <string name="weather_setting">मौसम आ कुहेस चेतावनी</string>
     <string name="weather_setting_hint">हर 15 मिनट पर एतय, 25 किमी आ 50 किमी आगाँ जाँचैत अछि</string>
-    <string name="crash_voice">दुर्घटना पकड़ल गेल। %1$d सेकंड मे आपातकालीन चेतावनी पठाओल जाएत। रद्द करबाक लेल ‘हम ठीक छी’ बाजू वा दबाउ।</string>
+    <string name="crash_voice">दुर्घटना पता चलल। %1$d सेकंड मे अहाँक इमरजेंसी संपर्क लेल SOS मैसेज पठेबा लेल तैयार भ जायत। रद्द करबाक लेल ‘हम ठीक छी’ बाजू वा दबाउ।</string>
     <string name="crash_title">संभव दुर्घटना पकड़ल गेल</string>
     <string name="crash_send_needs_tap">SMS पठेबाक लेल Android केँ एक बेर दबाबय पड़ैत अछि।</string>
     <string name="crash_im_ok">हम ठीक छी</string>

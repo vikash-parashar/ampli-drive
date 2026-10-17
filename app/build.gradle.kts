@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.vikash.ampli.drive"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.vikash.ampli.drive"
         // 26 (Android 8.0): many head units report "Android 12+" in About but really run Android 8 to 11.
         // Newer APIs are guarded with SDK_INT checks or androidx compat; lint fails the build on NewApi.
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // CI passes the run number so each test build installs as an update over the last one.
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
         versionName = "0.1.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"

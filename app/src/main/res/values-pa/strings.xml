@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ਅਜੇ ਕੋਈ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਨਹੀਂ। ਸੈਟਿੰਗਾਂ › ਐਮਰਜੈਂਸੀ ਪ੍ਰੋਫ਼ਾਈਲ ਵਿੱਚ ਜੋੜੋ।</string>
     <string name="help_medical_info">ਡਾਕਟਰੀ ਜਾਣਕਾਰੀ</string>
     <string name="sos_button_hint">ਤੁਹਾਡੇ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕਾਂ ਲਈ ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਵਾਲਾ ਸੁਨੇਹਾ ਖੋਲ੍ਹਦਾ ਹੈ</string>
-    <string name="sos_countdown_title">SOS ਭੇਜਿਆ ਜਾਵੇਗਾ</string>
+    <string name="sos_countdown_title">SOS ਸੁਨੇਹਾ ਖੁੱਲ੍ਹੇਗਾ</string>
     <string name="sos_cancel">ਰੱਦ ਕਰੋ</string>
     <string name="sos_send_now">ਹੁਣੇ ਭੇਜੋ</string>
     <string name="sos_location_ready">ਲੋਕੇਸ਼ਨ ਮਿਲ ਗਈ</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ਦੀ ਉਡੀਕ</string>
     <string name="weather_setting">ਮੌਸਮ ਅਤੇ ਧੁੰਦ ਚੇਤਾਵਨੀਆਂ</string>
     <string name="weather_setting_hint">ਹਰ 15 ਮਿੰਟ ਇੱਥੇ, 25 ਕਿਮੀ ਅਤੇ 50 ਕਿਮੀ ਅੱਗੇ ਜਾਂਚਦਾ ਹੈ</string>
-    <string name="crash_voice">ਹਾਦਸਾ ਪਛਾਣਿਆ ਗਿਆ। %1$d ਸਕਿੰਟਾਂ ਵਿੱਚ ਐਮਰਜੈਂਸੀ ਚੇਤਾਵਨੀ ਭੇਜੀ ਜਾਵੇਗੀ। ਰੱਦ ਕਰਨ ਲਈ ‘ਮੈਂ ਠੀਕ ਹਾਂ’ ਬੋਲੋ ਜਾਂ ਟੈਪ ਕਰੋ।</string>
+    <string name="crash_voice">ਹਾਦਸਾ ਪਤਾ ਲੱਗਿਆ। %1$d ਸਕਿੰਟਾਂ ਵਿੱਚ ਤੁਹਾਡੇ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਲਈ SOS ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ ਤਿਆਰ ਹੋਵੇਗਾ। ਰੱਦ ਕਰਨ ਲਈ ‘ਮੈਂ ਠੀਕ ਹਾਂ’ ਬੋਲੋ ਜਾਂ ਦਬਾਓ।</string>
     <string name="crash_title">ਸੰਭਾਵੀ ਹਾਦਸਾ ਪਛਾਣਿਆ ਗਿਆ</string>
     <string name="crash_send_needs_tap">SMS ਭੇਜਣ ਲਈ Android ਨੂੰ ਇੱਕ ਟੈਪ ਚਾਹੀਦਾ ਹੈ।</string>
     <string name="crash_im_ok">ਮੈਂ ਠੀਕ ਹਾਂ</string>

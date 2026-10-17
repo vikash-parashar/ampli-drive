@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଜରୁରୀକାଳୀନ ଯୋଗାଯୋଗ ନାହିଁ। ସେଟିଂସ › ଜରୁରୀକାଳୀନ ପ୍ରୋଫାଇଲ୍‌ରେ ଯୋଡ଼ନ୍ତୁ।</string>
     <string name="help_medical_info">ଚିକିତ୍ସା ସୂଚନା</string>
     <string name="sos_button_hint">ଆପଣଙ୍କ ଜରୁରୀକାଳୀନ ଯୋଗାଯୋଗଙ୍କ ପାଇଁ ଆପଣଙ୍କ ଲୋକେସନ୍ ସହ ବାର୍ତ୍ତା ଖୋଲେ</string>
-    <string name="sos_countdown_title">SOS ପଠାଯିବ</string>
+    <string name="sos_countdown_title">SOS ମେସେଜ ଖୋଲିବ</string>
     <string name="sos_cancel">ବାତିଲ୍</string>
     <string name="sos_send_now">ଏବେ ପଠାନ୍ତୁ</string>
     <string name="sos_location_ready">ଲୋକେସନ୍ ମିଳିଲା</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ପାଇଁ ଅପେକ୍ଷା</string>
     <string name="weather_setting">ପାଣିପାଗ ଓ କୁହୁଡି ସତର୍କତା</string>
     <string name="weather_setting_hint">ପ୍ରତି 15 ମିନିଟରେ ଏଠାରେ, 25 କିମି ଓ 50 କିମି ଆଗରେ ଯାଞ୍ଚ କରେ</string>
-    <string name="crash_voice">ଦୁର୍ଘଟଣା ଚିହ୍ନଟ ହେଲା। %1$d ସେକେଣ୍ଡରେ ଜରୁରୀ ସତର୍କତା ପଠାଯିବ। ବାତିଲ କରିବାକୁ ‘ମୁଁ ଠିକ ଅଛି’ କୁହନ୍ତୁ କିମ୍ବା ଟ୍ୟାପ କରନ୍ତୁ।</string>
+    <string name="crash_voice">ଦୁର୍ଘଟଣା ଜଣାପଡ଼ିଲା। %1$d ସେକେଣ୍ଡରେ ଆପଣଙ୍କ ଜରୁରୀ ସମ୍ପର୍କ ପାଇଁ SOS ମେସେଜ ପଠାଇବାକୁ ପ୍ରସ୍ତୁତ ହେବ। ବାତିଲ କରିବାକୁ ‘ମୁଁ ଠିକ ଅଛି’ କୁହନ୍ତୁ କିମ୍ବା ଦବାନ୍ତୁ।</string>
     <string name="crash_title">ସମ୍ଭାବ୍ୟ ଦୁର୍ଘଟଣା ଚିହ୍ନଟ ହେଲା</string>
     <string name="crash_send_needs_tap">SMS ପଠାଇବାକୁ Android କୁ ଗୋଟିଏ ଟ୍ୟାପ ଦରକାର।</string>
     <string name="crash_im_ok">ମୁଁ ଠିକ ଅଛି</string>

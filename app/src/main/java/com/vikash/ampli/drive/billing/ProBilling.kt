@@ -33,7 +33,10 @@ import kotlinx.coroutines.flow.asStateFlow
  * products, consumed right after payment so they can be given again. They unlock nothing.
  *
  * TODO(before launch): verify purchase tokens on a server (Play Developer API) rather than
- *  trusting the client, and handle PENDING purchases with a "payment pending" message.
+ *  trusting the client.
+ *
+ * PENDING purchases (UPI collect requests, cash at a shop) set [paymentPending] so Settings can
+ * say "Payment pending" until Play reports the purchase as paid or cancelled.
  */
 class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpdatedListener {
 
@@ -53,9 +56,15 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
 
     private val details = java.util.concurrent.ConcurrentHashMap<String, ProductDetails>()
 
+    /** A Pro or tip payment Play reports as PENDING (UPI not approved yet). */
+    private val _paymentPending = MutableStateFlow(false)
+    val paymentPending: StateFlow<Boolean> = _paymentPending.asStateFlow()
+
     private val client = BillingClient.newBuilder(context.applicationContext)
         .setListener(this)
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+        // Billing 8: the client reconnects by itself after Play's service drops.
+        .enableAutoServiceReconnection()
         .build()
 
     fun start() {
@@ -116,7 +125,10 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
 
     override fun onPurchasesUpdated(result: BillingResult, purchases: MutableList<Purchase>?) {
         when (result.responseCode) {
-            BillingClient.BillingResponseCode.OK -> purchases?.forEach(::handlePurchase)
+            BillingClient.BillingResponseCode.OK -> {
+                purchases?.forEach(::handlePurchase)
+                _paymentPending.value = purchases.orEmpty().any { it.purchaseState == Purchase.PurchaseState.PENDING }
+            }
             BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> refreshPurchases()
             else -> Unit
         }
@@ -133,9 +145,10 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
                 },
             )
             .build()
-        client.queryProductDetailsAsync(params) { result, list ->
+        // Billing 8: the reply also lists products Play could not fetch (not created in Console yet).
+        client.queryProductDetailsAsync(params) { result, reply ->
             if (result.responseCode != BillingClient.BillingResponseCode.OK) return@queryProductDetailsAsync
-            list.forEach { details[it.productId] = it }
+            reply.productDetailsList.forEach { details[it.productId] = it }
             productDetails = details[PRODUCT_ID]
             _price.value = productDetails?.oneTimePurchaseOfferDetails?.formattedPrice
             _tipPrices.value = TIP_IDS.mapNotNull { id ->
@@ -150,6 +163,7 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
         ) { result, purchases ->
             if (result.responseCode != BillingClient.BillingResponseCode.OK) return@queryPurchasesAsync
             prefs.setProPurchased(purchases.any { it.ownsPro() })
+            _paymentPending.value = purchases.any { it.purchaseState == Purchase.PurchaseState.PENDING }
             purchases.forEach(::handlePurchase)
         }
     }

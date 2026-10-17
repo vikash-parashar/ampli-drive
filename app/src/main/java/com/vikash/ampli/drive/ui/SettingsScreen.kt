@@ -142,6 +142,8 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
+            // A Pro or tip payment still waiting for UPI approval.
+            PaymentPendingNote(app = app)
             // Ampli Shell: shown until Ampli is the head unit's home app.
             if (!isHome) DefaultHomeCard(onMake = makeHome, onLater = null, modifier = Modifier.fillMaxWidth())
             ThemePicker(

@@ -82,10 +82,36 @@ import kotlin.math.roundToInt
 /** Data-entry screens lock above this speed. */
 const val PARK_TO_EDIT_KMH = 10f
 
+/**
+ * Whether the text-entry lock is on. A missing speed (GPS lost in a tunnel or under a flyover)
+ * counts as moving for [DriveLock.STALE_MS] after the car was last seen moving: the lock fails
+ * closed. A unit that has never had a moving fix (garage, no GPS) stays editable.
+ */
+object DriveLock {
+    const val STALE_MS = 2 * 60_000L
+
+    /** elapsedRealtime of the last fix above [PARK_TO_EDIT_KMH]; 0 = never. */
+    @Volatile var lastMovingAtMs = 0L
+
+    fun moving(speedKmh: Float?, lastMovingAtMs: Long, nowMs: Long): Boolean = when {
+        speedKmh != null -> speedKmh > PARK_TO_EDIT_KMH
+        else -> lastMovingAtMs > 0L && nowMs - lastMovingAtMs in 0 until STALE_MS
+    }
+}
+
 @Composable
 fun isMoving(app: DriveApp): Boolean {
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
-    return (gps.speedKmh ?: 0f) > PARK_TO_EDIT_KMH
+    val speed = gps.speedKmh
+    if (speed != null && speed > PARK_TO_EDIT_KMH) DriveLock.lastMovingAtMs = android.os.SystemClock.elapsedRealtime()
+    // Re-checks every few seconds while there is no speed, so the lock lifts after STALE_MS.
+    val now by androidx.compose.runtime.produceState(android.os.SystemClock.elapsedRealtime(), speed == null) {
+        while (speed == null) {
+            kotlinx.coroutines.delay(5_000L)
+            value = android.os.SystemClock.elapsedRealtime()
+        }
+    }
+    return DriveLock.moving(speed, DriveLock.lastMovingAtMs, now)
 }
 
 /** Shows [content] only while parked; otherwise a big "Park to edit" message. Both fill [modifier]. */

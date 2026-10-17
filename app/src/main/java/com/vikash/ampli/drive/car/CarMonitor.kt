@@ -308,7 +308,9 @@ class CarMonitor(private val app: DriveApp) {
             val end = SystemClock.elapsedRealtime() + CRASH_COUNTDOWN_S * 1000L
             while (_crashAt.value != null && SystemClock.elapsedRealtime() < end - 3000) {
                 app.speaker.alertBeep()
-                app.speaker.say(res.getString(R.string.crash_voice), lang)
+                // Seconds left until the SOS message opens (the string has a %1$d placeholder).
+                val secondsLeft = ((end - SystemClock.elapsedRealtime() + 999) / 1000).toInt().coerceAtLeast(1)
+                app.speaker.say(res.getString(R.string.crash_voice, secondsLeft), lang)
                 delay(4000)
             }
         }

@@ -129,7 +129,7 @@
     <string name="help_no_contacts">इब्बै ताईं कोए आपातकालीन संपर्क कोनी। सेटिंग्स › आपातकालीन प्रोफाइल म्हं जोड़ो।</string>
     <string name="help_medical_info">इलाज की जाणकारी</string>
     <string name="sos_button_hint">थारे आपातकालीन संपर्कां खातर थारी लोकेशन आळा संदेस खोल्लै</string>
-    <string name="sos_countdown_title">SOS भेज्या जावैगा</string>
+    <string name="sos_countdown_title">SOS मैसेज खुलैगा</string>
     <string name="sos_cancel">रद्द करो</string>
     <string name="sos_send_now">इब्बै भेजो</string>
     <string name="sos_location_ready">लोकेशन मिलगी</string>
@@ -252,7 +252,7 @@
     <string name="voice_camera_next_ahead_nolimit">अगला स्पीड कैमरा %1$s किलोमीटर पै।</string>
     <string name="voice_camera_none_ahead">आगै 20 किलोमीटर ताईं कोए स्पीड कैमरा कोनी।</string>
     <string name="cameras_title">स्पीड कैमरे</string>
-    <string name="cameras_hint">आगै की सड़क पै स्पीड कैमरयां की चेतावनी देवै सै। बिना इंटरनेट चालै सै।</string>
+    <string name="cameras_hint">OpenStreetMap पै दर्ज अर थारे बताए स्पीड कैमरयां की चेतावनी देवै सै। कवरेज इलाके पै टिकी सै। बिना इंटरनेट चालै सै।</string>
     <string name="cameras_alerts_title">कैमरा अलर्ट</string>
     <string name="cameras_voice_title">बोल कै अलर्ट</string>
     <string name="cameras_voice_hint">दूरी अर लिमिट बोलै सै, अर लिमिट तै तेज होण पै बीप करै सै। उस बखत गाणा धीमा हो ज्या सै।</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS की बाट</string>
     <string name="weather_setting">मौसम अर धुंध चेतावणी</string>
     <string name="weather_setting_hint">हर 15 मिनट म्हं आड़ै, 25 किमी अर 50 किमी आग्गै जांच्चै सै</string>
-    <string name="crash_voice">एक्सीडेंट पकड़्या ग्या। %1$d सेकंड म्हं आपातकालीन चेतावणी भेज्जी जागी। रद्द करण खातर ‘मैं ठीक सूं’ बोल्लो या दबाओ।</string>
+    <string name="crash_voice">एक्सीडेंट पकड़्या ग्या। %1$d सेकंड म्हं थारे इमरजेंसी संपर्क खातर SOS मैसेज भेजण नै तैयार होगा। रद्द करण खातर ‘मैं ठीक सूं’ बोल्लो या दबाओ।</string>
     <string name="crash_title">शायद एक्सीडेंट होया सै</string>
     <string name="crash_send_needs_tap">SMS भेज्जण खातर Android नै एक बार दबाणा पड़ै सै।</string>
     <string name="crash_im_ok">मैं ठीक सूं</string>
@@ -647,4 +647,8 @@
     <string name="shell_fullscreen_hint">Android की ऊपर और नीचे की पट्टी छिपाएँ। किनारे से स्वाइप करने पर दिखेंगी।</string>
     <string name="shell_startup_title">शुरुआती एनिमेशन</string>
     <string name="shell_startup_hint">कार चालू होने पर, स्वागत से पहले Ampli एनिमेशन</string>
+    <string name="sos_limits_note">SOS इन संपर्कों के लिए आपकी लोकेशन के साथ मैसेज ऐप खोलता है। भेजें किसी को दबाना होगा: Ampli खुद SMS या कॉल नहीं कर सकता। क्रैश पहचान किसी दुर्घटना को छोड़ सकती है या गलती से शुरू हो सकती है।</string>
+    <string name="payment_pending_title">पेमेंट बाकी है</string>
+    <string name="payment_pending_hint">Google Play आपके UPI या दूसरे पेमेंट की मंज़ूरी का इंतज़ार कर रहा है। अपने पेमेंट ऐप में मंज़ूरी दें; दोबारा पैसे देने की ज़रूरत नहीं।</string>
+    <string name="nav_search_moving">गाड़ी चलते समय टाइपिंग बंद है। “बोलें” दबाएँ और जगह का नाम बोलें।</string>
 </resources>

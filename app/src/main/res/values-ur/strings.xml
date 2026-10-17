@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ابھی کوئی ایمرجنسی رابطہ نہیں۔ ترتیبات › ایمرجنسی پروفائل میں شامل کریں۔</string>
     <string name="help_medical_info">طبی معلومات</string>
     <string name="sos_button_hint">آپ کے ایمرجنسی رابطوں کے لیے آپ کے مقام والا پیغام کھولتا ہے</string>
-    <string name="sos_countdown_title">SOS بھیجا جائے گا</string>
+    <string name="sos_countdown_title">SOS پیغام کھلے گا</string>
     <string name="sos_cancel">منسوخ کریں</string>
     <string name="sos_send_now">ابھی بھیجیں</string>
     <string name="sos_location_ready">مقام مل گیا</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS کا انتظار</string>
     <string name="weather_setting">موسم اور دھند الرٹس</string>
     <string name="weather_setting_hint">ہر 15 منٹ یہاں، 25 کلومیٹر اور 50 کلومیٹر آگے چیک کرتا ہے</string>
-    <string name="crash_voice">حادثے کی شناخت ہوئی۔ %1$d سیکنڈ میں ایمرجنسی الرٹ بھیجا جائے گا۔ منسوخ کرنے کے لیے ‘میں ٹھیک ہوں’ بولیں یا ٹیپ کریں۔</string>
+    <string name="crash_voice">حادثے کا پتا چلا۔ %1$d سیکنڈ میں آپ کے ایمرجنسی رابطے کے لیے SOS پیغام بھیجنے کو تیار ہوگا۔ منسوخ کرنے کے لیے ‘میں ٹھیک ہوں’ بولیں یا دبائیں۔</string>
     <string name="crash_title">ممکنہ حادثے کی شناخت</string>
     <string name="crash_send_needs_tap">SMS بھیجنے کے لیے Android کو ایک ٹیپ درکار ہے۔</string>
     <string name="crash_im_ok">میں ٹھیک ہوں</string>

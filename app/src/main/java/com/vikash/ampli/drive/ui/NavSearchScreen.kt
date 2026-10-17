@@ -90,7 +90,17 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
 
     Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.8f))) {
         ScreenHeader(title = stringResource(R.string.nav_search_title), hint = stringResource(R.string.nav_search_hint), onBack = onBack)
+        // While moving: no keyboard, only "speak your destination".
+        val moving = isMoving(app)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            if (moving) {
+                Text(
+                    stringResource(R.string.nav_search_moving),
+                    fontSize = dims.t(2.8f, min = 16f),
+                    color = LocalDriveTheme.current.warning,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it.take(120) },
@@ -101,6 +111,7 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
                 modifier = Modifier.weight(1f),
             )
             BigButton(text = stringResource(R.string.nav_search_button), onClick = { search() }, icon = Icons.Filled.Search)
+            }
             BigButton(
                 text = stringResource(R.string.nav_search_speak),
                 onClick = {

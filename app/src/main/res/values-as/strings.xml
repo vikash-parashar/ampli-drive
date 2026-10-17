@@ -129,7 +129,7 @@
     <string name="help_no_contacts">এতিয়াও কোনো জৰুৰীকালীন সম্পৰ্ক নাই। ছেটিংছ › জৰুৰীকালীন প্ৰফাইলত যোগ কৰক।</string>
     <string name="help_medical_info">চিকিৎসা তথ্য</string>
     <string name="sos_button_hint">আপোনাৰ জৰুৰীকালীন সম্পৰ্কৰ বাবে আপোনাৰ অৱস্থানসহ বাৰ্তা খোলে</string>
-    <string name="sos_countdown_title">SOS পঠোৱা হ\'ব</string>
+    <string name="sos_countdown_title">SOS বাৰ্তা খোল খাব</string>
     <string name="sos_cancel">বাতিল কৰক</string>
     <string name="sos_send_now">এতিয়াই পঠিয়াওক</string>
     <string name="sos_location_ready">অৱস্থান পোৱা গ\'ল</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPSৰ বাবে অপেক্ষা</string>
     <string name="weather_setting">বতৰ আৰু কুঁৱলীৰ সতৰ্কবাণী</string>
     <string name="weather_setting_hint">প্ৰতি ১৫ মিনিটত ইয়াত, ২৫ কিমি আৰু ৫০ কিমি আগত পৰীক্ষা কৰে</string>
-    <string name="crash_voice">দুৰ্ঘটনা চিনাক্ত হৈছে। %1$d ছেকেণ্ডত জৰুৰী সতৰ্কবাণী পঠোৱা হ\'ব। বাতিল কৰিবলৈ ‘মই ঠিকে আছোঁ’ কওক বা টিপক।</string>
+    <string name="crash_voice">দুৰ্ঘটনা ধৰা পৰিছে। %1$d ছেকেণ্ডত আপোনাৰ জৰুৰী যোগাযোগৰ বাবে SOS বাৰ্তা পঠিয়াবলৈ সাজু হ\'ব। বাতিল কৰিবলৈ ‘মই ঠিকে আছোঁ’ কওক বা টিপক।</string>
     <string name="crash_title">সম্ভাৱ্য দুৰ্ঘটনা চিনাক্ত হৈছে</string>
     <string name="crash_send_needs_tap">SMS পঠাবলৈ Androidক এবাৰ টিপা লাগে।</string>
     <string name="crash_im_ok">মই ঠিকে আছোঁ</string>

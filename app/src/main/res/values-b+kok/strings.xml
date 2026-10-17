@@ -129,7 +129,7 @@
     <string name="help_no_contacts">अजून आपत्कालीन संपर्क नात. सेटिंग्स › आपत्कालीन प्रोफायलांत जोडात.</string>
     <string name="help_medical_info">वैजकी म्हायती</string>
     <string name="sos_button_hint">तुमच्या आपत्कालीन संपर्कां खातीर तुमच्या लोकेशना वांगडा संदेश उगडटा</string>
-    <string name="sos_countdown_title">SOS धाडटले</string>
+    <string name="sos_countdown_title">SOS संदेश उगडटलो</string>
     <string name="sos_cancel">रद्द करात</string>
     <string name="sos_send_now">आतां धाडात</string>
     <string name="sos_location_ready">लोकेशन मेळ्ळें</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ची वाट</string>
     <string name="weather_setting">हवामान आनी धुक्याच्यो शिटकावण्यो</string>
     <string name="weather_setting_hint">दर 15 मिणटांनी हांगा, 25 किमी आनी 50 किमी फुडें तपासता</string>
-    <string name="crash_voice">अपघात वळखलो. %1$d सेकंदांनी आपत्कालीन शिटकावणी धाडटले. रद्द करपाक ‘हांव बरो आसां’ म्हणात वा टॅप करात.</string>
+    <string name="crash_voice">अपघात सोदलो. %1$d सेकंदांनी तुमच्या आपत्कालीन संपर्का खातीर SOS संदेश धाडपाक तयार जातलो. रद्द करपाक ‘हांव बरो आसां’ म्हणात वा दाबात.</string>
     <string name="crash_title">अपघात जाला आसूं येता</string>
     <string name="crash_send_needs_tap">SMS धाडपाक Android क एक टॅप जाय.</string>
     <string name="crash_im_ok">हांव बरो आसां</string>

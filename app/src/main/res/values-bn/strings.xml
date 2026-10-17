@@ -129,7 +129,7 @@
     <string name="help_no_contacts">এখনও কোনো জরুরি পরিচিতি নেই। সেটিংস › জরুরি প্রোফাইলে যোগ করুন।</string>
     <string name="help_medical_info">চিকিৎসা তথ্য</string>
     <string name="sos_button_hint">জরুরি পরিচিতিদের জন্য আপনার লোকেশনসহ বার্তা খোলে</string>
-    <string name="sos_countdown_title">SOS পাঠানো হবে</string>
+    <string name="sos_countdown_title">SOS মেসেজ খুলবে</string>
     <string name="sos_cancel">বাতিল</string>
     <string name="sos_send_now">এখনই পাঠান</string>
     <string name="sos_location_ready">লোকেশন পাওয়া গেছে</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS-এর অপেক্ষায়</string>
     <string name="weather_setting">আবহাওয়া ও কুয়াশা সতর্কতা</string>
     <string name="weather_setting_hint">প্রতি ১৫ মিনিটে এখানে, ২৫ কিমি ও ৫০ কিমি সামনে দেখে</string>
-    <string name="crash_voice">দুর্ঘটনা শনাক্ত হয়েছে। %1$d সেকেন্ডে জরুরি সতর্কতা পাঠানো হবে। বাতিল করতে ‘আমি ঠিক আছি’ বলুন বা ট্যাপ করুন।</string>
+    <string name="crash_voice">দুর্ঘটনা শনাক্ত হয়েছে। %1$d সেকেন্ডে আপনার জরুরি পরিচিতির জন্য SOS মেসেজ পাঠানোর জন্য তৈরি হবে। বাতিল করতে ‘আমি ঠিক আছি’ বলুন বা চাপুন।</string>
     <string name="crash_title">সম্ভাব্য দুর্ঘটনা শনাক্ত হয়েছে</string>
     <string name="crash_send_needs_tap">SMS পাঠাতে Android-এর একটি ট্যাপ লাগে।</string>
     <string name="crash_im_ok">আমি ঠিক আছি</string>

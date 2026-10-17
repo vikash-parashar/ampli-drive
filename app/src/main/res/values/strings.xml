@@ -145,7 +145,7 @@
     <string name="help_no_contacts">No emergency contacts yet. Add them in Settings › Emergency profile.</string>
     <string name="help_medical_info">Medical info</string>
     <string name="sos_button_hint">Opens a message with your location for your emergency contacts</string>
-    <string name="sos_countdown_title">Sending SOS in</string>
+    <string name="sos_countdown_title">SOS message opens in</string>
     <string name="sos_cancel">Cancel</string>
     <string name="sos_send_now">Send now</string>
     <string name="sos_location_ready">Location found</string>
@@ -272,7 +272,7 @@
     <string name="voice_camera_next_ahead_nolimit">Next speed camera in %1$s kilometres.</string>
     <string name="voice_camera_none_ahead">No speed camera within 20 kilometres ahead.</string>
     <string name="cameras_title">Speed cameras</string>
-    <string name="cameras_hint">Warns about speed cameras on the road ahead. Works offline.</string>
+    <string name="cameras_hint">Warns about speed cameras mapped on OpenStreetMap and the ones you report. Coverage depends on the area. Works offline.</string>
     <string name="cameras_alerts_title">Camera alerts</string>
     <string name="cameras_voice_title">Voice alerts</string>
     <string name="cameras_voice_hint">Speaks the distance and limit, and beeps if you are over it. Music is lowered meanwhile.</string>
@@ -484,7 +484,7 @@
     <string name="weather_waiting">Waiting for GPS</string>
     <string name="weather_setting">Weather and fog alerts</string>
     <string name="weather_setting_hint">Checks here, 25 km and 50 km ahead every 15 minutes</string>
-    <string name="crash_voice">Crash detected. Sending an emergency alert in %1$d seconds. Say or tap I’m OK to cancel.</string>
+    <string name="crash_voice">Crash detected. In %1$d seconds an SOS text message will be ready to send to your emergency contact. Say or tap I’m OK to cancel.</string>
     <string name="crash_title">Possible crash detected</string>
     <string name="crash_send_needs_tap">Android needs one tap to send the SMS.</string>
     <string name="crash_im_ok">I’m OK</string>
@@ -798,4 +798,8 @@
     <string name="shell_fullscreen_hint">Hide Android\'s status and navigation bars. Swipe from the edge to see them.</string>
     <string name="shell_startup_title">Startup animation</string>
     <string name="shell_startup_hint">The Ampli animation when the car starts, before the welcome</string>
+    <string name="sos_limits_note">SOS opens your messages app with a text and your location ready for these contacts. Someone must press Send: Ampli cannot send SMS or call by itself. Crash detection can miss a crash or start by mistake.</string>
+    <string name="payment_pending_title">Payment pending</string>
+    <string name="payment_pending_hint">Google Play is waiting for your UPI or other payment to be approved. Approve it in your payment app; you don\'t need to pay again.</string>
+    <string name="nav_search_moving">Typing is off while driving. Tap “Say it” and say where to go.</string>
 </resources>

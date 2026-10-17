@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -218,6 +219,21 @@ internal fun SupportCardContent(prices: Map<String, String>, thanked: Boolean, o
                         .padding(horizontal = dims.d(2f), vertical = dims.d(1.4f)),
                 )
             }
+        }
+    }
+}
+
+/** UPI (or another slow method) not approved yet: say so, so the driver doesn't pay twice. */
+@Composable
+internal fun PaymentPendingNote(app: DriveApp) {
+    val pending by app.billing.paymentPending.collectAsStateWithLifecycle()
+    if (!pending) return
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    SettingCard {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            Icon(Icons.Filled.HourglassTop, contentDescription = null, tint = theme.warning, modifier = Modifier.size(32.dp))
+            CardTitle(stringResource(R.string.payment_pending_title), stringResource(R.string.payment_pending_hint))
         }
     }
 }

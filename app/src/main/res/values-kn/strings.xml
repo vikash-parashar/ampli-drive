@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ಇನ್ನೂ ತುರ್ತು ಸಂಪರ್ಕಗಳಿಲ್ಲ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು › ತುರ್ತು ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಸೇರಿಸಿ.</string>
     <string name="help_medical_info">ವೈದ್ಯಕೀಯ ಮಾಹಿತಿ</string>
     <string name="sos_button_hint">ನಿಮ್ಮ ತುರ್ತು ಸಂಪರ್ಕಗಳಿಗೆ ನಿಮ್ಮ ಸ್ಥಳದೊಂದಿಗೆ ಸಂದೇಶ ತೆರೆಯುತ್ತದೆ</string>
-    <string name="sos_countdown_title">SOS ಕಳುಹಿಸಲಾಗುತ್ತದೆ</string>
+    <string name="sos_countdown_title">SOS ಸಂದೇಶ ತೆರೆಯುತ್ತದೆ</string>
     <string name="sos_cancel">ರದ್ದುಮಾಡಿ</string>
     <string name="sos_send_now">ಈಗಲೇ ಕಳುಹಿಸಿ</string>
     <string name="sos_location_ready">ಸ್ಥಳ ಸಿಕ್ಕಿತು</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS ಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ</string>
     <string name="weather_setting">ಹವಾಮಾನ ಮತ್ತು ಮಂಜು ಎಚ್ಚರಿಕೆಗಳು</string>
     <string name="weather_setting_hint">ಪ್ರತಿ 15 ನಿಮಿಷಕ್ಕೆ ಇಲ್ಲಿ, 25 ಕಿಮೀ ಮತ್ತು 50 ಕಿಮೀ ಮುಂದೆ ಪರಿಶೀಲಿಸುತ್ತದೆ</string>
-    <string name="crash_voice">ಅಪಘಾತ ಪತ್ತೆಯಾಗಿದೆ. %1$d ಸೆಕೆಂಡುಗಳಲ್ಲಿ ತುರ್ತು ಎಚ್ಚರಿಕೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ರದ್ದುಮಾಡಲು ‘ನಾನು ಚೆನ್ನಾಗಿದ್ದೇನೆ’ ಎಂದು ಹೇಳಿ ಅಥವಾ ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
+    <string name="crash_voice">ಅಪಘಾತ ಪತ್ತೆಯಾಗಿದೆ. %1$d ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ ತುರ್ತು ಸಂಪರ್ಕಕ್ಕೆ ಕಳುಹಿಸಲು SOS ಸಂದೇಶ ಸಿದ್ಧವಾಗುತ್ತದೆ. ರದ್ದುಗೊಳಿಸಲು ‘ನಾನು ಚೆನ್ನಾಗಿದ್ದೇನೆ’ ಎಂದು ಹೇಳಿ ಅಥವಾ ಒತ್ತಿ.</string>
     <string name="crash_title">ಸಂಭವನೀಯ ಅಪಘಾತ ಪತ್ತೆಯಾಗಿದೆ</string>
     <string name="crash_send_needs_tap">SMS ಕಳುಹಿಸಲು Android ಗೆ ಒಂದು ಟ್ಯಾಪ್ ಬೇಕು.</string>
     <string name="crash_im_ok">ನಾನು ಚೆನ್ನಾಗಿದ್ದೇನೆ</string>

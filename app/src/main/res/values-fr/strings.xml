@@ -129,7 +129,7 @@
     <string name="help_no_contacts">Aucun contact d\'urgence. Ajoutez-en dans Paramètres › Profil d\'urgence.</string>
     <string name="help_medical_info">Infos médicales</string>
     <string name="sos_button_hint">Ouvre un message avec votre position pour vos contacts d\'urgence</string>
-    <string name="sos_countdown_title">Envoi du SOS dans</string>
+    <string name="sos_countdown_title">Message SOS dans</string>
     <string name="sos_cancel">Annuler</string>
     <string name="sos_send_now">Envoyer maintenant</string>
     <string name="sos_location_ready">Position trouvée</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">En attente du GPS</string>
     <string name="weather_setting">Alertes météo et brouillard</string>
     <string name="weather_setting_hint">Vérifie ici, à 25 km et à 50 km devant toutes les 15 minutes</string>
-    <string name="crash_voice">Accident détecté. Alerte d’urgence envoyée dans %1$d secondes. Dites ou touchez « Ça va » pour annuler.</string>
+    <string name="crash_voice">Accident détecté. Dans %1$d secondes, un SMS SOS pour votre contact d’urgence sera prêt à envoyer. Dites ou touchez « Ça va » pour annuler.</string>
     <string name="crash_title">Accident possible détecté</string>
     <string name="crash_send_needs_tap">Android demande une touche pour envoyer le SMS.</string>
     <string name="crash_im_ok">Ça va</string>

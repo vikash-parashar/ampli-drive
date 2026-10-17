@@ -129,7 +129,7 @@
     <string name="help_no_contacts">ఇంకా అత్యవసర కాంటాక్ట్‌లు లేవు. సెట్టింగ్‌లు › అత్యవసర ప్రొఫైల్‌లో జోడించండి.</string>
     <string name="help_medical_info">వైద్య సమాచారం</string>
     <string name="sos_button_hint">మీ అత్యవసర కాంటాక్ట్‌ల కోసం మీ లొకేషన్‌తో మెసేజ్ తెరుస్తుంది</string>
-    <string name="sos_countdown_title">SOS పంపబడుతుంది</string>
+    <string name="sos_countdown_title">SOS సందేశం తెరుచుకుంటుంది</string>
     <string name="sos_cancel">రద్దు చేయి</string>
     <string name="sos_send_now">ఇప్పుడే పంపు</string>
     <string name="sos_location_ready">లొకేషన్ దొరికింది</string>
@@ -470,7 +470,7 @@
     <string name="weather_waiting">GPS కోసం వేచి ఉంది</string>
     <string name="weather_setting">వాతావరణం మరియు పొగమంచు హెచ్చరికలు</string>
     <string name="weather_setting_hint">ప్రతి 15 నిమిషాలకు ఇక్కడ, 25 కిమీ మరియు 50 కిమీ ముందు తనిఖీ చేస్తుంది</string>
-    <string name="crash_voice">ప్రమాదం గుర్తించబడింది. %1$d సెకన్లలో అత్యవసర హెచ్చరిక పంపబడుతుంది. రద్దు చేయడానికి ‘నేను బాగున్నాను’ అని చెప్పండి లేదా ట్యాప్ చేయండి.</string>
+    <string name="crash_voice">ప్రమాదం గుర్తించబడింది. %1$d సెకన్లలో మీ అత్యవసర పరిచయానికి పంపడానికి SOS సందేశం సిద్ధమవుతుంది. రద్దు చేయడానికి ‘నేను బాగున్నాను’ అని చెప్పండి లేదా నొక్కండి.</string>
     <string name="crash_title">ప్రమాదం జరిగి ఉండవచ్చు</string>
     <string name="crash_send_needs_tap">SMS పంపడానికి Android కి ఒక ట్యాప్ కావాలి.</string>
     <string name="crash_im_ok">నేను బాగున్నాను</string>
