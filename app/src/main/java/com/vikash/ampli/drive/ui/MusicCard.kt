@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -141,32 +143,47 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
 private fun AccessNeeded(onAllow: () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dims.d(2f), Alignment.CenterVertically),
-    ) {
-        Icon(
-            Icons.Filled.NotificationsActive,
-            contentDescription = null,
-            tint = theme.accentSoft,
-            modifier = Modifier.size(maxOf(dims.d(8f), 40.dp)),
-        )
-        Text(
-            stringResource(R.string.music_access_text),
-            fontSize = dims.t(2.5f),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            // The text gives way first, so the button keeps a full touch target.
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        BigButton(
-            text = stringResource(R.string.allow_access),
-            onClick = onAllow,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        )
+    val density = LocalDensity.current
+    val gap = dims.d(2f)
+    val textSize = dims.t(2.5f)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // The button keeps a full touch target; the icon goes first and then text lines when the
+        // card is short (e.g. while the default-home banner takes space), ending with "…".
+        val iconSize = maxOf(dims.d(8f), 40.dp)
+        val buttonH = maxOf(MinTouch, 48.dp)
+        val lineH = with(density) { (textSize * 1.45f).toDp() }
+        val withIcon = maxHeight - buttonH - gap >= iconSize + gap + lineH * 2
+        val forText = maxHeight - buttonH - gap - if (withIcon) iconSize + gap else 0.dp
+        val lines = (forText / lineH).toInt().coerceIn(0, 3)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(gap, Alignment.CenterVertically),
+        ) {
+            if (withIcon) {
+                Icon(
+                    Icons.Filled.NotificationsActive,
+                    contentDescription = null,
+                    tint = theme.accentSoft,
+                    modifier = Modifier.size(iconSize),
+                )
+            }
+            if (lines > 0) {
+                Text(
+                    stringResource(R.string.music_access_text),
+                    fontSize = textSize,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = lines,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            BigButton(
+                text = stringResource(R.string.allow_access),
+                onClick = onAllow,
+                modifier = Modifier.fillMaxWidth().heightIn(min = buttonH),
+            )
+        }
     }
 }
 
