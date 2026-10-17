@@ -61,6 +61,11 @@ class NavPrompter(private val app: DriveApp) {
     val debug: StateFlow<Debug?> = _debug.asStateFlow()
 
     /** The line just spoken, for a few seconds: the speed bubble shows it over Maps. */
+    private val _speaking = MutableStateFlow(false)
+
+    /** True while a turn or speed prompt is being said (other voices, like messages, wait). */
+    val speaking: StateFlow<Boolean> = _speaking.asStateFlow()
+
     private val _caption = MutableStateFlow<String?>(null)
     val caption: StateFlow<String?> = _caption.asStateFlow()
 
@@ -179,7 +184,12 @@ class NavPrompter(private val app: DriveApp) {
             } ?: return@launch
             _debug.value = _debug.value?.copy(lastSpoken = spoken.text)
             showCaption(spoken.text)
-            app.voicePlayer.say(spoken)
+            _speaking.value = true
+            try {
+                app.voicePlayer.say(spoken)
+            } finally {
+                _speaking.value = false
+            }
         }
     }
 

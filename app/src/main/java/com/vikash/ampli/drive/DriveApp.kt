@@ -60,6 +60,9 @@ class DriveApp : Application() {
     /** Ampli Shell: full screen, startup animation, the Ampli app list and its PIN. */
     val shell: com.vikash.ampli.drive.prefs.ShellPrefs by lazy { com.vikash.ampli.drive.prefs.ShellPrefs(this) }
     val fastag: FastagStore by lazy { FastagStore(this) }
+
+    /** Pro: WhatsApp messages read aloud (Settings, off by default). */
+    val messages: com.vikash.ampli.drive.messages.WhatsAppReader by lazy { com.vikash.ampli.drive.messages.WhatsAppReader(this) }
     val emergency: EmergencyStore by lazy { EmergencyStore(this) }
 
     /** Car owner features: break reminder, papers, parking, crash detection, weather, expenses. */
