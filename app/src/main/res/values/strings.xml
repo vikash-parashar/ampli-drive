@@ -189,13 +189,13 @@
     <string name="fastag_month">This month</string>
     <string name="fastag_history">History</string>
     <string name="fastag_empty">No FASTag SMS yet. Your balance shows here after the first toll SMS arrives.</string>
-    <string name="fastag_needs_access">Needs notification access, and toll SMS must reach this unit (phone link or SIM).</string>
+    <string name="fastag_needs_access">Enter the balance by hand, or turn on “Read toll SMS automatically” in Settings (toll SMS must reach this unit by phone link or SIM).</string>
     <string name="fastag_recharge">Recharge</string>
     <string name="fastag_recharged">Recharge</string>
     <string name="fastag_balance_update">Balance update</string>
     <string name="fastag_open">History</string>
     <string name="fastag_settings_title">FASTag toll SMS</string>
-    <string name="fastag_settings_hint">Reads FASTag SMS notifications for the toll card. Balance shows after the first toll SMS arrives.</string>
+    <string name="fastag_settings_hint">Balance, tolls and the Annual Pass on the home screen. Enter them by hand, or let Car Hub read your bank’s FASTag SMS.</string>
     <string name="fastag_low_title">Warn below</string>
     <string name="fastag_url_label">Your bank\'s recharge page (optional)</string>
     <string name="fastag_url_hint">Leave empty to open NPCI\'s list of FASTag banks</string>

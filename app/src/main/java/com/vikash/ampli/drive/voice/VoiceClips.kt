@@ -114,6 +114,30 @@ object VoiceClips {
 
     fun paperId(key: String): String = "paper_$key"
 
+    /**
+     * Safety prompts in the recorded voices, for units without a TTS engine (else they only beep).
+     * Plain, clear Hindi, never Haryanvi slang and never from the playful bank; the texts follow
+     * the app's Hindi strings (crash_voice, sos_ready_*, voice_sos) with the number taken out.
+     */
+    val SAFETY: Map<String, String> = linkedMapOf(
+        SAFETY_CRASH to "दुर्घटना का पता चला। कुछ सेकंड में आपके इमरजेंसी संपर्क के लिए SOS मैसेज भेजने को तैयार होगा। रद्द करने के लिए ‘मैं ठीक हूँ’ बोलें या दबाएँ।",
+        SAFETY_SECONDS_LEFT to "सेकंड बाकी।",
+        SAFETY_SOS_READY to "SOS संदेश तैयार है। मैसेज ऐप में भेजें दबाएँ, फिर यह स्क्रीन बचाव दल को दिखाएँ।",
+        SAFETY_HELP_PANEL to "मदद पैनल खुल रहा है। आपकी पुष्टि के बिना कुछ नहीं भेजा जाएगा।",
+    )
+
+    const val SAFETY_CRASH = "safety_crash"
+    const val SAFETY_SECONDS_LEFT = "safety_seconds_left"
+    const val SAFETY_SOS_READY = "safety_sos_ready"
+    const val SAFETY_HELP_PANEL = "safety_help_panel"
+
+    /**
+     * The crash countdown without TTS: the full warning while more than ten seconds are left,
+     * then "<number> सेकंड बाकी।" for the last ten.
+     */
+    fun crashClips(secondsLeft: Int): List<String> =
+        countdownClip(secondsLeft)?.let { listOf(it, SAFETY_SECONDS_LEFT) } ?: listOf(SAFETY_CRASH)
+
     /** The recorded distance nearest to [meters]; on a tie the shorter one (better early than late). */
     fun bucket(meters: Int): Distance = DISTANCES.minWith(compareBy<Distance> { kotlin.math.abs(it.meters - meters) }.thenBy { it.meters })
 
@@ -225,6 +249,7 @@ object VoiceClips {
         for (d in DISTANCES) out += Entry(d.id, "Distance", "Distance", d.deva)
         NUMBERS.forEachIndexed { i, w -> out += Entry(numberId(i + 1), "Number", "Number", w) }
         for ((key, name) in PAPER_NAMES) out += Entry(paperId(key), "PaperName", "Papers", name)
+        for ((id, text) in SAFETY) out += Entry(id, "Safety", "Safety", text)
         return out
     }
 

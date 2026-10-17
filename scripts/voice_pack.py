@@ -54,7 +54,9 @@ TAG_BY_GROUP = {
 }
 # Numbers, paper names and the tails stitched after them are fragments too.
 NO_TAG_EVENTS = {"Distance", "NavSoonTail", "CameraAheadTail", "NavNow", "NavSoon",
-                 "Number", "PaperName", "PaperDueTail", "PaperExpiredTail", "PassTripsTail"}
+                 "Number", "PaperName", "PaperDueTail", "PaperExpiredTail", "PassTripsTail",
+                 # Crash / SOS prompts: plain and calm, no delivery tag.
+                 "Safety"}
 
 
 def key():

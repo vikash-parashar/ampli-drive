@@ -173,13 +173,13 @@
     <string name="fastag_month">इस महीने</string>
     <string name="fastag_history">इतिहास</string>
     <string name="fastag_empty">इब्बै ताईं कोए FASTag SMS कोनी। पहला टोल SMS आण के बाद बैलेंस उरै दिखैगा।</string>
-    <string name="fastag_needs_access">नोटिफिकेशन एक्सेस चाहिए, अर टोल SMS इस यूनिट ताईं पहोंचणे चाहिएं (फोन लिंक या SIM)।</string>
+    <string name="fastag_needs_access">बैलेंस हाथ तै भर दे, या सेटिंग मैं “टोल SMS आपणे आप पढ़” चालू कर (टोल SMS फोन लिंक या SIM तै इस यूनिट ताईं पहोंचणे चाहिएं)।</string>
     <string name="fastag_recharge">रिचार्ज</string>
     <string name="fastag_recharged">रिचार्ज</string>
     <string name="fastag_balance_update">बैलेंस अपडेट</string>
     <string name="fastag_open">इतिहास</string>
     <string name="fastag_settings_title">FASTag टोल SMS</string>
-    <string name="fastag_settings_hint">टोल कार्ड खातर FASTag SMS नोटिफिकेशन पढ़ै। पहला टोल SMS आण के बाद बैलेंस दिखैगा।</string>
+    <string name="fastag_settings_hint">होम स्क्रीन पै बैलेंस, टोल अर Annual Pass। हाथ तै भर, या Car Hub नै बैंक के FASTag SMS पढ़ण दे।</string>
     <string name="fastag_low_title">इसतै कम होण पै चेतावणी</string>
     <string name="fastag_url_label">थारे बैंक का रिचार्ज पेज (मर्जी तै)</string>
     <string name="fastag_url_hint">खाली छोड़ो तो NPCI की FASTag बैंक लिस्ट खुलैगी</string>

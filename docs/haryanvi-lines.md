@@ -469,7 +469,7 @@ Paper names, stitched in front of the paper tails: बीमा, पीयूस
 
 ## Not in this list
 
-- **SOS, crash countdown, emergency**: always plain Hindi / the app language, on purpose.
+- **SOS, crash countdown, emergency**: always plain Hindi / the app language, on purpose. On units without a text-to-speech engine, four fixed plain-Hindi safety clips are recorded in the same two voices (`safety_*` in voice/lines.json: the crash warning, "सेकंड बाकी" after a recorded number for the last ten seconds, "SOS message ready" and "Help panel opening").
 - **Incoming call announcement**: skipped, the app does not read call notifications.
 - **Traffic / slow ETA**: skipped, the routing server (OSRM) has no live traffic.
 - **Engine fault codes and overcharging (OBD)**: the plain description is clearer, so these stay as they are.
