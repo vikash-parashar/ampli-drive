@@ -28,25 +28,28 @@ class DesiVoice(private val app: DriveApp) {
 
     val enabled: Boolean get() = app.prefs.voiceStyle.value == VoiceStyle.Haryanvi
 
-    /** A line to speak: the text and the app-language tag to speak it with. */
-    data class Spoken(val text: String, val language: String)
-
     /** The sample playing in Settings › Voice › Hear samples, for its animation. */
     private val _sampling = MutableStateFlow<Pair<HaryanviLines.Event, String>?>(null)
     val sampling: StateFlow<Pair<HaryanviLines.Event, String>?> = _sampling.asStateFlow()
 
-    /** The desi line for [event] with [args] filled in, or null when the style is off ([force] ignores the style). */
+    /**
+     * The desi line for [event] with [args] filled in, or null when the style is off ([force]
+     * ignores the style). [Spoken.clips] holds the recorded-voice clips (a stand-in line when this
+     * one has a name or number in it, see [VoiceClips.clipsFor]).
+     */
     suspend fun line(event: HaryanviLines.Event, vararg args: Any, force: Boolean = false): Spoken? {
         if (!enabled && !force) return null
-        val line = picker.pick(event) ?: return null
+        val picked = picker.pickIndexed(event) ?: return null
         val hindi = app.speaker.hasVoice(HINDI)
-        return Spoken(format(if (hindi) line.deva else line.roman, args), if (hindi) "hi" else "en-IN")
+        val line = picked.line
+        val clips = VoiceClips.clipsFor(picked, args) { picker.pickIndexed(it) }
+        return Spoken(format(if (hindi) line.deva else line.roman, args), if (hindi) "hi" else "en-IN", clips)
     }
 
     /** Speaks the desi line; returns false when the style is off so the caller says the standard line. */
     suspend fun say(event: HaryanviLines.Event, vararg args: Any): Boolean {
         val spoken = line(event, *args) ?: return false
-        app.speaker.say(spoken.text, spoken.language)
+        app.voicePlayer.say(spoken)
         return true
     }
 
@@ -89,11 +92,11 @@ class DesiVoice(private val app: DriveApp) {
         val old = queue
         queue = scope.launch {
             old?.cancel()
-            app.speaker.stop()
+            app.voicePlayer.stop()
             val spoken = line(event, *HaryanviLines.sampleArgs(event), force = true) ?: return@launch
             _sampling.value = event to spoken.text
             try {
-                app.speaker.say(spoken.text, spoken.language)
+                app.voicePlayer.say(spoken)
             } finally {
                 if (_sampling.value?.first == event) _sampling.value = null
             }

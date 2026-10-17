@@ -90,6 +90,9 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.maxHeapSize = "2g"
+                // UPDATE_VOICE_LINES=1 ./gradlew testDebugUnitTest --tests '*VoiceManifestTest'
+                // rewrites voice/lines.json (the voice-pack workflow's script) from HaryanviLines.kt.
+                it.inputs.property("updateVoiceLines", System.getenv("UPDATE_VOICE_LINES") ?: "")
             }
         }
     }
@@ -111,6 +114,7 @@ dependencies {
     implementation(libs.maplibre.android)
     implementation(libs.billing.ktx)
     implementation(libs.haze)
+    implementation(libs.media3.exoplayer)
 
     // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
     implementation(libs.vosk.android)

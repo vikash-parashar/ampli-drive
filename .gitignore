@@ -12,3 +12,5 @@
 *.keystore
 # The fixed test signing key must be committed so every CI build installs over the last one.
 !app/test-debug.keystore
+# Written by scripts/voice_pack.py in the Voice pack workflow.
+/voice-pack-summary.json

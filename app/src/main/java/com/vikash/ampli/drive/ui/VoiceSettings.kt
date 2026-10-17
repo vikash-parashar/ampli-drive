@@ -39,6 +39,8 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.VoiceActions
+import com.vikash.ampli.drive.voice.VoiceClips
+import com.vikash.ampli.drive.voice.VoicePack
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.WakeModel
 import com.vikash.ampli.drive.prefs.NavApp
@@ -245,6 +247,39 @@ internal fun VoiceStyleCard(app: DriveApp) {
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
                 Chip(stringResource(R.string.voice_style_standard), style == VoiceStyle.Standard, { app.prefs.setVoiceStyle(VoiceStyle.Standard) })
                 Chip(stringResource(R.string.voice_style_haryanvi), style == VoiceStyle.Haryanvi, { app.prefs.setVoiceStyle(VoiceStyle.Haryanvi) })
+            }
+        }
+    }
+}
+
+/**
+ * Settings › Voice: Male (Ampli Bhai) / Female (Ampli Behen) recorded voice pack, or the phone's
+ * TTS. Default: Male once the clips are in the build, else TTS (VoicePack.resolve).
+ */
+@Composable
+internal fun VoicePackCard(app: DriveApp) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val chosen by app.prefs.voicePack.collectAsStateWithLifecycle()
+    val library = app.voicePlayer.library
+    val voice = VoicePack.resolve(chosen, library.count(VoicePack.Male))
+    val total = VoiceClips.manifest.size
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+            CardTitle(stringResource(R.string.voice_pack_title), stringResource(R.string.voice_pack_hint))
+            Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+                Chip(stringResource(R.string.voice_pack_male), voice == VoicePack.Male, { app.prefs.setVoicePack(VoicePack.Male) })
+                Chip(stringResource(R.string.voice_pack_female), voice == VoicePack.Female, { app.prefs.setVoicePack(VoicePack.Female) })
+                Chip(stringResource(R.string.voice_pack_tts), voice == VoicePack.Tts, { app.prefs.setVoicePack(VoicePack.Tts) })
+            }
+            if (voice.human) {
+                val have = library.count(voice)
+                Text(
+                    if (have > 0) stringResource(R.string.voice_pack_status, have, total) else stringResource(R.string.voice_pack_missing),
+                    color = theme.muted,
+                    fontSize = dims.t(2.2f, min = 13f),
+                )
+                Text(stringResource(R.string.voice_pack_name_note), color = theme.muted, fontSize = dims.t(2.2f, min = 13f))
             }
         }
     }

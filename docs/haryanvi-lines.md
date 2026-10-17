@@ -4,7 +4,7 @@ Every line the car speaks in the **Haryanvi desi** voice style (Settings › Voi
 The source of truth is `app/src/main/java/com/vikash/ampli/drive/voice/HaryanviLines.kt`;
 change a line there and here together (a unit test checks that every line in the app is listed here).
 
-- 62 events, 263 lines. The car never says the same line twice in a row.
+- 70 events, 307 lines. The car never says the same line twice in a row.
 - Left is **उल्टे हाथ** (ulte haath), right is **सुल्टे हाथ** (sulte haath).
 - Family-safe only: no abuse, no crude words, no caste or community jokes (a banned-word test runs over every line).
 - SOS, crash countdown and emergency prompts are never in this list: they always stay in plain, clear Hindi.
@@ -14,8 +14,7 @@ change a line there and here together (a unit test checks that every line in the
 
 ## Welcome and goodbye
 
-- **Welcome on car start**: Car start (boot / ACC on). With a name set, every other start uses the next table.
-- **Welcome by name**: Car start, greeting you by name (Settings › Voice › Your name). Fills in: `%1$s` = your name.
+- **Welcome on car start**: Car start (boot / ACC on). The car never says your name: it shows only on the welcome card.
 - **Morning (4 to 11)**: Said right after the welcome and the Hey Ampli greeting, 4 am to 11 am.
 - **Afternoon (12 to 4 pm)**: After the welcome / greeting, noon to 4 pm.
 - **Evening (5 to 8 pm)**: After the welcome / greeting, 5 pm to 8 pm.
@@ -29,10 +28,9 @@ change a line there and here together (a unit test checks that every line in the
 | Welcome on car start | और तैयारे? सुणा दे, के हाल सै? | Aur taiyaare? Suna de, ke haal sai? | So, all set? Tell me, how are things? |
 | Welcome on car start | राम राम ताई आले, आज कित की तैयारी सै? | Ram Ram Tai Aale, aaj kit ki taiyaari hai? | Ram Ram, dear friend! What are we ready for today? |
 | Welcome on car start | राम राम भाई! गाड्डी त्यार सै, बोल कित चालां? | Ram Ram bhai! Gaadi tyaar sai, bol kit chaalaan? | Ram Ram! The car is ready, say where we go. |
-| Welcome by name | राम राम %1$s जी, आज कित का प्लान सै? | Ram Ram %1$s Ji, aaj kit ka plan hai? | Ram Ram {name} ji, what's the plan today? |
-| Welcome by name | राम राम %1$s जी, आज कित जाणा सै? | Ram Ram %1$s Ji, aaj kit jaana sai? | Ram Ram {name} ji, where are we going today? |
-| Welcome by name | आ ग्या %1$s भाई? सुणा दे, के हाल सै? | Aa gaya %1$s bhai? Suna de, ke haal sai? | Here you are, {name}! Tell me, how are you? |
-| Welcome by name | राम राम %1$s जी! गाड्डी भी त्यार, मैं भी त्यार। | Ram Ram %1$s Ji! Gaadi bhi tyaar, main bhi tyaar. | Ram Ram {name} ji! The car is ready, and so am I. |
+| Welcome on car start | भाई कित जाणा सै आज? | Bhai kit jaana sai aaj? | Brother, where are we going today? |
+| Welcome on car start | आज कित की तैयारी सै? | Aaj kit ki taiyaari sai? | What are we ready for today? |
+| Welcome on car start | आज कित का प्लान बणैगा? | Aaj kit ka plan banega? | What's the plan going to be today? |
 | Morning (4 to 11) | सवेरे सवेरे कित चाल पड़े ताऊ? | Savere savere kit chaal pade tau? | Off somewhere so early in the morning, Tau? |
 | Morning (4 to 11) | सवेरे की राम राम! चाय पी ली के? | Savere ki Ram Ram! Chai pi li ke? | Morning Ram Ram! Had your tea? |
 | Morning (4 to 11) | सवेरे सवेरे सड़क खाली सै, फेर भी धीरे चलाइए। | Savere savere sadak khaali sai, pher bhi dheere chalaiye. | The road is empty this early, still drive slowly. |
@@ -70,6 +68,7 @@ change a line there and here together (a unit test checks that every line in the
 | Hey Ampli greeting | राम राम! बेल्ट ला ले, फेर चालांगे। | Ram Ram! Belt laga le, phir chalange. | Ram Ram! Put on your belt, then we go. |
 | Hey Ampli greeting | आ ग्या भाई? चाल, आज कित की सैर करणी सै? | Aa gaya bhai? Chal, aaj kit ki sair karni sai? | You're here? Come on, where shall we ride today? |
 | Hey Ampli greeting | राम राम जी! गाड्डी भी रेडी, मैं भी रेडी। | Ram Ram ji! Gaadi bhi ready, main bhi ready. | Ram Ram! The car is ready, and so am I. |
+| Hey Ampli greeting | भाई कैसा सै, सब राजी खुशी? परिवार में सब ठीक? | Bhai kaisa sai, sab raazi khushi? Parivaar mein sab theek? | How are you, brother, all well? Everyone fine at home? |
 | Hey Ampli reply | हाँ भाई, बोल। | Haan bhai, bol. | Yes brother, go ahead. |
 | Hey Ampli reply | हाँ जी, सुण रया सूं। | Haan ji, sun reya sun. | Yes, I'm listening. |
 | Hey Ampli reply | बोल ताऊ, के सेवा करूं? | Bol tau, ke seva karun? | Tell me, Tau, how can I help? |
@@ -137,12 +136,14 @@ change a line there and here together (a unit test checks that every line in the
 | Left | बाएं मुड़ ज्या, आराम तै। | baayen mud jya, aaram te. | turn left, easy. |
 | Left | लेफ्ट ले ले भाई। | left le le bhai. | take a left, brother. |
 | Left | उल्टे हाथ कान्ही मुड़ ले भाई। | ulte haath kaanhi mud le bhai. | turn towards the left, brother. |
+| Left | भाई उल्टे हाथ न ले ले। | bhai ulte haath na le le. | brother, take the left. |
 | Right | सुल्टे हाथ ले ले। | sulte haath le le. | take the right. |
 | Right | सीधे हाथ मुड़ ले। | seedhe haath mud le. | turn right. |
 | Right | दाएं हाथ नै मुड़ ले भाई। | daayen haath nai mud le bhai. | turn right, brother. |
 | Right | दाएं मुड़ ज्या, आराम तै। | daayen mud jya, aaram te. | turn right, easy. |
 | Right | राइट ले ले भाई। | right le le bhai. | take a right, brother. |
 | Right | सुल्टे हाथ कान्ही मुड़ ले भाई। | sulte haath kaanhi mud le bhai. | turn towards the right, brother. |
+| Right | सुल्टे हाथ न ले ले। | sulte haath na le le. | take the right. |
 | Slight left | हल्का सा बाएं नै हो ले। | halka sa baayen nai ho le. | bear slightly left. |
 | Slight left | थोड़ा सा उल्टे हाथ नै दबा ले। | thoda sa ulte haath nai daba le. | ease a little to the left. |
 | Slight left | बाएं नै हल्का सरक ले। | baayen nai halka sarak le. | slide slightly left. |
@@ -196,6 +197,7 @@ change a line there and here together (a unit test checks that every line in the
 | Continue straight | सीधा चालता रह भाई। | Seedha chalta reh bhai. | Keep going straight, brother. |
 | Continue straight | सीधे सीधे चाल, कित मुड़णा कोनी। | Seedhe seedhe chal, kit mudna koni. | Straight on, no turns for now. |
 | Continue straight | सीधा रास्ता सै, मौज तै चला। | Seedha rasta sai, mauj te chala. | Straight road, enjoy the drive. |
+| Continue straight | भाई सीधा चाल। | Bhai seedha chal. | Go straight, brother. |
 | Arrived | पहुँच गए ताऊ! | Pahunch gaye tau! | We've arrived, Tau! |
 | Arrived | पहुंच गे भाई, मंजिल आ गी! | Pahunch ge bhai, manzil aa gi! | We're here, brother, destination reached! |
 | Arrived | ल्यो जी, आ ग्या ठिकाणा! | Lyo ji, aa gaya thikana! | There you go, we've reached the place! |
@@ -220,6 +222,8 @@ change a line there and here together (a unit test checks that every line in the
 | Still over the limit | रेस ना सै भाई, आराम तै चला। | Race na sai bhai, aaram te chala. | It's not a race, brother, drive easy. |
 | Still over the limit | पैर हटा ले एक्सीलेटर तै, भाई। | Pair hata le accelerator te, bhai. | Ease off the accelerator, brother. |
 | Still over the limit | इतनी जल्दी के सै भाई, घरां सब बाट देखैं सैं। | Itni jaldi ke sai bhai, ghara sab baat dekhe sai. | Why the hurry, brother? Everyone at home is waiting for you. |
+| Still over the limit | भाई मंदा कर ले। | Bhai manda kar le. | Brother, slow down. |
+| Still over the limit | भाई आराम तै चाल। | Bhai aaram te chal. | Brother, go easy. |
 | Back under the limit | शाबाश, न्यू ए चला। | Shaabaash, nyu e chala. | Well done, drive just like this. |
 | Back under the limit | ये हुई ना बात! इब ठीक सै स्पीड। | Ye hui na baat! Ib theek sai speed. | That's it! The speed is fine now. |
 | Back under the limit | बढ़िया भाई, आराम तै चलाण मैं ए मजा सै। | Badhiya bhai, aaram te chalaan main e maza sai. | Nice, brother, the fun is in driving easy. |
@@ -237,6 +241,8 @@ change a line there and here together (a unit test checks that every line in the
 | Over the limit at a camera | ताऊ, गाड्डी मंदी कर ले। | Tau, gaddi mandi kar le. | Tau, slow the car down. |
 | Over the limit at a camera | अरे धीरे भाई, चालान कट ज्यागा! | Arre dheere bhai, chalaan kat jyaga! | Hey, slowly, brother, you'll get a fine! |
 | Over the limit at a camera | घरां कोए बाट देख रया सै, धीरे चला। | Ghara koi baat dekh reya sai, dheere chala. | Someone at home is waiting for you, drive slowly. |
+| Over the limit at a camera | भाई आगे कैमरे लाग रे सैं, मंदा कर ले। | Bhai aage camere laag re sain, manda kar le. | Brother, cameras ahead, slow down. |
+| Over the limit at a camera | भाई आगे ब्रेक कर ले। | Bhai aage brake kar le. | Brother, brake ahead. |
 
 ## Toll, breaks, parking, weather
 
@@ -244,6 +250,7 @@ change a line there and here together (a unit test checks that every line in the
 - **Toll deducted (no balance)**: FASTag toll SMS without a balance. *(Haryanvi only)* Fills in: `%1$s` = rupees deducted.
 - **Break reminder**: Fills in: `%1$s` = hours driven.
 - **Parking spot saved**: "Save spot here" on the parked-car screen. *(Haryanvi only)*
+- **Seat belt reminder**: Once per trip, when the car first moves (head units have no belt sensor; not again within 45 minutes). *(Haryanvi only)*
 - **Where's my car**: "Where is my car": said before the plain answer.
 - **Heat**: Route weather: 42 °C or more here or ahead.
 
@@ -266,6 +273,10 @@ change a line there and here together (a unit test checks that every line in the
 | Parking spot saved | ठीक सै, गाड्डी याड़े खड़ी सै, मन्नै बेरा सै। | Theek sai, gaadi yaade khadi sai, manne bera sai. | OK, the car is parked here, I know it. |
 | Parking spot saved | पार्किंग सेव कर दी, भूल ज्यावै तो मन्नै पूछ लिए। | Parking save kar di, bhool jyaave to manne poochh liye. | Parking saved; if you forget, ask me. |
 | Parking spot saved | जगह नोट कर ली भाई, गाड्डी ना गुमैगी। | Jagah note kar li bhai, gaadi na gumegi. | Spot noted, brother, the car won't get lost. |
+| Seat belt reminder | भाई सीट बेल्ट पहन ले। | Bhai seat belt pehan le. | Brother, put on your seat belt. |
+| Seat belt reminder | बेल्ट ला ले भाई, फेर चालांगे। | Belt la le bhai, pher chaalaange. | Buckle up, brother, then we go. |
+| Seat belt reminder | सीट बेल्ट पहन ले, सफर बढ़िया रहवैगा। | Seat belt pehan le, safar badhiya rahvega. | Put on the seat belt, the trip will go well. |
+| Seat belt reminder | पहलां बेल्ट, फेर गाड्डी। पहन ले भाई। | Pehlaan belt, pher gaadi. Pehan le bhai. | Belt first, then the car. Put it on, brother. |
 | Where's my car | रुक, देखूं गाड्डी कित खड़ी सै। | Ruk, dekhun gaadi kit khadi sai. | Wait, let me see where the car is. |
 | Where's my car | थारी गाड्डी का पता मेरे धोरै सै। | Thaari gaadi ka pata mere dhore sai. | I have your car's location. |
 | Where's my car | चिंता मत कर, गाड्डी गुमी कोनी। | Chinta mat kar, gaadi gumi koni. | Don't worry, the car isn't lost. |
@@ -360,6 +371,60 @@ change a line there and here together (a unit test checks that every line in the
 | "चुटकला सुणा" | जाम मैं फंस कै ताऊ बोल्या, इतणी देर मैं तो मेरी भैंस भी पहुँच ज्यांदी! | Jaam main phans ke tau bolya, itni der main to meri bhains bhi pahunch jyaandi! | Stuck in a jam, Tau said: my buffalo would have got there by now! |
 | "चुटकला सुणा" | ताऊ बोल्या, जीपीएस की के जरूरत, मैं तो हर चौक पै रास्ता पूछ ल्यूं सूं! | Tau bolya, GPS ki ke zaroorat, main to har chowk pe rasta poochh lyun sun! | Tau said: who needs GPS? I ask the way at every crossing! |
 | "चुटकला सुणा" | स्पीड ब्रेकर देख कै ताऊ बोल्या, यो सड़क भी थक कै बैठ गी! | Speed breaker dekh ke tau bolya, yo sadak bhi thak ke baith gi! | Seeing a speed breaker, Tau said: even the road got tired and sat down! |
+
+## Human voice only (no names or numbers)
+
+Said only by the recorded voices (Settings › Voice: Male "Ampli Bhai" / Female "Ampli Behen") instead of a line with a place, song, amount, distance or number in it: a recording can't say those, so the screen shows the detail (the toll card shows the rupees, the speed pane the limit, the caption the distance). The phone voice keeps the full lines above.
+
+- **Searching (human voice)**: Instead of *Searching a place*.
+- **Starting navigation (human voice)**: Instead of *Starting navigation*.
+- **Route found (human voice)**: Instead of *Route found*.
+- **After a distance (human voice)**: Said after a recorded distance ("चार सौ मीटर" + "आगे,"), then the turn.
+- **Over the limit (human voice)**: Instead of *Over the limit*.
+- **Camera after a distance (human voice)**: Said after a recorded distance: "तीन सौ मीटर" + "पै कैमरा सै…".
+- **Toll deducted (human voice)**: Instead of both toll lines.
+- **Break reminder (human voice)**: Instead of *Break reminder*.
+- *Play a named song* uses the *Play music* lines; roundabout exits 1 to 5 are recorded as whole sentences.
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Searching (human voice) | ढूंढ रया सूं, रुक जा एक मिनट। | Dhoond reya sun, ruk ja ek minute. | Looking it up, wait a minute. |
+| Searching (human voice) | ठहर जा भाई, देख रया सूं। | Thahar ja bhai, dekh reya sun. | Hold on, brother, I'm looking. |
+| Searching (human voice) | इबे तलाश करूं। | Ibe talash karun. | Searching right away. |
+| Searching (human voice) | चाल, पता करूं सूं कित सै। | Chaal, pata karun sun kit sai. | OK, finding out where it is. |
+| Starting navigation (human voice) | चाल भाई, चालांगे। रास्ता मैं बताऊंगा। | Chal bhai, chalange. Rasta main bataunga. | Come on, let's go. I'll show the way. |
+| Starting navigation (human voice) | रास्ता लाग ग्या, आराम तै चालियो। | Rasta laag gaya, aaram te chaliyo. | Route is set, drive easy. |
+| Starting navigation (human voice) | ठीक सै, चाल पड़ां। ध्यान तै चलाणा भाई। | Theek sai, chaal padaan. Dhyan te chalana bhai. | OK, let's go. Drive carefully, brother. |
+| Starting navigation (human voice) | चाल पड़े, बेल्ट ला ले। | Chaal pade, belt la le. | We're off, buckle up. |
+| Route found (human voice) | चाल, रास्ता मिल गया, चाल पड़। | Chaal, rasta mil gaya, chaal pad. | Come on, got the route, let's go. |
+| Route found (human voice) | रास्ता मिल ग्या भाई, दूरी स्क्रीन पै देख ले। | Rasta mil gaya bhai, doori screen pe dekh le. | Got the route, brother, the distance is on the screen. |
+| Route found (human voice) | लै, रास्ता त्यार सै, चाल पड़। | Lai, rasta tyaar sai, chaal pad. | Here, the route is ready, let's go. |
+| Route found (human voice) | बढ़िया, रास्ता लाग ग्या। | Badhiya, rasta laag gaya. | Great, the route is set. |
+| After a distance (human voice) | आगे, | aage, | ahead, |
+| After a distance (human voice) | आगे जा कै, | aage ja ke, | further on, |
+| After a distance (human voice) | बाद, | baad, | after that, |
+| After a distance (human voice) | पै, | pe, | at that point, |
+| Over the limit (human voice) | स्पीड घटा ले भाई, लिमिट तै ऊपर सै। | Speed ghata le bhai, limit te upar sai. | Reduce speed, brother, you're over the limit. |
+| Over the limit (human voice) | धीरे कर ले, आड़े लिमिट कम सै। | Dheere kar le, aade limit kam sai. | Slow down, the limit here is lower. |
+| Over the limit (human voice) | लिमिट तै ऊपर ना, चालान कट ज्यागा। | Limit te upar na, chalaan kat jyaga. | Not above the limit, or you'll get a fine. |
+| Over the limit (human voice) | भाई, स्पीड घणी सै, लिमिट स्क्रीन पै देख ले। | Bhai, speed ghani sai, limit screen pe dekh le. | Brother, too fast; the limit is on the screen. |
+| Over the limit (human voice) | भाई मंदा कर ले, लिमिट तै ऊपर सै। | Bhai manda kar le, limit te upar sai. | Brother, slow down, you're over the limit. |
+| Camera after a distance (human voice) | पै कैमरा सै, स्पीड कम कर ले! | pe camera sai, speed kam kar le! | {distance}: camera there, slow down! |
+| Camera after a distance (human voice) | पै कैमरा आ रया सै, ध्यान तै। | pe camera aa reya sai, dhyan te. | {distance}: a camera is coming, careful. |
+| Camera after a distance (human voice) | पै कैमरा खड़्या सै, लिमिट तै ऊपर मत जाइयो। | pe camera khadya sai, limit te upar mat jaiyo. | {distance}: a camera stands there, don't go over the limit. |
+| Camera after a distance (human voice) | पै कैमरा सै, आराम तै। | pe camera sai, aaram te. | {distance}: camera there, take it easy. |
+| Toll deducted (human voice) | टोल कट गया भाई, स्क्रीन पै देख ले कितणे कटे। | Toll kat gaya bhai, screen pe dekh le kitne kate. | Toll deducted, brother; see on screen how much. |
+| Toll deducted (human voice) | फास्टैग तै टोल कट ग्या, चाल आगे। | FASTag te toll kat gaya, chaal aage. | The toll went from FASTag, let's move on. |
+| Toll deducted (human voice) | टोल पार! पैसे कट गए। | Toll paar! Paise kat gaye. | Past the toll! Money deducted. |
+| Toll deducted (human voice) | टोल का पैसा कट ग्या, बैलेंस स्क्रीन पै सै। | Toll ka paisa kat gaya, balance screen pe sai. | Toll paid; the balance is on the screen. |
+| Break reminder (human voice) | घणी देर हो ली चलाते, थक ग्या होगा भाई, एक चाय हो जाए? | Ghani der ho li chalaate, thak gaya hoga bhai, ek chai ho jaye? | You've been driving a long time, tired? A cup of tea? |
+| Break reminder (human voice) | थोड़ा रुक कै कमर सीधी कर ले भाई। | Thoda ruk ke kamar seedhi kar le bhai. | Stop a bit and stretch your back, brother. |
+| Break reminder (human voice) | भाई घणी देर हो गी, ढाबा आवै तै रुक लियो। | Bhai ghani der ho gi, dhaba aave te ruk liyo. | Brother, it's been a while; stop at the next dhaba. |
+| Break reminder (human voice) | स्टीयरिंग घणी देर तै पकड़ राख्या सै, पाँच मिनट टांग सीधी कर ले। | Steering ghani der te pakad raakhya sai, paanch minute taang seedhi kar le. | You've held the wheel a long time; stretch your legs for five minutes. |
+
+### Recorded distances
+
+Turn and camera distances are rounded to the nearest of these (a tie goes to the shorter one) and stitched in front of the line: पचास, सौ, डेढ़ सौ, दो सौ, ढाई सौ, तीन सौ, साढ़े तीन सौ, चार सौ, साढ़े चार सौ, पाँच सौ, छह सौ, सात सौ, आठ सौ, नौ सौ मीटर; एक, डेढ़, दो, ढाई, तीन, चार, पाँच, दस किलोमीटर.
 
 ## Not in this list
 

@@ -8,6 +8,7 @@ import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.voice.HaryanviLines
+import com.vikash.ampli.drive.voice.Spoken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,9 +83,8 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
         val old = speech
         speech = scope.launch {
             old?.join()
-            val lines = ArrayList<String>(2)
+            val lines = ArrayList<Spoken>(2)
             var beep = false
-            var speakLang = lang
             for (e in events) {
                 // Haryanvi desi style (Settings › Voice style): the same alert in desi words.
                 val desi = when (e) {
@@ -97,24 +97,27 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
                     else -> null
                 }
                 if (desi != null) {
-                    lines += desi.text
-                    speakLang = desi.language
+                    lines += desi
                     continue
                 }
                 when (e) {
-                    is CameraAlertEngine.Event.Announce -> lines += if (e.camera.maxspeed != null) {
-                        res.getString(R.string.camera_voice_ahead, e.roundedMeters, e.camera.maxspeed)
-                    } else {
-                        res.getString(R.string.camera_voice_ahead_nolimit, e.roundedMeters)
-                    }
-                    is CameraAlertEngine.Event.SlowDown -> lines += res.getString(R.string.camera_voice_slow_down)
+                    is CameraAlertEngine.Event.Announce -> lines += Spoken(
+                        if (e.camera.maxspeed != null) {
+                            res.getString(R.string.camera_voice_ahead, e.roundedMeters, e.camera.maxspeed)
+                        } else {
+                            res.getString(R.string.camera_voice_ahead_nolimit, e.roundedMeters)
+                        },
+                        lang,
+                    )
+                    is CameraAlertEngine.Event.SlowDown -> lines += Spoken(res.getString(R.string.camera_voice_slow_down), lang)
                     is CameraAlertEngine.Event.Beep -> beep = true
                     is CameraAlertEngine.Event.Cleared -> Unit
                 }
             }
             if (lines.isEmpty() && !beep) return@launch
             if (beep) app.speaker.alertBeep()
-            if (lines.isNotEmpty()) app.speaker.say(lines.joinToString(" "), speakLang)
+            // Recorded voice (Settings › Voice) when every part has clips, else one TTS sentence.
+            if (lines.isNotEmpty()) app.voicePlayer.say(lines.reduce { a, b -> a + b })
         }
     }
 

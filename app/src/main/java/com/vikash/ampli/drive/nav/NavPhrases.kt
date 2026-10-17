@@ -2,6 +2,7 @@ package com.vikash.ampli.drive.nav
 
 import com.vikash.ampli.drive.voice.HaryanviLines
 import com.vikash.ampli.drive.voice.LinePicker
+import com.vikash.ampli.drive.voice.VoiceClips
 import java.util.Locale
 
 /**
@@ -31,19 +32,36 @@ object NavPhrases {
     /** Arriving and "keep going straight" are whole sentences; they take no distance or "abhi". */
     fun takesPrefix(maneuver: Maneuver): Boolean = maneuver != Maneuver.Arrive && maneuver != Maneuver.Continue
 
-    fun desi(prompt: NavPrompt, picker: LinePicker, roman: Boolean): String? {
+    fun desi(prompt: NavPrompt, picker: LinePicker, roman: Boolean): String? = desiPhrase(prompt, picker, roman)?.text
+
+    /** The sentence and, for the recorded voice, its clips (empty when one part can't be recorded). */
+    data class Phrase(val text: String, val clips: List<String>)
+
+    /**
+     * Like [desi], plus the recorded-voice clips: "<distance clip> <tail clip> <turn clip>" for a
+     * turn ahead (distance rounded to the nearest recorded one), "<ib clip> <turn clip>" for now.
+     */
+    fun desiPhrase(prompt: NavPrompt, picker: LinePicker, roman: Boolean): Phrase? {
         val turn = prompt.turn
-        val main = picker.pick(event(turn.maneuver, turn.exitNumber)) ?: return null
-        val body = fill(if (roman) main.roman else main.deva, turn.exitNumber ?: 0)
-        if (!takesPrefix(turn.maneuver)) return body
+        val main = picker.pickIndexed(event(turn.maneuver, turn.exitNumber)) ?: return null
+        val body = fill(if (roman) main.line.roman else main.line.deva, turn.exitNumber ?: 0)
+        val bodyClips = VoiceClips.clipsFor(main, arrayOf(turn.exitNumber ?: 0)) { picker.pickIndexed(it) }
+        if (!takesPrefix(turn.maneuver)) return Phrase(body, bodyClips)
+        var prefixClips: List<String> = emptyList()
         val prefix = when {
-            prompt.now -> picker.pick(HaryanviLines.Event.NavNow)?.let { if (roman) it.roman else it.deva }
-            prompt.distanceM != null -> picker.pick(HaryanviLines.Event.NavSoon)?.let {
-                fill(if (roman) it.roman else it.deva, distance(prompt.distanceM, roman))
+            prompt.now -> picker.pickIndexed(HaryanviLines.Event.NavNow)?.let {
+                prefixClips = listOf(it.id)
+                if (roman) it.line.roman else it.line.deva
+            }
+            prompt.distanceM != null -> picker.pickIndexed(HaryanviLines.Event.NavSoon)?.let {
+                prefixClips = VoiceClips.distanceClips(prompt.distanceM, picker.pickIndexed(HaryanviLines.Event.NavSoonTail))
+                fill(if (roman) it.line.roman else it.line.deva, distance(prompt.distanceM, roman))
             }
             else -> null
         }
-        return if (prefix == null) body else "$prefix $body"
+        if (prefix == null) return Phrase(body, bodyClips)
+        val clips = if (prefixClips.isNotEmpty() && bodyClips.isNotEmpty()) prefixClips + bodyClips else emptyList()
+        return Phrase("$prefix $body", clips)
     }
 
     /** "400 मीटर", "1.5 किलोमीटर" (roman: "400 metre", "1.5 kilometre"). */

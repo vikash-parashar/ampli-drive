@@ -2,6 +2,7 @@ package com.vikash.ampli.drive.prefs
 
 import android.content.Context
 import com.vikash.ampli.drive.BuildConfig
+import com.vikash.ampli.drive.voice.VoicePack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -122,6 +123,18 @@ class DrivePrefs(context: Context) {
     /** "Voice style": standard, or the Haryanvi desi pack (the default until the driver picks one). */
     private val _voiceStyle = MutableStateFlow(FirstRunDefaults.voiceStyle(sp.getString(KEY_VOICE_STYLE, null)))
     val voiceStyle: StateFlow<VoiceStyle> = _voiceStyle.asStateFlow()
+
+    /**
+     * Settings › Voice: Male / Female recorded voice or the phone's TTS. Null until the driver
+     * picks; VoicePlayer then uses Male when the clips are bundled, else TTS (VoicePack.resolve).
+     */
+    private val _voicePack = MutableStateFlow(VoicePack.fromKey(sp.getString(KEY_VOICE_PACK, null)))
+    val voicePack: StateFlow<VoicePack?> = _voicePack.asStateFlow()
+
+    fun setVoicePack(value: VoicePack) {
+        sp.edit().putString(KEY_VOICE_PACK, value.key).apply()
+        _voicePack.value = value
+    }
 
     /**
      * Draw the glance map into a TextureView (true) or a GLSurfaceView (false). TextureView is
@@ -459,6 +472,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_PHONE_PKG = "phone_package"
         private const val KEY_LAST_MEDIA_PKG = "last_media_package"
         private const val KEY_VOICE_STYLE = "voice_style"
+        private const val KEY_VOICE_PACK = "voice_pack"
         private const val KEY_MAP_TEXTURE = "map_texture_mode"
         private const val KEY_NAV_PROMPTS = "nav_prompts"
         private const val KEY_NAV_APP = "nav_app"
