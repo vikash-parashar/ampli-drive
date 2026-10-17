@@ -6,4 +6,15 @@
     <string name="disclosure_wa_uses">દરેક મેસેજ એક જ વાર બોલાય છે અને પછી ભૂલી જવાય છે. તે ક્યારેય ડ્રાઇવિંગ સ્ક્રીન પર બતાવાતો નથી અને ક્યાંય સેવ થતો નથી. Car Hub ક્યારેય જવાબ આપતું નથી, SMS મોકલતું નથી અને ચૅટ ખોલતું નથી. તમે મંજૂરી ન આપો ત્યાં સુધી ગ્રુપના મેસેજ છોડી દેવાય છે. નોટિફિકેશન ઍક્સેસ ચાલુ હોય ત્યાં સુધી Car Hub બૅકગ્રાઉન્ડમાં હોય ત્યારે પણ આ કામ કરે છે.</string>
     <string name="disclosure_wa_stays">Car Hub કંઈ પણ સેવ કે અપલોડ કરતું નથી, અને Ampli Studio કે બીજા કોઈ સાથે કંઈ પણ શેર કરતું નથી. મેસેજ તમારા ડિવાઇસનું પોતાનું સ્પીચ એન્જિન વાંચે છે.</string>
     <string name="disclosure_park_hint">આ વાંચવા અને ચાલુ કરવા ગાડી રોકો.</string>
+    <string name="wa_title">WhatsApp મેસેજ મોટેથી વાંચી સંભળાવો</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">કોણે લખ્યું અને મેસેજમાં શું છે તે કાર કહે છે, ફક્ત અવાજમાં.</string>
+    <string name="wa_hint_on">ચાલુ. ફક્ત અવાજ: મેસેજનું લખાણ સ્ક્રીન પર ક્યારેય દેખાતું નથી.</string>
+    <string name="wa_hint_locked">આ Pro ફીચર છે. Pro જોવા ટૅપ કરો.</string>
+    <string name="wa_groups_title">ગ્રુપના મેસેજ પણ વાંચો</string>
+    <string name="wa_groups_hint">બંધ: ગ્રુપ ચૅટ શાંત રહે છે. ફક્ત સીધા તમને મોકલેલા મેસેજ વાંચાય છે.</string>
+    <string name="wa_rules">20 સેકન્ડમાં વધુમાં વધુ એક મેસેજ. કૉલ અને વળાંકની સૂચના વખતે શાંત. Car Hub ક્યારેય જવાબ આપતું નથી અને કંઈ મોકલતું નથી.</string>
+    <string name="wa_needs_access">WhatsApp મેસેજ સાંભળવા નોટિફિકેશન ઍક્સેસ જોઈએ.</string>
+    <string name="wa_tts_missing">આ યુનિટમાં સ્પીચ એન્જિન નથી, તેથી મેસેજ વાંચી સંભળાવી શકાતા નથી. અવાજ તપાસો માં જઈ એક એન્જિન ઇન્સ્ટૉલ કરો.</string>
+    <string name="wa_park_to_turn_on">ચાલુ કરવા ગાડી રોકો.</string>
 </resources>

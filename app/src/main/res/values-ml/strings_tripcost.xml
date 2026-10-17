@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">യാത്രാ ചെലവ്</string>
+    <string name="trip_cost_example">ഉദാഹരണം</string>
+    <string name="trip_cost_route">പ്ലാൻ ചെയ്ത റൂട്ട് · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d ടോളുകൾ</string>
+    <string name="trip_cost_fuel">ഇന്ധനം</string>
+    <string name="trip_cost_fuel_unknown">ഒരു ഫിൽ-അപ്പ് ചേർക്കുക</string>
+    <string name="trip_cost_pass_saves">Annual Pass ലാഭിക്കുന്നത്</string>
+    <string name="trip_cost_pass_would_save">Annual Pass ലാഭിക്കുമായിരുന്നത്</string>
+    <string name="trip_cost_pass_trips">%1$d പാസ് യാത്രകൾ</string>
+    <string name="trip_cost_total">ടോൾ + ഇന്ധനം</string>
+    <string name="trip_cost_note">ഏകദേശ കണക്ക്. ഇന്ധനം നിങ്ങളുടെ സ്വന്തം മൈലേജും അവസാന ഫിൽ-അപ്പ് വിലയും ഉപയോഗിക്കുന്നു. ടോൾ നിരക്കുകൾ മാറാം.</string>
+    <string name="trip_cost_example_note">പ്രിവ്യൂവിനുള്ള സാമ്പിൾ കണക്കുകൾ, യഥാർത്ഥ റൂട്ട് അല്ല.</string>
+</resources>

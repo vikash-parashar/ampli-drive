@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">यात्राक खर्चा</string>
+    <string name="trip_cost_example">उदाहरण</string>
+    <string name="trip_cost_route">चुनल बाट · %1$s किमी</string>
+    <string name="trip_cost_tolls">%1$d टोल</string>
+    <string name="trip_cost_fuel">तेल</string>
+    <string name="trip_cost_fuel_unknown">एकटा तेल भराइ जोड़ू</string>
+    <string name="trip_cost_pass_saves">Annual Pass सँ बचत</string>
+    <string name="trip_cost_pass_would_save">Annual Pass रहैत त बचत</string>
+    <string name="trip_cost_pass_trips">पासक %1$d ट्रिप</string>
+    <string name="trip_cost_total">टोल + तेल</string>
+    <string name="trip_cost_note">अनुमान। तेल अहाँक अपन माइलेज आ पछिला भराइक दाम सँ। टोल रेट बदलि सकैत अछि।</string>
+    <string name="trip_cost_example_note">प्रीव्यूक लेल नमूना आँकड़ा, असली बाट नहि।</string>
+</resources>

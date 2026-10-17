@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">行程费用</string>
+    <string name="trip_cost_example">示例</string>
+    <string name="trip_cost_route">计划路线 · %1$s 公里</string>
+    <string name="trip_cost_tolls">%1$d 个收费站</string>
+    <string name="trip_cost_fuel">燃油</string>
+    <string name="trip_cost_fuel_unknown">添加一次加油记录</string>
+    <string name="trip_cost_pass_saves">Annual Pass 节省</string>
+    <string name="trip_cost_pass_would_save">使用 Annual Pass 可节省</string>
+    <string name="trip_cost_pass_trips">年票 %1$d 次</string>
+    <string name="trip_cost_total">过路费 + 燃油</string>
+    <string name="trip_cost_note">估算值。燃油按你自己的油耗和上次加油价格计算。过路费标准可能变化。</string>
+    <string name="trip_cost_example_note">用于预览的示例数字，不是真实路线。</string>
+</resources>

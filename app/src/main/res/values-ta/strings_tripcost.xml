@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">பயணச் செலவு</string>
+    <string name="trip_cost_example">உதாரணம்</string>
+    <string name="trip_cost_route">திட்டமிட்ட வழி · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d சுங்கச்சாவடிகள்</string>
+    <string name="trip_cost_fuel">எரிபொருள்</string>
+    <string name="trip_cost_fuel_unknown">ஒரு நிரப்புதலைச் சேருங்கள்</string>
+    <string name="trip_cost_pass_saves">Annual Pass சேமிப்பது</string>
+    <string name="trip_cost_pass_would_save">Annual Pass சேமித்திருக்கும்</string>
+    <string name="trip_cost_pass_trips">%1$d பாஸ் பயணங்கள்</string>
+    <string name="trip_cost_total">சுங்கம் + எரிபொருள்</string>
+    <string name="trip_cost_note">மதிப்பீடு. எரிபொருள் உங்கள் சொந்த மைலேஜ் மற்றும் கடைசி நிரப்புதல் விலையைப் பயன்படுத்துகிறது. சுங்கக் கட்டணங்கள் மாறலாம்.</string>
+    <string name="trip_cost_example_note">முன்னோட்டத்துக்கான மாதிரி எண்கள், உண்மையான வழி அல்ல.</string>
+</resources>
