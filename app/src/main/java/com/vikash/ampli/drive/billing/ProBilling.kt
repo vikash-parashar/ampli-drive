@@ -2,6 +2,9 @@ package com.vikash.ampli.drive.billing
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.ProductType
@@ -182,10 +185,50 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
         }
         if (!purchase.ownsPro()) return
         prefs.setProPurchased(true)
-        // Purchases not acknowledged within 3 days are refunded automatically by Play.
-        if (!purchase.isAcknowledged) {
-            val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()
-            client.acknowledgePurchase(params) { }
+        // Purchases not acknowledged within 3 days are refunded automatically by Play. A failed
+        // acknowledgement is retried here, and again on the next refreshPurchases (every launch
+        // and "Restore purchase"), which still lists the purchase as unacknowledged.
+        if (!purchase.isAcknowledged) acknowledge(purchase.purchaseToken)
+    }
+
+    /** Tokens with an acknowledgement in flight, so a refresh during a retry doesn't double it. */
+    private val acknowledging = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private fun acknowledge(token: String, attempt: Int = 1) {
+        if (attempt == 1 && !acknowledging.add(token)) return
+        val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(token).build()
+        val retry = {
+            if (attempt < ACK_TRIES) {
+                mainHandler.postDelayed({ acknowledge(token, attempt + 1) }, ACK_BACKOFF_MS * attempt)
+            } else {
+                acknowledging.remove(token)
+                Log.w(TAG, "Pro purchase still unacknowledged after $ACK_TRIES tries; retried on next launch")
+            }
+        }
+        try {
+            client.acknowledgePurchase(params) { result ->
+                when (result.responseCode) {
+                    BillingClient.BillingResponseCode.OK -> {
+                        acknowledging.remove(token)
+                        Log.i(TAG, "Pro purchase acknowledged (try $attempt)")
+                    }
+                    // Not retryable here; the next refreshPurchases tries again.
+                    BillingClient.BillingResponseCode.ITEM_NOT_OWNED,
+                    BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                    -> {
+                        acknowledging.remove(token)
+                        Log.w(TAG, "Acknowledge failed: ${result.responseCode} ${result.debugMessage}")
+                    }
+                    else -> {
+                        Log.w(TAG, "Acknowledge try $attempt failed: ${result.responseCode} ${result.debugMessage}")
+                        retry()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Acknowledge try $attempt threw", e)
+            retry()
         }
     }
 
@@ -194,6 +237,10 @@ class ProBilling(context: Context, private val prefs: DrivePrefs) : PurchasesUpd
 
     companion object {
         const val PRODUCT_ID = "ampli_drive_pro"
+
+        private const val TAG = "ProBilling"
+        private const val ACK_TRIES = 3
+        private const val ACK_BACKOFF_MS = 2_000L
 
         /**
          * Consumable tips (Settings › Buy the developer a chai), the same ids in every Ampli app
