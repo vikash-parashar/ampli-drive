@@ -45,7 +45,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
  * spoken, never shown, stored, replied to or uploaded. Not dismissable by tapping outside.
  */
 @Composable
-fun WhatsAppDisclosureDialog(onAgree: () -> Unit, onDecline: () -> Unit) {
+fun WhatsAppDisclosureDialog(onAgree: () -> Unit, onDecline: () -> Unit, moving: Boolean = false) {
     val (bg, fg) = dialogColors()
     val theme = LocalDriveTheme.current
     AlertDialog(
@@ -59,14 +59,21 @@ fun WhatsAppDisclosureDialog(onAgree: () -> Unit, onDecline: () -> Unit) {
             }
         },
         text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Too long to read while driving, and agreeing needs a stopped car.
+            if (moving) {
+                Text(stringResource(R.string.disclosure_park_hint))
+            } else Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.disclosure_wa_body))
                 Text(stringResource(R.string.disclosure_wa_uses))
                 Text(stringResource(R.string.disclosure_wa_stays), fontWeight = FontWeight.SemiBold)
                 Text(stringResource(R.string.disclosure_change_later), color = theme.muted)
             }
         },
-        confirmButton = { TextButton(onClick = onAgree) { Text(stringResource(R.string.disclosure_agree)) } },
+        confirmButton = {
+            TextButton(onClick = { if (!moving) onAgree() }, enabled = !moving) {
+                Text(stringResource(if (moving) R.string.park_to_set else R.string.disclosure_agree))
+            }
+        },
         dismissButton = { TextButton(onClick = onDecline) { Text(stringResource(R.string.disclosure_decline)) } },
     )
 }
@@ -84,6 +91,7 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
     val context = LocalContext.current
     val hasAccess = remember(resumeTick) { app.mediaHub.hasAccess() }
     var askDisclosure by rememberSaveable { mutableStateOf(false) }
+    val moving = isMoving(app)
 
     fun turnOn() {
         if (!isPro) {
@@ -108,7 +116,9 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
 
     if (askDisclosure) {
         WhatsAppDisclosureDialog(
+            moving = moving,
             onAgree = {
+                if (moving) return@WhatsAppDisclosureDialog
                 askDisclosure = false
                 prefs.setDisclosureAccepted(true)
                 prefs.setEnabled(true)

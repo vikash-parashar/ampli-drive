@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp संदेश वाचून दाखयात</string>
+    <string name="disclosure_wa_body">गाडी चलयतना तुमचे WhatsApp आनी WhatsApp Business संदेश वाचून दाखोवपाक Car Hub तांच्या नोटिफिकेशनांतल्यान धाडप्याचें नांव आनी संदेशाचो मजकूर वाचता. हाचे खातीर नोटिफिकेशन एक्सेस वापरतात.</string>
+    <string name="disclosure_wa_uses">दरेक संदेश एकदांच वाचतात आनी उपरांत विसरतात. तो ड्रायव्हिंग स्क्रीनार केन्नाच दिसना आनी खंयच सेव्ह जायना. Car Hub केन्नाच जाप दिना, SMS धाडिना आनी चॅट उगडिना. तुमी परवानगी दिना मेरेन ग्रुपांतले संदेश सोडटात. नोटिफिकेशन एक्सेस चालू आसा मेरेन Car Hub फाटल्यान आसतनाय हें चलता.</string>
+    <string name="disclosure_wa_stays">Car Hub कांयच सेव्ह वा अपलोड करिना, आनी Ampli Studio वा हेर कोणाकूय कांयच शेअर करिना. संदेश तुमच्या उपकरणाचें आपलेंच उलोवपाचें इंजिन वाचता.</string>
+    <string name="disclosure_park_hint">हें वाचपाक आनी चालू करपाक गाडी राबयात.</string>
+</resources>
