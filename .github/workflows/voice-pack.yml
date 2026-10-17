@@ -9,6 +9,9 @@ name: Voice pack
 # list-voices job picks the most used Hindi male / female voice from the shared library.
 
 on:
+  # Pushing to voice-pack-run records with the defaults below (male,female, all clips).
+  push:
+    branches: [voice-pack-run]
   workflow_dispatch:
     inputs:
       voices:
@@ -54,8 +57,8 @@ jobs:
         id: voices
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          VOICE_ID_MALE: ${{ vars.VOICE_ID_MALE }}
-          VOICE_ID_FEMALE: ${{ vars.VOICE_ID_FEMALE }}
+          VOICE_ID_MALE: ${{ vars.VOICE_ID_MALE || '7b9mYhmnp0y2qSH1FnBL' }}  # Bunty, funny best friend (owner's pick)
+          VOICE_ID_FEMALE: ${{ vars.VOICE_ID_FEMALE || '9w21nMuk8CWXIME31V1S' }}  # Simran, young and friendly (owner's pick)
         run: python3 scripts/voice_pack.py list-voices
 
   generate:
@@ -92,7 +95,7 @@ jobs:
           FEMALE_ID: ${{ needs.list-voices.outputs.female_id }}
           FEMALE_OWNER: ${{ needs.list-voices.outputs.female_owner }}
         run: |
-          python3 scripts/voice_pack.py generate --voices "${{ inputs.voices }}" \
+          python3 scripts/voice_pack.py generate --voices "${{ inputs.voices || 'male,female' }}" \
             ${{ inputs.only_missing && '--only-missing' || '' }}
 
       - name: Open a PR with the clips
@@ -113,7 +116,7 @@ jobs:
           git push -q origin "$branch"
           summary=$(python3 -c "import json;d=json.load(open('voice-pack-summary.json'));print('\n'.join(f\"- {k}: {v['recorded']} recorded, {v['skipped']} skipped, {v['failed']} failed, {v['characters']} characters, {v['clips']}/{v['total']} clips\" for k,v in d['voices'].items()))" 2>/dev/null || echo "- see the run log")
           body=$(printf 'Recorded by the Voice pack workflow, run %s.\n\n%s\n\nPlayback falls back to the phone voice for any missing clip.\n' "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" "$summary")
-          if url=$(gh pr create --base "${{ github.ref_name }}" --head "$branch" --title "Voice pack: recorded clips (run ${{ github.run_number }})" --body "$body" 2>&1); then
+          if url=$(gh pr create --base "${{ github.event_name == 'push' && 'main' || github.ref_name }}" --head "$branch" --title "Voice pack: recorded clips (run ${{ github.run_number }})" --body "$body" 2>&1); then
             echo "::notice title=Voice pack PR::$url"
           else
             echo "::warning title=Voice pack::Pushed $branch but could not open a PR ($url). Allow it under Settings > Actions > General > 'Allow GitHub Actions to create and approve pull requests', or open it by hand: ${{ github.server_url }}/${{ github.repository }}/compare/$branch"
