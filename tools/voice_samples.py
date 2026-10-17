@@ -3,10 +3,10 @@ import json, os, sys, urllib.request, urllib.error, urllib.parse
 
 KEY = os.environ.get("ELEVENLABS_API_KEY", "")
 if not KEY:
-    sys.exit("ELEVENLABS_API_KEY secret is missing")
+    print("::error::ELEVENLABS_API_KEY secret is missing"); sys.exit(1)
 BASE = "https://api.elevenlabs.io"
-TEXT = "[warmly] राम राम विकास जी! आज कित का प्लान सै? चाल, गाड्डी तैयार सै।"
-PLAIN = "राम राम विकास जी! आज कित का प्लान सै? चाल, गाड्डी तैयार सै।"
+TEXT = "[warmly] राम राम भाई! के हाल सै, सब राजी खुशी? [pause] आज कित की तैयारी सै? चाल, सीट बेल्ट पहन ले।"
+PLAIN = "राम राम भाई! के हाल सै, सब राजी खुशी? आज कित की तैयारी सै? चाल, सीट बेल्ट पहन ले।"
 os.makedirs("out", exist_ok=True)
 
 def req(method, path, body=None, raw=False):
@@ -18,6 +18,13 @@ def req(method, path, body=None, raw=False):
         return b if raw else json.loads(b or b"{}")
 
 def shared(gender):
+    try:
+        return _shared(gender)
+    except urllib.error.HTTPError as e:
+        print(f"::error::shared-voices {gender} {e.code} {e.read()[:300]!r}")
+        return []
+
+def _shared(gender):
     q = urllib.parse.urlencode({"language": "hi", "gender": gender, "page_size": 40,
                                 "sort": "usage_character_count_1y"})
     return req("GET", "/v1/shared-voices?" + q).get("voices", [])
@@ -31,7 +38,7 @@ def tts(voice_id, path):
             open(path, "wb").write(audio)
             return model
         except urllib.error.HTTPError as e:
-            print("  tts", model, voice_id, e.code, e.read()[:300])
+            print(f"::error::tts {model} {voice_id} {e.code} {e.read()[:300]!r}")
     return None
 
 index = []
@@ -47,7 +54,7 @@ for gender in ("male", "female"):
             added = req("POST", f"/v1/voices/add/{v['public_owner_id']}/{vid}", {"new_name": f"Ampli {name}"[:40]})
             use_id = added.get("voice_id", vid)
         except urllib.error.HTTPError as e:
-            print("  add", name, e.code, e.read()[:300])
+            print(f"::warning::add {name} {e.code} {e.read()[:300]!r}")
             use_id = vid
         got += 1
         fname = f"{gender}-{got}-{''.join(c for c in name if c.isalnum())[:20]}.mp3"
@@ -59,11 +66,11 @@ for gender in ("male", "female"):
                       "accent": v.get("accent"), "age": v.get("age"), "description": (v.get("description") or "")[:160],
                       "model": model})
         print("ok", fname, name, model)
-    print(gender, "recorded", got)
+    print(f"::notice::{gender} recorded {got}")
 
 json.dump(index, open("out/voices.json", "w"), ensure_ascii=False, indent=1)
 with open("out/README.md", "w") as f:
     for i in index:
         f.write(f"- {i['file']}: {i['name']} ({i['gender']}, {i.get('accent')}, {i.get('age')}) voice_id={i['voice_id']} model={i['model']}\n")
 if not index:
-    sys.exit("no samples recorded")
+    print("::error::no samples recorded"); sys.exit(1)
