@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import com.vikash.ampli.drive.system.Shell
 import com.vikash.ampli.drive.ui.BootSplash
+import com.vikash.ampli.drive.ui.DefaultHomeCard
 import com.vikash.ampli.drive.ui.QuickControlsPanel
 import com.vikash.ampli.drive.ui.quickTiles
 import androidx.compose.ui.Alignment
@@ -200,7 +201,17 @@ class ScreenshotTest {
         app.prefs.setNameAsked()
         app.shell.homeCardDismissed = false
         compose.mainClock.autoAdvance = false
-        compose.setContent { DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {}) }
+        // Robolectric's only HOME app is Ampli itself, so the host would hide the card: draw it directly.
+        compose.setContent {
+            Box(Modifier.fillMaxSize()) {
+                DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {})
+                Frame(backdrop = false) {
+                    Box(Modifier.fillMaxSize().padding(top = 72.dpCompat()), contentAlignment = Alignment.TopCenter) {
+                        DefaultHomeCard(onMake = {}, onLater = {}, modifier = Modifier.padding(horizontal = 24.dpCompat()))
+                    }
+                }
+            }
+        }
         compose.mainClock.advanceTimeBy(2_000L)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/shell-home-default-card.png")
     }

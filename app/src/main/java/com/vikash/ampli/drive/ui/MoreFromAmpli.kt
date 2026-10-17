@@ -113,7 +113,7 @@ internal fun MoreFromAmpliCard(products: List<AmpliProduct> = AMPLI_PRODUCTS) {
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(theme.surfaceHigh)
+                        .background(theme.surface)
                         .border(1.dp, theme.border, RoundedCornerShape(18.dp))
                         .heightIn(min = MinTouch)
                         .padding(horizontal = dims.d(1.8f), vertical = dims.d(1.2f)),
