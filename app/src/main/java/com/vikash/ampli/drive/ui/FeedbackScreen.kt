@@ -261,6 +261,12 @@ private fun ReportForm(app: DriveApp, kind: ReportKind) {
         if (!app.feedback.hasBackend) {
             Text(stringResource(R.string.feedback_email_note, FeedbackRepository.SUPPORT_EMAIL), color = theme.muted, fontSize = dims.t(2.1f, min = 12f))
         }
+        // Website and support address, also when reports go to the server.
+        Text(
+            stringResource(R.string.website_title) + ": " + WEBSITE_URL.removePrefix("https://") + " · " + FeedbackRepository.SUPPORT_EMAIL,
+            color = theme.muted,
+            fontSize = dims.t(2.1f, min = 12f),
+        )
     }
 }
 

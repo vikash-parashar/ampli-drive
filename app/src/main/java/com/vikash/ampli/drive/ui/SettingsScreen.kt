@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Language
+import com.vikash.ampli.drive.feedback.FeedbackRepository
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
@@ -243,6 +245,7 @@ fun SettingsScreen(
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
             VoiceStyleCard(app = app)
+            WelcomeSettingsCard(app = app)
             NavigateWithCard(app = app)
             NavPromptsCard(app = app)
             CarStartCard(app = app)
@@ -278,6 +281,14 @@ fun SettingsScreen(
                 hint = stringResource(R.string.diag_hint),
                 action = stringResource(R.string.action_open),
                 onClick = onOpenDiagnostics,
+            )
+            // Settings › About › Website.
+            LinkRow(
+                icon = Icons.Filled.Language,
+                title = stringResource(R.string.website_title),
+                hint = WEBSITE_URL.removePrefix("https://") + " · " + FeedbackRepository.SUPPORT_EMAIL,
+                action = stringResource(R.string.action_open),
+                onClick = { startSafely(context, Intent(Intent.ACTION_VIEW, Uri.parse(WEBSITE_URL))) },
             )
             // Settings › About › Privacy policy (also required by Play).
             LinkRow(
@@ -380,6 +391,9 @@ internal fun SettingRow(
 }
 
 /** Privacy policy, published from docs/privacy-policy.html with GitHub Pages. */
+/** Ampli's website (Settings › About, Help & feedback, privacy policy). */
+const val WEBSITE_URL = "https://ampliapps.in"
+
 const val PRIVACY_POLICY_URL = "https://vikash-parashar.github.io/ampli-drive/privacy-policy.html"
 
 @Composable

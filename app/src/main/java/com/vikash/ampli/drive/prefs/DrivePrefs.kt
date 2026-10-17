@@ -119,8 +119,8 @@ class DrivePrefs(context: Context) {
         get() = sp.getString(KEY_LAST_MEDIA_PKG, null)
         set(value) { if (value != lastMediaPackage) sp.edit().putString(KEY_LAST_MEDIA_PKG, value).apply() }
 
-    /** "Voice style": standard, or the playful Haryanvi desi pack (free, off by default). */
-    private val _voiceStyle = MutableStateFlow(VoiceStyle.from(sp.getString(KEY_VOICE_STYLE, null)))
+    /** "Voice style": standard, or the Haryanvi desi pack (the default until the driver picks one). */
+    private val _voiceStyle = MutableStateFlow(FirstRunDefaults.voiceStyle(sp.getString(KEY_VOICE_STYLE, null)))
     val voiceStyle: StateFlow<VoiceStyle> = _voiceStyle.asStateFlow()
 
     /**
@@ -130,9 +130,11 @@ class DrivePrefs(context: Context) {
      */
     /**
      * "Haryanvi navigation prompts": Ampli speaks Google Maps' next turn (read from its
-     * navigation notification) in the chosen voice style. Off by default.
+     * navigation notification) in the chosen voice style. On until the driver turns it off.
      */
-    private val _navPrompts = MutableStateFlow(sp.getBoolean(KEY_NAV_PROMPTS, false))
+    private val _navPrompts = MutableStateFlow(
+        FirstRunDefaults.navPrompts(if (sp.contains(KEY_NAV_PROMPTS)) sp.getBoolean(KEY_NAV_PROMPTS, false) else null),
+    )
     val navPrompts: StateFlow<Boolean> = _navPrompts.asStateFlow()
 
     fun setNavPrompts(value: Boolean) {
@@ -151,6 +153,46 @@ class DrivePrefs(context: Context) {
 
     private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
     val mapTextureMode: StateFlow<Boolean> = _mapTextureMode.asStateFlow()
+
+    /** The car owner's name for the welcome message ("" = not set: "Ram Ram Tai Aale"). */
+    private val _ownerName = MutableStateFlow(sp.getString(KEY_OWNER_NAME, "") ?: "")
+    val ownerName: StateFlow<String> = _ownerName.asStateFlow()
+
+    fun setOwnerName(name: String) {
+        val clean = com.vikash.ampli.drive.voice.OwnerName.clean(name)
+        sp.edit().putString(KEY_OWNER_NAME, clean).putBoolean(KEY_NAME_ASKED, true).apply()
+        _ownerName.value = clean
+        _nameAsked.value = true
+    }
+
+    /** The first-run "Thara naam ke sai?" step was answered or skipped. */
+    private val _nameAsked = MutableStateFlow(sp.getBoolean(KEY_NAME_ASKED, false))
+    val nameAsked: StateFlow<Boolean> = _nameAsked.asStateFlow()
+
+    fun setNameAsked() {
+        sp.edit().putBoolean(KEY_NAME_ASKED, true).apply()
+        _nameAsked.value = true
+    }
+
+    /** How many welcome messages played, so the two Haryanvi lines alternate across reboots. */
+    var welcomeCount: Int
+        get() = sp.getInt(KEY_WELCOME_COUNT, 0)
+        set(value) { sp.edit().putInt(KEY_WELCOME_COUNT, value).apply() }
+
+    /**
+     * Once per install, on the first start: the language a fresh install switches to (Hindi), or
+     * null. An updated app (it has run before: the permission prompt was already shown) or a
+     * stored language choice is left alone. The choice is saved here; the caller applies it.
+     */
+    fun takeFirstRunLanguage(): String? {
+        if (sp.getBoolean(KEY_DEFAULTS_DONE, false)) return null
+        val fresh = !sp.contains(KEY_ASKED)
+        val stored = if (sp.contains(KEY_LANGUAGE)) sp.getString(KEY_LANGUAGE, "") else null
+        sp.edit().putBoolean(KEY_DEFAULTS_DONE, true).commit()
+        val tag = FirstRunDefaults.language(stored, fresh) ?: return null
+        setLanguage(tag)
+        return tag
+    }
 
     /** When the car-start actions (greeting, auto start) last ran (wall clock), so they run once per start. */
     var lastCarStartAt: Long
@@ -423,6 +465,10 @@ class DrivePrefs(context: Context) {
         private const val KEY_START_GREETED = "start_greeting_at"
         private const val KEY_START_GREET_PENDING = "start_greeting_pending"
         private const val KEY_BOOT_COUNT = "last_boot_count"
+        private const val KEY_OWNER_NAME = "owner_name"
+        private const val KEY_NAME_ASKED = "owner_name_asked"
+        private const val KEY_WELCOME_COUNT = "welcome_count"
+        private const val KEY_DEFAULTS_DONE = "first_run_defaults_done"
         private const val KEY_AS_MODE = "autostart_mode"
         private const val KEY_AS_MIRROR = "autostart_mirror_package"
         private const val KEY_AS_NAV = "autostart_nav_package"

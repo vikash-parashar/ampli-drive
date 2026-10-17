@@ -234,7 +234,7 @@ private fun StatusLine(
     }
 }
 
-/** Settings › Voice style: Standard, or the playful Haryanvi desi pack (free, off by default). */
+/** Settings › Voice style: Standard, or the Haryanvi desi pack (free; the default on a fresh install). */
 @Composable
 internal fun VoiceStyleCard(app: DriveApp) {
     val dims = LocalDims.current
