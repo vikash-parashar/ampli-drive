@@ -563,7 +563,9 @@ private fun DockButton(
             style = theme.labelStyle(labelColor),
             fontSize = dims.t(2.2f, min = 16f),
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.SemiBold,
-            maxLines = 1,
+            // 16 sp minimum on the driving screen: a long label ("HEY AMPLI") wraps instead of "…".
+            maxLines = 2,
+            lineHeight = dims.t(2.4f, min = 18f),
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 4.dp),
