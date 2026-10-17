@@ -277,7 +277,7 @@ private fun MicButton(listening: Boolean, onClick: () -> Unit) {
 
 /** Accent-gradient circle with a soft halo, for the 🙏 on the name step and the welcome card. */
 @Composable
-private fun GlowBadge(content: @Composable () -> Unit) {
+internal fun GlowBadge(content: @Composable () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Box(

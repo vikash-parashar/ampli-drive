@@ -296,6 +296,9 @@ fun DriveRoot(
                     } else {
                         BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
                     }
+                    // Android 13+: notification access still off after "Allow access" (sideloaded
+                    // APK, restricted settings): show how to allow it.
+                    RestrictedSettingsGuideHost(resumeTick = resumeTick)
                     // "Ram Ram {name} Ji 🙏" while the car-start welcome plays.
                     WelcomeCardHost(app = app)
                     // A trip started (voice, search, retry): show the navigation screen, unless the

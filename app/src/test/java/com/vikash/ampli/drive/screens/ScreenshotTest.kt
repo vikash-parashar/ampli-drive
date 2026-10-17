@@ -31,6 +31,7 @@ import com.vikash.ampli.drive.ui.Dims
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.FirstRunNameHost
 import com.vikash.ampli.drive.ui.LocalDims
+import com.vikash.ampli.drive.ui.RestrictedSettingsGuide
 import com.vikash.ampli.drive.ui.Screen
 import com.vikash.ampli.drive.ui.VoiceStyleCard
 import com.vikash.ampli.drive.ui.WelcomeCard
@@ -70,12 +71,12 @@ class ScreenshotTest {
 
     /** The app's theme, backdrop and 1024x600 proportions, as DriveRoot sets them up. */
     @Composable
-    private fun Frame(content: @Composable () -> Unit) {
+    private fun Frame(backdrop: Boolean = true, content: @Composable () -> Unit) {
         val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false).let {
             if (it.glass != null) it.withoutBlur() else it
         }
         AmpliDriveTheme(theme) {
-            Box(Modifier.fillMaxSize().themeBackground(theme)) {
+            Box(Modifier.fillMaxSize().then(if (backdrop) Modifier.themeBackground(theme) else Modifier)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     val unit = maxHeight / 100f
                     val dims = Dims(u = unit, uSp = with(LocalDensity.current) { unit.toSp().value }, compact = maxWidth / maxHeight < 1.72f)
@@ -121,6 +122,23 @@ class ScreenshotTest {
         }
         compose.mainClock.advanceTimeBy(1_500L)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/welcome-card.png")
+    }
+
+    /** Android 13+ guide shown when notification access is still off (sideloaded APK). */
+    @Test
+    fun restrictedSettingsGuide() {
+        app.prefs.setNameAsked()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Box(Modifier.fillMaxSize()) {
+                DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {})
+                Frame(backdrop = false) {
+                    RestrictedSettingsGuide(visible = true, onOpenAppInfo = {}, onOpenAccess = {}, onClose = {})
+                }
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide.png")
     }
 
     @Test
