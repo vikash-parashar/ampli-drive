@@ -119,4 +119,25 @@ class NavPromptPlannerTest {
             assertEquals(OverLimitNag.Level.None, n.onSpeed(t, null, 60))
         }
     }
+
+    @Test
+    fun praiseOnceWhenBackUnderTheLimitAfterAWarning() {
+        val p = BackUnderPraise()
+        // No warning yet: no praise.
+        assertEquals(false, p.onSpeed(0, 50f, 60))
+        p.onWarned(1_000)
+        assertEquals(false, p.onSpeed(2_000, 70f, 60))
+        assertEquals(false, p.onSpeed(3_000, 62f, null))
+        assertEquals(true, p.onSpeed(4_000, 58f, 60))
+        // Only once per warning.
+        assertEquals(false, p.onSpeed(5_000, 50f, 60))
+    }
+
+    @Test
+    fun noPraiseLongAfterTheWarning() {
+        val p = BackUnderPraise()
+        p.onWarned(0)
+        assertEquals(false, p.onSpeed(BackUnderPraise.WINDOW_MS + 1, 50f, 60))
+        assertEquals(false, p.onSpeed(BackUnderPraise.WINDOW_MS + 2_000, 50f, 60))
+    }
 }

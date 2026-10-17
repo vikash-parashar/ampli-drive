@@ -7,7 +7,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Fetches Open-Meteo hourly visibility, precipitation and weather code. No key, no account. */
+/** Fetches Open-Meteo hourly visibility, precipitation, weather code and temperature. No key, no account. */
 object WeatherClient {
 
     /** [points] from [RouteWeather.points]. Throws on network errors. */
@@ -39,16 +39,19 @@ object WeatherClient {
         val vis = h.optJSONArray("visibility")
         val pr = h.optJSONArray("precipitation")
         val wc = h.optJSONArray("weather_code")
+        val tc = h.optJSONArray("temperature_2m")
         fun JSONArray?.d(i: Int): Double? = this?.takeIf { i < it.length() && !it.isNull(i) }?.optDouble(i)
         val n = maxOf(vis?.length() ?: 0, pr?.length() ?: 0, wc?.length() ?: 0).coerceAtMost(2)
         var minVis: Double? = null
         var maxPr: Double? = null
         var worstCode: Int? = null
+        var maxTemp: Double? = null
         for (i in 0 until n) {
             vis.d(i)?.let { minVis = minOf(minVis ?: it, it) }
             pr.d(i)?.let { maxPr = maxOf(maxPr ?: it, it) }
             wc.d(i)?.toInt()?.let { worstCode = maxOf(worstCode ?: it, it) }
+            tc.d(i)?.let { maxTemp = maxOf(maxTemp ?: it, it) }
         }
-        return PointWeather(aheadKm, minVis, maxPr, worstCode)
+        return PointWeather(aheadKm, minVis, maxPr, worstCode, maxTemp)
     }
 }

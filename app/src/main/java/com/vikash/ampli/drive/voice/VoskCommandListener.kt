@@ -107,6 +107,7 @@ object VoskCommands {
         "where is my car", "tyre pressure", "next service", "engine status",
         "sos", "help me", "emergency", "report a problem",
         "cancel", "stop", "hello",
+        "how are you", "who are you", "tell me a joke",
     )
 
     /** Only while a list of places is showing. */

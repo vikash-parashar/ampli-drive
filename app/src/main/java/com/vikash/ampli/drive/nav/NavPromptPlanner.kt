@@ -111,3 +111,32 @@ class OverLimitNag {
         const val COOLDOWN_MS = 60_000L
     }
 }
+
+/**
+ * "शाबाश, न्यू ए चला": one word of praise when the driver gets back under the limit soon after
+ * a slow-down warning. Plain Kotlin, unit-tested.
+ */
+class BackUnderPraise {
+    private var warnedAtMs = -1L
+
+    /** A slow-down warning was just spoken. */
+    fun onWarned(nowMs: Long) {
+        warnedAtMs = nowMs
+    }
+
+    /** True once, at the first speed at or under the limit within [WINDOW_MS] of a warning. */
+    fun onSpeed(nowMs: Long, speedKmh: Float?, limitKmh: Int?): Boolean {
+        if (warnedAtMs < 0) return false
+        if (nowMs - warnedAtMs > WINDOW_MS) {
+            warnedAtMs = -1L
+            return false
+        }
+        if (speedKmh == null || limitKmh == null || limitKmh <= 0 || speedKmh > limitKmh) return false
+        warnedAtMs = -1L
+        return true
+    }
+
+    companion object {
+        const val WINDOW_MS = 90_000L
+    }
+}

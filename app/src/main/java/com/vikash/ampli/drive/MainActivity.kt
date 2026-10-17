@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
         app.car
         // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
         app.navPrompter.start()
+        app.desi.start()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -13,6 +13,8 @@ class RouteWeatherTest {
         assertEquals(setOf(Hazard.HeavyRain), RouteWeather.hazards(5_000.0, 2.0, 82))
         assertEquals(setOf(Hazard.Thunderstorm, Hazard.HeavyRain), RouteWeather.hazards(3_000.0, 12.0, 95))
         assertTrue(RouteWeather.hazards(null, null, null).isEmpty())
+        assertEquals(setOf(Hazard.Heat), RouteWeather.hazards(10_000.0, 0.0, 0, 44.0))
+        assertTrue(RouteWeather.hazards(10_000.0, 0.0, 0, 38.0).isEmpty())
     }
 
     @Test
@@ -37,7 +39,7 @@ class RouteWeatherTest {
         val u = RouteWeather.url(listOf(Triple(0, 18.5, 73.8), Triple(25, 18.7, 73.8)))
         assertEquals(
             "https://api.open-meteo.com/v1/forecast?latitude=18.5000,18.7000&longitude=73.8000,73.8000" +
-                "&hourly=visibility,precipitation,weather_code&forecast_hours=2&timezone=GMT",
+                "&hourly=visibility,precipitation,weather_code,temperature_2m&forecast_hours=2&timezone=GMT",
             u,
         )
     }

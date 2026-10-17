@@ -255,6 +255,8 @@
     <string name="voice_call">Opening the phone. Please choose %1$s.</string>
     <string name="voice_call_any">Opening the phone.</string>
     <string name="voice_cancelled">Okay, cancelled.</string>
+    <string name="voice_who_am_i">I\'m Ampli, your car assistant. I can show the way, play music and keep an eye on the road.</string>
+    <string name="voice_joke">What did the traffic light say to the car? Don\'t look, I\'m changing!</string>
 
     <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
     <string name="camera_chip_label">Camera</string>
@@ -474,6 +476,7 @@
     <string name="weather_thunder">Thunderstorm</string>
     <string name="weather_heavy_rain">Heavy rain</string>
     <string name="weather_fog">Fog</string>
+    <string name="weather_heat">Extreme heat</string>
     <string name="weather_here">%1$s here</string>
     <string name="weather_ahead">%1$s %2$d km ahead</string>
     <string name="weather_clear">No weather hazards ahead</string>
@@ -623,6 +626,10 @@
     <string name="vcheck_listening">Listening…</string>
     <string name="vcheck_listen_hint">Tap Listen test and say \"next song\" or \"navigate\".</string>
     <string name="voice_style_title">Voice style</string>
+    <string name="voice_samples_title">Hear samples</string>
+    <string name="voice_samples_hint">Tap a moment to hear one Haryanvi line</string>
+    <string name="voice_samples_show">Show samples</string>
+    <string name="voice_samples_hide">Hide samples</string>
     <string name="voice_style_hint">How Car Hub talks. Haryanvi desi is playful; SOS and crash prompts always stay plain.</string>
     <string name="voice_style_standard">Standard</string>
     <string name="voice_style_haryanvi">Haryanvi desi</string>

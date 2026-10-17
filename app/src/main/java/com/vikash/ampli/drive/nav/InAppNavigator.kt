@@ -251,6 +251,8 @@ class InAppNavigator(private val app: DriveApp) {
                             rerouteCount = it.rerouteCount + if (reroute) 1 else 0,
                         )
                     }
+                    // Haryanvi desi: "चाल, रास्ता मिल गया, 42 किलोमीटर सै।" (first route only).
+                    if (!reroute) app.navPrompter.onRouteFound(route.distanceM, route.durationS)
                     speak(progress)
                 }
                 is RouteResult.Failed -> {
@@ -299,7 +301,24 @@ class InAppNavigator(private val app: DriveApp) {
             // The arrival card stays a while, then the map goes back to normal by itself.
             arrivedJob?.cancel()
             arrivedJob = scope.launch {
-                delay(ARRIVED_SHOW_MS)
+                // Parked after arriving (stood still a while): the Haryanvi goodbye, once.
+                val end = SystemClock.elapsedRealtime() + ARRIVED_SHOW_MS
+                var stillSince = -1L
+                while (SystemClock.elapsedRealtime() < end && _state.value.phase == NavSession.Phase.Arrived) {
+                    val now = SystemClock.elapsedRealtime()
+                    val kmh = app.speedTracker.state.value.speedKmh
+                    if (kmh != null && kmh < PARKED_KMH) {
+                        if (stillSince < 0) stillSince = now
+                        if (now - stillSince >= PARKED_MS) {
+                            app.navPrompter.onParkedAfterArrival()
+                            break
+                        }
+                    } else {
+                        stillSince = -1L
+                    }
+                    delay(2_000L)
+                }
+                delay((end - SystemClock.elapsedRealtime()).coerceAtLeast(0L))
                 if (_state.value.phase == NavSession.Phase.Arrived) stop()
             }
             return
@@ -311,6 +330,8 @@ class InAppNavigator(private val app: DriveApp) {
             val to = dest?.point
             if (dest != null && to != null && !s.rerouting && limiter.tryAcquire(SystemClock.elapsedRealtime())) {
                 _state.value = s.copy(progress = p, rerouting = true)
+                // Haryanvi desi: "रास्ता भटक गया भाई, नया रास्ता देख रया सूं।"
+                app.navPrompter.onRerouting()
                 fetch(dest, to, reroute = true)
                 return
             }
@@ -338,6 +359,10 @@ class InAppNavigator(private val app: DriveApp) {
         const val FIX_WAIT_MS = 15_000L
         const val MOVING_KMH = 8f
         const val ARRIVED_SHOW_MS = 60_000L
+
+        /** Arrived and below this speed for [PARKED_MS]: parked, say goodbye. */
+        const val PARKED_KMH = 3f
+        const val PARKED_MS = 20_000L
 
         /** Further than this to the next manoeuvre: say "keep going straight" instead. */
         const val LONG_STRAIGHT_M = 2_000
