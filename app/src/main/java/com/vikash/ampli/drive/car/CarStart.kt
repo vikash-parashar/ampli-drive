@@ -47,7 +47,7 @@ object StartPolicy {
  * start other apps. A signal that arrives while Car Hub is hidden is kept as pending and runs the
  * next time the launcher shows.
  *
- * Actions: the welcome message (WelcomeGreeter) and Settings › When the car
+ * Actions: the welcome message (WelcomeGreeter), spoken paper reminders (PaperVoice) and Settings › When the car
  * starts (open the phone-mirroring app, or start music and open the map).
  */
 object CarStart {
@@ -107,6 +107,13 @@ object CarStart {
             // Ampli startup animation first (Settings › Startup animation), then "Ram Ram…".
             if (Shell.requestSplash(app.shell.startupAnimation.value)) delay(Shell.SPLASH_MS)
             app.welcome.play()
+            // Papers about to expire / FASTag pass running low, in the same voice (at most two).
+            try {
+                app.paperVoice.speakAtStart()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            }
         }
 
         if (settings.mode == AutoStartMode.Off) return

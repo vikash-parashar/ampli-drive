@@ -249,6 +249,7 @@ fun SettingsScreen(
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
+            PapersReminderCard(app = app)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)

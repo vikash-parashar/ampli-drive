@@ -39,7 +39,6 @@ import com.vikash.ampli.drive.location.GpsState
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.map.GlanceMap
 import com.vikash.ampli.drive.map.MapDiagnostics
-import com.vikash.ampli.drive.map.BASIC_ATTRIBUTION
 import com.vikash.ampli.drive.nav.NavSession
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
@@ -111,7 +110,7 @@ fun MapPane(
                     Box(Modifier.fillMaxSize().clickable(onClick = if (nav.visible) onOpenNav else onOpenNavigation))
                     val mapStatus by MapDiagnostics.status.collectAsStateWithLifecycle()
                     Text(
-                        if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · " + BASIC_ATTRIBUTION else GLANCE_ATTRIBUTION,
+                        if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · © OpenStreetMap contributors" else GLANCE_ATTRIBUTION,
                         fontSize = dims.t(1.6f, min = 10f),
                         color = Color(0xFF3F3A44),
                         maxLines = 1,
@@ -123,6 +122,16 @@ fun MapPane(
                             .background(Color.White.copy(alpha = 0.75f))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     )
+                    // Theme style and fallback both failed: say so instead of a blank or grey pane.
+                    if (mapStatus.unavailable) {
+                        Box(Modifier.fillMaxSize().background(theme.background)) {
+                            MapMessage(
+                                text = stringResource(R.string.map_tiles_unavailable),
+                                button = stringResource(R.string.map_open_google_maps),
+                                onClick = onOpenNavigation,
+                            )
+                        }
+                    }
                 }
             }
 

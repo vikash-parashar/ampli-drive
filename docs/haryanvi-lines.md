@@ -4,7 +4,7 @@ Every line the car speaks in the **Haryanvi desi** voice style (Settings › Voi
 The source of truth is `app/src/main/java/com/vikash/ampli/drive/voice/HaryanviLines.kt`;
 change a line there and here together (a unit test checks that every line in the app is listed here).
 
-- 70 events, 307 lines. The car never says the same line twice in a row.
+- 76 events, 331 lines. The car never says the same line twice in a row.
 - Left is **उल्टे हाथ** (ulte haath), right is **सुल्टे हाथ** (sulte haath).
 - Family-safe only: no abuse, no crude words, no caste or community jokes (a banned-word test runs over every line).
 - SOS, crash countdown and emergency prompts are never in this list: they always stay in plain, clear Hindi.
@@ -372,6 +372,27 @@ change a line there and here together (a unit test checks that every line in the
 | "चुटकला सुणा" | ताऊ बोल्या, जीपीएस की के जरूरत, मैं तो हर चौक पै रास्ता पूछ ल्यूं सूं! | Tau bolya, GPS ki ke zaroorat, main to har chowk pe rasta poochh lyun sun! | Tau said: who needs GPS? I ask the way at every crossing! |
 | "चुटकला सुणा" | स्पीड ब्रेकर देख कै ताऊ बोल्या, यो सड़क भी थक कै बैठ गी! | Speed breaker dekh ke tau bolya, yo sadak bhi thak ke baith gi! | Seeing a speed breaker, Tau said: even the road got tired and sat down! |
 
+## Papers and FASTag pass
+
+- **Paper expiring soon**: When the car starts, a few days before insurance, PUC, RC, driving licence or FASTag KYC expires (Settings › Car papers; at most once a day per paper). `%1$s` is the paper. *(Standard style says a plain line instead.)*
+- **Paper expired**: Same, after the date has passed.
+- **Annual Pass trips running out**: When the car starts, with 10 or fewer FASTag Annual Pass trips left. `%1$d` is the trips.
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Paper expiring soon | भाई, %1$s की तारीख नेड़ै आ गी सै, टाइम पै करवा लिए। | Bhai, %1$s ki taareekh nede aa gi sai, time pe karwa liye. | Brother, the {paper} date is close; get it done on time. |
+| Paper expiring soon | %1$s खतम होण आळा सै, इसी हफ्ते करवा ले। | %1$s khatam hon aala sai, isi hafte karwa le. | {paper} is about to run out; get it done this week. |
+| Paper expiring soon | याद दिला दूं, %1$s की तारीख आण आळी सै। | Yaad dila dun, %1$s ki taareekh aan aali sai. | A reminder: the {paper} date is coming up. |
+| Paper expiring soon | %1$s का टाइम पूरा होण आळा सै, चालान तै बच ले। | %1$s ka time poora hon aala sai, chalaan te bach le. | {paper} is nearly due; avoid a fine. |
+| Paper expired | भाई, %1$s की तारीख निकल गी सै, जल्दी करवा ले। | Bhai, %1$s ki taareekh nikal gi sai, jaldi karwa le. | Brother, the {paper} has expired; renew it soon. |
+| Paper expired | %1$s पुराणा हो ग्या सै, आज ए करवा ले। | %1$s puraana ho gaya sai, aaj e karwa le. | {paper} has lapsed; renew it today. |
+| Paper expired | %1$s की तारीख जा ली, चालान कट सकै सै। | %1$s ki taareekh ja li, chalaan kat sake sai. | The {paper} date has passed; you could get a fine. |
+| Paper expired | ध्यान दे भाई, %1$s खतम हो लिया सै। | Dhyan de bhai, %1$s khatam ho liya sai. | Note, brother: {paper} has run out. |
+| Annual Pass trips running out | भाई, फास्टैग पास मैं बस %1$d ट्रिप बचे सैं। | Bhai, FASTag pass main bas %1$d trip bache sain. | Brother, only {n} trips left on the FASTag pass. |
+| Annual Pass trips running out | पास के %1$d ट्रिप रह गे, ध्यान राखिए। | Pass ke %1$d trip reh ge, dhyan raakhiye. | {n} trips left on the pass, keep it in mind. |
+| Annual Pass trips running out | सालाना पास मैं %1$d ट्रिप बाकी सैं। | Saalana pass main %1$d trip baaki sain. | {n} trips remain on the annual pass. |
+| Annual Pass trips running out | %1$d ट्रिप और, फेर पास खतम। | %1$d trip aur, pher pass khatam. | {n} more trips, then the pass is used up. |
+
 ## Human voice only (no names or numbers)
 
 Said only by the recorded voices (Settings › Voice: Male "Ampli Bhai" / Female "Ampli Behen") instead of a line with a place, song, amount, distance or number in it: a recording can't say those, so the screen shows the detail (the toll card shows the rupees, the speed pane the limit, the caption the distance). The phone voice keeps the full lines above.
@@ -385,6 +406,9 @@ Said only by the recorded voices (Settings › Voice: Male "Ampli Bhai" / Female
 - **Toll deducted (human voice)**: Instead of both toll lines.
 - **Break reminder (human voice)**: Instead of *Break reminder*.
 - *Play a named song* uses the *Play music* lines; roundabout exits 1 to 5 are recorded as whole sentences.
+- **Paper due after its name (human voice)**: Said right after a recorded paper name ("बीमा" + "की तारीख नेड़ै…") instead of *Paper expiring soon*.
+- **Paper expired after its name (human voice)**: Same, instead of *Paper expired*.
+- **Pass trips after a number (human voice)**: Said right after a recorded number ("पाँच" + "ट्रिप बचे सैं…") instead of *Annual Pass trips running out*.
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
@@ -421,10 +445,27 @@ Said only by the recorded voices (Settings › Voice: Male "Ampli Bhai" / Female
 | Break reminder (human voice) | थोड़ा रुक कै कमर सीधी कर ले भाई। | Thoda ruk ke kamar seedhi kar le bhai. | Stop a bit and stretch your back, brother. |
 | Break reminder (human voice) | भाई घणी देर हो गी, ढाबा आवै तै रुक लियो। | Bhai ghani der ho gi, dhaba aave te ruk liyo. | Brother, it's been a while; stop at the next dhaba. |
 | Break reminder (human voice) | स्टीयरिंग घणी देर तै पकड़ राख्या सै, पाँच मिनट टांग सीधी कर ले। | Steering ghani der te pakad raakhya sai, paanch minute taang seedhi kar le. | You've held the wheel a long time; stretch your legs for five minutes. |
+| Paper due after its name (human voice) | की तारीख नेड़ै आ गी सै भाई, टाइम पै करवा लिए। | ki taareekh nede aa gi sai bhai, time pe karwa liye. | {paper}: the date is close, brother; get it done on time. |
+| Paper due after its name (human voice) | खतम होण आळा सै, इसी हफ्ते करवा ले। | khatam hon aala sai, isi hafte karwa le. | {paper} is about to run out; get it done this week. |
+| Paper due after its name (human voice) | की तारीख आण आळी सै, याद राखिए। | ki taareekh aan aali sai, yaad raakhiye. | {paper}: the date is coming up, remember. |
+| Paper due after its name (human voice) | का टाइम पूरा होण आळा सै, चालान तै बच ले। | ka time poora hon aala sai, chalaan te bach le. | {paper} is nearly due; avoid a fine. |
+| Paper expired after its name (human voice) | की तारीख निकल गी सै भाई, जल्दी करवा ले। | ki taareekh nikal gi sai bhai, jaldi karwa le. | {paper}: expired, brother; renew it soon. |
+| Paper expired after its name (human voice) | पुराणा हो ग्या सै, आज ए करवा ले। | puraana ho gaya sai, aaj e karwa le. | {paper} has lapsed; renew it today. |
+| Paper expired after its name (human voice) | की तारीख जा ली, चालान कट सकै सै। | ki taareekh ja li, chalaan kat sake sai. | {paper}: the date has passed; you could get a fine. |
+| Paper expired after its name (human voice) | खतम हो लिया सै भाई, ध्यान दे। | khatam ho liya sai bhai, dhyan de. | {paper} has run out, brother, take note. |
+| Pass trips after a number (human voice) | ट्रिप बचे सैं फास्टैग पास मैं। | trip bache sain FASTag pass main. | {n} trips left on the FASTag pass. |
+| Pass trips after a number (human voice) | ट्रिप रह गे पास मैं, ध्यान राखिए। | trip reh ge pass main, dhyan raakhiye. | {n} trips left on the pass, keep it in mind. |
+| Pass trips after a number (human voice) | ट्रिप बाकी सैं सालाना पास मैं। | trip baaki sain saalana pass main. | {n} trips remain on the annual pass. |
+| Pass trips after a number (human voice) | ट्रिप और, फेर पास खतम। | trip aur, pher pass khatam. | {n} more trips, then the pass is used up. |
 
 ### Recorded distances
 
 Turn and camera distances are rounded to the nearest of these (a tie goes to the shorter one) and stitched in front of the line: पचास, सौ, डेढ़ सौ, दो सौ, ढाई सौ, तीन सौ, साढ़े तीन सौ, चार सौ, साढ़े चार सौ, पाँच सौ, छह सौ, सात सौ, आठ सौ, नौ सौ मीटर; एक, डेढ़, दो, ढाई, तीन, चार, पाँच, दस किलोमीटर.
+
+### Recorded numbers and paper names
+
+Numbers one to ten (the pass "N trips left" and a countdown): एक, दो, तीन, चार, पाँच, छह, सात, आठ, नौ, दस.
+Paper names, stitched in front of the paper tails: बीमा, पीयूसी, आरसी, ड्राइविंग लाइसेंस, फास्टैग केवाईसी, फास्टैग पास.
 
 ## Not in this list
 

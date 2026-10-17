@@ -19,21 +19,23 @@ data class Place(
 )
 
 /**
- * Destination search through Photon (free OpenStreetMap geocoding with location bias).
+ * Destination search through Photon (OpenStreetMap geocoding with location bias).
  *
- * TODO: point [ENDPOINT] at our own Photon box before launch. The business plan budgets a
- * self-hosted instance; the public komoot server is for light testing only and has no SLA.
+ * The endpoint comes from RemoteConfig (BuildConfig.GEOCODER_URL underneath). Release builds must
+ * point it at our own Photon (deploy/osrm-photon); only debug builds default to the public komoot
+ * server, which is for light testing and not allowed for a paid app.
  */
 object PlaceSearch {
-    private const val ENDPOINT = "https://photon.komoot.io/api/"
     private const val FETCH = 5
     const val KEEP = 3
 
     /** Throws IOException on network trouble; an empty list means nothing matched. */
     suspend fun search(query: String, near: Location?): List<Place> = withContext(Dispatchers.IO) {
+        val endpoint = com.vikash.ampli.drive.config.RemoteConfig.current().geocoderUrl
+        if (endpoint.isBlank()) throw java.io.IOException("Place search server not configured")
         val q = URLEncoder.encode(query, "UTF-8")
         val bias = if (near != null) "&lat=${near.latitude}&lon=${near.longitude}" else ""
-        val url = URL("$ENDPOINT?q=$q$bias&limit=$FETCH")
+        val url = URL("$endpoint${if (endpoint.contains('?')) "&" else "?"}q=$q$bias&limit=$FETCH")
         val conn = url.openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 8_000

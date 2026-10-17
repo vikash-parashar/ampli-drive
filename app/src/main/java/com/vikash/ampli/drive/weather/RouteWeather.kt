@@ -26,7 +26,11 @@ data class WeatherReport(val time: Long, val points: List<PointWeather>) {
         get() = Hazard.entries.mapNotNull { hz -> points.filter { hz in it.hazards }.minByOrNull { it.aheadKm }?.let { hz to it.aheadKm } }
 }
 
-/** Open-Meteo (https://open-meteo.com, CC BY 4.0): no key, free for non-commercial use. Pure helpers. */
+/**
+ * Open-Meteo (https://open-meteo.com, CC BY 4.0). The free API is non-commercial only, so release
+ * builds use the paid customer API or a self-hosted server (RemoteConfig.weatherUrl), else no
+ * weather at all. Pure helpers.
+ */
 object RouteWeather {
     const val REFRESH_MS = 15L * 60_000L
     val AHEAD_KM = listOf(0, 25, 50)
@@ -74,11 +78,19 @@ object RouteWeather {
     }
 
     /** One request for all points; the current hour and the next. */
-    fun url(points: List<Triple<Int, Double, Double>>): String {
+    /** Open-Meteo's free endpoint: non-commercial use only, so debug builds only. */
+    const val FREE_URL = "https://api.open-meteo.com/v1/forecast"
+
+    /**
+     * [base] is the configured forecast endpoint (Open-Meteo customer API or a self-hosted
+     * server); [apiKey] is added for the customer API.
+     */
+    fun url(points: List<Triple<Int, Double, Double>>, base: String = FREE_URL, apiKey: String = ""): String {
         fun f(v: Double) = "%.4f".format(Locale.US, v)
         val lats = points.joinToString(",") { f(it.second) }
         val lons = points.joinToString(",") { f(it.third) }
-        return "https://api.open-meteo.com/v1/forecast?latitude=$lats&longitude=$lons" +
-            "&hourly=visibility,precipitation,weather_code,temperature_2m&forecast_hours=2&timezone=GMT"
+        return base.trimEnd('?') + "?latitude=$lats&longitude=$lons" +
+            "&hourly=visibility,precipitation,weather_code,temperature_2m&forecast_hours=2&timezone=GMT" +
+            (if (apiKey.isNotBlank()) "&apikey=$apiKey" else "")
     }
 }

@@ -65,6 +65,9 @@ class DriveApp : Application() {
     /** Car owner features: break reminder, papers, parking, crash detection, weather, expenses. */
     val car: CarMonitor by lazy { CarMonitor(this) }
 
+    /** Papers (and FASTag pass) reminders spoken at car start. */
+    val paperVoice: com.vikash.ampli.drive.car.PaperVoice by lazy { com.vikash.ampli.drive.car.PaperVoice(this) }
+
     /** OBD-II dongle (Pro) and BLE tyre sensors (Pro). */
     val obd: ObdClient by lazy { ObdClient(this) }
     val tpms: TpmsMonitor by lazy { TpmsMonitor(this) }
@@ -73,11 +76,16 @@ class DriveApp : Application() {
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }
     val wakeModel: WakeModel by lazy { WakeModel(this) }
 
+    /** Optional offline Hindi command model (~42 MB), downloaded only when the driver asks. */
+    val hindiModel: WakeModel by lazy { WakeModel(this, com.vikash.ampli.drive.voice.VoskModelSpec.Hindi) }
+
     /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
     val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
 
     override fun onCreate() {
         super.onCreate()
+        // Server endpoints: cached remote config over BuildConfig (one small GET at most every 12 h).
+        com.vikash.ampli.drive.config.RemoteConfig.init(this)
         // A fresh install starts in Hindi (FirstRunDefaults). Runs before the first activity, so
         // MainActivity already opens in it. A per-app language set in system Settings wins.
         prefs.takeFirstRunLanguage()?.let { tag ->

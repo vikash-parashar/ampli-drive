@@ -14,6 +14,10 @@ data class FastagMessage(
     val balance: Double?,
     val vehicle: String?,
     val bank: String?,
+    /** A FASTag Annual Pass crossing (no money taken), not a paid toll. */
+    val passTrip: Boolean = false,
+    /** Trips left on the Annual Pass, when the SMS says so. */
+    val passTripsLeft: Int? = null,
 )
 
 /**
@@ -65,6 +69,20 @@ object FastagParser {
         Regex("""((?:[\p{L}\p{M}]+\s+){0,3}[\p{L}\p{M}]+)\s*टोल\s*प्ला(?:ज़|ज)ा"""),
     )
 
+    /** FASTag Annual Pass (NHAI/IHMCL, 200 trips or one year). */
+    private val PASS = Regex("""(?i)annual\s*pass|वार्षिक\s*पास|सालाना\s*पास""")
+
+    /** Pass bought or renewed: not a crossing. */
+    private val PASS_ACTIVATED = Regex("""(?i)activat|purchas|renew|सक्रिय""")
+
+    /** "Remaining trips: 185", "185 trips left", "trips remaining 185", "शेष ट्रिप 185". */
+    private val TRIPS_LEFT = Regex(
+        """(?i)(?:remaining|balance|available|left|bal\.?)\s*(?:no\.?\s*of\s*)?trips?\s*(?:is|are|:|-|=)?\s*([0-9]{1,3})\b""" +
+            """|\b([0-9]{1,3})\s*trips?\s*(?:remaining|left|available)""" +
+            """|trips?\s*(?:remaining|left|available)\s*(?:is|are|:|-|=)?\s*([0-9]{1,3})\b""" +
+            """|(?:शेष|बाकी)\s*(?:ट्रिप|यात्रा(?:एं|एँ)?)\s*:?\s*([0-9]{1,3})""",
+    )
+
     /** Indian state/UT registration codes, to keep plates from matching random IDs. */
     private val STATE_CODES = setOf(
         "AN", "AP", "AR", "AS", "BR", "CG", "CH", "DD", "DL", "DN", "GA", "GJ", "HP", "HR", "JH", "JK",
@@ -98,6 +116,9 @@ object FastagParser {
         "IHMCL" to Regex("""(?i)IHMCL|NHAI"""),
     )
 
+    /** Trips an Annual Pass starts with. */
+    const val PASS_TRIPS = 200
+
     /** True when [text] looks like a FASTag message at all (cheap pre-check). */
     fun mentionsFastag(text: String): Boolean = KEYWORD.containsMatchIn(text)
 
@@ -123,6 +144,25 @@ object FastagParser {
 
         val isDebit = DEBIT.containsMatchIn(body)
         val isCredit = CREDIT.containsMatchIn(body)
+
+        // Annual Pass crossing: counted as a pass trip, never as a paid toll.
+        if (PASS.containsMatchIn(body)) {
+            if (PASS_ACTIVATED.containsMatchIn(body) && !body.contains("trip", ignoreCase = true)) return null
+            val left = TRIPS_LEFT.find(body)?.groupValues?.drop(1)?.firstOrNull { it.isNotEmpty() }?.toIntOrNull()
+                ?.takeIf { it in 0..PASS_TRIPS }
+            val plaza = findPlaza(body)
+            if (left == null && plaza == null && !isDebit) return null
+            return FastagMessage(
+                kind = FastagKind.Debit,
+                amount = amount?.takeIf { it > 0.0 },
+                plaza = plaza,
+                balance = balance,
+                vehicle = findVehicle(body),
+                bank = findBank(sender, body),
+                passTrip = true,
+                passTripsLeft = left,
+            )
+        }
         val kind = when {
             amount != null && isDebit && !(isCredit && !body.contains("toll", ignoreCase = true)) -> FastagKind.Debit
             amount != null && isCredit -> FastagKind.Recharge

@@ -116,11 +116,16 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
     val isLow = balance != null && balance < low
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
     val fg = if (isLow) theme.onDanger else theme.text
+    val passText = passChipText(app)
 
     val text = buildString {
         append(stringResource(R.string.fastag_title))
         append(" · ")
         append(if (balance != null) rupees(balance) else "—")
+        if (passText != null) {
+            append(" · ")
+            append(passText)
+        }
         if (latest != null && !dims.compact) {
             append(" · ")
             append(ago(latest.time, now))
@@ -295,12 +300,17 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
                     TotalTile(stringResource(R.string.fastag_today), totals.today, Modifier.weight(1f))
                     TotalTile(stringResource(R.string.fastag_month), totals.month, Modifier.weight(1f))
                 }
-                BigButton(
-                    text = stringResource(R.string.fastag_recharge),
-                    onClick = { openFastagRecharge(context, url) },
-                    icon = Icons.Filled.Payment,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                AnnualPassCard(app, Modifier.fillMaxWidth())
+                Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                    BigButton(
+                        text = stringResource(R.string.fastag_recharge),
+                        onClick = { openFastagRecharge(context, url) },
+                        icon = Icons.Filled.Payment,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // Without SMS reading (or a bank that sends none), the balance by hand.
+                    ManualBalanceButton(app, Modifier.weight(1f))
+                }
             }
             Pane(Modifier.weight(1.3f).fillMaxHeight()) {
                 if (events.isEmpty()) {
@@ -408,6 +418,7 @@ internal fun FastagSettingsCard(app: DriveApp, onOpenFastag: () -> Unit) {
                 ThemedSwitch(enabled) { app.fastag.setEnabled(it) }
             }
             if (enabled) {
+                FastagSmsRow(app)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),

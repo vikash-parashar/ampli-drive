@@ -9,20 +9,26 @@ import org.vosk.android.RecognitionListener
 import org.vosk.android.SpeechService
 
 /**
- * Offline command recognition with the same small Vosk model as the wake word, for head units
- * without Google speech services (no SpeechRecognizer at all). With [grammar] it only hears our
- * command phrases ([VoskCommands]), which makes it far more accurate; without it (when asking
- * "where to?") it transcribes freely, English only. Main thread.
+ * Offline command recognition for head units without Google speech services (no
+ * SpeechRecognizer at all). In Hindi, Haryanvi, Bhojpuri or Maithili it uses the optional Hindi
+ * model ([DriveApp.hindiModel]) when downloaded, else the English wake-word model. With [grammar]
+ * it only hears our command phrases ([VoskCommands]), which makes it far more accurate; without
+ * it (when asking "where to?") it transcribes freely in that model's language. Main thread.
  */
 class VoskCommandListener(private val app: DriveApp) {
     private var speech: SpeechService? = null
 
-    fun isReady(): Boolean = app.wakeModel.isInstalled()
+    private fun hindiWanted(): Boolean = VoiceLocales.parserLanguage(app.prefs.language.value) == "hi"
+
+    fun isReady(): Boolean = app.wakeModel.isInstalled() || (hindiWanted() && app.hindiModel.isInstalled())
 
     suspend fun listen(grammar: Boolean, onPartial: (String) -> Unit): Listener.Result {
-        val model = app.wakeModel.loadModel() ?: return Listener.Result.Unavailable
+        // Hindi model first for Hindi-family app languages; the English model stays the fallback.
+        val hindiModel = if (hindiWanted() && app.hindiModel.isInstalled()) app.hindiModel.loadModel() else null
+        val hindi = hindiModel != null
+        val model = hindiModel ?: app.wakeModel.loadModel() ?: return Listener.Result.Unavailable
         val recognizer = try {
-            if (grammar) Recognizer(model, SAMPLE_RATE, VoskCommands.grammarJson()) else Recognizer(model, SAMPLE_RATE)
+            if (grammar) Recognizer(model, SAMPLE_RATE, VoskCommands.grammarJson(hindi)) else Recognizer(model, SAMPLE_RATE)
         } catch (_: Throwable) {
             return Listener.Result.Unavailable
         }
@@ -113,7 +119,25 @@ object VoskCommands {
     /** Only while a list of places is showing. */
     val CHOICES = listOf("first", "second", "third", "first one", "second one", "third one", "one", "two", "three")
 
-    fun grammarJson(): String = (COMMANDS + CHOICES + "[unk]").joinToString(",", "[", "]") { phrase ->
+    /**
+     * Hindi / Haryanvi phrases for the Hindi model (Devanagari, as that model writes). Words the
+     * model doesn't know are skipped by Vosk with a log warning, so plain Hindi words are used.
+     */
+    val HINDI_COMMANDS = listOf(
+        "रास्ता दिखाओ", "ले चलो", "घर ले चलो", "चलो", "ले चल", "नेविगेट करो",
+        "कैमरा", "अगला कैमरा",
+        "गाना बजाओ", "गाना चलाओ", "बजाओ", "गाना बंद करो", "गाना रोको", "अगला गाना", "पिछला गाना", "गाना चालू करो",
+        "फोन करो", "कॉल करो", "फोन जोड़ो",
+        "गाड़ी कहाँ है", "अगली सर्विस कब", "टायर प्रेशर", "इंजन कैसा है",
+        "मदद", "बचाओ", "इमरजेंसी", "शिकायत",
+        "रद्द करो", "रहने दो", "बस", "नमस्ते",
+        "के हाल सै", "क्या हाल है", "तू कौन सै", "तुम कौन हो", "चुटकला सुणा", "चुटकुला सुनाओ",
+    )
+
+    val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
+
+    fun grammarJson(hindi: Boolean = false): String =
+        ((if (hindi) HINDI_COMMANDS + HINDI_CHOICES else COMMANDS + CHOICES) + "[unk]").joinToString(",", "[", "]") { phrase ->
         "\"" + phrase.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
     }
 

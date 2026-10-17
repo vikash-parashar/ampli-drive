@@ -40,6 +40,7 @@ object HaryanviLines {
         Car("Car health (OBD, Pro)"),
         Music("Music"),
         Talk("Small talk"),
+        Papers("Papers and FASTag pass"),
 
         /** Recorded human voice only: stand-ins for lines with a name or number in them. */
         HumanVoice("Human voice only (no names or numbers)"),
@@ -165,6 +166,15 @@ object HaryanviLines {
         TalkWhoAreYou(Group.Talk, "\"कौन सै तू?\""),
         TalkJoke(Group.Talk, "\"चुटकला सुणा\""),
 
+        /** Car start, a few days before a paper expires: %1$s is the paper ("बीमा"). */
+        PaperDue(Group.Papers, "Paper expiring soon"),
+
+        /** Car start, a paper already expired: %1$s is the paper. */
+        PaperExpired(Group.Papers, "Paper expired"),
+
+        /** FASTag Annual Pass with 10 or fewer trips left: %1$d is the trips. */
+        PassTripsLow(Group.Papers, "Annual Pass trips running out"),
+
         // Recorded human voice only (Settings › Voice: Male / Female). A recorded clip can't say
         // the place, a song or a rupee amount, so the voice pack says these instead and
         // the screen shows the detail. VoiceClips.recordedEvent maps each event to its stand-in.
@@ -192,6 +202,15 @@ object HaryanviLines {
 
         /** Instead of BreakReminder (no hours). */
         BreakReminderPlain(Group.HumanVoice, "Break reminder (human voice)"),
+
+        /** Said right after a recorded paper name ("बीमा" + "की तारीख नेड़ै…"). */
+        PaperDueTail(Group.HumanVoice, "Paper due after its name (human voice)"),
+
+        /** Said right after a recorded paper name, when it has expired. */
+        PaperExpiredTail(Group.HumanVoice, "Paper expired after its name (human voice)"),
+
+        /** Said right after a recorded number ("पाँच" + "ट्रिप बचे सैं…"). */
+        PassTripsTail(Group.HumanVoice, "Pass trips after a number (human voice)"),
 
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
@@ -633,6 +652,26 @@ object HaryanviLines {
             ),
         ),
 
+        // ------------------------------------------------------------------ Papers and FASTag pass
+        Event.PaperDue to listOf(
+            Line("भाई, %1\$s की तारीख नेड़ै आ गी सै, टाइम पै करवा लिए।", "Bhai, %1\$s ki taareekh nede aa gi sai, time pe karwa liye.", "Brother, the {paper} date is close; get it done on time."),
+            Line("%1\$s खतम होण आळा सै, इसी हफ्ते करवा ले।", "%1\$s khatam hon aala sai, isi hafte karwa le.", "{paper} is about to run out; get it done this week."),
+            Line("याद दिला दूं, %1\$s की तारीख आण आळी सै।", "Yaad dila dun, %1\$s ki taareekh aan aali sai.", "A reminder: the {paper} date is coming up."),
+            Line("%1\$s का टाइम पूरा होण आळा सै, चालान तै बच ले।", "%1\$s ka time poora hon aala sai, chalaan te bach le.", "{paper} is nearly due; avoid a fine."),
+        ),
+        Event.PaperExpired to listOf(
+            Line("भाई, %1\$s की तारीख निकल गी सै, जल्दी करवा ले।", "Bhai, %1\$s ki taareekh nikal gi sai, jaldi karwa le.", "Brother, the {paper} has expired; renew it soon."),
+            Line("%1\$s पुराणा हो ग्या सै, आज ए करवा ले।", "%1\$s puraana ho gaya sai, aaj e karwa le.", "{paper} has lapsed; renew it today."),
+            Line("%1\$s की तारीख जा ली, चालान कट सकै सै।", "%1\$s ki taareekh ja li, chalaan kat sake sai.", "The {paper} date has passed; you could get a fine."),
+            Line("ध्यान दे भाई, %1\$s खतम हो लिया सै।", "Dhyan de bhai, %1\$s khatam ho liya sai.", "Note, brother: {paper} has run out."),
+        ),
+        Event.PassTripsLow to listOf(
+            Line("भाई, फास्टैग पास मैं बस %1\$d ट्रिप बचे सैं।", "Bhai, FASTag pass main bas %1\$d trip bache sain.", "Brother, only {n} trips left on the FASTag pass."),
+            Line("पास के %1\$d ट्रिप रह गे, ध्यान राखिए।", "Pass ke %1\$d trip reh ge, dhyan raakhiye.", "{n} trips left on the pass, keep it in mind."),
+            Line("सालाना पास मैं %1\$d ट्रिप बाकी सैं।", "Saalana pass main %1\$d trip baaki sain.", "{n} trips remain on the annual pass."),
+            Line("%1\$d ट्रिप और, फेर पास खतम।", "%1\$d trip aur, pher pass khatam.", "{n} more trips, then the pass is used up."),
+        ),
+
         // ------------------------------------------------------------------ Human voice only
         Event.SearchingPlain to listOf(
             Line("ढूंढ रया सूं, रुक जा एक मिनट।", "Dhoond reya sun, ruk ja ek minute.", "Looking it up, wait a minute."),
@@ -683,6 +722,24 @@ object HaryanviLines {
             Line("भाई घणी देर हो गी, ढाबा आवै तै रुक लियो।", "Bhai ghani der ho gi, dhaba aave te ruk liyo.", "Brother, it's been a while; stop at the next dhaba."),
             Line("स्टीयरिंग घणी देर तै पकड़ राख्या सै, पाँच मिनट टांग सीधी कर ले।", "Steering ghani der te pakad raakhya sai, paanch minute taang seedhi kar le.", "You've held the wheel a long time; stretch your legs for five minutes."),
         ),
+        Event.PaperDueTail to listOf(
+            Line("की तारीख नेड़ै आ गी सै भाई, टाइम पै करवा लिए।", "ki taareekh nede aa gi sai bhai, time pe karwa liye.", "{paper}: the date is close, brother; get it done on time."),
+            Line("खतम होण आळा सै, इसी हफ्ते करवा ले।", "khatam hon aala sai, isi hafte karwa le.", "{paper} is about to run out; get it done this week."),
+            Line("की तारीख आण आळी सै, याद राखिए।", "ki taareekh aan aali sai, yaad raakhiye.", "{paper}: the date is coming up, remember."),
+            Line("का टाइम पूरा होण आळा सै, चालान तै बच ले।", "ka time poora hon aala sai, chalaan te bach le.", "{paper} is nearly due; avoid a fine."),
+        ),
+        Event.PaperExpiredTail to listOf(
+            Line("की तारीख निकल गी सै भाई, जल्दी करवा ले।", "ki taareekh nikal gi sai bhai, jaldi karwa le.", "{paper}: expired, brother; renew it soon."),
+            Line("पुराणा हो ग्या सै, आज ए करवा ले।", "puraana ho gaya sai, aaj e karwa le.", "{paper} has lapsed; renew it today."),
+            Line("की तारीख जा ली, चालान कट सकै सै।", "ki taareekh ja li, chalaan kat sake sai.", "{paper}: the date has passed; you could get a fine."),
+            Line("खतम हो लिया सै भाई, ध्यान दे।", "khatam ho liya sai bhai, dhyan de.", "{paper} has run out, brother, take note."),
+        ),
+        Event.PassTripsTail to listOf(
+            Line("ट्रिप बचे सैं फास्टैग पास मैं।", "trip bache sain FASTag pass main.", "{n} trips left on the FASTag pass."),
+            Line("ट्रिप रह गे पास मैं, ध्यान राखिए।", "trip reh ge pass main, dhyan raakhiye.", "{n} trips left on the pass, keep it in mind."),
+            Line("ट्रिप बाकी सैं सालाना पास मैं।", "trip baaki sain saalana pass main.", "{n} trips remain on the annual pass."),
+            Line("ट्रिप और, फेर पास खतम।", "trip aur, pher pass khatam.", "{n} more trips, then the pass is used up."),
+        ),
     )
 
     /** The lines for [event], or null for safety events and events with no desi lines. */
@@ -712,6 +769,8 @@ object HaryanviLines {
         Event.TollPaidNoBalance -> arrayOf("145")
         Event.BreakReminder -> arrayOf("2")
         Event.MusicPlayNamed -> arrayOf("52 गज का दामण")
+        Event.PaperDue, Event.PaperExpired -> arrayOf("बीमा", "insurance")
+        Event.PassTripsLow -> arrayOf(5)
         else -> emptyArray()
     }
 }

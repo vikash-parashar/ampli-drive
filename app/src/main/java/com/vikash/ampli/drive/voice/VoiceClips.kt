@@ -87,6 +87,33 @@ object VoiceClips {
         Distance(10000, "दस किलोमीटर"),
     )
 
+    /**
+     * Recorded numbers one to ten: the FASTag pass "N trips left" and a countdown
+     * ([countdownClip]). Words, not digits, so the voice reads them in Hindi.
+     */
+    val NUMBERS: List<String> = listOf("एक", "दो", "तीन", "चार", "पाँच", "छह", "सात", "आठ", "नौ", "दस")
+
+    fun numberId(n: Int): String = "num_$n"
+
+    /** The clip for [n] (1..10), or null outside that range (the phone voice speaks then). */
+    fun countdownClip(n: Int): String? = if (n in 1..NUMBERS.size) numberId(n) else null
+
+    /**
+     * Recorded paper names, stitched in front of a [HaryanviLines.Event.PaperDueTail] /
+     * [HaryanviLines.Event.PaperExpiredTail] clip. Keys match car.PaperKind names in lower case,
+     * plus "fastag_pass".
+     */
+    val PAPER_NAMES: Map<String, String> = linkedMapOf(
+        "insurance" to "बीमा",
+        "puc" to "पीयूसी",
+        "rc" to "आरसी",
+        "licence" to "ड्राइविंग लाइसेंस",
+        "fastagkyc" to "फास्टैग केवाईसी",
+        "fastag_pass" to "फास्टैग पास",
+    )
+
+    fun paperId(key: String): String = "paper_$key"
+
     /** The recorded distance nearest to [meters]; on a tie the shorter one (better early than late). */
     fun bucket(meters: Int): Distance = DISTANCES.minWith(compareBy<Distance> { kotlin.math.abs(it.meters - meters) }.thenBy { it.meters })
 
@@ -137,6 +164,21 @@ object VoiceClips {
                 listOf(bucket(meters).id, tail.id)
             }
             HaryanviLines.Event.NavSoon -> emptyList() // NavPhrases stitches the distance itself.
+            // "<paper name>" + tail; args = (shown name, PAPER_NAMES key).
+            HaryanviLines.Event.PaperDue, HaryanviLines.Event.PaperExpired -> {
+                val key = args.getOrNull(1) as? String ?: return emptyList()
+                if (key !in PAPER_NAMES) return emptyList()
+                val tailEvent = if (event == HaryanviLines.Event.PaperDue) HaryanviLines.Event.PaperDueTail else HaryanviLines.Event.PaperExpiredTail
+                val tail = pick(tailEvent) ?: return emptyList()
+                listOf(paperId(key), tail.id)
+            }
+            // "<number>" + tail, only up to ten.
+            HaryanviLines.Event.PassTripsLow -> {
+                val n = (args.firstOrNull() as? Number)?.toInt() ?: return emptyList()
+                val num = countdownClip(n) ?: return emptyList()
+                val tail = pick(HaryanviLines.Event.PassTripsTail) ?: return emptyList()
+                listOf(num, tail.id)
+            }
             else -> {
                 val stand = recordedEvent(event)
                 when {
@@ -181,6 +223,8 @@ object VoiceClips {
             }
         }
         for (d in DISTANCES) out += Entry(d.id, "Distance", "Distance", d.deva)
+        NUMBERS.forEachIndexed { i, w -> out += Entry(numberId(i + 1), "Number", "Number", w) }
+        for ((key, name) in PAPER_NAMES) out += Entry(paperId(key), "PaperName", "Papers", name)
         return out
     }
 

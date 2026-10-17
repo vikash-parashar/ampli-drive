@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.update
 data class MapStatus(
     val styleUrl: String? = null,
     val phase: Phase = Phase.NotStarted,
-    /** True while the simple OpenStreetMap raster style is showing instead of the vector one. */
+    /** True while our own fallback style (RemoteConfig.mapFallbackStyleUrl) is showing. */
     val basic: Boolean = false,
+    /** No style could load and no fallback is configured: the pane shows "map tiles unavailable". */
+    val unavailable: Boolean = false,
     val textureMode: Boolean = true,
     /** At least one frame drawn by MapLibre since the map view was made. */
     val drewFrame: Boolean = false,
@@ -45,29 +47,3 @@ object MapDiagnostics {
         }
     }
 }
-
-/**
- * A raster style with standard OpenStreetMap tiles, used when the vector style can't load in
- * time (old CA store, blocked host, GL trouble with vector tiles). Tiles are requested with
- * MapLibre's user agent, which names the app as the OSM tile policy asks; it is a fallback,
- * not the normal path, so traffic to tile.openstreetmap.org stays small.
- */
-const val BASIC_ATTRIBUTION = "© OpenStreetMap contributors"
-
-const val BASIC_STYLE_JSON = """{
-  "version": 8,
-  "name": "Ampli basic",
-  "sources": {
-    "osm": {
-      "type": "raster",
-      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      "tileSize": 256,
-      "maxzoom": 19,
-      "attribution": "© OpenStreetMap contributors"
-    }
-  },
-  "layers": [
-    {"id": "background", "type": "background", "paint": {"background-color": "#e8e4dc"}},
-    {"id": "osm", "type": "raster", "source": "osm"}
-  ]
-}"""

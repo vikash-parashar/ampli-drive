@@ -122,8 +122,10 @@ private val COLOR_WHITE: Int = 0xFFFFFFFF.toInt()
 /**
  * MapLibre glance map that follows [location]. Call it only once a first fix exists, so the
  * map never opens zoomed out on a country view. [styleUrl] and [puckColor] follow the
- * home-screen theme; a style that fails to load falls back to [GLANCE_STYLE_URL], and when that
- * fails or is too slow too, to a basic OpenStreetMap raster map ([BASIC_STYLE_JSON]).
+ * home-screen theme; a style that fails to load falls back to [GLANCE_STYLE_URL], then to our own
+ * fallback style when one is configured (RemoteConfig.mapFallbackStyleUrl), and else the pane says
+ * the map tiles are unavailable. There is no tile.openstreetmap.org fallback: the OSMF tile policy
+ * does not allow distributed apps to use those tiles.
  */
 @Composable
 fun GlanceMap(
@@ -213,10 +215,10 @@ fun GlanceMap(
 /** Nothing drawn this long after the map view was made: try the other surface type once. */
 const val NO_FRAME_TIMEOUT_MS = 20_000L
 
-/** The vector style must load within this long, or the basic raster map takes over. */
+/** The vector style must load within this long, or the next fallback takes over. */
 private const val STYLE_TIMEOUT_MS = 10_000L
 
-/** After the style loads, tiles that keep failing for this long also switch to the basic map. */
+/** After the style loads, tiles that keep failing for this long also move to the next fallback. */
 private const val TILES_TIMEOUT_MS = 15_000L
 
 /**
@@ -288,8 +290,8 @@ private class MapHolder(
         styleUrl = url
         puckColor = puck
         val m = map ?: return
-        // Once on the basic map, stay on it for this map view: the vector host didn't work.
-        if (url != loadedUrl && !basic) {
+        // Once on the fallback, stay on it for this map view: the theme's host didn't work.
+        if (url != loadedUrl && !basic && !unavailable) {
             loadStyle(m)
         } else if (puckChanged && tracking) {
             recolourPuck(m)
@@ -297,13 +299,17 @@ private class MapHolder(
     }
 
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
+    /** On our own fallback style ([fallbackUrl]) after the theme's style failed. */
     private var basic = false
+
+    /** Nothing loaded: no fallback configured, or it failed too. */
+    private var unavailable = false
     private var styleLoaded = false
     private var errorsAtStyleLoad = 0
 
     /** Vector style too slow: no style at all after [STYLE_TIMEOUT_MS]. */
     private val styleWatchdog = Runnable {
-        if (!destroyed && !basic && !styleLoaded) {
+        if (!destroyed && !unavailable && !styleLoaded) {
             MapDiagnostics.error("Style not loaded after ${STYLE_TIMEOUT_MS / 1000} s: $loadedUrl")
             useBasic()
         }
@@ -312,8 +318,8 @@ private class MapHolder(
     /** Style loaded but tiles keep failing (blocked host, TLS): no full map and new errors. */
     private val tilesWatchdog = Runnable {
         val st = MapDiagnostics.status.value
-        if (!destroyed && !basic && st.phase != MapStatus.Phase.MapLoaded && st.netErrorCount > errorsAtStyleLoad) {
-            MapDiagnostics.error("Vector tiles not loading; switching to the basic map")
+        if (!destroyed && !unavailable && st.phase != MapStatus.Phase.MapLoaded && st.netErrorCount > errorsAtStyleLoad) {
+            MapDiagnostics.error("Vector tiles not loading; trying the next fallback")
             useBasic()
         }
     }
@@ -323,8 +329,8 @@ private class MapHolder(
      * the default one falls back to the basic raster map.
      */
     fun onStyleFailed() {
-        if (destroyed || basic) return
-        if (styleUrl != GLANCE_STYLE_URL) {
+        if (destroyed || unavailable) return
+        if (!basic && styleUrl != GLANCE_STYLE_URL) {
             styleUrl = GLANCE_STYLE_URL
             map?.let { loadStyle(it) }
         } else {
@@ -337,19 +343,28 @@ private class MapHolder(
         errorsAtStyleLoad = MapDiagnostics.status.value.netErrorCount
         main.removeCallbacks(styleWatchdog)
         MapDiagnostics.update { if (it.phase == MapStatus.Phase.MapLoaded) it else it.copy(phase = MapStatus.Phase.StyleLoaded) }
-        if (!basic) {
+        if (!unavailable) {
             main.removeCallbacks(tilesWatchdog)
             main.postDelayed(tilesWatchdog, TILES_TIMEOUT_MS)
         }
     }
 
+    /** Our own fallback style once, then the "map tiles unavailable" state. */
     private fun useBasic() {
         val m = map ?: return
-        basic = true
         main.removeCallbacks(styleWatchdog)
         main.removeCallbacks(tilesWatchdog)
-        MapDiagnostics.update { it.copy(basic = true) }
-        applyStyle(m, Style.Builder().fromJson(BASIC_STYLE_JSON), "basic:osm-raster")
+        val fallback = com.vikash.ampli.drive.config.RemoteConfig.current().mapFallbackStyleUrl
+        if (!basic && fallback.isNotBlank()) {
+            basic = true
+            MapDiagnostics.update { it.copy(basic = true) }
+            main.postDelayed(styleWatchdog, STYLE_TIMEOUT_MS)
+            applyStyle(m, Style.Builder().fromUri(fallback), fallback)
+            return
+        }
+        unavailable = true
+        MapDiagnostics.error("Map tiles unavailable: theme style failed and no working fallback style is configured")
+        MapDiagnostics.update { it.copy(unavailable = true, phase = MapStatus.Phase.Failed) }
     }
 
     private fun loadStyle(map: MapLibreMap) {
@@ -359,7 +374,7 @@ private class MapHolder(
     }
 
     private fun applyStyle(map: MapLibreMap, builder: Style.Builder, label: String) {
-        loadedUrl = if (label.startsWith("basic:")) loadedUrl else label
+        loadedUrl = label
         styleLoaded = false
         MapDiagnostics.update { it.copy(styleUrl = label, phase = MapStatus.Phase.LoadingStyle) }
         try {

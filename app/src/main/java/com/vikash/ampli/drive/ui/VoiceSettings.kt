@@ -173,6 +173,7 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
                 action = if (model is WakeModel.State.Failed && always) stringResource(R.string.action_retry) else null,
                 onAction = { app.wakeModel.ensure() },
             )
+            HindiModelLine(app)
             StatusLine(
                 text = stringResource(R.string.voice_mic_title) + " · " +
                     stringResource(if (hasMic) R.string.voice_mic_ok else R.string.voice_mic_needed),
@@ -206,6 +207,45 @@ private fun sensitivityLabel(level: Int): Int = when (level) {
     1, 2 -> R.string.voice_sensitivity_strict
     3 -> R.string.voice_sensitivity_normal
     else -> R.string.voice_sensitivity_eager
+}
+
+/**
+ * Optional offline Hindi command model (~42 MB) for head units without Google speech. Shown for
+ * Hindi-family app languages (and whenever it is already downloaded); downloads only on a tap,
+ * with progress, and can be removed again.
+ */
+@Composable
+private fun HindiModelLine(app: DriveApp) {
+    val language by app.prefs.language.collectAsStateWithLifecycle()
+    val state by app.hindiModel.state.collectAsStateWithLifecycle()
+    val hindiLanguage = com.vikash.ampli.drive.voice.VoiceLocales.parserLanguage(language) == "hi"
+    if (!hindiLanguage && state == WakeModel.State.Missing) return
+    val text = when (val m = state) {
+        WakeModel.State.Missing -> stringResource(R.string.voice_hindi_model_missing)
+        is WakeModel.State.Downloading -> stringResource(R.string.voice_hindi_model_downloading, m.percent)
+        WakeModel.State.Unpacking -> stringResource(R.string.voice_model_unpacking)
+        WakeModel.State.Ready -> stringResource(R.string.voice_hindi_model_ready)
+        is WakeModel.State.Failed -> stringResource(R.string.voice_hindi_model_failed)
+    }
+    Column {
+        StatusLine(
+            text = text,
+            ok = state == WakeModel.State.Ready,
+            action = when (state) {
+                WakeModel.State.Missing, is WakeModel.State.Failed -> stringResource(R.string.voice_hindi_model_download)
+                WakeModel.State.Ready -> stringResource(R.string.voice_hindi_model_delete)
+                else -> null
+            },
+            onAction = { if (state == WakeModel.State.Ready) app.hindiModel.delete() else app.hindiModel.ensure() },
+        )
+        (state as? WakeModel.State.Downloading)?.let { d ->
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { d.percent / 100f },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 6.dp),
+                color = LocalDriveTheme.current.accent,
+            )
+        }
+    }
 }
 
 @Composable

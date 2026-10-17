@@ -7,13 +7,19 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Fetches Open-Meteo hourly visibility, precipitation, weather code and temperature. No key, no account. */
+/**
+ * Fetches Open-Meteo hourly visibility, precipitation, weather code and temperature from the
+ * configured server. Throws when no weather server is configured (release builds without the paid
+ * Open-Meteo plan or a self-hosted one): the caller treats it like being offline.
+ */
 object WeatherClient {
 
     /** [points] from [RouteWeather.points]. Throws on network errors. */
     suspend fun fetch(points: List<Triple<Int, Double, Double>>, now: Long = System.currentTimeMillis()): WeatherReport =
         withContext(Dispatchers.IO) {
-            val conn = URL(RouteWeather.url(points)).openConnection() as HttpURLConnection
+            val cfg = com.vikash.ampli.drive.config.RemoteConfig.current()
+            if (!cfg.weatherConfigured) throw java.io.IOException("Weather server not configured")
+            val conn = URL(RouteWeather.url(points, cfg.weatherUrl, cfg.weatherApiKey)).openConnection() as HttpURLConnection
             conn.connectTimeout = 10_000
             conn.readTimeout = 10_000
             conn.setRequestProperty("User-Agent", "AmpliCarHub (Android head unit)")

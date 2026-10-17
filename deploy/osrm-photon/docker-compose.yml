@@ -1,0 +1,68 @@
+# Ampli Car Hub: self-hosted routing (OSRM) and place search (Photon) for India.
+# Step-by-step setup, sizing and costs: README.md in this folder.
+#
+#   ./prepare.sh          # one-off: download the India extract + Photon dump, build the OSRM graph
+#   docker compose up -d  # run osrm + photon + caddy (TLS)
+#
+# Nothing here is started or paid for automatically: you run it on your own EC2 instance.
+
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:${OSRM_VERSION:-v5.27.1}
+    container_name: ampli-osrm
+    restart: unless-stopped
+    # MLD algorithm (matches prepare.sh). --max-table-size 0: the app only uses /route.
+    command: >
+      osrm-routed --algorithm mld --max-table-size 0 --max-matching-size 0
+      --max-viaroute-size 50 /data/india-latest.osrm
+    volumes:
+      - ./data/osrm:/data:ro
+    expose:
+      - "5000"
+    mem_limit: ${OSRM_MEM_LIMIT:-9g}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:5000/route/v1/driving/77.2090,28.6139;77.2167,28.6200?overview=false' >/dev/null || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  photon:
+    build:
+      context: ./photon
+      args:
+        PHOTON_VERSION: ${PHOTON_VERSION:-0.7.0}
+    container_name: ampli-photon
+    restart: unless-stopped
+    environment:
+      # Heap for Photon; the index itself is memory-mapped from disk.
+      JAVA_OPTS: ${PHOTON_JAVA_OPTS:--Xms1g -Xmx3g}
+    volumes:
+      - ./data/photon:/photon/data
+    expose:
+      - "2322"
+    mem_limit: ${PHOTON_MEM_LIMIT:-5g}
+
+  caddy:
+    image: caddy:2.8
+    container_name: ampli-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ROUTE_HOST: ${ROUTE_HOST:?set ROUTE_HOST in .env, e.g. route.ampliapps.in}
+      GEO_HOST: ${GEO_HOST:?set GEO_HOST in .env, e.g. geo.ampliapps.in}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./public:/srv/public:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - osrm
+      - photon
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -98,7 +98,9 @@ class DriveNotificationListener : NotificationListenerService() {
     /** Parses every message text the SMS notification carries (single, inbox or messaging style). */
     private fun handleSms(sbn: StatusBarNotification, announce: Boolean) {
         val store = (application as? DriveApp)?.fastag ?: return
-        if (!store.enabled.value) return
+        // Only after the FASTag SMS disclosure was accepted (Play: prominent disclosure); nothing
+        // but FASTag-keyword messages is parsed, and only the parsed toll fields are stored.
+        if (!store.readsSms) return
         val extras = sbn.notification?.extras ?: return
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         // text -> (sender, time). The same text often appears in several extras; keep the first.

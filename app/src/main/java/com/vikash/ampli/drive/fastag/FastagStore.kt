@@ -22,6 +22,10 @@ data class TollEvent(
     val balance: Double?,
     val vehicle: String?,
     val bank: String?,
+    /** An Annual Pass crossing (no money taken). */
+    val passTrip: Boolean = false,
+    /** Trips left on the pass, when the SMS said so. */
+    val passTripsLeft: Int? = null,
 )
 
 /** Toll totals for the FASTag screen. */
@@ -53,6 +57,61 @@ class FastagStore(context: Context) {
     private val _rechargeUrl = MutableStateFlow(sp.getString(KEY_URL, "") ?: "")
     /** The driver's own bank FASTag recharge page, or "" for the NPCI list of issuers. */
     val rechargeUrl: StateFlow<String> = _rechargeUrl.asStateFlow()
+
+    private val _smsConsent = MutableStateFlow(sp.getBoolean(KEY_SMS_CONSENT, false))
+
+    /**
+     * The driver agreed to the FASTag SMS disclosure (Disclosure.FastagSms). Off by default:
+     * without it no SMS is read at all, and the balance and pass trips are entered by hand.
+     */
+    val smsConsent: StateFlow<Boolean> = _smsConsent.asStateFlow()
+
+    /** Toll SMS are parsed only when the feature is on and the disclosure was accepted. */
+    val readsSms: Boolean get() = _enabled.value && _smsConsent.value
+
+    fun setSmsConsent(value: Boolean) {
+        sp.edit().putBoolean(KEY_SMS_CONSENT, value).apply()
+        _smsConsent.value = value
+    }
+
+    private val _pass = MutableStateFlow(loadPass())
+
+    /** FASTag Annual Pass: start date and the driver's +1 / −1 corrections. */
+    val pass: StateFlow<AnnualPass> = _pass.asStateFlow()
+
+    fun setPassStart(start: java.time.LocalDate?) {
+        // A new pass starts a new count.
+        savePass(AnnualPass(start, emptyList()))
+    }
+
+    /** Manual trip correction: +1 a crossing the SMS missed, −1 one counted by mistake. */
+    fun adjustPassTrips(delta: Int, time: Long = System.currentTimeMillis()) {
+        val p = _pass.value
+        if (p.start == null) return
+        savePass(p.copy(adjustments = (p.adjustments + PassAdjustment(time, delta)).takeLast(AnnualPass.MAX_ADJUSTMENTS)))
+    }
+
+    private fun loadPass(): AnnualPass = try {
+        val o = JSONObject(sp.getString(KEY_PASS, "{}") ?: "{}")
+        val arr = o.optJSONArray("adj") ?: JSONArray()
+        AnnualPass(
+            start = o.optString("start").takeIf { it.isNotEmpty() }?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() },
+            adjustments = (0 until arr.length()).mapNotNull { i ->
+                arr.optJSONArray(i)?.let { PassAdjustment(it.optLong(0), it.optInt(1)) }
+            },
+        )
+    } catch (_: Exception) {
+        AnnualPass(null, emptyList())
+    }
+
+    private fun savePass(p: AnnualPass) {
+        val arr = JSONArray()
+        for (a in p.adjustments) arr.put(JSONArray().put(a.time).put(a.delta))
+        val o = JSONObject().put("adj", arr)
+        p.start?.let { o.put("start", it.toString()) }
+        sp.edit().putString(KEY_PASS, o.toString()).apply()
+        _pass.value = p
+    }
 
     fun setEnabled(value: Boolean) {
         sp.edit().putBoolean(KEY_ENABLED, value).apply()
@@ -90,19 +149,28 @@ class FastagStore(context: Context) {
             balance = message.balance,
             vehicle = message.vehicle,
             bank = message.bank,
+            passTrip = message.passTrip,
+            passTripsLeft = message.passTripsLeft,
         )
         val current = _events.value
         // The balance changes with every debit or recharge, so the same amount and balance is the
         // same SMS seen again, however much later. Without a balance, only a nearby time counts.
+        // A pass crossing takes no money, so the balance doesn't change: the trips left (or the
+        // plaza and a nearby time) tell two crossings apart.
         val duplicate = current.any {
             it.kind == event.kind && it.amount == event.amount && it.balance == event.balance &&
-                (event.balance != null || abs(it.time - time) < DUPLICATE_WINDOW_MS)
+                it.passTrip == event.passTrip && it.passTripsLeft == event.passTripsLeft &&
+                if (event.passTrip) {
+                    event.passTripsLeft != null || (it.plaza == event.plaza && abs(it.time - time) < DUPLICATE_WINDOW_MS)
+                } else {
+                    event.balance != null || abs(it.time - time) < DUPLICATE_WINDOW_MS
+                }
         }
         if (duplicate) return false
         val updated = (current + event).sortedByDescending { it.time }.take(MAX_EVENTS)
         _events.value = updated
         save(updated)
-        if (announce && event.kind == FastagKind.Debit) _arrivals.tryEmit(event)
+        if (announce && event.kind == FastagKind.Debit && !event.passTrip) _arrivals.tryEmit(event)
         return true
     }
 
@@ -118,6 +186,8 @@ class FastagStore(context: Context) {
                 balance = o.optDoubleOrNull("b"),
                 vehicle = o.optStringOrNull("v"),
                 bank = o.optStringOrNull("n"),
+                passTrip = o.optBoolean("pt", false),
+                passTripsLeft = if (o.has("pl")) o.optInt("pl") else null,
             )
         }.sortedByDescending { it.time }
     } catch (_: Exception) {
@@ -136,6 +206,8 @@ class FastagStore(context: Context) {
                     e.balance?.let { put("b", it) }
                     e.vehicle?.let { put("v", it) }
                     e.bank?.let { put("n", it) }
+                    if (e.passTrip) put("pt", true)
+                    e.passTripsLeft?.let { put("pl", it) }
                 },
             )
         }
@@ -159,6 +231,8 @@ class FastagStore(context: Context) {
         private const val KEY_ENABLED = "enabled"
         private const val KEY_LOW = "low_balance"
         private const val KEY_URL = "recharge_url"
+        private const val KEY_SMS_CONSENT = "sms_consent"
+        private const val KEY_PASS = "annual_pass"
 
         /** Newest event that carries a balance. */
         fun latestBalance(events: List<TollEvent>): TollEvent? = events.firstOrNull { it.balance != null }
@@ -168,7 +242,7 @@ class FastagStore(context: Context) {
          * of the next, ending with the newest one (if that is itself recent).
          */
         fun totals(events: List<TollEvent>, now: Long = System.currentTimeMillis(), zone: ZoneId = ZoneId.systemDefault()): TollTotals {
-            val debits = events.filter { it.kind == FastagKind.Debit && it.amount != null }
+            val debits = events.filter { it.kind == FastagKind.Debit && it.amount != null && !it.passTrip }
             val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
             fun date(e: TollEvent) = Instant.ofEpochMilli(e.time).atZone(zone).toLocalDate()
             var trip = 0.0

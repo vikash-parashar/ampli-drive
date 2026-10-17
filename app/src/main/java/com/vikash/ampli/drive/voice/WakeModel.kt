@@ -17,12 +17,33 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.ZipInputStream
 
+/** One downloadable Vosk model (Apache-2.0, alphacephei.com). */
+enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: Long) {
+    /** Wake word + English command fallback. */
+    EnglishIndia(
+        "vosk-model-small-en-in-0.4",
+        "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip",
+        36L * 1024 * 1024,
+    ),
+
+    /**
+     * Hindi commands (and Haryanvi said with Hindi words) on head units without Google speech.
+     * ~42 MB zipped, so it is never bundled: Settings › Voice downloads it when the driver asks.
+     */
+    Hindi(
+        "vosk-model-small-hi-0.22",
+        "https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip",
+        42L * 1024 * 1024,
+    ),
+}
+
 /**
- * The small offline Vosk model used only to spot "Hey Ampli". It is about 36 MB, so it is not
- * in the APK: it downloads once, the first time the driver switches the wake word on, into
- * filesDir/vosk/. Progress shows in Settings › Voice.
+ * A small offline Vosk model, downloaded once into filesDir/vosk/<model>/ (never in the APK).
+ * [VoskModelSpec.EnglishIndia] spots "Hey Ampli" and is fetched the first time the driver switches
+ * the wake word on; [VoskModelSpec.Hindi] hears Hindi/Haryanvi commands and is fetched on demand.
+ * Progress shows in Settings › Voice.
  */
-class WakeModel(context: Context) {
+class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.EnglishIndia) {
     private val appContext = context.applicationContext
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var job: Job? = null
@@ -38,7 +59,7 @@ class WakeModel(context: Context) {
     private val root = File(appContext.filesDir, "vosk")
 
     /** Folder handed to org.vosk.Model. */
-    val modelDir = File(root, MODEL_NAME)
+    val modelDir = File(root, spec.dirName)
 
     private val _state = MutableStateFlow(if (isInstalled()) State.Ready else State.Missing)
     val state: StateFlow<State> = _state.asStateFlow()
@@ -66,14 +87,14 @@ class WakeModel(context: Context) {
 
     private suspend fun download() {
         root.mkdirs()
-        val zip = File(appContext.cacheDir, "$MODEL_NAME.zip")
+        val zip = File(appContext.cacheDir, "${spec.dirName}.zip")
         _state.value = State.Downloading(0)
-        val conn = URL(MODEL_URL).openConnection() as HttpURLConnection
+        val conn = URL(spec.url).openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 15_000
             conn.readTimeout = 30_000
             if (conn.responseCode !in 200..299) throw IOException("HTTP ${conn.responseCode}")
-            val total = conn.contentLengthLong.takeIf { it > 0 } ?: APPROX_BYTES
+            val total = conn.contentLengthLong.takeIf { it > 0 } ?: spec.approxBytes
             conn.inputStream.use { input ->
                 zip.outputStream().use { out ->
                     val buf = ByteArray(64 * 1024)
@@ -98,7 +119,7 @@ class WakeModel(context: Context) {
         }
 
         _state.value = State.Unpacking
-        val tmp = File(root, "$MODEL_NAME.tmp")
+        val tmp = File(root, "${spec.dirName}.tmp")
         tmp.deleteRecursively()
         tmp.mkdirs()
         val base = tmp.canonicalPath + File.separator
@@ -126,14 +147,15 @@ class WakeModel(context: Context) {
         File(modelDir, READY_MARKER).writeText("ok")
     }
 
-    /** Frees the 36 MB, for example when the driver switches the wake word off for good. */
+    /** Frees this model's space (the other model stays). */
     fun delete() {
         job?.cancel()
         synchronized(this) {
             loaded?.close()
             loaded = null
         }
-        root.deleteRecursively()
+        modelDir.deleteRecursively()
+        File(root, "${spec.dirName}.tmp").deleteRecursively()
         _state.value = State.Missing
     }
 
@@ -181,9 +203,6 @@ class WakeModel(context: Context) {
     }
 
     companion object {
-        const val MODEL_NAME = "vosk-model-small-en-in-0.4"
-        const val MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip"
-        private const val APPROX_BYTES = 36L * 1024 * 1024
         private const val READY_MARKER = ".ampli-ready"
     }
 }
