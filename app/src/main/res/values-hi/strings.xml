@@ -791,4 +791,6 @@
     <string name="payment_pending_title">पेमेंट बाकी है</string>
     <string name="payment_pending_hint">Google Play आपके UPI या दूसरे पेमेंट की मंज़ूरी का इंतज़ार कर रहा है। अपने पेमेंट ऐप में मंज़ूरी दें; दोबारा पैसे देने की ज़रूरत नहीं।</string>
     <string name="nav_search_moving">गाड़ी चलते समय टाइपिंग बंद है। “बोलें” दबाएँ और जगह का नाम बोलें।</string>
+    <string name="shell_open_settings">सेटिंग खोलें</string>
+    <string name="voice_tts_missing_hint">फ़ोन की आवाज़ (TTS) इंस्टॉल नहीं है; Ampli की आवाज़ बोलेगी।</string>
 </resources>

@@ -802,4 +802,6 @@
     <string name="payment_pending_title">Payment pending</string>
     <string name="payment_pending_hint">Google Play is waiting for your UPI or other payment to be approved. Approve it in your payment app; you don\'t need to pay again.</string>
     <string name="nav_search_moving">Typing is off while driving. Tap “Say it” and say where to go.</string>
+    <string name="shell_open_settings">Open settings</string>
+    <string name="voice_tts_missing_hint">No phone voice installed; using Ampli voice.</string>
 </resources>

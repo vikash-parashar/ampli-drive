@@ -519,7 +519,9 @@ class VoiceAssistant(private val app: DriveApp) {
     private suspend fun styled(res: Context, lang: String, event: HaryanviLines.Event, standard: String, vararg args: Any) {
         val desi = app.desi.line(event, *args)
         if (desi == null) {
-            say(res, lang, standard)
+            _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = standard) }
+            // Without a TTS engine the recorded line for the same moment plays instead.
+            app.voicePlayer.sayPlain(standard, lang, event, *args)
             return
         }
         speakDesi(desi)
