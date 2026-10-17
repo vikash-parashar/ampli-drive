@@ -8,6 +8,8 @@
     <!-- Map tiles (OpenFreeMap). -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Quick controls: Wi-Fi on/off and the connected network's name (normal permission). -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Connected phone name in the status row; OBD-II dongle (Bluetooth SPP). -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <!-- Android 8 to 11 (many head units): legacy install-time Bluetooth permissions. There, a BLE
@@ -138,6 +140,24 @@
         <package android:name="com.ts.phonelink" />
         <package android:name="com.tw.carplay" />
         <package android:name="com.ex.phonelink" />
+        <package android:name="cn.manstep.phonemirrorBox" />
+        <!-- Quick controls › Equalizer: head-unit vendors' EQ apps (system/Shell.kt EQ_PACKAGES). -->
+        <package android:name="com.syu.eq" />
+        <package android:name="com.syu.audio" />
+        <package android:name="com.fyt.eq" />
+        <package android:name="com.ts.eq" />
+        <package android:name="com.ts.dsp" />
+        <package android:name="com.tw.eq" />
+        <package android:name="com.microntek.eq" />
+        <package android:name="com.microntek.audio" />
+        <package android:name="com.mtc.eq" />
+        <package android:name="com.android.eq" />
+        <package android:name="com.yf.eq" />
+        <package android:name="com.hzbhd.eq" />
+        <package android:name="com.autochips.eq" />
+        <intent>
+            <action android:name="android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL" />
+        </intent>
     </queries>
 
     <application

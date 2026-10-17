@@ -200,24 +200,8 @@ object VoiceActions {
 
     // ---------------------------------------------------------------- Android Auto / phone link
 
-    /** Phone-projection and phone-link apps, best first. Head units ship many variants. */
-    private val PHONE_LINK_PACKAGES = listOf(
-        "com.google.android.projection.gearhead",
-        "com.zjinnova.zlink",
-        "com.suding.speedplay",
-        "com.autokit",
-        "com.autokit.app",
-        "net.easyconn",
-        "net.easyconn.carman.wws",
-        "com.carlinkit",
-        "com.carbit.phonelink",
-        "com.syu.carlink",
-        "com.fyt.phonelink",
-        "com.ts.phonelink",
-        "com.tw.carplay",
-        "com.ex.phonelink",
-    )
-    private val PHONE_LINK_LABELS = listOf("android auto", "carplay", "car play", "zlink", "phone link", "phonelink", "autokit", "carlink", "easyconn")
+    private val PHONE_LINK_PACKAGES get() = Launchers.PHONE_LINK_PACKAGES
+    private val PHONE_LINK_LABELS get() = Launchers.PHONE_LINK_LABELS
 
     /** Opens the first phone-link app found and returns its label, or null when there is none. */
     suspend fun openPhoneLink(context: Context, pinned: String?): String? {

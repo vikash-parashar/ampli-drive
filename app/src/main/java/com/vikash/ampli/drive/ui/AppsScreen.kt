@@ -23,7 +23,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhonelinkRing
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.vikash.ampli.drive.system.Shell
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,29 +63,65 @@ import com.vikash.ampli.drive.system.InstalledApps
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
-/** All launchable apps. Tap opens; long-press puts the app on the dock's Auto button. */
+/**
+ * Apps, Ampli Shell style: only the driver's Ampli list (by default the map, music, phone link and
+ * Ampli apps), then "More apps" with everything else, optionally behind a 4-digit PIN. In More
+ * apps, "Edit list" turns taps into add / remove. Long-press puts an app on the Phone link button.
+ */
 @Composable
 fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     val context = LocalContext.current
     val autoPackage by app.prefs.autoPackage.collectAsStateWithLifecycle()
+    val musicPackage by app.prefs.musicPackage.collectAsStateWithLifecycle()
+    val chosenSaved by app.shell.drawerApps.collectAsStateWithLifecycle()
+    val pinSet by app.shell.pinSet.collectAsStateWithLifecycle()
     val apps by produceState<List<AppEntry>?>(null) { value = InstalledApps.load(context) }
+    var showAll by rememberSaveable { mutableStateOf(false) }
+    var editing by rememberSaveable { mutableStateOf(false) }
+    var askPin by remember { mutableStateOf<PinAsk?>(null) }
+    var pinError by remember { mutableStateOf(false) }
+
+    val list = apps
+    val chosen = remember(list, chosenSaved, musicPackage) {
+        chosenSaved ?: list?.let { Shell.defaultDrawer(context, it, musicPackage) }.orEmpty()
+    }
+    if (showAll) BackHandler(enabled = true) { showAll = false; editing = false }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(dims.d(2.4f)),
         verticalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
-        ScreenHeader(
-            title = stringResource(R.string.apps_title),
-            hint = stringResource(R.string.apps_hint),
-            onBack = onBack,
-        )
-        val list = apps
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            Box(Modifier.weight(1f)) {
+                ScreenHeader(
+                    title = stringResource(if (showAll) R.string.shell_more_apps else R.string.apps_title),
+                    hint = stringResource(if (editing) R.string.shell_edit_hint else R.string.apps_hint),
+                    onBack = { if (showAll) { showAll = false; editing = false } else onBack() },
+                )
+            }
+            if (showAll) {
+                BigButton(
+                    text = stringResource(if (pinSet) R.string.shell_pin_remove else R.string.shell_pin_set),
+                    onClick = { if (pinSet) app.shell.setPin(null) else askPin = PinAsk.Set },
+                    icon = Icons.Filled.Lock,
+                    primary = false,
+                )
+                BigButton(
+                    text = stringResource(if (editing) R.string.shell_edit_done else R.string.shell_edit_list),
+                    onClick = { editing = !editing },
+                    icon = Icons.Filled.Edit,
+                    primary = editing,
+                )
+            }
+        }
         if (list == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = LocalDriveTheme.current.accent)
+                CircularProgressIndicator(color = theme.accent)
             }
         } else {
+            val shown = if (showAll) list else list.filter { it.packageName in chosen }
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 132.dp),
                 modifier = Modifier.fillMaxSize(),
@@ -82,11 +129,19 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f)),
                 verticalArrangement = Arrangement.spacedBy(dims.d(1.5f)),
             ) {
-                items(list, key = { it.packageName + "/" + it.activityName }) { entry ->
+                items(shown, key = { it.packageName + "/" + it.activityName }) { entry ->
                     AppTile(
                         entry = entry,
                         isAuto = entry.packageName == autoPackage,
-                        onOpen = { Launchers.openComponent(context, entry.packageName, entry.activityName) },
+                        onList = if (showAll) entry.packageName in chosen else null,
+                        onOpen = {
+                            if (editing) {
+                                val next = if (entry.packageName in chosen) chosen - entry.packageName else chosen + entry.packageName
+                                app.shell.setDrawerApps(next)
+                            } else {
+                                Launchers.openComponent(context, entry.packageName, entry.activityName)
+                            }
+                        },
                         onLongPress = {
                             if (entry.packageName == autoPackage) {
                                 app.prefs.setAutoPackage(null)
@@ -98,8 +153,67 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
                         },
                     )
                 }
+                if (!showAll) {
+                    item(key = "more-apps") {
+                        MoreAppsTile(locked = pinSet, onClick = {
+                            if (pinSet) {
+                                pinError = false
+                                askPin = PinAsk.Unlock
+                            } else {
+                                showAll = true
+                            }
+                        })
+                    }
+                }
             }
         }
+    }
+
+    askPin?.let { ask ->
+        PinDialog(
+            title = stringResource(if (ask == PinAsk.Set) R.string.shell_pin_set else R.string.shell_pin_enter),
+            error = pinError,
+            onPin = { pin ->
+                when (ask) {
+                    PinAsk.Set -> {
+                        app.shell.setPin(pin)
+                        askPin = null
+                    }
+                    PinAsk.Unlock -> if (app.shell.checkPin(pin)) {
+                        askPin = null
+                        showAll = true
+                    } else {
+                        pinError = true
+                    }
+                }
+            },
+            onDismiss = { askPin = null },
+        )
+    }
+}
+
+private enum class PinAsk { Set, Unlock }
+
+/** The last tile of the Ampli list: everything else, with a lock when a PIN is set. */
+@Composable
+private fun MoreAppsTile(locked: Boolean, onClick: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = RoundedCornerShape(dims.d(2.2f))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 120.dp)
+            .clip(shape)
+            .background(theme.accent.copy(alpha = 0.14f))
+            .border(1.dp, theme.accent.copy(alpha = 0.5f), shape)
+            .clickable(onClick = onClick)
+            .padding(dims.d(1.4f)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Icon(if (locked) Icons.Filled.Lock else Icons.Filled.Apps, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(44.dp))
+        Text(stringResource(R.string.shell_more_apps), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -131,7 +245,7 @@ fun ScreenHeader(title: String, hint: String?, onBack: () -> Unit) {
 }
 
 @Composable
-private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLongPress: () -> Unit) {
+private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLongPress: () -> Unit, onList: Boolean? = null) {
     val dims = LocalDims.current
     val context = LocalContext.current
     val iconPx = with(LocalDensity.current) { 56.dp.roundToPx() }
@@ -156,9 +270,21 @@ private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLong
         Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
             val bmp = icon
             if (bmp != null) Image(bmp, contentDescription = null, modifier = Modifier.size(56.dp))
+            if (onList != null) {
+                Icon(
+                    if (onList) Icons.Filled.CheckCircle else Icons.Filled.AddCircleOutline,
+                    contentDescription = stringResource(if (onList) R.string.shell_on_list else R.string.shell_not_on_list),
+                    tint = if (onList) LocalDriveTheme.current.ok else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainer),
+                )
+            }
             if (isAuto) {
                 Icon(
-                    Icons.Filled.DirectionsCar,
+                    Icons.Filled.PhonelinkRing,
                     contentDescription = stringResource(R.string.apps_on_auto),
                     tint = LocalDriveTheme.current.accent,
                     modifier = Modifier

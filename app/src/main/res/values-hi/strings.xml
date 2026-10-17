@@ -750,4 +750,41 @@
     <string name="support_unavailable">Play पर आने के बाद मिलेगा</string>
     <string name="support_thanks">बहुत-बहुत धन्यवाद! आपके साथ से Car Hub आगे बढ़ता है। 🙏</string>
     <string name="more_get">पाएँ</string>
+
+    <!-- Ampli Shell -->
+    <string name="dock_phone_link">फ़ोन लिंक</string>
+    <string name="shell_home_title">Ampli को कार की होम स्क्रीन बनाएँ</string>
+    <string name="shell_home_hint">फिर स्क्रीन सीधे Ampli में खुलेगी, और होम बटन हमेशा यहीं लौटेगा।</string>
+    <string name="shell_home_action">होम बनाएँ</string>
+    <string name="shell_home_later">अभी नहीं</string>
+    <string name="shell_quick_title">क्विक कंट्रोल</string>
+    <string name="shell_quick_short">कंट्रोल</string>
+    <string name="shell_on">चालू</string>
+    <string name="shell_off">बंद</string>
+    <string name="shell_connected">जुड़ा है</string>
+    <string name="shell_wifi">वाई-फ़ाई</string>
+    <string name="shell_hotspot">हॉटस्पॉट</string>
+    <string name="shell_equalizer">इक्वलाइज़र</string>
+    <string name="shell_brightness">रोशनी</string>
+    <string name="shell_volume">आवाज़</string>
+    <string name="shell_display">डिस्प्ले</string>
+    <string name="shell_sound">साउंड</string>
+    <string name="shell_link_missing_title">अपनी स्क्रीन का CarPlay ऐप लगाएँ</string>
+    <string name="shell_link_missing_body">कोई फ़ोन-लिंक ऐप नहीं मिला। ज़्यादातर स्क्रीन CarPlay और Android Auto के लिए ZLink, AutoKit, TLink या EasyConnection इस्तेमाल करती हैं। स्क्रीन बेचने वाले ने जो बताया हो वह ऐप लगाएँ, फिर फ़ोन लिंक दोबारा दबाएँ।</string>
+    <string name="shell_link_open_apps">सभी ऐप</string>
+    <string name="shell_more_apps">और ऐप</string>
+    <string name="shell_edit_list">लिस्ट बदलें</string>
+    <string name="shell_edit_done">हो गया</string>
+    <string name="shell_edit_hint">किसी ऐप को Ampli लिस्ट में जोड़ने या हटाने के लिए उसे दबाएँ</string>
+    <string name="shell_on_list">Ampli लिस्ट में है</string>
+    <string name="shell_not_on_list">Ampli लिस्ट में नहीं है</string>
+    <string name="shell_pin_set">PIN लगाएँ</string>
+    <string name="shell_pin_remove">PIN हटाएँ</string>
+    <string name="shell_pin_enter">PIN डालें</string>
+    <string name="shell_pin_field">4 अंकों का PIN</string>
+    <string name="shell_pin_wrong">PIN गलत है, फिर कोशिश करें</string>
+    <string name="shell_fullscreen_title">फ़ुल स्क्रीन</string>
+    <string name="shell_fullscreen_hint">Android की ऊपर और नीचे की पट्टी छिपाएँ। किनारे से स्वाइप करने पर दिखेंगी।</string>
+    <string name="shell_startup_title">शुरुआती एनिमेशन</string>
+    <string name="shell_startup_hint">कार चालू होने पर, स्वागत से पहले Ampli एनिमेशन</string>
 </resources>

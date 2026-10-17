@@ -11,6 +11,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
+import com.vikash.ampli.drive.system.Shell
+import com.vikash.ampli.drive.ui.BootSplash
+import com.vikash.ampli.drive.ui.QuickControlsPanel
+import com.vikash.ampli.drive.ui.quickTiles
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -157,6 +168,66 @@ class ScreenshotTest {
             }
         }
         shot("settings-support")
+    }
+
+    /** Quick controls pulled down over Home (BT on, Wi-Fi connected, levels as Android reports them). */
+    @Test
+    fun shellQuickControls() {
+        app.prefs.setNameAsked()
+        app.shell.homeCardDismissed = true
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Box(Modifier.fillMaxSize()) {
+                DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {})
+                Frame(backdrop = false) {
+                    val status = Shell.Status(wifiOn = true, wifiConnected = true, ssid = "Swift-Hotspot", brightnessPct = 70, volumePct = 45)
+                    QuickControlsPanel(
+                        visible = true,
+                        tiles = quickTiles(status, btSupported = true, btOn = true, btDevice = "Vikash's Pixel"),
+                        onTile = {},
+                        onClose = {},
+                    )
+                }
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/shell-quick-controls.png")
+    }
+
+    /** First run on a unit where Ampli is not the default home app yet. */
+    @Test
+    fun shellHomeDefaultCard() {
+        app.prefs.setNameAsked()
+        app.shell.homeCardDismissed = false
+        compose.mainClock.autoAdvance = false
+        compose.setContent { DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {}) }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/shell-home-default-card.png")
+    }
+
+    /** The startup animation's last frame, and a strip of three frames (start, middle, end). */
+    @Test
+    fun shellBootSplash() {
+        var t by mutableFloatStateOf(1f)
+        var strip by mutableStateOf(false)
+        compose.setContent {
+            if (!strip) {
+                BootSplash(t)
+            } else {
+                Row(Modifier.fillMaxSize()) {
+                    for (f in listOf(0.2f, 0.5f, 1f)) {
+                        Box(Modifier.weight(1f).fillMaxSize().clipToBounds(), contentAlignment = Alignment.Center) {
+                            Box(Modifier.requiredSize(1024.dpCompat(), 600.dpCompat()).graphicsLayer { scaleX = 0.32f; scaleY = 0.32f }) {
+                                BootSplash(f)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        shot("shell-boot-splash")
+        strip = true
+        shot("shell-boot-splash-strip")
     }
 
     /** Android 13+ guide shown when notification access is still off (sideloaded APK). */

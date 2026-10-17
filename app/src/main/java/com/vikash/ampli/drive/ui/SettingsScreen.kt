@@ -118,9 +118,13 @@ fun SettingsScreen(
     val musicPkg by app.prefs.musicPackage.collectAsStateWithLifecycle()
     val phonePkg by app.prefs.phonePackage.collectAsStateWithLifecycle()
     var showProSheet by rememberSaveable { mutableStateOf(false) }
+    val fullScreen by app.shell.fullScreen.collectAsStateWithLifecycle()
+    val startupAnimation by app.shell.startupAnimation.collectAsStateWithLifecycle()
+    var homeAsked by remember { mutableStateOf(0) }
+    val makeHome = rememberMakeHome { homeAsked++ }
 
     // Re-read every time the launcher comes back from a system settings screen.
-    val isHome = remember(resumeTick) { Launchers.isDefaultHome(context) }
+    val isHome = remember(resumeTick, homeAsked) { Launchers.isDefaultHome(context) }
     val hasFine = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_FINE_LOCATION) }
     val hasCoarse = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) }
     val hasBt = remember(resumeTick) { BtPermissions.hasConnect(context) }
@@ -138,6 +142,8 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
+            // Ampli Shell: shown until Ampli is the head unit's home app.
+            if (!isHome) DefaultHomeCard(onMake = makeHome, onLater = null, modifier = Modifier.fillMaxWidth())
             ThemePicker(
                 choice = themeChoice,
                 night = night,
@@ -173,7 +179,7 @@ fun SettingsScreen(
                 status = stringResource(if (isHome) R.string.home_ok else R.string.home_not_default),
                 ok = isHome,
                 action = stringResource(if (isHome) R.string.action_change else R.string.home_set_default),
-                onAction = { Launchers.openHomeSettings(context) },
+                onAction = { if (isHome) Launchers.openHomeSettings(context) else makeHome() },
             )
             // Head units name their apps "Multimedia", "BT phone"…: the driver can pick them here.
             SettingRow(
@@ -252,6 +258,19 @@ fun SettingsScreen(
             NavPromptsCard(app = app)
             CarStartCard(app = app)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
+            // Settings › Display: Ampli as the whole screen.
+            ToggleRow(
+                title = stringResource(R.string.shell_fullscreen_title),
+                status = stringResource(R.string.shell_fullscreen_hint),
+                checked = fullScreen,
+                onChange = app.shell::setFullScreen,
+            )
+            ToggleRow(
+                title = stringResource(R.string.shell_startup_title),
+                status = stringResource(R.string.shell_startup_hint),
+                checked = startupAnimation,
+                onChange = app.shell::setStartupAnimation,
+            )
             ToggleRow(
                 title = stringResource(R.string.screen_on_title),
                 status = stringResource(R.string.screen_on_hint),

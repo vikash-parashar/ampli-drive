@@ -13,6 +13,7 @@ import com.vikash.ampli.drive.prefs.AutoStartMode
 import com.vikash.ampli.drive.system.AppResolver
 import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.Shell
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -61,9 +62,10 @@ object CarStart {
         pendingTrigger = trigger
         if (launcherVisible) {
             _events.tryEmit(trigger)
-        } else if (trigger == StartTrigger.Ignition) {
-            // Ignition on while another app is in front: ask for the launcher. Android may refuse a
-            // background start (10+); the pending flag covers that.
+        } else if (trigger != StartTrigger.PhoneConnected) {
+            // Boot or ignition with another app (or another launcher) in front: bring Ampli forward.
+            // Android 8/9 head units allow it; 10+ may refuse a background start, and then the
+            // pending flag runs everything the next time the launcher shows.
             try {
                 app.startActivity(
                     Intent(app, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
@@ -101,7 +103,11 @@ object CarStart {
         prefs.lastCarStartAt = now
 
         // Welcome audio: "Ram Ram {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
-        if (StartPolicy.greets(trigger)) app.welcome.play()
+        if (StartPolicy.greets(trigger)) {
+            // Ampli startup animation first (Settings › Startup animation), then "Ram Ram…".
+            if (Shell.requestSplash(app.shell.startupAnimation.value)) delay(Shell.SPLASH_MS)
+            app.welcome.play()
+        }
 
         if (settings.mode == AutoStartMode.Off) return
         delay(settings.delaySec.coerceIn(0, 120) * 1000L)
