@@ -259,7 +259,7 @@ fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modif
             turn.text?.let {
                 Text(
                     it,
-                    fontSize = dims.t(2.6f * (if (large) 1.3f else 1f)),
+                    fontSize = dims.t(2.6f * (if (large) 1.3f else 1f), min = 16f),
                     color = theme.turnMuted,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = if (dims.compact) 1 else 2,
@@ -268,6 +268,7 @@ fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modif
             }
             Text(
                 stringResource(R.string.map_via_google_maps),
+                // Attribution: may stay small.
                 fontSize = dims.t(1.9f, min = 11f),
                 color = theme.turnMuted.copy(alpha = 0.8f),
                 maxLines = 1,

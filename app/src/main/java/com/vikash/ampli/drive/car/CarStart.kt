@@ -1,5 +1,6 @@
 package com.vikash.ampli.drive.car
 
+import com.vikash.ampli.drive.ui.DriveLock
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -62,8 +63,9 @@ object CarStart {
         pendingTrigger = trigger
         if (launcherVisible) {
             _events.tryEmit(trigger)
-        } else if (trigger != StartTrigger.PhoneConnected) {
-            // Boot or ignition with another app (or another launcher) in front: bring Ampli forward.
+        } else if (trigger != StartTrigger.PhoneConnected && !DriveLock.movingNow(app.speedTracker.state.value.speedKmh)) {
+            // Boot or ignition with another app (or another launcher) in front: bring Ampli forward,
+            // but never over the map while the car is moving.
             // Android 8/9 head units allow it; 10+ may refuse a background start, and then the
             // pending flag runs everything the next time the launcher shows.
             try {
@@ -105,8 +107,11 @@ object CarStart {
         // Welcome audio: "Ram Ram {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
         if (StartPolicy.greets(trigger)) {
             // Ampli startup animation first (Settings › Startup animation), then "Ram Ram…".
-            if (Shell.requestSplash(app.shell.startupAnimation.value)) delay(Shell.SPLASH_MS)
-            app.welcome.play()
+            // Never over the map while driving (an ACC or quick-boot event can arrive on the move,
+            // and any app can send the quick-boot broadcast): then the greeting is voice only.
+            val moving = DriveLock.movingNow(app.speedTracker.state.value.speedKmh)
+            if (!moving && Shell.requestSplash(app.shell.startupAnimation.value)) delay(Shell.SPLASH_MS)
+            app.welcome.play(showCard = !moving)
             // Papers about to expire / FASTag pass running low, in the same voice (at most two).
             try {
                 app.paperVoice.speakAtStart()

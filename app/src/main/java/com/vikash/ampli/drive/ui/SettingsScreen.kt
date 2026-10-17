@@ -299,6 +299,7 @@ fun SettingsScreen(
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
                     stringResource(R.string.weather_attribution),
+                    stringResource(R.string.about_not_affiliated),
                 ),
             )
             // Settings › About › Diagnostics: real Android version, map, GPS, network, for support photos.
@@ -417,11 +418,11 @@ internal fun SettingRow(
     }
 }
 
-/** Privacy policy, published from docs/privacy-policy.html with GitHub Pages. */
 /** Ampli's website (Settings › About, Help & feedback, privacy policy). */
 const val WEBSITE_URL = "https://ampliapps.in"
 
-const val PRIVACY_POLICY_URL = "https://vikash-parashar.github.io/ampli-drive/privacy-policy.html"
+/** Car Hub privacy policy on the Ampli website (source: docs/privacy-policy.html). */
+const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
 
 @Composable
 private fun LinkRow(icon: ImageVector, title: String, hint: String, action: String, onClick: () -> Unit) {

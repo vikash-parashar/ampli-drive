@@ -85,7 +85,7 @@ fun CameraChip(app: DriveApp, modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .heightIn(min = 56.dp)
+            .heightIn(min = MinTouch)
             .combinedClickable(
                 onClickLabel = reportLabel,
                 onClick = { menu = true },
@@ -112,7 +112,7 @@ fun CameraChip(app: DriveApp, modifier: Modifier = Modifier) {
             if (text != null) {
                 Text(
                     text,
-                    fontSize = dims.t(2.4f, min = 13f),
+                    fontSize = dims.t(2.4f, min = 16f),
                     color = if (alert == null) theme.muted else fg,
                     fontWeight = if (alert == null) FontWeight.Normal else FontWeight.Bold,
                     maxLines = 1,
@@ -203,7 +203,7 @@ internal fun CameraSettingsCard(app: DriveApp, isPro: Boolean, onLocked: () -> U
                     )
                 }
             }
-            val small = dims.t(2.3f)
+            val small = dims.t(2.3f, min = 16f)
             Text(stringResource(R.string.cameras_stats, stats.loaded, stats.reported), color = theme.text, fontSize = small)
             Text(
                 stats.dataDate?.let { stringResource(R.string.cameras_data_date, it) } ?: stringResource(R.string.cameras_data_unknown),

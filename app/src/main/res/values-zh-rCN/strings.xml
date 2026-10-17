@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">您还没有发送任何内容。</string>
     <string name="feedback_waiting">%1$d 条等待发送</string>
     <string name="feedback_reply">回复：%1$s</string>
+    <string name="sos_limits_note">SOS 会打开短信应用，并为这些联系人准备好文字和您的位置。必须有人按“发送”：Ampli 无法自己发短信或打电话。碰撞检测可能漏掉事故，也可能误触发。</string>
+    <string name="nav_search_moving">行驶中无法输入。点按“Say it”并说出目的地。</string>
+    <string name="payment_pending_title">付款待处理</string>
+    <string name="payment_pending_hint">Google Play 正在等待您的 UPI 或其他付款获批。请在付款应用中批准；无需再次付款。</string>
+    <string name="voice_tts_missing_hint">未安装手机语音 (TTS)；正在使用 Ampli 语音。</string>
+    <string name="shell_open_settings">打开设置</string>
+    <string name="autostart_acc_note">只有在“后台监测”开启时，才能收到车机的点火 (ACC) 信号。</string>
+    <string name="about_not_affiliated">Ampli Studio 与 NPCI、NHAI、Apple 或 Google 无关联。提及 FASTag、CarPlay、Android Auto 和 Google Maps 仅用于说明 Car Hub 可配合使用的产品。</string>
+    <string name="shell_eq_pick_title">选择均衡器应用</string>
 </resources>

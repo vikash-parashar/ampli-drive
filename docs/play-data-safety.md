@@ -1,6 +1,6 @@
 # Play Console answers: Data safety and permission declarations
 
-For Ampli Car Hub (`com.vikash.ampli.drive`). Re-check these whenever a feature changes what is sent off the unit. Privacy policy URL: https://vikash-parashar.github.io/ampli-drive/privacy-policy.html (GitHub Pages from `/docs` on `main`; switch Pages on in the repo settings).
+For Ampli Car Hub (`com.vikash.ampli.drive`). Re-check these whenever a feature changes what is sent off the unit. Privacy policy URL: https://ampliapps.in/privacy/carhub/ (GitHub Pages from `/docs` on `main`; switch Pages on in the repo settings).
 
 ## Data safety form
 

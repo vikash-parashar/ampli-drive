@@ -569,4 +569,13 @@
     <string name="feedback_none_yet">रउआ अबहीं ले कुछ ना भेजले बानी।</string>
     <string name="feedback_waiting">%1$d भेजे के इंतजार में</string>
     <string name="feedback_reply">जवाब: %1$s</string>
+    <string name="sos_limits_note">SOS एह संपर्क खातिर रउरा लोकेशन के साथे मैसेज ऐप खोलेला। केहू के भेजीं दबावे के पड़ी: Ampli अपने से SMS भा कॉल ना कर सकेला। दुर्घटना पहचान कवनो दुर्घटना छोड़ सकेला भा गलती से चालू हो सकेला।</string>
+    <string name="nav_search_moving">गाड़ी चलावत घरी टाइपिंग बंद बा। “Say it” दबाईं आ बताईं कहाँ जाए के बा।</string>
+    <string name="payment_pending_title">पेमेंट बाकी बा</string>
+    <string name="payment_pending_hint">Google Play रउरा UPI भा दोसर पेमेंट के मंजूरी के इंतजार में बा। अपना पेमेंट ऐप में मंजूरी दीं; फेर से पइसा देवे के जरूरत नइखे।</string>
+    <string name="voice_tts_missing_hint">फोन के आवाज (TTS) इंस्टॉल नइखे; Ampli के आवाज बोली।</string>
+    <string name="shell_open_settings">सेटिंग खोलीं</string>
+    <string name="autostart_acc_note">हेड यूनिट के इग्निशन (ACC) सिग्नल तबे मिलेला जब “पीछे से निगरानी” चालू होखे।</string>
+    <string name="about_not_affiliated">Ampli Studio के NPCI, NHAI, Apple भा Google से कवनो संबंध नइखे। FASTag, CarPlay, Android Auto आ Google Maps के नाम खाली ई बतावे खातिर बा कि Car Hub केकरा साथे चलेला।</string>
+    <string name="shell_eq_pick_title">आपन इक्वलाइज़र ऐप चुनीं</string>
 </resources>

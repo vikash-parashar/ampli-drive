@@ -102,7 +102,7 @@ fun openFastagRecharge(context: Context, userUrl: String) {
 
 /**
  * Status-row chip: FASTag balance and when it was last updated. Red below the low-balance
- * threshold. The whole row height is the tap target (at least 56 dp).
+ * threshold. The whole row height is the tap target (at least 64 dp).
  */
 @Composable
 fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -133,7 +133,7 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
     }
     Box(
         modifier = modifier
-            .heightIn(min = 56.dp)
+            .heightIn(min = MinTouch)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -154,7 +154,7 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
             )
             Text(
                 text,
-                fontSize = dims.t(2.4f, min = 13f),
+                fontSize = dims.t(2.4f, min = 16f),
                 color = fg,
                 fontWeight = if (isLow) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,

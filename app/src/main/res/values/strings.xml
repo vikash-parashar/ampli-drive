@@ -853,4 +853,7 @@
     <string name="nav_search_moving">Typing is off while driving. Tap “Say it” and say where to go.</string>
     <string name="shell_open_settings">Open settings</string>
     <string name="voice_tts_missing_hint">No phone voice installed; using Ampli voice.</string>
+    <string name="autostart_acc_note">Ignition (ACC) signals from the head unit are heard only while “Monitor in background” is on.</string>
+    <string name="about_not_affiliated">Ampli Studio is not affiliated with NPCI, NHAI, Apple or Google. FASTag, CarPlay, Android Auto and Google Maps are named only to say what works with Car Hub.</string>
+    <string name="shell_eq_pick_title">Choose your equalizer app</string>
 </resources>

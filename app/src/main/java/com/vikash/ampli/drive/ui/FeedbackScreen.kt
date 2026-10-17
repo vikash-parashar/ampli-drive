@@ -87,14 +87,21 @@ fun FeedbackScreen(app: DriveApp, onBack: () -> Unit) {
                 TabButton(Icons.Filled.BugReport, stringResource(R.string.feedback_bug), tab == FeedbackTab.Bug) { tab = FeedbackTab.Bug }
                 TabButton(Icons.Filled.Lightbulb, stringResource(R.string.feedback_feature), tab == FeedbackTab.Feature) { tab = FeedbackTab.Feature }
                 TabButton(Icons.Filled.SupportAgent, stringResource(R.string.feedback_support), tab == FeedbackTab.Support) { tab = FeedbackTab.Support }
-                TabButton(Icons.Filled.Inbox, stringResource(R.string.feedback_mine), tab == FeedbackTab.Mine) { tab = FeedbackTab.Mine }
+                // Votes and "My requests" need the owner server; hidden until OWNER_API_URL is set.
+                if (app.feedback.hasBackend) {
+                    TabButton(Icons.Filled.Inbox, stringResource(R.string.feedback_mine), tab == FeedbackTab.Mine) { tab = FeedbackTab.Mine }
+                }
             }
             Pane(Modifier.weight(1f).fillMaxHeight()) {
                 when (tab) {
                     FeedbackTab.Bug -> ReportForm(app, ReportKind.Bug)
-                    FeedbackTab.Feature -> Row(Modifier.fillMaxSize()) {
-                        Box(Modifier.weight(1f)) { ReportForm(app, ReportKind.Feature) }
-                        Box(Modifier.weight(1f)) { FeatureVotes(app) }
+                    FeedbackTab.Feature -> if (app.feedback.hasBackend) {
+                        Row(Modifier.fillMaxSize()) {
+                            Box(Modifier.weight(1f)) { ReportForm(app, ReportKind.Feature) }
+                            Box(Modifier.weight(1f)) { FeatureVotes(app) }
+                        }
+                    } else {
+                        ReportForm(app, ReportKind.Feature)
                     }
                     FeedbackTab.Support -> ReportForm(app, ReportKind.Support)
                     FeedbackTab.Mine -> MyRequests(app)
