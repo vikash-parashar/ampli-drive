@@ -292,6 +292,7 @@ class CarMonitor(private val app: DriveApp) {
     // ------------------------------------------------------------------ Crash
 
     private var crashJob: Job? = null
+    private var crashTimer: Job? = null
     private var crashFixSignal: android.os.CancellationSignal? = null
     @Volatile private var crashFix: Location? = null
     private var savedVolume: Int? = null
@@ -329,10 +330,13 @@ class CarMonitor(private val app: DriveApp) {
                 app.speaker.say(res.getString(R.string.crash_voice, secondsLeft), lang)
                 delay(4000)
             }
-            // The countdown ends here, not in the UI: the SOS message opens even when the
-            // countdown screen was left (HOME key, another app in front).
-            val wait = end - SystemClock.elapsedRealtime()
-            if (wait > 0) delay(wait)
+        }
+        // The countdown ends here, not in the UI: the SOS message opens even when the countdown
+        // screen was left (HOME key, another app in front). Its own timer, so a slow or missing
+        // TTS engine in the voice loop above can never hold it up.
+        crashTimer?.cancel()
+        crashTimer = scope.launch {
+            delay(CRASH_COUNTDOWN_S * 1000L)
             if (_crashAt.value != null) sendCrashSos(null)
         }
     }
@@ -349,7 +353,7 @@ class CarMonitor(private val app: DriveApp) {
         val profile = app.emergency.profile.value
         val message = Sos.buildMessage(profile, fix)
         _crashSos.value = message
-        // When the countdown job is the caller, cancelling it here only stops it at its next
+        // When the countdown timer is the caller, cancelling it here only stops it at its next
         // suspension point; the composer below still opens.
         clearCrash()
         Sos.openSmsComposer(app, profile.contacts.map { it.phone }, message)
@@ -363,6 +367,8 @@ class CarMonitor(private val app: DriveApp) {
         crashFixSignal = null
         crashJob?.cancel()
         crashJob = null
+        crashTimer?.cancel()
+        crashTimer = null
         app.speaker.stop()
         restoreVolume()
     }
