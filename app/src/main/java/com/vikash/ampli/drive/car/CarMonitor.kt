@@ -459,7 +459,8 @@ class CarMonitor(private val app: DriveApp) {
             // Haryanvi desi: "आगे धुंध सै भाई, फॉग लाइट जला ले अर धीरे चला।"
             fresh.forEach { (hz, _) -> app.desi.sayLater(desiHazard(hz)) }
         } else {
-            speak { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
+            // No phone voice on this unit: the recorded desi weather lines stand in.
+            speak(fresh.map { (hz, _) -> desiHazard(hz) }) { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
         }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_WEATHER, app.getString(R.string.weather_title), fresh.joinToString(" ") { (hz, km) -> hazardLine(app, hz, km) })
@@ -528,7 +529,9 @@ class CarMonitor(private val app: DriveApp) {
             if (plain.isNotEmpty()) speak { res -> plain.joinToString(" ") { engineWarningLine(res, it) } }
             return
         }
-        speak { res -> new.joinToString(" ") { engineWarningLine(res, it) } }
+        // No phone voice: the recorded desi lines stand in when every warning has one.
+        val standIns = new.map { desiWarning(it) }
+        speak(if (null in standIns) emptyList() else standIns.filterNotNull()) { res -> new.joinToString(" ") { engineWarningLine(res, it) } }
     }
 
     private fun desiWarning(w: EngineWarning): HaryanviLines.Event? = when (w) {
@@ -558,14 +561,19 @@ class CarMonitor(private val app: DriveApp) {
 
     private var speech: Job? = null
 
-    /** Speaks after any line already being spoken, unless the voice assistant is busy. */
-    private fun speak(text: (Context) -> String) {
+    /**
+     * Speaks after any line already being spoken, unless the voice assistant is busy. On a unit
+     * without a TTS engine the recorded lines of [standIns] play instead (when all are recorded);
+     * a line with no recording (tyres, fault codes) stays with the phone voice.
+     */
+    private fun speak(standIns: List<HaryanviLines.Event> = emptyList(), text: (Context) -> String) {
         val old = speech
         speech = scope.launch {
             old?.join()
             if (app.voice.busy.value) return@launch
             val lang = language()
-            app.speaker.say(text(localized(lang)), lang)
+            val clips = app.voicePlayer.standInClips(standIns.map { it to emptyArray<Any>() })
+            app.voicePlayer.say(Spoken(text(localized(lang)), lang, clips))
         }
     }
 

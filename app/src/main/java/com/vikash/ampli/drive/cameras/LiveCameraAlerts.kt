@@ -100,6 +100,8 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
                     lines += desi
                     continue
                 }
+                // Standard style. Without a TTS engine the recorded desi line stands in
+                // (distance clip + "पै कैमरा सै…", or the slow-down line), so the alert is heard.
                 when (e) {
                     is CameraAlertEngine.Event.Announce -> lines += Spoken(
                         if (e.camera.maxspeed != null) {
@@ -108,8 +110,17 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
                             res.getString(R.string.camera_voice_ahead_nolimit, e.roundedMeters)
                         },
                         lang,
+                        if (e.camera.maxspeed != null) {
+                            app.voicePlayer.standInClips(HaryanviLines.Event.CameraAhead, e.roundedMeters, e.camera.maxspeed ?: 0)
+                        } else {
+                            app.voicePlayer.standInClips(HaryanviLines.Event.CameraAheadNoLimit, e.roundedMeters)
+                        },
                     )
-                    is CameraAlertEngine.Event.SlowDown -> lines += Spoken(res.getString(R.string.camera_voice_slow_down), lang)
+                    is CameraAlertEngine.Event.SlowDown -> lines += Spoken(
+                        res.getString(R.string.camera_voice_slow_down),
+                        lang,
+                        app.voicePlayer.standInClips(HaryanviLines.Event.OverSpeed),
+                    )
                     is CameraAlertEngine.Event.Beep -> beep = true
                     is CameraAlertEngine.Event.Cleared -> Unit
                 }
