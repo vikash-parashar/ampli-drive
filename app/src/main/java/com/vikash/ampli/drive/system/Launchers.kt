@@ -64,6 +64,8 @@ object Launchers {
     }
 
     fun openNotificationAccess(context: Context) {
+        // Android 13+: if access is still off on return, show the "restricted settings" guide.
+        RestrictedSettings.arm(context)
         val component = ComponentName(context, DriveNotificationListener::class.java)
         val detail = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
             .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, component.flattenToString())

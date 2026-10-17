@@ -584,4 +584,15 @@
     <string name="welcome_hint">हर बार गाड्डी स्टार्ट होण पै एक बार बाजै (बूट या इग्निसन ऑन)</string>
     <string name="welcome_play">इब्बे स्वागत सुण</string>
     <string name="website_title">वेबसाइट</string>
+
+    <!-- Android 13+ restricted settings guide (sideloaded APK, notification access refused) -->
+    <string name="restricted_title">नोटिफ़िकेशन एक्सेस अभी भी बंद है</string>
+    <string name="restricted_hint">Android 13 और नए फ़ोन उन ऐप के लिए इसे रोक देते हैं जो Play से नहीं लगाए गए (\"restricted setting\")। एक बार ऐसे चालू करें:</string>
+    <string name="restricted_step_1">नीचे \"App info खोलें\" दबाएँ।</string>
+    <string name="restricted_step_2">ऊपर दाईं ओर ⋮ मेन्यू दबाएँ, फिर \"Allow restricted settings\" (प्रतिबंधित सेटिंग की अनुमति दें) चुनें और पक्का करें।</string>
+    <string name="restricted_step_3">वापस आएँ, \"नोटिफ़िकेशन एक्सेस खोलें\" दबाएँ और Ampli Car Hub चालू करें।</string>
+    <string name="restricted_menu_missing">⋮ मेन्यू में \"Allow restricted settings\" नहीं दिखा? पहले एक बार नोटिफ़िकेशन एक्सेस चालू करके देखें, फ़ोन मना करेगा, फिर ⋮ मेन्यू दोबारा खोलें।</string>
+    <string name="restricted_play_note">ऐप Play से लगाने पर यह रोक अपने-आप हट जाती है।</string>
+    <string name="restricted_open_app_info">App info खोलें</string>
+    <string name="restricted_open_access">नोटिफ़िकेशन एक्सेस खोलें</string>
 </resources>

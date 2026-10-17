@@ -735,4 +735,15 @@
     <string name="welcome_hint">Plays once each time the car starts (boot or ignition on)</string>
     <string name="welcome_play">Play welcome now</string>
     <string name="website_title">Website</string>
+
+    <!-- Android 13+ restricted settings guide (sideloaded APK, notification access refused) -->
+    <string name="restricted_title">Notification access is still off</string>
+    <string name="restricted_hint">On Android 13 and newer, the phone blocks this for apps not installed from Play (\"restricted setting\"). Allow it once like this:</string>
+    <string name="restricted_step_1">Tap \"Open App info\" below.</string>
+    <string name="restricted_step_2">Tap the ⋮ menu at the top right, then \"Allow restricted settings\", and confirm.</string>
+    <string name="restricted_step_3">Come back, tap \"Open notification access\" and turn on Ampli Car Hub.</string>
+    <string name="restricted_menu_missing">No \"Allow restricted settings\" in the ⋮ menu? Try turning on notification access once, let the phone say no, then open the ⋮ menu again.</string>
+    <string name="restricted_play_note">This block goes away once the app is installed from Play.</string>
+    <string name="restricted_open_app_info">Open App info</string>
+    <string name="restricted_open_access">Open notification access</string>
 </resources>
