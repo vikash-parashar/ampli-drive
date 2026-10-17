@@ -98,6 +98,7 @@ fun DriveRoot(
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
     var settingsReturn by remember { mutableStateOf(Screen.Home) }
     var showPro by remember { mutableStateOf(false) }
+    var showQuick by remember { mutableStateOf(false) }
     // A detected crash opens the SOS countdown over whatever is showing.
     val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
     LaunchedEffect(crashAt) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
@@ -154,6 +155,7 @@ fun DriveRoot(
                                 onRequestPermissions = onRequestPermissions,
                                 onOpenNavScreen = { onNavigate(Screen.Navigation) },
                                 onOpenNavSearch = { onNavigate(Screen.NavSearch) },
+                                onOpenQuick = { showQuick = true },
                             )
                             TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                             CarAlertHost(app = app)
@@ -296,6 +298,12 @@ fun DriveRoot(
                     } else {
                         BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
                     }
+                    // Ampli Shell: "Make Ampli your home screen" (first run, until done or "Not now").
+                    if (nameAsked && screen == Screen.Home) DefaultHomeCardHost(app = app, resumeTick = resumeTick)
+                    // Quick controls, pulled down from Home's status row.
+                    if (showQuick) BackHandler(enabled = true) { showQuick = false }
+                    LaunchedEffect(screen) { if (screen != Screen.Home) showQuick = false }
+                    QuickControlsHost(app = app, open = showQuick && screen == Screen.Home, onClose = { showQuick = false })
                     // Android 13+: notification access still off after "Allow access" (sideloaded
                     // APK, restricted settings): show how to allow it.
                     RestrictedSettingsGuideHost(resumeTick = resumeTick)
@@ -316,6 +324,8 @@ fun DriveRoot(
                     val voice by app.voice.state.collectAsStateWithLifecycle()
                     if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
                     VoiceOverlay(state = voice, onCancel = app.voice::cancel, onChoose = app.voice::choose)
+                    // After boot / ignition: the Ampli startup animation over everything.
+                    BootSplashHost()
                 }
             }
         }

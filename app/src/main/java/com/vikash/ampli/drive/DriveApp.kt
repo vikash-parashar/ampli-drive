@@ -56,6 +56,9 @@ class DriveApp : Application() {
     val mediaHub: MediaHub by lazy { MediaHub(this) }
     val bluetooth: BluetoothStatus by lazy { BluetoothStatus(this) }
     val billing: ProBilling by lazy { ProBilling(this, prefs) }
+
+    /** Ampli Shell: full screen, startup animation, the Ampli app list and its PIN. */
+    val shell: com.vikash.ampli.drive.prefs.ShellPrefs by lazy { com.vikash.ampli.drive.prefs.ShellPrefs(this) }
     val fastag: FastagStore by lazy { FastagStore(this) }
     val emergency: EmergencyStore by lazy { EmergencyStore(this) }
 

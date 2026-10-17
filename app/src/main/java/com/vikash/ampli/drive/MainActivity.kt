@@ -13,6 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -71,6 +74,13 @@ class MainActivity : ComponentActivity() {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
                 }
+            }
+        }
+
+        // Settings › Full screen: hide the status and navigation bars (a swipe brings them back).
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                app.shell.fullScreen.collect { applyFullScreen(it) }
             }
         }
 
@@ -219,6 +229,26 @@ class MainActivity : ComponentActivity() {
             return true
         }
         return super.onKeyUp(keyCode, event)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Dialogs and other apps can bring the bars back; hide them again on return.
+        if (hasFocus) applyFullScreen(app.shell.fullScreen.value)
+    }
+
+    private fun applyFullScreen(on: Boolean) {
+        try {
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            if (on) {
+                controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+            } else {
+                controller.show(WindowInsetsCompat.Type.systemBars())
+            }
+        } catch (_: Exception) {
+            // Some head-unit ROMs have no navigation bar to hide.
+        }
     }
 
     private fun startSensors() {

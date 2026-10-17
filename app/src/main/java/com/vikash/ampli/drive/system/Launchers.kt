@@ -17,10 +17,33 @@ import com.vikash.ampli.drive.service.DriveNotificationListener
 object Launchers {
     const val GOOGLE_MAPS = DriveNotificationListener.GOOGLE_MAPS
 
-    /** Phone-link apps the "Auto" button tries when the driver hasn't picked one. */
+    /**
+     * Phone-link (CarPlay / Android Auto mirroring) apps, best first: the Phone link button, voice
+     * "connect my phone" and the Ampli app list all use this one list. Head units ship many
+     * variants; keep the manifest's <queries> in step.
+     */
     val PHONE_LINK_PACKAGES = listOf(
         "com.zjinnova.zlink",
+        "cn.manstep.phonemirrorBox",
+        "com.suding.speedplay",
+        "com.autokit",
+        "com.autokit.app",
+        "com.carlinkit",
+        "net.easyconn",
+        "net.easyconn.carman.wws",
+        "com.carbit.phonelink",
+        "com.syu.carlink",
+        "com.fyt.phonelink",
+        "com.ts.phonelink",
+        "com.tw.carplay",
+        "com.ex.phonelink",
         "com.google.android.projection.gearhead",
+    )
+
+    /** Installed apps whose name says phone link, when none of [PHONE_LINK_PACKAGES] is there. */
+    val PHONE_LINK_LABELS = listOf(
+        "android auto", "carplay", "car play", "zlink", "phone link", "phonelink", "autokit", "carlink",
+        "carlinkit", "easyconn", "easy connection", "easyconnection", "tlink", "t-link", "phone mirror",
     )
 
     fun openNavigation(context: Context, location: Location?): Boolean {
@@ -60,7 +83,21 @@ object Launchers {
     /** Returns false when nothing is set up, so the caller can show the app picker. */
     fun openPhoneLink(context: Context, pinnedPackage: String?): Boolean {
         if (pinnedPackage != null && openPackage(context, pinnedPackage, quiet = true)) return true
-        return PHONE_LINK_PACKAGES.any { openPackage(context, it, quiet = true) }
+        if (PHONE_LINK_PACKAGES.any { openPackage(context, it, quiet = true) }) return true
+        val byLabel = phoneLinkByLabel(context) ?: return false
+        return openComponent(context, byLabel.packageName, byLabel.name)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun phoneLinkByLabel(context: Context): android.content.pm.ActivityInfo? = try {
+        val pm = context.packageManager
+        pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+            .firstOrNull { ri ->
+                val label = ri.loadLabel(pm)?.toString()?.lowercase().orEmpty()
+                ri.activityInfo.packageName != context.packageName && PHONE_LINK_LABELS.any { label.contains(it) }
+            }?.activityInfo
+    } catch (_: Exception) {
+        null
     }
 
     fun openNotificationAccess(context: Context) {

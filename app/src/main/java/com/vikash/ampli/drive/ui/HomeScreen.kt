@@ -37,6 +37,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.PhonelinkRing
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.CircleShape
@@ -92,6 +98,8 @@ fun HomeScreen(
     /** Car Hub's own navigation: the full navigation screen, and "Where to?". */
     onOpenNavScreen: () -> Unit = {},
     onOpenNavSearch: () -> Unit = {},
+    /** Ampli Shell quick controls (pull down on the status row, or its button). */
+    onOpenQuick: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -102,7 +110,6 @@ fun HomeScreen(
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val nav by app.navigator.state.collectAsStateWithLifecycle()
     val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
-    val autoHint = stringResource(R.string.auto_button_hint)
     val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
     val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
 
@@ -131,6 +138,16 @@ fun HomeScreen(
         Unit
     }
     val gap = dims.d(2f)
+    var linkMissing by remember { mutableStateOf(false) }
+    if (linkMissing) {
+        PhoneLinkMissingDialog(
+            onOpenApps = {
+                linkMissing = false
+                onOpenApps()
+            },
+            onDismiss = { linkMissing = false },
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -160,10 +177,25 @@ fun HomeScreen(
                     }
                 }
             },
+            onQuickClick = onOpenQuick,
             modifier = Modifier
                 .fillMaxWidth()
                 // 56 dp so the FASTag chip and status pills are full-size touch targets.
-                .height(maxOf(dims.d(7.5f), 56.dp)),
+                .height(maxOf(dims.d(7.5f), 56.dp))
+                // Pull down from the top bar, like a phone's quick settings.
+                .pointerInput(Unit) {
+                    var pulled = 0f
+                    detectVerticalDragGestures(
+                        onDragStart = { pulled = 0f },
+                        onVerticalDrag = { _, dy ->
+                            pulled += dy
+                            if (pulled > 48.dp.toPx()) {
+                                pulled = Float.NEGATIVE_INFINITY
+                                onOpenQuick()
+                            }
+                        },
+                    )
+                },
         )
         Row(
             modifier = Modifier
@@ -287,11 +319,9 @@ fun HomeScreen(
             // Long-press Music / Phone: pick which app the button opens.
             onMusicLong = { AppChooser.ask(AppRole.Music) },
             onPhoneLong = { AppChooser.ask(AppRole.Phone) },
+            // Phone link: the screen's CarPlay / Android Auto app (Launchers.PHONE_LINK_PACKAGES).
             onAuto = {
-                if (!Launchers.openPhoneLink(context, autoPackage)) {
-                    Toast.makeText(context, autoHint, Toast.LENGTH_LONG).show()
-                    onOpenApps()
-                }
+                if (!Launchers.openPhoneLink(context, autoPackage)) linkMissing = true
             },
             onCar = onOpenCar,
             carAlert = carAlert,
@@ -312,6 +342,7 @@ private fun StatusRow(
     car: (@Composable () -> Unit)?,
     onGpsClick: () -> Unit,
     onBtClick: () -> Unit,
+    onQuickClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dims = LocalDims.current
@@ -381,6 +412,7 @@ private fun StatusRow(
             Pill(text = text, icon = icon, dotColor = dot, onClick = onBtClick)
         }
         GpsPill(gps, onGpsClick)
+        Pill(text = stringResource(R.string.shell_quick_short), icon = Icons.Filled.Tune, onClick = onQuickClick)
     }
 }
 
@@ -447,12 +479,7 @@ private fun Dock(
         DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item)
         DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item, onLongClick = onMusicLong)
         DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item, onLongClick = onPhoneLong)
-        DockButton(
-            if (dims.compact) stringResource(R.string.dock_auto) else stringResource(R.string.dock_android_auto),
-            Icons.Filled.DirectionsCar,
-            onAuto,
-            item,
-        )
+        DockButton(stringResource(R.string.dock_phone_link), Icons.Filled.PhonelinkRing, onAuto, item)
         // Car hub: parked car, papers, expenses, engine, tyres. A red dot when something is due.
         DockButton(stringResource(R.string.dock_car), Icons.Filled.CarRepair, onCar, item, badge = carAlert)
         DockButton(stringResource(R.string.dock_apps), Icons.Filled.Apps, onApps, item)

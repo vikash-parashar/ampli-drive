@@ -51,39 +51,50 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.billing.ProBilling
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 
-/** One card in Settings › More from Ampli. Edit [AMPLI_PRODUCTS] to add or change products. */
+/**
+ * One row in Settings › More from Ampli (in-app-hook-spec v1 §4). Edit [AMPLI_PRODUCTS] to add a
+ * product or to flip [live] once it is on Play.
+ */
 data class AmpliProduct(
     @StringRes val name: Int,
     @StringRes val line: Int,
+    /** Play package, or null while it has none yet. */
+    val packageName: String?,
+    /** On Play: "Get" opens its listing. Otherwise "Coming soon" opens ampliapps.in. */
+    val live: Boolean,
     /** Logo image, or null for a [monogram] tile. */
     @DrawableRes val logo: Int?,
     val monogram: String = "",
-    /** Tried first (Play's market:// link), then [fallbackUrl]. */
-    val url: String,
-    val fallbackUrl: String? = null,
-    val comingSoon: Boolean = false,
-)
+) {
+    /** market:// first, then the Play web page; ampliapps.in before launch. */
+    val links: List<String>
+        get() = if (live && packageName != null) {
+            listOf("market://details?id=$packageName", "https://play.google.com/store/apps/details?id=$packageName")
+        } else {
+            listOf(WEBSITE_URL)
+        }
+}
 
 val AMPLI_PRODUCTS = listOf(
     AmpliProduct(
         name = R.string.more_mp3_name,
         line = R.string.more_mp3_line,
+        packageName = "com.vikash.ampli",
+        live = false,
         logo = R.drawable.ampli_mp3_logo,
-        url = "market://details?id=com.vikash.ampli",
-        fallbackUrl = "https://play.google.com/store/apps/details?id=com.vikash.ampli",
     ),
     AmpliProduct(
         name = R.string.more_naukri_name,
         line = R.string.more_naukri_line,
+        packageName = null,
+        live = false,
         logo = null,
         monogram = "N",
-        url = "https://ampliapps.in",
-        comingSoon = true,
     ),
 )
 
-private val Saffron = Color(0xFFFF9933)
-private val Indigo = Color(0xFF1E1B4B)
+internal val Saffron = Color(0xFFFF9933)
+internal val Indigo = Color(0xFF1E1B4B)
 
 /** Settings › More from Ampli: the other Ampli apps, each with a button to Play or the website. */
 @Composable
@@ -102,7 +113,7 @@ internal fun MoreFromAmpliCard(products: List<AmpliProduct> = AMPLI_PRODUCTS) {
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(theme.surfaceHigh)
+                        .background(theme.surface)
                         .border(1.dp, theme.border, RoundedCornerShape(18.dp))
                         .heightIn(min = MinTouch)
                         .padding(horizontal = dims.d(1.8f), vertical = dims.d(1.2f)),
@@ -111,31 +122,13 @@ internal fun MoreFromAmpliCard(products: List<AmpliProduct> = AMPLI_PRODUCTS) {
                 ) {
                     ProductLogo(p)
                     Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
-                            Text(stringResource(p.name), color = theme.text, fontSize = dims.t(2.9f, min = 17f), fontWeight = FontWeight.SemiBold)
-                            if (p.comingSoon) {
-                                Text(
-                                    stringResource(R.string.more_coming_soon),
-                                    color = Indigo,
-                                    fontSize = dims.t(2f, min = 12f),
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Saffron)
-                                        .padding(horizontal = 10.dp, vertical = 2.dp),
-                                )
-                            }
-                        }
+                        Text(stringResource(p.name), color = theme.text, fontSize = dims.t(2.9f, min = 17f), fontWeight = FontWeight.SemiBold)
                         Text(stringResource(p.line), color = theme.muted, fontSize = dims.t(2.3f, min = 13f))
                     }
                     BigButton(
-                        text = stringResource(if (p.comingSoon) R.string.more_learn_more else R.string.more_open_play),
-                        onClick = {
-                            if (!startSafely(context, Intent(Intent.ACTION_VIEW, Uri.parse(p.url)))) {
-                                p.fallbackUrl?.let { startSafely(context, Intent(Intent.ACTION_VIEW, Uri.parse(it))) }
-                            }
-                        },
-                        primary = false,
+                        text = stringResource(if (p.live) R.string.more_get else R.string.more_coming_soon),
+                        onClick = { p.links.any { startSafely(context, Intent(Intent.ACTION_VIEW, Uri.parse(it))) } },
+                        primary = p.live,
                     )
                 }
             }
@@ -156,7 +149,7 @@ private fun ProductLogo(p: AmpliProduct) {
     }
 }
 
-/** Settings › Help the developer grow: Play Billing tips, with a thank-you once paid. */
+/** Settings › Buy the developer a chai: Play Billing tips (unlock nothing), with a thank-you once paid. */
 @Composable
 internal fun SupportCard(app: DriveApp) {
     val context = LocalContext.current
@@ -189,28 +182,18 @@ internal fun SupportCardContent(prices: Map<String, String>, thanked: Boolean, o
                 Icon(Icons.Filled.Coffee, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(32.dp))
                 Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.support_title), stringResource(R.string.support_hint)) }
             }
-            val small = prices[ProBilling.TIP_SMALL]
-            val big = prices[ProBilling.TIP_BIG]
-            if (small == null && big == null) {
+            val tiers = ProBilling.TIP_IDS.mapNotNull { id -> prices[id]?.let { id to it } }
+            if (tiers.isEmpty()) {
                 // Sideloaded build, or the tips are not created in Play Console yet.
                 Text(stringResource(R.string.support_unavailable), color = theme.muted, fontSize = dims.t(2.4f, min = 14f))
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)), modifier = Modifier.fillMaxWidth()) {
-                    if (small != null) {
+                    tiers.forEachIndexed { i, (id, price) ->
                         BigButton(
-                            text = stringResource(R.string.support_tip_small, small),
-                            onClick = { onTip(ProBilling.TIP_SMALL) },
-                            icon = Icons.Filled.Coffee,
-                            primary = false,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    if (big != null) {
-                        BigButton(
-                            text = stringResource(R.string.support_tip_big, big),
-                            onClick = { onTip(ProBilling.TIP_BIG) },
-                            icon = Icons.Filled.Favorite,
-                            primary = true,
+                            text = price,
+                            onClick = { onTip(id) },
+                            icon = if (i == tiers.lastIndex) Icons.Filled.Favorite else Icons.Filled.Coffee,
+                            primary = i == tiers.lastIndex,
                             modifier = Modifier.weight(1f),
                         )
                     }
