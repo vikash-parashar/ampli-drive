@@ -595,4 +595,22 @@
     <string name="restricted_play_note">ऐप Play से लगाने पर यह रोक अपने-आप हट जाती है।</string>
     <string name="restricted_open_app_info">App info खोलें</string>
     <string name="restricted_open_access">नोटिफ़िकेशन एक्सेस खोलें</string>
+
+    <!-- Settings › More from Ampli -->
+    <string name="more_title">Ampli के और ऐप</string>
+    <string name="more_hint">Car Hub बनाने वालों के दूसरे ऐप</string>
+    <string name="more_mp3_name">Ampli MP3 Player</string>
+    <string name="more_mp3_line">एक बार ख़रीदें, हमेशा सुनें: म्यूज़िक प्लेयर</string>
+    <string name="more_naukri_name">Ampli Naukri</string>
+    <string name="more_naukri_line">मुफ़्त सरकारी नौकरी अलर्ट, आपकी योग्यता से मिलान के साथ</string>
+    <string name="more_coming_soon">जल्द आ रहा है</string>
+    <string name="more_open_play">Play पर देखें</string>
+    <string name="more_learn_more">और जानें</string>
+    <!-- Settings › Help the developer grow (Play Billing tips, unlock nothing) -->
+    <string name="support_title">डेवलपर का साथ दें</string>
+    <string name="support_hint">Car Hub पसंद आया? एक कॉफ़ी पिला दें। यह सिर्फ़ टिप है, इससे कुछ अनलॉक नहीं होता।</string>
+    <string name="support_tip_small">कॉफ़ी %1$s</string>
+    <string name="support_tip_big">कॉफ़ी और नाश्ता %1$s</string>
+    <string name="support_unavailable">Play पर आने के बाद मिलेगा</string>
+    <string name="support_thanks">बहुत-बहुत धन्यवाद! आपके साथ से Car Hub आगे बढ़ता है। 🙏</string>
 </resources>
