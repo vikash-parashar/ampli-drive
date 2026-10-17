@@ -29,6 +29,11 @@ sealed interface VoiceIntent {
     data object Sos : VoiceIntent
     data object Greeting : VoiceIntent
 
+    /** Small talk: "के हाल सै?", "कौन सै तू?", "चुटकला सुणा". */
+    data class SmallTalk(val kind: Talk) : VoiceIntent
+
+    enum class Talk { HowAreYou, WhoAreYou, Joke }
+
     /** Car questions: "how many km to next service", "tyre pressure", "engine status", "where did I park". */
     data object ServiceDue : VoiceIntent
     data object TyrePressure : VoiceIntent
@@ -68,6 +73,7 @@ object VoiceIntents {
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
         if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
         carQuestion(t)?.let { return it }
+        if (words <= 8) smallTalk(t)?.let { return it }
         if (kw.camera.any { has(t, it) }) return VoiceIntent.NextCamera
         if (kw.auto.any { has(t, it) }) return VoiceIntent.OpenAndroidAuto
         if (kw.next.any { has(t, it) } && (words <= 4 || kw.music.any { has(t, it) })) return VoiceIntent.Next
@@ -106,6 +112,33 @@ object VoiceIntents {
         CAR_ENGINE.any { has(t, it) } -> VoiceIntent.EngineStatus
         else -> null
     }
+
+    /** Small talk, Haryanvi / Hindi / English in any app language. Before "play" ("चुटकुला सुनाओ"). */
+    private fun smallTalk(t: String): VoiceIntent? = when {
+        TALK_JOKE.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.Joke)
+        TALK_WHO.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.WhoAreYou)
+        TALK_HOW.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.HowAreYou)
+        else -> null
+    }
+
+    private val TALK_JOKE = listOf(
+        "joke", "jokes", "tell me a joke", "something funny", "चुटकला", "चुटकुला", "चुटकले", "चुटकुले",
+        "जोक", "chutkula", "chutkala", "chutkule", "chutkale",
+    ).map { normalize(it) }
+
+    private val TALK_WHO = listOf(
+        "who are you", "what is your name", "what s your name", "your name",
+        "कौन सै तू", "तू कौन सै", "कौन है तू", "तू कौन है", "तुम कौन हो", "आप कौन हो", "आप कौन हैं",
+        "तेरा नाम", "तुम्हारा नाम", "आपका नाम", "थारा नाम",
+        "kaun sai tu", "tu kaun sai", "kaun hai tu", "tu kaun hai", "tum kaun ho", "aap kaun ho",
+        "tera naam", "tumhara naam", "aapka naam", "thara naam",
+    ).map { normalize(it) }
+
+    private val TALK_HOW = listOf(
+        "how are you", "how r you", "how is it going", "what s up",
+        "के हाल सै", "के हाल", "क्या हाल है", "क्या हाल", "कैसे हो", "कैसा है", "कैसी हो", "हाल चाल",
+        "ke haal", "kya haal", "kaise ho", "kaisa hai", "haal chaal",
+    ).map { normalize(it) }
 
     private val REPORT = listOf(
         "report a problem", "report problem", "report an issue", "report a bug", "report bug",

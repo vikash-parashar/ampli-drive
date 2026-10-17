@@ -157,8 +157,11 @@ class VoiceAssistant(private val app: DriveApp) {
         val now = System.currentTimeMillis()
         if (now - app.prefs.lastVoiceGreeting > GREETING_EVERY_MS) {
             app.prefs.lastVoiceGreeting = now
-            styled(res, lang, HaryanviLines.Event.Greeting, greeting(res))
+            greet(res, lang)
             expect = Expect.Destination
+        } else {
+            // Haryanvi desi between greetings: a short "हाँ भाई, बोल।" (Standard: just the beep).
+            app.desi.line(HaryanviLines.Event.WakeReply)?.let { speakDesi(it) }
         }
 
         var misses = 0
@@ -261,14 +264,16 @@ class VoiceAssistant(private val app: DriveApp) {
                 }
                 return null
             }
-            VoiceIntent.Resume -> VoiceActions.transport(app, VoiceActions.Transport.Play)
-            VoiceIntent.Pause -> VoiceActions.transport(app, VoiceActions.Transport.Pause)
-            VoiceIntent.Next -> VoiceActions.transport(app, VoiceActions.Transport.Next)
-            VoiceIntent.Previous -> VoiceActions.transport(app, VoiceActions.Transport.Previous)
+            // Haryanvi desi says a short "ले, गाणा बजा दिया।"; the Standard style stays silent as before.
+            VoiceIntent.Resume -> transport(VoiceActions.Transport.Play, HaryanviLines.Event.MusicPlay)
+            VoiceIntent.Pause -> transport(VoiceActions.Transport.Pause, HaryanviLines.Event.MusicPause)
+            VoiceIntent.Next -> transport(VoiceActions.Transport.Next, HaryanviLines.Event.MusicNext)
+            VoiceIntent.Previous -> transport(VoiceActions.Transport.Previous, HaryanviLines.Event.MusicPrevious)
             VoiceIntent.OpenAndroidAuto -> {
                 val label = VoiceActions.openPhoneLink(app, app.prefs.autoPackage.value)
                 if (label != null) {
-                    say(res, lang, res.getString(R.string.voice_auto_opening, label))
+                    // Haryanvi desi: "ठीक सै, कर दिया।"
+                    styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, label))
                 } else {
                     say(res, lang, R.string.voice_auto_missing)
                 }
@@ -295,9 +300,10 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             VoiceIntent.Greeting -> {
-                styled(res, lang, HaryanviLines.Event.Greeting, greeting(res))
+                greet(res, lang)
                 return Expect.Destination
             }
+            is VoiceIntent.SmallTalk -> return smallTalk(intent.kind, res, lang)
             VoiceIntent.ServiceDue -> {
                 say(res, lang, CarAnswers.service(app, res))
                 return null
@@ -311,6 +317,8 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             VoiceIntent.WhereParked -> {
+                // Haryanvi desi: "रुक, देखूं गाड्डी कित खड़ी सै।" before the plain answer.
+                app.desi.line(HaryanviLines.Event.WhereParked)?.let { speakDesi(it) }
                 say(res, lang, CarAnswers.parked(app, res))
                 return null
             }
@@ -423,7 +431,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (VoiceActions.hasAudioPermission(app)) {
             val song = VoiceActions.findSong(app, query)
             if (song != null) {
-                say(res, lang, res.getString(R.string.voice_playing, song.title))
+                styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, song.title), song.title)
                 VoiceActions.playSong(app, song)
                 return
             }
@@ -431,7 +439,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (query.isNotEmpty() &&
             (VoiceActions.playFromSearchSession(app, query) || VoiceActions.playFromSearchIntent(app, query))
         ) {
-            say(res, lang, res.getString(R.string.voice_playing, query))
+            styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, query), query)
             return
         }
         if (!VoiceActions.hasAudioPermission(app)) {
@@ -453,6 +461,55 @@ class VoiceAssistant(private val app: DriveApp) {
         return hello + " " + res.getString(R.string.voice_greet_question)
     }
 
+    /**
+     * The session greeting. Haryanvi desi: a greeting line and a time-of-day line ("राम राम भाई!
+     * कित चालणा सै आज? सवेरे सवेरे कित चाल पड़े ताऊ?"). Standard: good morning / evening.
+     */
+    private suspend fun greet(res: Context, lang: String) {
+        val desi = app.desi.line(HaryanviLines.Event.Greeting)
+        if (desi == null) {
+            say(res, lang, greeting(res))
+            return
+        }
+        val time = app.desi.line(HaryanviLines.timeOfDay(LocalTime.now().hour))
+        speakDesi(if (time == null) desi else desi.copy(text = desi.text + " " + time.text))
+    }
+
+    /**
+     * "के हाल सै?", "कौन सै तू?", "चुटकला सुणा". Haryanvi desi lines; the Standard style answers
+     * plainly (how are you gets the usual greeting, as before).
+     */
+    private suspend fun smallTalk(kind: VoiceIntent.Talk, res: Context, lang: String): Expect? = when (kind) {
+        VoiceIntent.Talk.HowAreYou -> {
+            val desi = app.desi.line(HaryanviLines.Event.TalkHowAreYou)
+            if (desi != null) speakDesi(desi) else say(res, lang, greeting(res))
+            Expect.Destination
+        }
+        VoiceIntent.Talk.WhoAreYou -> {
+            styled(res, lang, HaryanviLines.Event.TalkWhoAreYou, res.getString(R.string.voice_who_am_i))
+            null
+        }
+        VoiceIntent.Talk.Joke -> {
+            styled(res, lang, HaryanviLines.Event.TalkJoke, res.getString(R.string.voice_joke))
+            null
+        }
+    }
+
+    /** Music keys by voice, with the desi acknowledgement when that style is on. */
+    private suspend fun transport(action: VoiceActions.Transport, ack: HaryanviLines.Event) {
+        val ok = VoiceActions.transport(app, action)
+        if (!ok) return
+        val desi = app.desi.line(ack) ?: return
+        // Let the player start (or stop) first, so the line plays over ducked music.
+        kotlinx.coroutines.delay(ACK_DELAY_MS)
+        speakDesi(desi)
+    }
+
+    private suspend fun speakDesi(desi: DesiVoice.Spoken) {
+        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = desi.text) }
+        speaker.say(desi.text, desi.language)
+    }
+
     private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, res.getString(id))
 
     /**
@@ -465,8 +522,7 @@ class VoiceAssistant(private val app: DriveApp) {
             say(res, lang, standard)
             return
         }
-        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = desi.text) }
-        speaker.say(desi.text, desi.language)
+        speakDesi(desi)
     }
 
     private suspend fun say(@Suppress("UNUSED_PARAMETER") res: Context, lang: String, text: String) {
@@ -490,6 +546,7 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private companion object {
         const val MAX_TURNS = 4
+        const val ACK_DELAY_MS = 600L
         /** The full greeting at most every three hours; otherwise just the listening beep. */
         const val GREETING_EVERY_MS = 3L * 60 * 60 * 1000
     }

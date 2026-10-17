@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import java.util.Locale
 
 /**
@@ -64,6 +65,7 @@ class WelcomeGreeter(private val app: DriveApp) {
             count = count,
             hindiVoice = hindiVoice,
             hindiScreen = WelcomeLines.isHindiScreen(screenTag),
+            hour = LocalTime.now().hour,
         )
         prefs.welcomeCount = count + 1
         _card.value = Card(welcome.card, welcome.text, System.nanoTime())

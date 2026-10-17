@@ -247,6 +247,8 @@
     <string name="voice_call">फ़ोन खोल रही हूँ। कृपया %1$s चुनें।</string>
     <string name="voice_call_any">फ़ोन खोल रही हूँ।</string>
     <string name="voice_cancelled">ठीक है, रद्द किया।</string>
+    <string name="voice_who_am_i">मैं एम्पली हूँ, आपकी कार की सहायक। रास्ता बताती हूँ, गाने बजाती हूँ और सड़क पर नज़र रखती हूँ।</string>
+    <string name="voice_joke">ट्रैफ़िक जाम में एक आदमी बोला, इतनी देर में तो पैदल पहुँच जाता। दूसरा बोला, तो उतर जाइए, गाड़ी मैं ले आऊँगा!</string>
 
     <!-- Speed-camera alerts. Spoken lines stay short: the driver hears them while driving. -->
     <string name="camera_chip_label">कैमरा</string>
@@ -465,6 +467,7 @@
     <string name="weather_thunder">आंधी-तूफ़ान</string>
     <string name="weather_heavy_rain">भारी बारिश</string>
     <string name="weather_fog">कोहरा</string>
+    <string name="weather_heat">भीषण गर्मी</string>
     <string name="weather_here">यहाँ %1$s</string>
     <string name="weather_ahead">%2$d किमी आगे %1$s</string>
     <string name="weather_clear">आगे मौसम का कोई खतरा नहीं</string>
@@ -612,6 +615,10 @@
     <string name="vcheck_listening">सुन रहा है…</string>
     <string name="vcheck_listen_hint">सुनकर जाँचें दबाएँ और \"next song\" या \"navigate\" बोलें।</string>
     <string name="voice_style_title">आवाज़ का अंदाज़</string>
+    <string name="voice_samples_title">नमूने सुनें</string>
+    <string name="voice_samples_hint">किसी मौके पर टैप करें और एक हरियाणवी लाइन सुनें</string>
+    <string name="voice_samples_show">नमूने दिखाएँ</string>
+    <string name="voice_samples_hide">नमूने छिपाएँ</string>
     <string name="voice_style_hint">कार हब कैसे बोले। हरियाणवी देसी मज़ेदार है; SOS और दुर्घटना वाले संदेश हमेशा सादे रहते हैं।</string>
     <string name="voice_style_standard">सामान्य</string>
     <string name="voice_style_haryanvi">हरियाणवी देसी</string>

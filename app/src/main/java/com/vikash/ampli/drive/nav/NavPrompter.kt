@@ -18,8 +18,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Speaks navigation turns. Two sources: Car Hub's own turn-by-turn ([InAppNavigator], via
@@ -37,6 +40,7 @@ class NavPrompter(private val app: DriveApp) {
     /** Car Hub's own turn-by-turn ([InAppNavigator]): same timing, separate memory. */
     private val inAppPlanner = NavPromptPlanner()
     private val nag = OverLimitNag()
+    private val praise = BackUnderPraise()
     private val picker = LinePicker()
     private var started = false
     private var speech: Job? = null
@@ -108,11 +112,18 @@ class NavPrompter(private val app: DriveApp) {
         val mapsPrompts = prefs.navPrompts.value && NavTurnRepository.turn.value != null
         val inAppPrompts = inApp && !app.navigator.muted.value
         if (!mapsPrompts && !inAppPrompts) return
-        val level = nag.onSpeed(SystemClock.elapsedRealtime(), speedKmh, limitKmh)
-        if (level == OverLimitNag.Level.None) return
+        val now = SystemClock.elapsedRealtime()
         // Pro camera voice alerts already say "slow down" near the camera.
-        if (prefs.pro.value.isPro && prefs.cameraVoice.value && prefs.cameraAlerts.value) return
+        val cameraVoice = prefs.pro.value.isPro && prefs.cameraVoice.value && prefs.cameraAlerts.value
+        if (!cameraVoice && praise.onSpeed(now, speedKmh, limitKmh)) {
+            // Haryanvi desi only: "शाबाश, न्यू ए चला". The Standard style stays quiet as before.
+            say { haryanvi -> if (haryanvi) desiLine(HaryanviLines.Event.SpeedBackUnder) else null }
+        }
+        val level = nag.onSpeed(now, speedKmh, limitKmh)
+        if (level == OverLimitNag.Level.None) return
+        if (cameraVoice) return
         val limit = limitKmh ?: return
+        praise.onWarned(now)
         say { haryanvi ->
             if (haryanvi) {
                 val event = if (level == OverLimitNag.Level.EaseOff) HaryanviLines.Event.SpeedEaseOff else HaryanviLines.Event.SpeedLimit
@@ -122,6 +133,34 @@ class NavPrompter(private val app: DriveApp) {
                 Spoken(localized().getString(id, limit), language())
             }
         }
+    }
+
+    /**
+     * In-app route ready (first route only): "चाल, रास्ता मिल गया, 42 किलोमीटर सै।" Haryanvi
+     * style only. Waits for a Hey Ampli reply to finish so it doesn't cut it off.
+     */
+    fun onRouteFound(distanceM: Double, durationS: Double) {
+        if (app.navigator.muted.value) return
+        val km = distanceM / 1000.0
+        val kmText = if (km >= 10) km.roundToInt().toString() else String.format(Locale.US, "%.1f", km)
+        val minutes = (durationS / 60.0).roundToInt().coerceAtLeast(1)
+        say { haryanvi ->
+            if (!haryanvi) return@say null
+            withTimeoutOrNull(VOICE_WAIT_MS) { app.voice.busy.first { !it } }
+            desiLine(HaryanviLines.Event.RouteFound, kmText, minutes)
+        }
+    }
+
+    /** Off the route, a new one is on its way: "रास्ता भटक गया भाई, नया रास्ता देख रया सूं।" */
+    fun onRerouting() {
+        if (app.navigator.muted.value) return
+        say { haryanvi -> if (haryanvi) desiLine(HaryanviLines.Event.Rerouting) else null }
+    }
+
+    /** Arrived and the car has stood still a while: "चाल फेर मिलांगे।" */
+    fun onParkedAfterArrival() {
+        if (app.navigator.muted.value) return
+        say { haryanvi -> if (haryanvi) desiLine(HaryanviLines.Event.Farewell) else null }
     }
 
     private data class Spoken(val text: String, val language: String)
@@ -161,12 +200,12 @@ class NavPrompter(private val app: DriveApp) {
         return Spoken(text, if (hindi) "hi" else "en-IN")
     }
 
-    private suspend fun desiLine(event: HaryanviLines.Event, arg: Any): Spoken? {
+    private suspend fun desiLine(event: HaryanviLines.Event, vararg args: Any): Spoken? {
         val hindi = hindiVoice()
         val line = picker.pick(event) ?: return null
         val template = if (hindi) line.deva else line.roman
         val text = try {
-            String.format(Locale.US, template, arg)
+            String.format(Locale.US, template, *args)
         } catch (_: Exception) {
             template
         }
@@ -224,6 +263,7 @@ class NavPrompter(private val app: DriveApp) {
     private companion object {
         const val TAG = "NavPrompter"
         const val CAPTION_MS = 7_000L
+        const val VOICE_WAIT_MS = 10_000L
         val HINDI: Locale = Locale.forLanguageTag("hi-IN")
     }
 }

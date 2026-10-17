@@ -8,48 +8,71 @@ import org.junit.Test
 
 class WelcomeLinesTest {
 
-    private fun haryanvi(name: String?, count: Int, hindiVoice: Boolean = true) =
-        WelcomeLines.select(VoiceStyle.Haryanvi, name, count, hindiVoice, hindiScreen = true)
+    private fun haryanvi(name: String?, count: Int, hindiVoice: Boolean = true, hour: Int = 9) =
+        WelcomeLines.select(VoiceStyle.Haryanvi, name, count, hindiVoice, hindiScreen = true, hour = hour)
+
+    private fun lines(e: HaryanviLines.Event) = HaryanviLines.forEvent(e)!!
 
     @Test
-    fun namedLineIsTheOwnersWording() {
+    fun firstNamedWelcomeIsTheOwnersWording() {
         val w = haryanvi("Vikash", 0)
-        assertEquals("राम राम Vikash जी, आज कित का प्लान सै?", w.text)
+        assertTrue(w.text, w.text.startsWith("राम राम Vikash जी, आज कित का प्लान सै?"))
         assertEquals("hi", w.language)
         assertEquals("Ram Ram Vikash Ji 🙏", w.card)
         assertTrue(w.named)
     }
 
     @Test
-    fun noNameAlwaysSaysTaiAale() {
+    fun withoutANameTheWelcomesRotate() {
+        val texts = (0..9).map { haryanvi(null, it).text }
+        for (t in texts) assertFalse(t, t.contains("%"))
+        for (i in 1 until texts.size) assertTrue("repeat at $i", texts[i] != texts[i - 1])
+        // Every general opener gets its turn, the owner's new lines included.
+        for (opener in lines(HaryanviLines.Event.Welcome)) {
+            assertTrue("never said: ${opener.deva}", texts.any { it.startsWith(opener.deva) })
+        }
         for (count in 0..5) {
-            for (name in listOf(null, "", "   ")) {
-                val w = haryanvi(name, count)
-                assertEquals("राम राम ताई आले, आज कित की तैयारी सै?", w.text)
-                assertEquals("Ram Ram Tai Aale 🙏", w.card)
-                assertFalse(w.named)
-            }
+            val w = haryanvi("", count)
+            assertFalse(w.named)
+            assertEquals("Ram Ram 🙏", w.card)
         }
     }
 
     @Test
-    fun alternatesBetweenTheTwoLinesWhenANameIsSet() {
-        val texts = (0..5).map { haryanvi("Vikash", it).text }
-        assertEquals(WelcomeLines.NAMED_DEVA.format("Vikash"), texts[0])
-        assertEquals(WelcomeLines.TAI_DEVA, texts[1])
-        assertEquals(WelcomeLines.NAMED_DEVA.format("Vikash"), texts[2])
-        assertEquals(WelcomeLines.TAI_DEVA, texts[3])
-        for (i in 1 until texts.size) assertTrue("repeat at $i", texts[i] != texts[i - 1])
+    fun withANameEveryOtherStartGreetsByName() {
+        val ws = (0..7).map { haryanvi("Vikash", it) }
+        for ((i, w) in ws.withIndex()) {
+            assertEquals("start $i", i % 2 == 0, w.named)
+            assertEquals(w.named, w.text.contains("Vikash"))
+        }
+        for (i in 1 until ws.size) assertTrue("repeat at $i", ws[i].text != ws[i - 1].text)
+    }
+
+    @Test
+    fun timeOfDayLineFollowsTheOpener() {
+        fun timeLine(hour: Int, count: Int): String {
+            val w = haryanvi(null, count, hour = hour)
+            val opener = lines(HaryanviLines.Event.Welcome).first { w.text.startsWith(it.deva) }
+            return w.text.removePrefix(opener.deva).trim()
+        }
+        for (count in 0..4) {
+            assertTrue(lines(HaryanviLines.Event.WelcomeMorning).any { it.deva == timeLine(7, count) })
+            assertTrue(lines(HaryanviLines.Event.WelcomeAfternoon).any { it.deva == timeLine(14, count) })
+            assertTrue(lines(HaryanviLines.Event.WelcomeEvening).any { it.deva == timeLine(19, count) })
+            assertTrue(lines(HaryanviLines.Event.WelcomeNight).any { it.deva == timeLine(23, count) })
+            assertTrue(lines(HaryanviLines.Event.WelcomeNight).any { it.deva == timeLine(2, count) })
+        }
+        assertTrue(timeLine(7, 0) != timeLine(7, 1))
     }
 
     @Test
     fun romanLinesWithEnglishVoiceWhenNoHindiVoice() {
         val named = haryanvi("Vikash", 0, hindiVoice = false)
-        assertEquals("Ram Ram Vikash Ji, aaj kit ka plan hai?", named.text)
+        assertTrue(named.text, named.text.startsWith("Ram Ram Vikash Ji, aaj kit ka plan hai?"))
         assertEquals("en-IN", named.language)
-        val tai = haryanvi(null, 0, hindiVoice = false)
-        assertEquals("Ram Ram Tai Aale, aaj kit ki taiyaari hai?", tai.text)
-        assertEquals("en-IN", tai.language)
+        val plain = haryanvi(null, 3, hindiVoice = false)
+        assertFalse(plain.text.any { it in 'ऀ'..'ॿ' })
+        assertEquals("en-IN", plain.language)
     }
 
     @Test

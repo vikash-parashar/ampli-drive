@@ -5,22 +5,19 @@ import java.util.Locale
 
 /**
  * The welcome message spoken once per car start (boot, ignition on, or the launcher showing
- * after a reboot). The two Haryanvi lines are the owner's own wording; keep them as they are.
+ * after a reboot). The Haryanvi lines live in [HaryanviLines] (events Welcome, WelcomeNamed and
+ * the four time-of-day events); the owner's own wording is the first line of each.
  *
- * - Haryanvi style, name set: alternates "Ram Ram {name} Ji, aaj kit ka plan hai?" and
- *   "Ram Ram Tai Aale, aaj kit ki taiyaari hai?" on successive starts.
- * - Haryanvi style, no name: always "Ram Ram Tai Aale, aaj kit ki taiyaari hai?".
+ * - Haryanvi style: an opener, then a time-of-day line ("सवेरे सवेरे कित चाल पड़े ताऊ?",
+ *   "रात हो री सै, आराम तै चलाइए।"). With a name set, every other start greets by name
+ *   ("Ram Ram {name} Ji, aaj kit ka plan hai?" first). Openers and time lines rotate with the
+ *   stored welcome count, so the same line never plays on two starts in a row, across reboots too.
  * - Standard style: a plain Hindi (Hindi screen language and a Hindi voice) or English welcome.
  *
  * [Welcome.text] is Devanagari for the hi-IN voice; without a Hindi voice the Latin line is
  * spoken with en-IN instead. Plain Kotlin, unit-tested.
  */
 object WelcomeLines {
-    const val NAMED_DEVA = "राम राम %1\$s जी, आज कित का प्लान सै?"
-    const val NAMED_ROMAN = "Ram Ram %1\$s Ji, aaj kit ka plan hai?"
-    const val TAI_DEVA = "राम राम ताई आले, आज कित की तैयारी सै?"
-    const val TAI_ROMAN = "Ram Ram Tai Aale, aaj kit ki taiyaari hai?"
-
     const val STANDARD_HI_NAMED = "नमस्ते %1\$s जी, एम्पली कार हब में आपका स्वागत है। सुरक्षित चलाइए।"
     const val STANDARD_HI = "नमस्ते जी, एम्पली कार हब में आपका स्वागत है। सुरक्षित चलाइए।"
     const val STANDARD_EN_NAMED = "Welcome, %1\$s. Have a safe drive."
@@ -30,21 +27,27 @@ object WelcomeLines {
     data class Welcome(val text: String, val language: String, val card: String, val named: Boolean)
 
     /**
-     * Picks the welcome. [count] is how many welcomes played before (stored, so the alternation
+     * Picks the welcome. [count] is how many welcomes played before (stored, so the rotation
      * carries across reboots); [hindiVoice] whether the TTS engine has hi-IN; [hindiScreen]
-     * whether the screen language is Hindi (or a language Hindi stands in for).
+     * whether the screen language is Hindi (or a language Hindi stands in for); [hour] the local
+     * hour (0..23) for the time-of-day line.
      */
-    fun select(style: VoiceStyle, name: String?, count: Int, hindiVoice: Boolean, hindiScreen: Boolean): Welcome {
+    fun select(style: VoiceStyle, name: String?, count: Int, hindiVoice: Boolean, hindiScreen: Boolean, hour: Int = 9): Welcome {
         val who = OwnerName.clean(name)
+        val n = count.coerceAtLeast(0)
         return when (style) {
             VoiceStyle.Haryanvi -> {
-                val named = who.isNotEmpty() && count % 2 == 0
+                val named = who.isNotEmpty() && n % 2 == 0
                 val lang = if (hindiVoice) "hi" else "en-IN"
-                if (named) {
-                    Welcome(fill(if (hindiVoice) NAMED_DEVA else NAMED_ROMAN, who), lang, "Ram Ram $who Ji 🙏", true)
+                val opener = if (named) {
+                    rotate(HaryanviLines.Event.WelcomeNamed, n / 2)
                 } else {
-                    Welcome(if (hindiVoice) TAI_DEVA else TAI_ROMAN, lang, "Ram Ram Tai Aale 🙏", false)
+                    rotate(HaryanviLines.Event.Welcome, if (who.isNotEmpty()) n / 2 else n)
                 }
+                val time = rotate(HaryanviLines.timeOfDay(hour), n)
+                fun text(l: HaryanviLines.Line) = if (hindiVoice) l.deva else l.roman
+                val first = if (named) fill(text(opener), who) else text(opener)
+                Welcome("$first ${text(time)}", lang, if (named) "Ram Ram $who Ji 🙏" else "Ram Ram 🙏", named)
             }
             VoiceStyle.Standard -> {
                 val hindi = hindiVoice && hindiScreen
@@ -64,6 +67,12 @@ object WelcomeLines {
                 Welcome(text, if (hindi) "hi" else "en-IN", card, named)
             }
         }
+    }
+
+    /** The [i]th line of [event], wrapping: consecutive [i] never give the same line. */
+    private fun rotate(event: HaryanviLines.Event, i: Int): HaryanviLines.Line {
+        val lines = HaryanviLines.forEvent(event)!!
+        return lines[i % lines.size]
     }
 
     /** Screen languages whose speech uses the Hindi voice (see VoiceLocales). */

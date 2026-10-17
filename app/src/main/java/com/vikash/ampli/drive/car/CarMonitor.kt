@@ -221,6 +221,8 @@ class CarMonitor(private val app: DriveApp) {
             IgnitionEvent.Off -> {
                 onIgnitionOff()
                 odometer.reset()
+                // Haryanvi desi: "चाल फेर मिलांगे।" / "गाड्डी ढंग तै लॉक कर दिए।" (Standard stays quiet).
+                app.desi.sayLater(HaryanviLines.Event.Farewell)
             }
             IgnitionEvent.On -> {
                 // A new trip for the average speed, then greeting / auto start (CarStart).
@@ -243,6 +245,7 @@ class CarMonitor(private val app: DriveApp) {
     fun parkHere(): Boolean {
         val loc = app.speedTracker.state.value.location ?: lastLocation ?: return false
         park(ParkedSpot(loc.latitude, loc.longitude, System.currentTimeMillis(), if (loc.hasAccuracy()) loc.accuracy else null))
+        app.desi.sayLater(HaryanviLines.Event.ParkingSaved)
         return true
     }
 
@@ -379,10 +382,22 @@ class CarMonitor(private val app: DriveApp) {
         val fresh = report.hazards.filter { (hz, _) -> now - (spokenHazards[hz] ?: 0L) > 60L * 60_000L }
         if (fresh.isEmpty()) return
         fresh.forEach { spokenHazards[it.first] = now }
-        speak { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
+        if (app.desi.enabled) {
+            // Haryanvi desi: "आगे धुंध सै भाई, फॉग लाइट जला ले अर धीरे चला।"
+            fresh.forEach { (hz, _) -> app.desi.sayLater(desiHazard(hz)) }
+        } else {
+            speak { res -> fresh.joinToString(" ") { (hz, km) -> hazardLine(res, hz, km) } }
+        }
         if (!foreground) {
             CarNotifier.post(app, CarNotifier.ID_WEATHER, app.getString(R.string.weather_title), fresh.joinToString(" ") { (hz, km) -> hazardLine(app, hz, km) })
         }
+    }
+
+    private fun desiHazard(hz: Hazard): HaryanviLines.Event = when (hz) {
+        Hazard.Thunderstorm -> HaryanviLines.Event.WeatherThunder
+        Hazard.HeavyRain -> HaryanviLines.Event.WeatherRain
+        Hazard.Fog -> HaryanviLines.Event.WeatherFog
+        Hazard.Heat -> HaryanviLines.Event.WeatherHeat
     }
 
     fun hazardLine(res: Context, hz: Hazard, km: Int): String {
@@ -391,6 +406,7 @@ class CarMonitor(private val app: DriveApp) {
                 Hazard.Thunderstorm -> R.string.weather_thunder
                 Hazard.HeavyRain -> R.string.weather_heavy_rain
                 Hazard.Fog -> R.string.weather_fog
+                Hazard.Heat -> R.string.weather_heat
             },
         )
         return if (km == 0) res.getString(R.string.weather_here, what) else res.getString(R.string.weather_ahead, what, km)
@@ -432,7 +448,21 @@ class CarMonitor(private val app: DriveApp) {
 
     fun onEngineWarnings(new: Set<EngineWarning>) {
         if (new.isEmpty()) return
+        if (app.desi.enabled) {
+            // Haryanvi desi for the common ones; overcharging keeps the plain line.
+            val plain = new.filter { desiWarning(it) == null }
+            new.mapNotNull { desiWarning(it) }.forEach { app.desi.sayLater(it) }
+            if (plain.isNotEmpty()) speak { res -> plain.joinToString(" ") { engineWarningLine(res, it) } }
+            return
+        }
         speak { res -> new.joinToString(" ") { engineWarningLine(res, it) } }
+    }
+
+    private fun desiWarning(w: EngineWarning): HaryanviLines.Event? = when (w) {
+        EngineWarning.CoolantHot -> HaryanviLines.Event.ObdEngineHot
+        EngineWarning.BatteryLow -> HaryanviLines.Event.ObdBatteryLow
+        EngineWarning.NotCharging -> HaryanviLines.Event.ObdNotCharging
+        EngineWarning.Overcharging -> null
     }
 
     fun onEngineCodes(codes: List<String>, announced: MutableSet<String>) {
