@@ -283,6 +283,8 @@
     <string name="action_refresh">ರಿಫ್ರೆಶ್</string>
     <string name="dock_car">ಕಾರು</string>
     <string name="pro_point_car">ಕಾರು ಪರಿಕರಗಳು: OBD-II ಎಂಜಿನ್ ಡೇಟಾ ಮತ್ತು ದೋಷ ಕೋಡ್‌ಗಳು, ಬ್ಲೂಟೂತ್ ಟೈರ್ ಒತ್ತಡ, ಖರ್ಚುಗಳ CSV ರಫ್ತು</string>
+    <string name="pro_point_whatsapp">WhatsApp ಸಂದೇಶಗಳನ್ನು ಓದಿ ಹೇಳುತ್ತದೆ, ಧ್ವನಿಯಲ್ಲಿ ಮಾತ್ರ</string>
+    <string name="pro_point_trip_cost">ಪ್ರಯಾಣ ವೆಚ್ಚ: ಯೋಜಿತ ಮಾರ್ಗದ ಇಂಧನ ಮತ್ತು ಟೋಲ್</string>
     <string name="park_to_edit">ಸಂಪಾದಿಸಲು ಕಾರು ನಿಲ್ಲಿಸಿ</string>
     <string name="park_to_edit_hint">ಕಾರು ಚಲಿಸುತ್ತಿರುವಾಗ ಸಂಪಾದನೆ ನಿಲ್ಲಿಸಲಾಗಿದೆ. ಬದಲಿಗೆ “Hey Ampli” ಅನ್ನು ಕೇಳಿ.</string>
     <string name="car_distance_m">%1$d ಮೀ</string>

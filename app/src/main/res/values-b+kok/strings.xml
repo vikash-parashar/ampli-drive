@@ -283,6 +283,8 @@
     <string name="action_refresh">रिफ्रेश</string>
     <string name="dock_car">गाडी</string>
     <string name="pro_point_car">गाडयेचीं साधनां: OBD-II इंजिन डेटा आनी फॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खर्चाचो CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp messages read aloud while you drive, by voice only</string>
+    <string name="pro_point_trip_cost">Trip cost: fuel and tolls for the planned route</string>
     <string name="park_to_edit">बदलपाक गाडी थांबयात</string>
     <string name="park_to_edit_hint">गाडी चलता तेन्ना बदल बंद आसा. ताचे बदला “Hey Ampli” क विचारात.</string>
     <string name="car_distance_m">%1$d मी</string>

@@ -283,6 +283,8 @@
     <string name="action_refresh">ରିଫ୍ରେସ</string>
     <string name="dock_car">କାର</string>
     <string name="pro_point_car">କାର ଟୁଲ: OBD-II ଇଞ୍ଜିନ ଡାଟା ଓ ଫଲ୍ଟ କୋଡ, ବ୍ଲୁଟୁଥ ଟାୟାର ପ୍ରେସର, ଖର୍ଚ୍ଚର CSV ଏକ୍ସପୋର୍ଟ</string>
+    <string name="pro_point_whatsapp">WhatsApp messages read aloud while you drive, by voice only</string>
+    <string name="pro_point_trip_cost">Trip cost: fuel and tolls for the planned route</string>
     <string name="park_to_edit">ଏଡିଟ ପାଇଁ ଗାଡି ରଖନ୍ତୁ</string>
     <string name="park_to_edit_hint">ଗାଡି ଚାଲୁଥିବା ବେଳେ ଏଡିଟ ବନ୍ଦ ଅଛି। ତା ବଦଳରେ “Hey Ampli” କୁ ପଚାରନ୍ତୁ।</string>
     <string name="car_distance_m">%1$d ମି</string>

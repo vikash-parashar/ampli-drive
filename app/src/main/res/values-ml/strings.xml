@@ -283,6 +283,8 @@
     <string name="action_refresh">പുതുക്കുക</string>
     <string name="dock_car">കാർ</string>
     <string name="pro_point_car">കാർ ടൂളുകൾ: OBD-II എഞ്ചിൻ ഡാറ്റയും ഫോൾട്ട് കോഡുകളും, ബ്ലൂടൂത്ത് ടയർ പ്രഷർ, ചെലവുകളുടെ CSV എക്സ്പോർട്ട്</string>
+    <string name="pro_point_whatsapp">WhatsApp സന്ദേശങ്ങൾ വായിച്ചു കേൾപ്പിക്കും, ശബ്ദത്തിൽ മാത്രം</string>
+    <string name="pro_point_trip_cost">യാത്രാ ചെലവ്: പ്ലാൻ ചെയ്ത റൂട്ടിന്റെ ഇന്ധനവും ടോളും</string>
     <string name="park_to_edit">എഡിറ്റ് ചെയ്യാൻ കാർ നിർത്തുക</string>
     <string name="park_to_edit_hint">കാർ ഓടുമ്പോൾ എഡിറ്റിംഗ് നിർത്തിവെച്ചിരിക്കുന്നു. പകരം “Hey Ampli” യോട് ചോദിക്കുക.</string>
     <string name="car_distance_m">%1$d മീ</string>

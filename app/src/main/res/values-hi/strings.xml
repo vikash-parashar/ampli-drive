@@ -292,6 +292,8 @@
     <string name="action_refresh">रिफ़्रेश</string>
     <string name="dock_car">कार</string>
     <string name="pro_point_car">कार टूल: OBD-II इंजन डेटा और फ़ॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खर्चों का CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp मैसेज बोलकर सुनाए जाते हैं, सिर्फ़ आवाज़ में</string>
+    <string name="pro_point_trip_cost">सफ़र का ख़र्च: तय रास्ते का ईंधन और टोल</string>
     <string name="park_to_edit">बदलने के लिए गाड़ी रोकें</string>
     <string name="park_to_edit_hint">गाड़ी चलते समय बदलाव बंद है। “Hey Ampli” से पूछें।</string>
     <string name="car_distance_m">%1$d मीटर</string>

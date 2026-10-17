@@ -283,6 +283,8 @@
     <string name="action_refresh">ਤਾਜ਼ਾ ਕਰੋ</string>
     <string name="dock_car">ਕਾਰ</string>
     <string name="pro_point_car">ਕਾਰ ਟੂਲ: OBD-II ਇੰਜਣ ਡਾਟਾ ਅਤੇ ਫਾਲਟ ਕੋਡ, ਬਲੂਟੁੱਥ ਟਾਇਰ ਪ੍ਰੈਸ਼ਰ, ਖਰਚਿਆਂ ਦਾ CSV ਐਕਸਪੋਰਟ</string>
+    <string name="pro_point_whatsapp">WhatsApp ਸੁਨੇਹੇ ਬੋਲ ਕੇ ਸੁਣਾਏ ਜਾਂਦੇ ਹਨ, ਸਿਰਫ਼ ਆਵਾਜ਼ ਵਿੱਚ</string>
+    <string name="pro_point_trip_cost">ਸਫ਼ਰ ਦਾ ਖਰਚਾ: ਤੈਅ ਰਸਤੇ ਦਾ ਤੇਲ ਅਤੇ ਟੋਲ</string>
     <string name="park_to_edit">ਬਦਲਣ ਲਈ ਕਾਰ ਰੋਕੋ</string>
     <string name="park_to_edit_hint">ਕਾਰ ਚੱਲਦੇ ਸਮੇਂ ਬਦਲਾਅ ਰੁਕਿਆ ਹੈ। ਇਸ ਦੀ ਥਾਂ “Hey Ampli” ਨੂੰ ਪੁੱਛੋ।</string>
     <string name="car_distance_m">%1$d ਮੀ</string>

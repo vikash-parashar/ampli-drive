@@ -283,6 +283,8 @@
     <string name="action_refresh">புதுப்பி</string>
     <string name="dock_car">கார்</string>
     <string name="pro_point_car">கார் கருவிகள்: OBD-II என்ஜின் தரவு மற்றும் பிழைக் குறியீடுகள், புளூடூத் டயர் அழுத்தம், செலவுகளின் CSV ஏற்றுமதி</string>
+    <string name="pro_point_whatsapp">WhatsApp செய்திகள் குரலில் படித்துக் காட்டப்படும்</string>
+    <string name="pro_point_trip_cost">பயணச் செலவு: திட்டமிட்ட வழிக்கான எரிபொருள் மற்றும் சுங்கக் கட்டணம்</string>
     <string name="park_to_edit">திருத்த காரை நிறுத்துங்கள்</string>
     <string name="park_to_edit_hint">கார் ஓடும்போது திருத்தம் நிறுத்தப்பட்டுள்ளது. அதற்குப் பதில் “Hey Ampli” இடம் கேளுங்கள்.</string>
     <string name="car_distance_m">%1$d மீ</string>

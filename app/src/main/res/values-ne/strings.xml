@@ -283,6 +283,8 @@
     <string name="action_refresh">रिफ्रेस</string>
     <string name="dock_car">कार</string>
     <string name="pro_point_car">कार उपकरण: OBD-II इन्जिन डेटा र फल्ट कोड, ब्लुटुथ टायर प्रेसर, खर्चको CSV निर्यात</string>
+    <string name="pro_point_whatsapp">WhatsApp सन्देश बोलेर सुनाइन्छ, आवाजमा मात्र</string>
+    <string name="pro_point_trip_cost">यात्रा खर्च: तय गरिएको बाटोको इन्धन र टोल</string>
     <string name="park_to_edit">सम्पादन गर्न गाडी रोक्नुहोस्</string>
     <string name="park_to_edit_hint">गाडी चलिरहँदा सम्पादन रोकिएको छ। बरु “Hey Ampli” लाई सोध्नुहोस्।</string>
     <string name="car_distance_m">%1$d मि</string>

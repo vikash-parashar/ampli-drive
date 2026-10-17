@@ -283,6 +283,8 @@
     <string name="action_refresh">রিফ্রেশ</string>
     <string name="dock_car">গাড়ি</string>
     <string name="pro_point_car">গাড়ির টুল: OBD-II ইঞ্জিন ডেটা ও ফল্ট কোড, ব্লুটুথ টায়ার প্রেশার, খরচের CSV এক্সপোর্ট</string>
+    <string name="pro_point_whatsapp">WhatsApp মেসেজ জোরে পড়ে শোনানো হয়, শুধু ভয়েসে</string>
+    <string name="pro_point_trip_cost">যাত্রার খরচ: পরিকল্পিত রুটের জ্বালানি ও টোল</string>
     <string name="park_to_edit">এডিট করতে গাড়ি থামান</string>
     <string name="park_to_edit_hint">গাড়ি চলার সময় এডিট বন্ধ থাকে। তার বদলে “Hey Ampli” কে বলুন।</string>
     <string name="car_distance_m">%1$d মি</string>

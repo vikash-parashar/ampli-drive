@@ -283,6 +283,8 @@
     <string name="action_refresh">ৰিফ্ৰেছ</string>
     <string name="dock_car">গাড়ী</string>
     <string name="pro_point_car">গাড়ীৰ সঁজুলি: OBD-II ইঞ্জিন ডেটা আৰু ফল্ট কোড, ব্লুটুথ টায়াৰ প্ৰেছাৰ, খৰচৰ CSV এক্সপ\'ৰ্ট</string>
+    <string name="pro_point_whatsapp">WhatsApp messages read aloud while you drive, by voice only</string>
+    <string name="pro_point_trip_cost">Trip cost: fuel and tolls for the planned route</string>
     <string name="park_to_edit">সম্পাদনা কৰিবলৈ গাড়ী ৰখাওক</string>
     <string name="park_to_edit_hint">গাড়ী চলি থাকোঁতে সম্পাদনা বন্ধ থাকে। তাৰ সলনি “Hey Ampli”ক কওক।</string>
     <string name="car_distance_m">%1$d মি</string>

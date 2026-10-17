@@ -288,6 +288,8 @@
     <string name="action_refresh">रिफ्रेश</string>
     <string name="dock_car">गाड्डी</string>
     <string name="pro_point_car">गाड्डी के औजार: OBD-II इंजन डेटा अर फॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खरचे का CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp मैसेज बोल कै सुणावै, बस आवाज़ मैं</string>
+    <string name="pro_point_trip_cost">सफर का खरचा: रस्ते का तेल अर टोल</string>
     <string name="park_to_edit">बदलण खातर गाड्डी रोक्को</string>
     <string name="park_to_edit_hint">गाड्डी चाल्लती होए तो बदलाव रुक्या सै। इसकी जगां “Hey Ampli” तै बूज्झो।</string>
     <string name="car_distance_m">%1$d मी</string>

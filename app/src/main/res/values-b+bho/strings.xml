@@ -283,6 +283,8 @@
     <string name="action_refresh">रिफ्रेश</string>
     <string name="dock_car">गाड़ी</string>
     <string name="pro_point_car">गाड़ी के औजार: OBD-II इंजन डेटा आ फॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खरचा के CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp मैसेज बोल के सुनावल जाला, खाली आवाज़ में</string>
+    <string name="pro_point_trip_cost">सफर के खरचा: रस्ता के तेल आ टोल</string>
     <string name="park_to_edit">बदले खातिर गाड़ी रोकीं</string>
     <string name="park_to_edit_hint">गाड़ी चलत घरी बदलाव रुकल बा। ओकरा बदले “Hey Ampli” से पूछीं।</string>
     <string name="car_distance_m">%1$d मी</string>

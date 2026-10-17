@@ -283,6 +283,8 @@
     <string name="action_refresh">Aktualisieren</string>
     <string name="dock_car">Auto</string>
     <string name="pro_point_car">Auto-Werkzeuge: OBD-II-Motordaten und Fehlercodes, Bluetooth-Reifendruck, CSV-Export der Ausgaben</string>
+    <string name="pro_point_whatsapp">WhatsApp-Nachrichten werden vorgelesen, nur per Sprache</string>
+    <string name="pro_point_trip_cost">Fahrtkosten: Sprit und Maut für die geplante Route</string>
     <string name="park_to_edit">Zum Bearbeiten parken</string>
     <string name="park_to_edit_hint">Bearbeiten ist während der Fahrt pausiert. Frag stattdessen „Hey Ampli“.</string>
     <string name="car_distance_m">%1$d m</string>

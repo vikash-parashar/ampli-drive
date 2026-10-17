@@ -283,6 +283,8 @@
     <string name="action_refresh">刷新</string>
     <string name="dock_car">车辆</string>
     <string name="pro_point_car">车辆工具：OBD-II 发动机数据和故障码、蓝牙胎压、支出 CSV 导出</string>
+    <string name="pro_point_whatsapp">朗读 WhatsApp 消息，仅语音播报</string>
+    <string name="pro_point_trip_cost">行程费用：计划路线的油费和过路费</string>
     <string name="park_to_edit">停车后编辑</string>
     <string name="park_to_edit_hint">车辆行驶时暂停编辑。请改用“Hey Ampli”。</string>
     <string name="car_distance_m">%1$d 米</string>

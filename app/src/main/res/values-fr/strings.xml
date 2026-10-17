@@ -283,6 +283,8 @@
     <string name="action_refresh">Actualiser</string>
     <string name="dock_car">Voiture</string>
     <string name="pro_point_car">Outils voiture : données moteur OBD-II et codes défaut, pression des pneus Bluetooth, export CSV des dépenses</string>
+    <string name="pro_point_whatsapp">Messages WhatsApp lus à voix haute, uniquement à l\'oral</string>
+    <string name="pro_point_trip_cost">Coût du trajet : carburant et péages de l\'itinéraire prévu</string>
     <string name="park_to_edit">Garez-vous pour modifier</string>
     <string name="park_to_edit_hint">La modification est en pause pendant que la voiture roule. Demandez plutôt à « Hey Ampli ».</string>
     <string name="car_distance_m">%1$d m</string>

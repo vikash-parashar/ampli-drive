@@ -283,6 +283,8 @@
     <string name="action_refresh">ریفریش</string>
     <string name="dock_car">کار</string>
     <string name="pro_point_car">کار ٹولز: OBD-II انجن ڈیٹا اور فالٹ کوڈز، بلوٹوتھ ٹائر پریشر، اخراجات کی CSV ایکسپورٹ</string>
+    <string name="pro_point_whatsapp">WhatsApp پیغامات بول کر سنائے جاتے ہیں، صرف آواز میں</string>
+    <string name="pro_point_trip_cost">سفر کا خرچ: طے شدہ راستے کا ایندھن اور ٹول</string>
     <string name="park_to_edit">ترمیم کے لیے گاڑی روکیں</string>
     <string name="park_to_edit_hint">گاڑی چلتے وقت ترمیم بند ہے۔ اس کے بجائے “Hey Ampli” سے پوچھیں۔</string>
     <string name="car_distance_m">%1$d میٹر</string>

@@ -301,6 +301,8 @@
     <string name="action_refresh">Refresh</string>
     <string name="dock_car">Car</string>
     <string name="pro_point_car">Car tools: OBD-II engine data and fault codes, Bluetooth tyre pressure, CSV export of expenses</string>
+    <string name="pro_point_whatsapp">WhatsApp messages read aloud while you drive, by voice only</string>
+    <string name="pro_point_trip_cost">Trip cost: fuel and tolls for the planned route</string>
     <string name="park_to_edit">Park to edit</string>
     <string name="park_to_edit_hint">Editing is paused while the car is moving. Ask “Hey Ampli” instead.</string>
     <string name="car_distance_m">%1$d m</string>
