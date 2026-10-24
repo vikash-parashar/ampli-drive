@@ -77,8 +77,8 @@ object Launchers {
     /** Phone button: see [AppResolver.openPhone] (dialer, BT phone app, or the app picker). */
     fun openDialer(context: Context): Boolean = AppResolver.openPhone(context)
 
-    /** Music button: see [AppResolver.openMusic] (the driver's pick, the playing app, Multimedia…). */
-    fun openMusic(context: Context, currentPackage: String?): Boolean = AppResolver.openMusic(context, currentPackage)
+    /** Music button: see [AppResolver.openMusic] (the driver's pick, else Ampli MP3 Player). */
+    fun openMusic(context: Context): Boolean = AppResolver.openMusic(context, autoplay = true)
 
     /** Returns false when nothing is set up, so the caller can show the app picker. */
     fun openPhoneLink(context: Context, pinnedPackage: String?): Boolean {

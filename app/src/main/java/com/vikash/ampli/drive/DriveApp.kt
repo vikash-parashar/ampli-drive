@@ -55,6 +55,12 @@ class DriveApp : Application() {
     val speedTracker: SpeedTracker by lazy { SpeedTracker(this, cameraAlerts) }
     val mediaHub: MediaHub by lazy { MediaHub(this) }
     val bluetooth: BluetoothStatus by lazy { BluetoothStatus(this) }
+
+    /** Paired devices, phone music keys, auto-play on connect, switch device (Phone Link sheet). */
+    val phoneBt: com.vikash.ampli.drive.bluetooth.PhoneBluetooth by lazy { com.vikash.ampli.drive.bluetooth.PhoneBluetooth(this) }
+
+    /** Last 10 start signals and whether the welcome played (Settings › Diagnostics). */
+    val startLog: com.vikash.ampli.drive.car.StartLog by lazy { com.vikash.ampli.drive.car.StartLog(this) }
     val billing: ProBilling by lazy { ProBilling(this, prefs) }
 
     /** Ampli Shell: full screen, startup animation, the Ampli app list and its PIN. */

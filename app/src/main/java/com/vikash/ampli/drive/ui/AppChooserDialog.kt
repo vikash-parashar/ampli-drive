@@ -46,7 +46,7 @@ import kotlinx.coroutines.withContext
  * [onPick] with null means "Automatic" (forget the choice).
  */
 @Composable
-fun AppChooserDialog(role: AppRole, onPick: (AppEntry?) -> Unit, onDismiss: () -> Unit) {
+fun AppChooserDialog(role: AppRole, onPick: (AppEntry?) -> Unit, onDismiss: () -> Unit, automaticLabel: String? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
@@ -86,7 +86,7 @@ fun AppChooserDialog(role: AppRole, onPick: (AppEntry?) -> Unit, onDismiss: () -
             } else {
                 LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     item {
-                        ChooserRow(label = stringResource(R.string.chooser_automatic), icon = null, suggested = false) { onPick(null) }
+                        ChooserRow(label = automaticLabel ?: stringResource(R.string.chooser_automatic), icon = null, suggested = false) { onPick(null) }
                     }
                     items(list, key = { it.first.packageName + "/" + it.first.activityName }) { (entry, score) ->
                         val iconPx = with(LocalDensity.current) { 40.dp.roundToPx() }

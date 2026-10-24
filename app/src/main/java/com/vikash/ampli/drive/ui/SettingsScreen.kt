@@ -119,6 +119,8 @@ fun SettingsScreen(
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val musicPkg by app.prefs.musicPackage.collectAsStateWithLifecycle()
     val phonePkg by app.prefs.phonePackage.collectAsStateWithLifecycle()
+    val phoneAutoPlay by app.prefs.phoneAutoPlay.collectAsStateWithLifecycle()
+    val mirrorPkg by app.prefs.autoPackage.collectAsStateWithLifecycle()
     var showProSheet by rememberSaveable { mutableStateOf(false) }
     val fullScreen by app.shell.fullScreen.collectAsStateWithLifecycle()
     val startupAnimation by app.shell.startupAnimation.collectAsStateWithLifecycle()
@@ -192,6 +194,21 @@ fun SettingsScreen(
                 ok = true,
                 action = stringResource(R.string.action_change),
                 onAction = { AppChooser.ask(AppRole.Music, settingOnly = true) },
+            )
+            // Phone music over Bluetooth: press play on the phone when it connects.
+            ToggleRow(
+                title = stringResource(R.string.phone_autoplay_title),
+                status = stringResource(R.string.phone_autoplay_hint),
+                checked = phoneAutoPlay,
+                onChange = app.prefs::setPhoneAutoPlay,
+            )
+            // Phone Link sheet: an optional screen-mirroring app at its bottom (none by default).
+            SettingRow(
+                title = stringResource(R.string.mirror_app_title),
+                status = mirrorPkg?.let { AppResolver.label(context, it) } ?: stringResource(R.string.mirror_app_none),
+                ok = true,
+                action = stringResource(R.string.action_change),
+                onAction = { AppChooser.ask(AppRole.Mirror, settingOnly = true, phoneLink = true) },
             )
             SettingRow(
                 title = stringResource(R.string.phone_app_title),

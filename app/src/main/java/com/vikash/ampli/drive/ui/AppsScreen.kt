@@ -30,6 +30,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.PhonelinkRing
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +87,8 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
     var editing by rememberSaveable { mutableStateOf(false) }
     var askPin by remember { mutableStateOf<PinAsk?>(null) }
     var pinError by remember { mutableStateOf(false) }
+    val hidden by app.shell.hiddenApps.collectAsStateWithLifecycle()
+    var menuFor by remember { mutableStateOf<AppEntry?>(null) }
 
     val list = apps
     val chosen = remember(list, chosenSaved, musicPackage) {
@@ -100,6 +106,14 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
                     title = stringResource(if (showAll) R.string.shell_more_apps else R.string.apps_title),
                     hint = stringResource(if (editing) R.string.shell_edit_hint else R.string.apps_hint),
                     onBack = { if (showAll) { showAll = false; editing = false } else onBack() },
+                )
+            }
+            if (showAll && hidden.isNotEmpty()) {
+                BigButton(
+                    text = stringResource(R.string.apps_unhide_all, hidden.size),
+                    onClick = app.shell::unhideAll,
+                    icon = Icons.Filled.Visibility,
+                    primary = false,
                 )
             }
             if (showAll) {
@@ -122,7 +136,8 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
                 CircularProgressIndicator(color = theme.accent)
             }
         } else {
-            val shown = if (showAll) list else list.filter { it.packageName in chosen }
+            val visible = list.filter { it.packageName !in hidden }
+            val shown = if (showAll) visible else visible.filter { it.packageName in chosen }
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 132.dp),
                 modifier = Modifier.fillMaxSize(),
@@ -143,15 +158,8 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
                                 Launchers.openComponent(context, entry.packageName, entry.activityName)
                             }
                         },
-                        onLongPress = {
-                            if (entry.packageName == autoPackage) {
-                                app.prefs.setAutoPackage(null)
-                                Toast.makeText(context, context.getString(R.string.apps_removed_from_auto), Toast.LENGTH_SHORT).show()
-                            } else {
-                                app.prefs.setAutoPackage(entry.packageName)
-                                Toast.makeText(context, context.getString(R.string.apps_added_to_auto, entry.label), Toast.LENGTH_SHORT).show()
-                            }
-                        },
+                        // Long-press: hide it, or make it the Phone Link sheet's screen-mirroring app.
+                        onLongPress = { menuFor = entry },
                     )
                 }
                 if (!showAll) {
@@ -170,6 +178,48 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
                 }
             }
         }
+    }
+
+    menuFor?.let { entry ->
+        val (bg, fg) = dialogColors()
+        val isMirror = entry.packageName == autoPackage
+        AlertDialog(
+            onDismissRequest = { menuFor = null },
+            containerColor = bg, titleContentColor = fg, textContentColor = fg,
+            title = { Text(entry.label) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+                    BigButton(
+                        text = stringResource(R.string.apps_hide),
+                        onClick = {
+                            app.shell.setHidden(entry.packageName, true)
+                            Toast.makeText(context, context.getString(R.string.apps_hidden_toast, entry.label), Toast.LENGTH_SHORT).show()
+                            menuFor = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.Filled.VisibilityOff,
+                        primary = false,
+                    )
+                    BigButton(
+                        text = stringResource(if (isMirror) R.string.apps_mirror_stop else R.string.apps_mirror_use),
+                        onClick = {
+                            if (isMirror) {
+                                app.prefs.setAutoPackage(null)
+                                Toast.makeText(context, context.getString(R.string.apps_removed_from_auto), Toast.LENGTH_SHORT).show()
+                            } else {
+                                app.prefs.setAutoPackage(entry.packageName)
+                                Toast.makeText(context, context.getString(R.string.apps_added_to_auto, entry.label), Toast.LENGTH_SHORT).show()
+                            }
+                            menuFor = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.Filled.PhonelinkRing,
+                        primary = false,
+                    )
+                }
+            },
+            confirmButton = { TextButton(onClick = { menuFor = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 
     askPin?.let { ask ->

@@ -283,8 +283,20 @@ class VoiceAssistant(private val app: DriveApp) {
             VoiceIntent.Next -> transport(VoiceActions.Transport.Next, HaryanviLines.Event.MusicNext)
             VoiceIntent.Previous -> transport(VoiceActions.Transport.Previous, HaryanviLines.Event.MusicPrevious)
             VoiceIntent.OpenAndroidAuto -> {
-                val label = VoiceActions.openPhoneLink(app, app.prefs.autoPackage.value)
-                if (label != null) {
+                // Car Hub's own Phone Link sheet, unless the driver picked a screen-mirroring app.
+                val pinned = app.prefs.autoPackage.value
+                val label = if (pinned != null) VoiceActions.openPhoneLink(app, pinned) else null
+                if (pinned == null) {
+                    app.phoneBt.requestSheet()
+                    try {
+                        app.startActivity(
+                            android.content.Intent(app, com.vikash.ampli.drive.MainActivity::class.java)
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                        )
+                    } catch (_: Exception) {
+                    }
+                    styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, res.getString(R.string.plink_title)))
+                } else if (label != null) {
                     // Haryanvi desi: "ठीक सै, कर दिया।"
                     styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, label))
                 } else {

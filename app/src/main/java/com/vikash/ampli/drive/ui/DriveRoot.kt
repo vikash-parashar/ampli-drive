@@ -290,12 +290,17 @@ fun DriveRoot(
                         val context = androidx.compose.ui.platform.LocalContext.current
                         AppChooserDialog(
                             role = req.role,
+                            automaticLabel = if (req.phoneLink) androidx.compose.ui.res.stringResource(com.vikash.ampli.drive.R.string.mirror_app_none) else null,
                             onPick = { entry ->
                                 AppChooser.done()
                                 when (req.role) {
-                                    AppRole.Music -> app.prefs.setMusicPackage(entry?.packageName)
+                                    AppRole.Music -> app.prefs.pickMusicPackage(entry?.packageName)
                                     AppRole.Phone -> app.prefs.setPhonePackage(entry?.packageName)
-                                    AppRole.Mirror -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    AppRole.Mirror -> if (req.phoneLink) {
+                                        app.prefs.setAutoPackage(entry?.packageName)
+                                    } else {
+                                        app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    }
                                     AppRole.Nav -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(navPackage = entry?.packageName))
                                 }
                                 // Dock / Help panel: open the app right away. Settings choices just save.
@@ -306,6 +311,8 @@ fun DriveRoot(
                             onDismiss = { AppChooser.done() },
                         )
                     }
+                    // Music button without Ampli MP3 Player: "Get Ampli MP3 Player".
+                    GetAmpliHost()
                     // First run: "Thara naam ke sai?" over Home; the location disclosure waits for it.
                     val nameAsked by app.prefs.nameAsked.collectAsStateWithLifecycle()
                     if (!nameAsked && screen == Screen.Home) {

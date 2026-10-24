@@ -114,7 +114,6 @@ fun HomeScreen(
     val context = LocalContext.current
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
-    val autoPackage by app.prefs.autoPackage.collectAsStateWithLifecycle()
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val nav by app.navigator.state.collectAsStateWithLifecycle()
     val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
@@ -146,9 +145,21 @@ fun HomeScreen(
         Unit
     }
     val gap = dims.d(2f)
-    var linkMissing by remember { mutableStateOf(false) }
     var phoneCard by remember { mutableStateOf(false) }
     if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
+    // Phone Link: Car Hub's own sheet (connected phone, phone music, devices), not the unit's
+    // paid mirroring app. Voice "connect my phone" opens it too.
+    var phoneLink by remember { mutableStateOf(false) }
+    val linkAsked by app.phoneBt.sheetRequested.collectAsStateWithLifecycle()
+    LaunchedEffect(linkAsked) {
+        if (linkAsked) {
+            app.phoneBt.sheetShown()
+            phoneLink = true
+        }
+    }
+    if (phoneLink) PhoneLinkSheet(app = app, onDismiss = { phoneLink = false }, onRequestPermissions = onRequestPermissions)
+    val btDevices by app.phoneBt.devices.collectAsStateWithLifecycle()
+    val phoneName = app.phoneBt.connectedPhone(btDevices)?.name ?: bt.connectedName
 
     // Fast start on 1-2 GB units: the first frame has only the light panes; the map and music
     // card come right after it. The cold-start time (Diagnostics) is taken at that first frame.
@@ -160,15 +171,6 @@ fun HomeScreen(
             delay(HEAVY_DELAY_MS)
             heavyReady = true
         }
-    }
-    if (linkMissing) {
-        PhoneLinkMissingDialog(
-            onOpenApps = {
-                linkMissing = false
-                onOpenApps()
-            },
-            onDismiss = { linkMissing = false },
-        )
     }
 
     Column(
@@ -276,7 +278,17 @@ fun HomeScreen(
                 )
             }
             val music = @Composable { m: Modifier ->
-                if (heavyReady) MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) else Pane(m) {}
+                if (heavyReady) {
+                    MusicCard(
+                        hub = app.mediaHub,
+                        resumeTick = resumeTick,
+                        modifier = m,
+                        phoneName = phoneName,
+                        onPhoneKey = app.phoneBt::key,
+                    )
+                } else {
+                    Pane(m) {}
+                }
             }
 
             when (theme.layout) {
@@ -349,16 +361,14 @@ fun HomeScreen(
                 .height(maxOf(dims.d(15f), MinTouch)),
             onNavigate = openNav,
             onVoice = { app.voice.start() },
-            onMusic = { Launchers.openMusic(context, app.mediaHub.currentPackage()) },
+            onMusic = { Launchers.openMusic(context) },
             // The Phone card: favourite calls and "Open phone app".
             onPhone = { phoneCard = true },
             // Long-press Music / Phone: pick which app the button opens.
             onMusicLong = { AppChooser.ask(AppRole.Music) },
             onPhoneLong = { AppChooser.ask(AppRole.Phone) },
-            // Phone link: the screen's CarPlay / Android Auto app (Launchers.PHONE_LINK_PACKAGES).
-            onAuto = {
-                if (!Launchers.openPhoneLink(context, autoPackage)) linkMissing = true
-            },
+            // Phone link: Car Hub's own sheet (a mirroring app only when the driver picked one).
+            onAuto = { phoneLink = true },
             onCar = onOpenCar,
             carAlert = carAlert,
             onApps = onOpenApps,

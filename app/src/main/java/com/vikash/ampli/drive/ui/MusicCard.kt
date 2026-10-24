@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Pause
@@ -69,7 +70,14 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
+fun MusicCard(
+    hub: MediaHub,
+    resumeTick: Int,
+    modifier: Modifier = Modifier,
+    /** A phone connected over Bluetooth: with no player session, the card shows "Phone music". */
+    phoneName: String? = null,
+    onPhoneKey: (Int) -> Unit = {},
+) {
     val dims = LocalDims.current
     val context = LocalContext.current
     val state by hub.state.collectAsStateWithLifecycle()
@@ -96,8 +104,9 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
         ) {
             val np = state.nowPlaying
             when {
+                np == null && phoneName != null -> PhoneMusic(phoneName, onPhoneKey)
                 !state.accessGranted -> AccessNeeded(onAllow = { Launchers.openNotificationAccess(context) })
-                np == null -> NothingPlaying(onOpen = { Launchers.openMusic(context, null) })
+                np == null -> NothingPlaying(onOpen = { Launchers.openMusic(context) })
                 else -> {
                     AlbumArt(np, Modifier.fillMaxWidth().weight(1f))
                     Column {
@@ -137,6 +146,62 @@ fun MusicCard(hub: MediaHub, resumeTick: Int, modifier: Modifier = Modifier) {
         }
         }
       }
+    }
+}
+
+/**
+ * "Phone music": songs from the phone over Bluetooth when no player shares its session. The
+ * buttons send media keys, which the unit's Bluetooth stack passes to the phone (AVRCP).
+ */
+@Composable
+internal fun PhoneMusic(phoneName: String, onKey: (Int) -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val playing by produceState(false) {
+        val audio = context.getSystemService(android.media.AudioManager::class.java)
+        while (true) {
+            value = audio?.isMusicActive == true
+            delay(1_000L)
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        // Short card (map-on-top layouts): just the name and the buttons.
+        val roomy = maxHeight >= 250.dp
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(dims.d(1.4f), Alignment.CenterVertically),
+        ) {
+            if (roomy) {
+                Icon(
+                    Icons.Filled.BluetoothAudio,
+                    contentDescription = null,
+                    tint = theme.accentSoft,
+                    modifier = Modifier.size(maxOf(dims.d(8f), 40.dp)),
+                )
+            }
+            Text(
+                stringResource(R.string.phone_music_title),
+                fontSize = dims.t(3f, min = 18f),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(R.string.phone_music_from, phoneName),
+                fontSize = dims.t(2.3f, min = 16f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = if (roomy) 2 else 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Controls(
+                playing = playing,
+                onPrev = { onKey(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS) },
+                onPlayPause = { onKey(android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) },
+                onNext = { onKey(android.view.KeyEvent.KEYCODE_MEDIA_NEXT) },
+            )
+        }
     }
 }
 
