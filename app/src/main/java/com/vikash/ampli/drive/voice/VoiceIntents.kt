@@ -98,7 +98,7 @@ object VoiceIntents {
         if (kw.call.any { has(t, it) }) {
             return VoiceIntent.CallContact(trimFillers(remove(t, kw.call), kw.fillers))
         }
-        if (words <= 6) savedPhrase(t)?.let { return VoiceIntent.GoSaved(it) }
+        if (words <= 6) savedPhrase(t, kw.fillers + kw.placeFillers)?.let { return VoiceIntent.GoSaved(it) }
         if (kw.navigate.any { has(t, it) }) {
             val dest = trimFillers(remove(t, kw.navigate), kw.fillers + kw.placeFillers)
             savedKind(dest)?.let { return VoiceIntent.GoSaved(it) }
@@ -192,11 +192,17 @@ object VoiceIntents {
         }
     }
 
-    /** Short commands without a navigate keyword: "go home", "head home", "घर चल". */
-    private fun savedPhrase(t: String): SavedKind? = when {
-        HOME_PHRASES.any { has(t, it) } -> SavedKind.Home
-        OFFICE_PHRASES.any { has(t, it) } -> SavedKind.Office
-        else -> null
+    /**
+     * Short commands without a navigate keyword: "go home", "head home", "घर चल". Only when nothing
+     * but fillers is left, so "go to office depot" stays a search for Office Depot.
+     */
+    private fun savedPhrase(t: String, fillers: List<String>): SavedKind? {
+        fun only(phrases: List<String>) = phrases.any { has(t, it) && trimFillers(remove(t, listOf(it)), fillers).isBlank() }
+        return when {
+            only(HOME_PHRASES) -> SavedKind.Home
+            only(OFFICE_PHRASES) -> SavedKind.Office
+            else -> null
+        }
     }
 
     private val HOME_WORDS = listOf(
