@@ -118,9 +118,10 @@ fun PhoneLinkSheet(app: DriveApp, onDismiss: () -> Unit, onRequestPermissions: (
                 },
                 onAddFavourite = { phoneCard = true },
                 onSwitch = { d ->
-                    when (bt.switchTo(d.address)) {
-                        PhoneBluetooth.SwitchStart.Asked -> switching = d
-                        PhoneBluetooth.SwitchStart.NotAllowed -> bt.openPairingScreen(context, d.name)
+                    if (bt.switchTo(d.address) == PhoneBluetooth.SwitchStart.Asked) {
+                        switching = d
+                    } else {
+                        bt.openPairingScreen(context, d.name)
                     }
                 },
                 onBtSettings = { bt.openPairingScreen(context, null) },
@@ -206,7 +207,7 @@ internal fun PhoneLinkContent(
         }
 
         // Favourite calls (round 6): one tap calls.
-        SectionLabel(stringResource(R.string.fav_calls_title))
+        PlinkLabel(stringResource(R.string.fav_calls_title))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
             for (c in contacts) {
                 SmallChip(c.name, onClick = { onCall(c) }, modifier = Modifier.weight(1f, fill = false))
@@ -217,7 +218,7 @@ internal fun PhoneLinkContent(
         }
 
         // Paired devices with Switch.
-        SectionLabel(stringResource(R.string.plink_devices))
+        PlinkLabel(stringResource(R.string.plink_devices))
         when {
             !btSupported -> Text(stringResource(R.string.plink_no_devices), color = theme.muted, fontSize = dims.t(2.3f, min = 14f))
             !hasPermission -> BigButton(stringResource(R.string.action_allow), onAllow, Modifier.fillMaxWidth(), icon = Icons.Filled.Bluetooth, primary = false)
@@ -238,7 +239,7 @@ internal fun PhoneLinkContent(
 }
 
 @Composable
-private fun SectionLabel(text: String) {
+private fun PlinkLabel(text: String) {
     val dims = LocalDims.current
     Text(text, color = LocalDriveTheme.current.accentSoft, fontSize = dims.t(2.4f, min = 15f), fontWeight = FontWeight.Bold)
 }
