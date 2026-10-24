@@ -102,7 +102,7 @@ class Round6ScreenshotTest {
     fun store() {
         compose.setContent {
             Frame {
-                StoreContent(isPro = false, proPrice = "₹199", launchLine = false, mp3Installed = false, onBack = {}, onPro = {}, onMp3 = {})
+                StoreContent(isPro = false, proPrice = "₹1,499", launchLine = true, mp3Installed = false, onBack = {}, onPro = {}, onMp3 = {})
             }
         }
         shot("round6-store")
