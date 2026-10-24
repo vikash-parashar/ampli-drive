@@ -194,7 +194,11 @@ fun GlanceMap(
             }
         }
         lifecycle.addObserver(observer)
+        // Launcher hidden or memory low: MapLibre drops its tile and glyph caches (reloaded on return).
+        val trim: () -> Unit = { mapView.onLowMemory() }
+        com.vikash.ampli.drive.system.MemoryTrim.add(trim)
         onDispose {
+            com.vikash.ampli.drive.system.MemoryTrim.remove(trim)
             lifecycle.removeObserver(observer)
             holder.pause(mapView)
             holder.stop(mapView)

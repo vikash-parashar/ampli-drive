@@ -125,7 +125,7 @@ internal fun rememberMakeHome(onDone: () -> Unit = {}): () -> Unit {
 
 /** Home: one row under the status bar that pushes the panes down, so nothing is covered. */
 @Composable
-internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier, title: String? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Row(
@@ -145,7 +145,7 @@ internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier
     ) {
         Icon(Icons.Filled.Home, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(30.dp))
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title ?: stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             if (!dims.compact) Text(stringResource(R.string.shell_home_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         BigButton(text = stringResource(R.string.shell_home_later), onClick = onLater, primary = false)
@@ -201,9 +201,12 @@ fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
     LaunchedEffect(isHome, moving) {
         when {
             moving -> showing = false
-            !isHome && !showing && !app.shell.homeCardDismissed -> {
+            // Once (and once more for drivers who saw the older banner): without being the home
+            // app, Car Hub may not be on screen after a power cut, so it can't greet.
+            !isHome && !showing && (!app.shell.homeCardDismissed || !app.shell.greetHomeBannerShown) -> {
                 showing = true
                 app.shell.homeCardDismissed = true
+                app.shell.greetHomeBannerShown = true
             }
         }
     }
@@ -212,7 +215,7 @@ fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
         enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
         exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
     ) {
-        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false })
+        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false }, title = stringResource(R.string.greet_home_title))
     }
 }
 

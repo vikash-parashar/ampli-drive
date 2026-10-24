@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">家</string>
+    <string name="place_office">公司</string>
+    <string name="place_not_set">%1$s 还没有保存。请先在地点搜索中保存它。</string>
+    <string name="place_saved">已保存：%1$s</string>
+    <string name="place_full">最多可以保存 %1$d 个收藏地点。请先删除一个。</string>
+    <string name="place_save_as">将此地点保存为</string>
+    <string name="place_name">名称</string>
+    <string name="place_add_favourite">添加到收藏</string>
+    <string name="places_title">已保存的地点</string>
+    <string name="places_empty">从搜索结果或当前位置保存家、公司或收藏地点。</string>
+    <string name="places_hint">点按即可开始导航。长按可删除。</string>
+    <string name="place_save_here">保存我的位置</string>
+    <string name="place_save">保存</string>
+    <string name="trips_title">行程记录</string>
+    <string name="trips_hint">每次驾驶都会自动保存在本机上</string>
+    <string name="trips_week">本周</string>
+    <string name="trips_count">行程：%1$d</string>
+    <string name="trips_fuel">≈ %1$s 油费</string>
+    <string name="trips_fuel_unknown">在支出中记录两次加满油，即可看到油费。</string>
+    <string name="trips_how">车辆行驶时通过 GPS 记录行程，停车后结束。仅在本机保留最近 %1$d 次行程。</string>
+    <string name="trips_clear">清除行程记录</string>
+    <string name="trips_clear_confirm">要删除本机上保存的所有行程吗？</string>
+    <string name="trips_empty">还没有行程。您的驾驶会自动显示在这里。</string>
+    <string name="trips_avg_top">平均 %1$d · 最高 %2$d km/h</string>
+    <string name="trips_tile_none">还没有行程</string>
+    <string name="trips_tile_week">本周 %1$s km</string>
+    <string name="speed_volume_title">随车速调节音量</string>
+    <string name="speed_volume_hint">车速超过 30 km/h、路噪变大时，音乐会稍微调大；减速后恢复原来的音量。您手动调整音量后，该音量即成为新的基准。</string>
+    <string name="speed_volume_low">低</string>
+    <string name="speed_volume_medium">中</string>
+    <string name="speed_volume_high">高</string>
+    <string name="fav_calls_title">常用联系人</string>
+    <string name="fav_calls_hint">点按姓名即可拨打。长按可删除。最多 %1$d 人。</string>
+    <string name="fav_calls_none">从通讯录添加最多 %1$d 人，之后点一下即可拨打。</string>
+    <string name="fav_calls_add">添加</string>
+    <string name="fav_calls_open_phone">打开电话应用</string>
+    <string name="fav_calls_failed">无法读取该联系人</string>
+    <string name="fav_calls_full">最多只能添加 %1$d 个。请先删除一个。</string>
+    <string name="fav_calls_type_title">添加常用联系人</string>
+    <string name="fav_calls_number">电话号码</string>
+    <string name="parked_qr">用手机扫描：停车位置会在 Google Maps 中打开。</string>
+    <string name="store_title">Ampli 商店</string>
+    <string name="store_hint">Car Hub Pro、MP3 播放器和语音包</string>
+    <string name="store_pro_line">Pro 主题、发动机和轮胎检查、朗读 WhatsApp 消息</string>
+    <string name="store_owned">已解锁</string>
+    <string name="store_install">安装</string>
+    <string name="store_voice_punjabi">旁遮普语语音包</string>
+    <string name="store_voice_rajasthani">拉贾斯坦语语音包</string>
+    <string name="store_voice_bhojpuri">博杰普尔语语音包</string>
+    <string name="store_voice_line">真人语音播报提醒和回复</string>
+</resources>

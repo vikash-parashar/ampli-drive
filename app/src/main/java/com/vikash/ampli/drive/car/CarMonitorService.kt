@@ -39,7 +39,23 @@ class CarMonitorService : Service() {
     /** Head units usually turn the screen off (or shut down) when the ignition goes off. */
     private val screenOff = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            app.car.onIgnitionOff()
+            when (intent.action) {
+                // Back after a long screen-off or a deep sleep: the car was started again (greeting).
+                Intent.ACTION_SCREEN_ON -> CarStart.onScreenOn(app)
+                Intent.ACTION_SCREEN_OFF -> {
+                    CarStart.onScreenOff()
+                    app.car.onIgnitionOff()
+                }
+                else -> app.car.onIgnitionOff()
+            }
+        }
+    }
+
+    /** The phone's Bluetooth link, while the launcher is hidden too (auto-play, Phone Link). */
+    private val btLink = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val device = com.vikash.ampli.drive.bluetooth.PhoneBluetooth.deviceFrom(intent)
+            app.phoneBt.onAcl(device, intent.action == android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED)
         }
     }
 
@@ -75,16 +91,23 @@ class CarMonitorService : Service() {
         try {
             val filter = IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SHUTDOWN)
+            }
+            val acl = IntentFilter().apply {
+                addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED)
+                addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED)
             }
             val vendor = IntentFilter().apply { IgnitionActions.actions.forEach { addAction(it) } }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(screenOff, filter, RECEIVER_NOT_EXPORTED)
                 // Sent by the head unit's own system apps, so it must be exported.
                 registerReceiver(vendorIgnition, vendor, RECEIVER_EXPORTED)
+                registerReceiver(btLink, acl, RECEIVER_EXPORTED)
             } else {
                 registerReceiver(screenOff, filter)
                 registerReceiver(vendorIgnition, vendor)
+                registerReceiver(btLink, acl)
             }
             registered = true
         } catch (_: Exception) {
@@ -133,6 +156,7 @@ class CarMonitorService : Service() {
             try {
                 unregisterReceiver(screenOff)
                 unregisterReceiver(vendorIgnition)
+                unregisterReceiver(btLink)
             } catch (_: Exception) {
             }
         }

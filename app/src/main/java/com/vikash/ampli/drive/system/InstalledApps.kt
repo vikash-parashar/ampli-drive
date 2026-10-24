@@ -16,6 +16,9 @@ data class AppEntry(val packageName: String, val activityName: String, val label
 object InstalledApps {
     private val iconCache = LruCache<String, ImageBitmap>(96)
 
+    /** Drops the icon cache (MemoryTrim, when the launcher is hidden or memory is low). */
+    fun clearCache() = iconCache.evictAll()
+
     @Suppress("DEPRECATION")
     suspend fun load(context: Context): List<AppEntry> = withContext(Dispatchers.IO) {
         val pm = context.packageManager

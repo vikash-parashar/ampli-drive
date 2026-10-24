@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">ਘਰ</string>
+    <string name="place_office">ਦਫ਼ਤਰ</string>
+    <string name="place_not_set">%1$s ਅਜੇ ਸੇਵ ਨਹੀਂ ਹੈ। ਪਹਿਲਾਂ ਥਾਂ ਲੱਭ ਕੇ ਉਸਨੂੰ ਸੇਵ ਕਰੋ।</string>
+    <string name="place_saved">ਸੇਵ ਹੋ ਗਿਆ: %1$s</string>
+    <string name="place_full">ਵੱਧ ਤੋਂ ਵੱਧ %1$d ਮਨਪਸੰਦ ਥਾਵਾਂ ਸੇਵ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਪਹਿਲਾਂ ਇੱਕ ਹਟਾਓ।</string>
+    <string name="place_save_as">ਇਸ ਥਾਂ ਨੂੰ ਇੰਝ ਸੇਵ ਕਰੋ</string>
+    <string name="place_name">ਨਾਮ</string>
+    <string name="place_add_favourite">ਮਨਪਸੰਦ ਵਿੱਚ ਜੋੜੋ</string>
+    <string name="places_title">ਸੇਵ ਕੀਤੀਆਂ ਥਾਵਾਂ</string>
+    <string name="places_empty">ਖੋਜ ਦੇ ਨਤੀਜੇ ਤੋਂ ਜਾਂ ਤੁਸੀਂ ਹੁਣ ਜਿੱਥੇ ਹੋ ਉੱਥੋਂ ਘਰ, ਦਫ਼ਤਰ ਜਾਂ ਮਨਪਸੰਦ ਥਾਂ ਸੇਵ ਕਰੋ।</string>
+    <string name="places_hint">ਟੈਪ ਕਰਦੇ ਹੀ ਰਸਤਾ ਸ਼ੁਰੂ। ਹਟਾਉਣ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।</string>
+    <string name="place_save_here">ਮੈਂ ਜਿੱਥੇ ਹਾਂ ਉਹ ਸੇਵ ਕਰੋ</string>
+    <string name="place_save">ਸੇਵ ਕਰੋ</string>
+    <string name="trips_title">ਸਫ਼ਰ ਦਾ ਇਤਿਹਾਸ</string>
+    <string name="trips_hint">ਹਰ ਸਫ਼ਰ ਇਸੇ ਯੂਨਿਟ \'ਤੇ ਆਪਣੇ ਆਪ ਸੇਵ ਹੁੰਦਾ ਹੈ</string>
+    <string name="trips_week">ਇਸ ਹਫ਼ਤੇ</string>
+    <string name="trips_count">ਸਫ਼ਰ: %1$d</string>
+    <string name="trips_fuel">≈ %1$s ਤੇਲ</string>
+    <string name="trips_fuel_unknown">ਤੇਲ ਦਾ ਖਰਚਾ ਵੇਖਣ ਲਈ ਖਰਚਿਆਂ ਵਾਲੇ ਪੰਨੇ \'ਤੇ ਦੋ ਵਾਰ ਫੁੱਲ ਟੈਂਕੀ ਭਰਵਾਉਣਾ ਦਰਜ ਕਰੋ।</string>
+    <string name="trips_how">ਗੱਡੀ ਚੱਲਦੇ ਹੀ GPS ਤੋਂ ਸਫ਼ਰ ਦਰਜ ਹੁੰਦਾ ਹੈ ਅਤੇ ਰੁਕਦੇ ਹੀ ਪੂਰਾ ਹੁੰਦਾ ਹੈ। ਆਖਰੀ %1$d ਸਫ਼ਰ ਸਿਰਫ਼ ਇਸੇ ਯੂਨਿਟ \'ਤੇ ਰੱਖੇ ਜਾਂਦੇ ਹਨ।</string>
+    <string name="trips_clear">ਸਫ਼ਰ ਦਾ ਇਤਿਹਾਸ ਮਿਟਾਓ</string>
+    <string name="trips_clear_confirm">ਇਸ ਯੂਨਿਟ ਤੋਂ ਸਾਰੇ ਸੇਵ ਕੀਤੇ ਸਫ਼ਰ ਮਿਟਾ ਦੇਈਏ?</string>
+    <string name="trips_empty">ਅਜੇ ਕੋਈ ਸਫ਼ਰ ਨਹੀਂ। ਤੁਹਾਡੇ ਸਫ਼ਰ ਇੱਥੇ ਆਪਣੇ ਆਪ ਦਿਖਣਗੇ।</string>
+    <string name="trips_avg_top">ਔਸਤ %1$d · ਸਭ ਤੋਂ ਤੇਜ਼ %2$d km/h</string>
+    <string name="trips_tile_none">ਅਜੇ ਕੋਈ ਸਫ਼ਰ ਨਹੀਂ</string>
+    <string name="trips_tile_week">ਇਸ ਹਫ਼ਤੇ %1$s km</string>
+    <string name="speed_volume_title">ਰਫ਼ਤਾਰ ਨਾਲ ਆਵਾਜ਼</string>
+    <string name="speed_volume_hint">30 km/h ਤੋਂ ਉੱਪਰ ਸੜਕ ਦਾ ਸ਼ੋਰ ਵਧਣ \'ਤੇ ਗੀਤ ਥੋੜ੍ਹਾ ਉੱਚਾ ਹੁੰਦਾ ਹੈ, ਅਤੇ ਹੌਲੀ ਹੋਣ \'ਤੇ ਫਿਰ ਪਹਿਲਾਂ ਵਰਗਾ। ਤੁਸੀਂ ਆਪ ਆਵਾਜ਼ ਬਦਲੋ ਤਾਂ ਉਹੀ ਨਵਾਂ ਪੱਧਰ ਬਣ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="speed_volume_low">ਘੱਟ</string>
+    <string name="speed_volume_medium">ਦਰਮਿਆਨਾ</string>
+    <string name="speed_volume_high">ਵੱਧ</string>
+    <string name="fav_calls_title">ਮਨਪਸੰਦ ਕਾਲਾਂ</string>
+    <string name="fav_calls_hint">ਕਾਲ ਕਰਨ ਲਈ ਨਾਮ ਦਬਾਓ। ਹਟਾਉਣ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ। ਵੱਧ ਤੋਂ ਵੱਧ %1$d ਲੋਕ।</string>
+    <string name="fav_calls_none">ਆਪਣੇ ਸੰਪਰਕਾਂ ਵਿੱਚੋਂ %1$d ਲੋਕਾਂ ਤੱਕ ਜੋੜੋ। ਫਿਰ ਇੱਕ ਟੈਪ ਨਾਲ ਕਾਲ।</string>
+    <string name="fav_calls_add">ਜੋੜੋ</string>
+    <string name="fav_calls_open_phone">ਫ਼ੋਨ ਐਪ ਖੋਲ੍ਹੋ</string>
+    <string name="fav_calls_failed">ਇਹ ਸੰਪਰਕ ਪੜ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</string>
+    <string name="fav_calls_full">ਸਿਰਫ਼ %1$d ਮਨਪਸੰਦ ਆ ਸਕਦੇ ਹਨ। ਪਹਿਲਾਂ ਇੱਕ ਹਟਾਓ।</string>
+    <string name="fav_calls_type_title">ਮਨਪਸੰਦ ਜੋੜੋ</string>
+    <string name="fav_calls_number">ਫ਼ੋਨ ਨੰਬਰ</string>
+    <string name="parked_qr">ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਸਕੈਨ ਕਰੋ: ਗੱਡੀ ਦੀ ਥਾਂ Google Maps ਵਿੱਚ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ।</string>
+    <string name="store_title">Ampli ਸਟੋਰ</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player ਅਤੇ ਆਵਾਜ਼ ਪੈਕ</string>
+    <string name="store_pro_line">Pro ਥੀਮਾਂ, ਇੰਜਣ ਅਤੇ ਟਾਇਰ ਜਾਂਚ, WhatsApp ਸੁਨੇਹੇ ਪੜ੍ਹ ਕੇ ਸੁਣਾਉਣਾ</string>
+    <string name="store_owned">ਚਾਲੂ ਹੈ</string>
+    <string name="store_install">ਇੰਸਟਾਲ ਕਰੋ</string>
+    <string name="store_voice_punjabi">ਪੰਜਾਬੀ ਆਵਾਜ਼ ਪੈਕ</string>
+    <string name="store_voice_rajasthani">ਰਾਜਸਥਾਨੀ ਆਵਾਜ਼ ਪੈਕ</string>
+    <string name="store_voice_bhojpuri">ਭੋਜਪੁਰੀ ਆਵਾਜ਼ ਪੈਕ</string>
+    <string name="store_voice_line">ਚੇਤਾਵਨੀਆਂ ਅਤੇ ਜਵਾਬਾਂ ਲਈ ਅਸਲੀ ਇਨਸਾਨੀ ਆਵਾਜ਼</string>
+</resources>

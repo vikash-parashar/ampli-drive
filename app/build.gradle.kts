@@ -86,6 +86,9 @@ android {
             buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
             buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
             buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL").ifEmpty { "https://api.open-meteo.com/v1/forecast" }}\"")
+            // Test APKs only: "Download and install" Ampli MP3 Player from its GitHub releases
+            // (src/debug/AndroidManifest.xml adds REQUEST_INSTALL_PACKAGES). Play builds use Play.
+            buildConfigField("boolean", "SIDELOAD_INSTALL", "true")
         }
         release {
             // Never a public demo server in a paid app: checkReleaseEndpoints fails the build when
@@ -93,6 +96,8 @@ android {
             buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL")}\"")
             buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL")}\"")
             buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL")}\"")
+            // The Play bundle never downloads or installs other APKs (and never declares the permission).
+            buildConfigField("boolean", "SIDELOAD_INSTALL", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -154,6 +159,8 @@ dependencies {
     implementation(libs.billing.ktx)
     implementation(libs.haze)
     implementation(libs.media3.exoplayer)
+    // Parking-spot QR on the "Where's my car" screen.
+    implementation(libs.zxing.core)
 
     // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
     implementation(libs.vosk.android)

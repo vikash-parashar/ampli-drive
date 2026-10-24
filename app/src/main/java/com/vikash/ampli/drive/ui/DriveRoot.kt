@@ -43,7 +43,10 @@ enum class Screen {
     Help, Sos, Fastag, Emergency,
 
     /** Car hub and its screens; [Crash] is the SOS countdown started by crash detection. */
-    Car, Parked, Papers, Expenses, Obd, Tyres, Crash,
+    Car, Parked, Papers, Expenses, Trips, Obd, Tyres, Crash,
+
+    /** Ampli Store: Pro, the MP3 Player and voice packs (from Apps). */
+    Store,
 
     /** Settings › Help & feedback (also "Hey Ampli, report a problem"). */
     Feedback,
@@ -165,7 +168,7 @@ fun DriveRoot(
                         }
                         Screen.Apps -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
-                            AppsScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                            AppsScreen(app = app, onBack = { onNavigate(Screen.Home) }, onOpenStore = { onNavigate(Screen.Store) })
                         }
                         Screen.Settings -> {
                             BackHandler(enabled = true) { onNavigate(settingsReturn) }
@@ -212,6 +215,7 @@ fun DriveRoot(
                                     CarDest.Parked -> onNavigate(Screen.Parked)
                                     CarDest.Papers -> onNavigate(Screen.Papers)
                                     CarDest.Expenses -> onNavigate(Screen.Expenses)
+                                    CarDest.Trips -> onNavigate(Screen.Trips)
                                     CarDest.Obd -> onNavigate(Screen.Obd)
                                     CarDest.Tyres -> onNavigate(Screen.Tyres)
                                     CarDest.Settings -> {
@@ -232,6 +236,14 @@ fun DriveRoot(
                         Screen.Expenses -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Car) }
                             ExpensesScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                        }
+                        Screen.Trips -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            TripsScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                        }
+                        Screen.Store -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Apps) }
+                            StoreScreen(app = app, onBack = { onNavigate(Screen.Apps) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Obd -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Car) }
@@ -278,12 +290,17 @@ fun DriveRoot(
                         val context = androidx.compose.ui.platform.LocalContext.current
                         AppChooserDialog(
                             role = req.role,
+                            automaticLabel = if (req.phoneLink) androidx.compose.ui.res.stringResource(com.vikash.ampli.drive.R.string.mirror_app_none) else null,
                             onPick = { entry ->
                                 AppChooser.done()
                                 when (req.role) {
-                                    AppRole.Music -> app.prefs.setMusicPackage(entry?.packageName)
+                                    AppRole.Music -> app.prefs.pickMusicPackage(entry?.packageName)
                                     AppRole.Phone -> app.prefs.setPhonePackage(entry?.packageName)
-                                    AppRole.Mirror -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    AppRole.Mirror -> if (req.phoneLink) {
+                                        app.prefs.setAutoPackage(entry?.packageName)
+                                    } else {
+                                        app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    }
                                     AppRole.Nav -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(navPackage = entry?.packageName))
                                 }
                                 // Dock / Help panel: open the app right away. Settings choices just save.
@@ -294,6 +311,8 @@ fun DriveRoot(
                             onDismiss = { AppChooser.done() },
                         )
                     }
+                    // Music button without Ampli MP3 Player: "Get Ampli MP3 Player".
+                    GetAmpliHost()
                     // First run: "Thara naam ke sai?" over Home; the location disclosure waits for it.
                     val nameAsked by app.prefs.nameAsked.collectAsStateWithLifecycle()
                     if (!nameAsked && screen == Screen.Home) {

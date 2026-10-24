@@ -252,6 +252,45 @@ class DrivePrefs(context: Context) {
         _musicPackage.value = pkg
     }
 
+    /** The driver picked the music app by hand (long-press Music, Settings): kept over Ampli. */
+    fun pickMusicPackage(pkg: String?) {
+        sp.edit().putBoolean(KEY_MUSIC_PICKED_V2, true).apply()
+        setMusicPackage(pkg)
+    }
+
+    /**
+     * Once: the stored music app becomes Ampli MP3 Player when it is installed (see
+     * MusicDefault.migrate). Cheap after the first time (one boolean read).
+     */
+    fun applyMusicDefault(ampliInstalled: () -> Boolean) {
+        if (sp.getBoolean(KEY_MUSIC_MIGRATED, false)) return
+        val installed = ampliInstalled()
+        val picked = sp.getBoolean(KEY_MUSIC_PICKED_V2, false)
+        com.vikash.ampli.drive.system.MusicDefault.migrate(_musicPackage.value, installed, false, picked)?.let { setMusicPackage(it) }
+        if (com.vikash.ampli.drive.system.MusicDefault.migrationDone(installed, false, picked)) {
+            sp.edit().putBoolean(KEY_MUSIC_MIGRATED, true).apply()
+        }
+    }
+
+    /** Settings › Play phone music when my phone connects. On by default. */
+    private val _phoneAutoPlay = MutableStateFlow(sp.getBoolean(KEY_PHONE_AUTOPLAY, true))
+    val phoneAutoPlay: StateFlow<Boolean> = _phoneAutoPlay.asStateFlow()
+
+    fun setPhoneAutoPlay(value: Boolean) {
+        sp.edit().putBoolean(KEY_PHONE_AUTOPLAY, value).apply()
+        _phoneAutoPlay.value = value
+    }
+
+    /** When the welcome last played ("wall,elapsed,bootCount"), see StartPolicy.RunMark. */
+    var lastGreetMark: String?
+        get() = sp.getString(KEY_GREET_MARK, null)
+        set(value) { sp.edit().putString(KEY_GREET_MARK, value).apply() }
+
+    /** When "When the car starts" last ran, same format. */
+    var lastAutoStartMark: String?
+        get() = sp.getString(KEY_AUTOSTART_MARK, null)
+        set(value) { sp.edit().putString(KEY_AUTOSTART_MARK, value).apply() }
+
     fun setPhonePackage(pkg: String?) {
         sp.edit().putString(KEY_PHONE_PKG, pkg).apply()
         _phonePackage.value = pkg
@@ -384,6 +423,15 @@ class DrivePrefs(context: Context) {
         _pro.value = _pro.value.copy(testUnlock = value)
     }
 
+    /** Settings › Volume by speed (off by default). */
+    private val _speedVolume = MutableStateFlow(com.vikash.ampli.drive.media.SpeedVolumeLevel.from(sp.getString(KEY_SPEED_VOLUME, null)))
+    val speedVolume: StateFlow<com.vikash.ampli.drive.media.SpeedVolumeLevel> = _speedVolume.asStateFlow()
+
+    fun setSpeedVolume(value: com.vikash.ampli.drive.media.SpeedVolumeLevel) {
+        sp.edit().putString(KEY_SPEED_VOLUME, value.key).apply()
+        _speedVolume.value = value
+    }
+
     fun setReduceGlass(value: Boolean) {
         sp.edit().putBoolean(KEY_REDUCE_GLASS, value).apply()
         _reduceGlass.value = value
@@ -461,6 +509,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_CAM_DISTANCE = "camera_distance"
         private const val KEY_CAM_OVER_ONLY = "camera_over_only"
         private const val KEY_REDUCE_GLASS = "reduce_glass"
+        private const val KEY_SPEED_VOLUME = "speed_volume"
         private const val KEY_WAKE_SENS = "wake_sensitivity"
         private const val KEY_BUBBLE = "speed_bubble"
         private const val KEY_BUBBLE_X = "speed_bubble_x"
@@ -489,6 +538,11 @@ class DrivePrefs(context: Context) {
         private const val KEY_AS_DELAY = "autostart_delay_s"
         private const val KEY_AS_RETURN = "autostart_return_s"
         private const val KEY_AS_BT = "autostart_bt_device"
+        private const val KEY_MUSIC_PICKED_V2 = "music_picked_by_driver_v2"
+        private const val KEY_MUSIC_MIGRATED = "music_default_ampli_done"
+        private const val KEY_PHONE_AUTOPLAY = "phone_music_autoplay"
+        private const val KEY_GREET_MARK = "greet_run_mark"
+        private const val KEY_AUTOSTART_MARK = "autostart_run_mark"
 
         const val WAKE_SENS_DEFAULT = 3
 

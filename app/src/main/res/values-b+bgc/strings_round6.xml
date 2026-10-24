@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">घर</string>
+    <string name="place_office">दफ्तर</string>
+    <string name="place_not_set">%1$s अजे सेव कोनी। पहलां जगहां टोह कै उसनै सेव कर ले।</string>
+    <string name="place_saved">सेव हो ग्या: %1$s</string>
+    <string name="place_full">घणी तै घणी %1$d पसंदीदा जगहां सेव हो सकैं सैं। पहलां एक हटा दे।</string>
+    <string name="place_save_as">इस जगहां नै न्यूं सेव कर</string>
+    <string name="place_name">नाम</string>
+    <string name="place_add_favourite">पसंदीदा मैं जोड़</string>
+    <string name="places_title">सेव करी होई जगहां</string>
+    <string name="places_empty">टोह के नतीजे तै या जित तू इब खड़्या सै उड़े तै, घर, दफ्तर या कोए पसंदीदा जगहां सेव कर ले।</string>
+    <string name="places_hint">दबांदे ए राह शुरू। हटाण खातर दबा कै राख।</string>
+    <string name="place_save_here">जित मैं सूं, वा सेव कर</string>
+    <string name="place_save">सेव कर</string>
+    <string name="trips_title">सफर का हिसाब</string>
+    <string name="trips_hint">हर सफर इसे यूनिट पै आप्पे सेव होवै सै</string>
+    <string name="trips_week">इस हफ्ते</string>
+    <string name="trips_count">सफर: %1$d</string>
+    <string name="trips_fuel">≈ %1$s का तेल</string>
+    <string name="trips_fuel_unknown">तेल का खरचा देखण खातर खरचे आळे पेज पै दो बार फुल टंकी भरवाणा लिख दे।</string>
+    <string name="trips_how">गाड्डी चालदे ए GPS तै सफर लिख्या जावै सै अर खड़ी होंदे ए पूरा होवै सै। आखरी %1$d सफर बस इसे यूनिट पै राक्खे जावैं सैं।</string>
+    <string name="trips_clear">सफर का हिसाब मिटा</string>
+    <string name="trips_clear_confirm">इस यूनिट तै सारे सेव करे होए सफर मिटा दयूं?</string>
+    <string name="trips_empty">अजे कोए सफर कोनी। थारे सफर उरै आप्पे दीखैंगे।</string>
+    <string name="trips_avg_top">औसत %1$d · सबतै तेज %2$d km/h</string>
+    <string name="trips_tile_none">अजे कोए सफर कोनी</string>
+    <string name="trips_tile_week">इस हफ्ते %1$s km</string>
+    <string name="speed_volume_title">रफ्तार गेल आवाज</string>
+    <string name="speed_volume_hint">30 km/h तै ऊपर सड़क का रोळा बधै तो गाणा थोड़ा ऊंचा हो जावै, अर धीमे होंदे ए फेर पहलां जिसा। तू आप्पे आवाज बदलै तो वोए नया लेवल बण जावै।</string>
+    <string name="speed_volume_low">कम</string>
+    <string name="speed_volume_medium">बिचला</string>
+    <string name="speed_volume_high">घणा</string>
+    <string name="fav_calls_title">पसंदीदा कॉल</string>
+    <string name="fav_calls_hint">कॉल करण खातर नाम दबा। हटाण खातर दबा कै राख। घणे तै घणे %1$d माणस।</string>
+    <string name="fav_calls_none">अपणे कॉन्टैक्ट तै %1$d माणस ताहीं जोड़ ले। फेर एक बार दबांदे ए कॉल।</string>
+    <string name="fav_calls_add">जोड़</string>
+    <string name="fav_calls_open_phone">फोन ऐप खोल</string>
+    <string name="fav_calls_failed">यो कॉन्टैक्ट पढ़्या कोनी ग्या</string>
+    <string name="fav_calls_full">बस %1$d पसंदीदा आ सकैं सैं। पहलां एक हटा दे।</string>
+    <string name="fav_calls_type_title">पसंदीदा जोड़</string>
+    <string name="fav_calls_number">फोन नंबर</string>
+    <string name="parked_qr">अपणे फोन तै स्कैन कर: गाड्डी की जगहां Google Maps मैं खुल ज्यागी।</string>
+    <string name="store_title">Ampli स्टोर</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player अर आवाज पैक</string>
+    <string name="store_pro_line">Pro थीम, इंजन अर टायर की जांच, WhatsApp मैसेज बोल कै सुणाणा</string>
+    <string name="store_owned">चालू सै</string>
+    <string name="store_install">इंस्टॉल कर</string>
+    <string name="store_voice_punjabi">पंजाबी आवाज पैक</string>
+    <string name="store_voice_rajasthani">राजस्थानी आवाज पैक</string>
+    <string name="store_voice_bhojpuri">भोजपुरी आवाज पैक</string>
+    <string name="store_voice_line">अलर्ट अर जवाब खातर असली माणस की आवाज</string>
+</resources>

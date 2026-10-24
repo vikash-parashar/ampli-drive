@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Obtenir Ampli MP3 Player</string>
+    <string name="getmp3_text">Car Hub lit vos chansons dans Ampli MP3 Player, qui n\'est pas encore sur cet écran. Installez-le une fois ; ensuite le bouton Musique l\'ouvre directement.</string>
+    <string name="getmp3_play">L\'obtenir sur le Play Store</string>
+    <string name="getmp3_download">Télécharger et installer</string>
+    <string name="getmp3_downloading">Téléchargement… %1$d%%</string>
+    <string name="getmp3_install">Installer maintenant</string>
+    <string name="getmp3_allow">Autorisez les installations depuis Car Hub sur l\'écran ouvert, revenez, puis touchez Installer maintenant.</string>
+    <string name="getmp3_failed">Échec du téléchargement. Vérifiez Internet et réessayez.</string>
+    <string name="getmp3_other">Utiliser une autre appli de musique</string>
+    <string name="getmp3_test_note">Version de test : télécharge la dernière version de test depuis la page GitHub d\'Ampli.</string>
+    <string name="phone_music_title">Musique du téléphone</string>
+    <string name="phone_music_from">Depuis %1$s en Bluetooth</string>
+    <string name="phone_autoplay_title">Lire la musique du téléphone quand il se connecte</string>
+    <string name="phone_autoplay_hint">Appuie sur lecture quelques secondes après la connexion. Jamais pendant un appel, ni si vous avez mis en pause dans la dernière minute.</string>
+    <string name="mirror_app_title">Appli de recopie d\'écran</string>
+    <string name="mirror_app_none">Aucune</string>
+    <string name="plink_title">Phone Link</string>
+    <string name="plink_connected">%1$s connecté</string>
+    <string name="plink_not_connected">Aucun téléphone connecté en Bluetooth</string>
+    <string name="plink_calls">Appels</string>
+    <string name="plink_music">Musique</string>
+    <string name="plink_battery">Batterie %1$d%%</string>
+    <string name="plink_play">Lire la musique du téléphone</string>
+    <string name="plink_devices">Appareils Bluetooth</string>
+    <string name="plink_no_devices">Aucun appareil associé visible. Cet autoradio gère peut-être le Bluetooth dans sa propre appli : ouvrez les réglages Bluetooth.</string>
+    <string name="plink_now">Connecté</string>
+    <string name="plink_paired">Associé</string>
+    <string name="plink_switch">Changer</string>
+    <string name="plink_switching">Demande de connexion de %1$s envoyée…</string>
+    <string name="plink_pick_here">Choisissez %1$s ici pour le connecter</string>
+    <string name="plink_bt_settings">Réglages Bluetooth</string>
+    <string name="plink_mirror">Ouvrir l\'appli de recopie d\'écran</string>
+    <string name="apps_hide">Masquer des applis</string>
+    <string name="apps_hidden_toast">%1$s est masquée. Réaffichez-la depuis Plus d\'applis.</string>
+    <string name="apps_unhide_all">Afficher les masquées (%1$d)</string>
+    <string name="apps_mirror_use">Utiliser pour la recopie d\'écran</string>
+    <string name="apps_mirror_stop">Ne plus utiliser pour la recopie d\'écran</string>
+    <string name="greet_home_title">Définissez Car Hub comme appli d\'accueil pour qu\'il vous salue au démarrage</string>
+</resources>

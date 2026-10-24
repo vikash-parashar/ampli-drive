@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">வீடு</string>
+    <string name="place_office">அலுவலகம்</string>
+    <string name="place_not_set">%1$s இன்னும் சேமிக்கப்படவில்லை. முதலில் இடத்தைத் தேடி அதைச் சேமியுங்கள்.</string>
+    <string name="place_saved">சேமிக்கப்பட்டது: %1$s</string>
+    <string name="place_full">அதிகபட்சம் %1$d பிடித்த இடங்களைச் சேமிக்கலாம். முதலில் ஒன்றை நீக்குங்கள்.</string>
+    <string name="place_save_as">இந்த இடத்தை இப்படிச் சேமி</string>
+    <string name="place_name">பெயர்</string>
+    <string name="place_add_favourite">பிடித்தவையில் சேர்</string>
+    <string name="places_title">சேமித்த இடங்கள்</string>
+    <string name="places_empty">தேடல் முடிவிலிருந்தோ நீங்கள் இப்போது இருக்கும் இடத்திலிருந்தோ வீடு, அலுவலகம் அல்லது பிடித்த இடத்தைச் சேமியுங்கள்.</string>
+    <string name="places_hint">தட்டினால் வழி தொடங்கும். நீக்க அழுத்திப் பிடியுங்கள்.</string>
+    <string name="place_save_here">நான் இருக்கும் இடத்தைச் சேமி</string>
+    <string name="place_save">சேமி</string>
+    <string name="trips_title">பயண வரலாறு</string>
+    <string name="trips_hint">ஒவ்வொரு பயணமும் இந்த யூனிட்டில் தானாகச் சேமிக்கப்படும்</string>
+    <string name="trips_week">இந்த வாரம்</string>
+    <string name="trips_count">பயணங்கள்: %1$d</string>
+    <string name="trips_fuel">≈ %1$s எரிபொருள்</string>
+    <string name="trips_fuel_unknown">எரிபொருள் செலவைப் பார்க்க செலவுகளில் இரண்டு முறை முழு டேங்க் நிரப்பியதைப் பதிவு செய்யுங்கள்.</string>
+    <string name="trips_how">கார் நகரும்போது GPS மூலம் பயணம் பதிவாகும், நிறுத்தும்போது முடியும். கடைசி %1$d பயணங்கள் இந்த யூனிட்டில் மட்டும் வைக்கப்படும்.</string>
+    <string name="trips_clear">பயண வரலாற்றை அழி</string>
+    <string name="trips_clear_confirm">இந்த யூனிட்டில் உள்ள எல்லா பயணங்களையும் அழிக்கவா?</string>
+    <string name="trips_empty">இன்னும் பயணங்கள் இல்லை. உங்கள் பயணங்கள் இங்கே தானாகத் தெரியும்.</string>
+    <string name="trips_avg_top">சராசரி %1$d · அதிகபட்சம் %2$d km/h</string>
+    <string name="trips_tile_none">இன்னும் பயணங்கள் இல்லை</string>
+    <string name="trips_tile_week">இந்த வாரம் %1$s km</string>
+    <string name="speed_volume_title">வேகத்துக்கு ஏற்ற ஒலி</string>
+    <string name="speed_volume_hint">30 km/h-க்கு மேல் சாலை இரைச்சல் கூடும்போது பாடல் கொஞ்சம் சத்தமாகும், வேகம் குறைந்தால் மீண்டும் பழையபடி. நீங்களே ஒலியை மாற்றினால் அதுவே புதிய அளவு.</string>
+    <string name="speed_volume_low">குறைவு</string>
+    <string name="speed_volume_medium">நடுத்தரம்</string>
+    <string name="speed_volume_high">அதிகம்</string>
+    <string name="fav_calls_title">பிடித்த அழைப்புகள்</string>
+    <string name="fav_calls_hint">அழைக்கப் பெயரைத் தட்டுங்கள். நீக்க அழுத்திப் பிடியுங்கள். அதிகபட்சம் %1$d பேர்.</string>
+    <string name="fav_calls_none">உங்கள் தொடர்புகளிலிருந்து %1$d பேர் வரை சேர்க்கவும். பிறகு ஒரே தட்டில் அழைப்பு.</string>
+    <string name="fav_calls_add">சேர்</string>
+    <string name="fav_calls_open_phone">ஃபோன் ஆப்பைத் திற</string>
+    <string name="fav_calls_failed">இந்தத் தொடர்பைப் படிக்க முடியவில்லை</string>
+    <string name="fav_calls_full">%1$d பிடித்தவை மட்டுமே. முதலில் ஒன்றை நீக்குங்கள்.</string>
+    <string name="fav_calls_type_title">பிடித்ததைச் சேர்</string>
+    <string name="fav_calls_number">ஃபோன் எண்</string>
+    <string name="parked_qr">உங்கள் ஃபோனில் ஸ்கேன் செய்யுங்கள்: காரின் இடம் Google Maps-ல் திறக்கும்.</string>
+    <string name="store_title">Ampli ஸ்டோர்</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player மற்றும் குரல் பேக்குகள்</string>
+    <string name="store_pro_line">Pro தீம்கள், என்ஜின் மற்றும் டயர் சோதனை, WhatsApp செய்திகளை வாசித்துக் காட்டுதல்</string>
+    <string name="store_owned">செயலில்</string>
+    <string name="store_install">நிறுவு</string>
+    <string name="store_voice_punjabi">பஞ்சாபி குரல் பேக்</string>
+    <string name="store_voice_rajasthani">ராஜஸ்தானி குரல் பேக்</string>
+    <string name="store_voice_bhojpuri">போஜ்புரி குரல் பேக்</string>
+    <string name="store_voice_line">எச்சரிக்கைகள் மற்றும் பதில்களுக்கு உண்மையான மனிதக் குரல்</string>
+</resources>

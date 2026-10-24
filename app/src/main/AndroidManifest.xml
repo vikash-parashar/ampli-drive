@@ -229,13 +229,38 @@
             </intent-filter>
         </service>
 
-        <!-- Boot: marks the car start as pending (see car/CarStart.kt). -->
+        <!-- Boot / ACC on: marks the car start as pending (see car/CarStart.kt). BOOT_COMPLETED and
+             LOCKED_BOOT_COMPLETED always arrive; the quick-boot and vendor ACC actions arrive only
+             when the unit's software sends them to background apps (Android 8 limits the rest,
+             which the drive monitor service then receives while it runs). -->
         <receiver
             android:name=".car.BootReceiver"
             android:exported="true">
-            <intent-filter>
+            <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.ACTION_BOOT_IPO" />
+                <action android:name="autochips.intent.action.QB_POWERON" />
+                <action android:name="com.fyt.boot.ACCON" />
+                <action android:name="com.glsx.boot.ACCON" />
+                <action android:name="com.cayboy.action.ACC_ON" />
+                <action android:name="com.carboy.action.ACC_ON" />
+                <action android:name="com.microntek.acc" />
+                <action android:name="android.intent.action.ACC_ON" />
+                <action android:name="com.ts.main.ACC_ON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- The phone's Bluetooth link up / down: "Play phone music when my phone connects" and the
+             Phone Link sheet. Exempt from Android 8's background broadcast limits. -->
+        <receiver
+            android:name=".bluetooth.BtAclReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
         </receiver>
 

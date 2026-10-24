@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="store_pro_name" translatable="false">Car Hub Pro</string>
+    <string name="place_home">Home</string>
+    <string name="place_office">Office</string>
+    <string name="place_not_set">%1$s is not saved yet. Save it in the place search first.</string>
+    <string name="place_saved">Saved: %1$s</string>
+    <string name="place_full">You can save up to %1$d favourites. Remove one first.</string>
+    <string name="place_save_as">Save this place as</string>
+    <string name="place_name">Name</string>
+    <string name="place_add_favourite">Add to favourites</string>
+    <string name="places_title">Saved places</string>
+    <string name="places_empty">Save Home, Office or a favourite from a search result, or from where you are now.</string>
+    <string name="places_hint">Tap to start the route. Hold to remove.</string>
+    <string name="place_save_here">Save where I am</string>
+    <string name="place_save">Save</string>
+    <string name="trips_title">Trip history</string>
+    <string name="trips_hint">Every drive is saved on this unit by itself</string>
+    <string name="trips_week">This week</string>
+    <string name="trips_count">Trips: %1$d</string>
+    <string name="trips_fuel">≈ %1$s fuel</string>
+    <string name="trips_fuel_unknown">Add two full-tank fill-ups in Expenses to see the fuel cost.</string>
+    <string name="trips_how">Trips are logged from GPS when the car moves and end when it parks. The last %1$d trips are kept, only on this unit.</string>
+    <string name="trips_clear">Clear trip history</string>
+    <string name="trips_clear_confirm">Delete all saved trips from this unit?</string>
+    <string name="trips_empty">No trips yet. Your drives will show up here by themselves.</string>
+    <string name="trips_avg_top">avg %1$d · top %2$d km/h</string>
+    <string name="trips_tile_none">No trips yet</string>
+    <string name="trips_tile_week">%1$s km this week</string>
+    <string name="speed_volume_title">Volume by speed</string>
+    <string name="speed_volume_hint">Music gets a little louder as road noise rises above 30 km/h, and comes back down when you slow. If you change the volume yourself, that becomes the new level.</string>
+    <string name="speed_volume_low">Low</string>
+    <string name="speed_volume_medium">Medium</string>
+    <string name="speed_volume_high">High</string>
+    <string name="fav_calls_title">Favourite calls</string>
+    <string name="fav_calls_hint">Tap a name to call. Hold it to remove. Up to %1$d people.</string>
+    <string name="fav_calls_none">Add up to %1$d people from your contacts. Then one tap calls them.</string>
+    <string name="fav_calls_add">Add</string>
+    <string name="fav_calls_open_phone">Open phone app</string>
+    <string name="fav_calls_failed">Could not read that contact</string>
+    <string name="fav_calls_full">Only %1$d favourites fit. Remove one first.</string>
+    <string name="fav_calls_type_title">Add a favourite</string>
+    <string name="fav_calls_number">Phone number</string>
+    <string name="parked_qr">Scan with your phone: the spot opens in Google Maps.</string>
+    <string name="store_title">Ampli Store</string>
+    <string name="store_hint">Car Hub Pro, the MP3 Player and voice packs</string>
+    <string name="store_pro_line">Pro themes, engine and tyre checks, WhatsApp read aloud</string>
+    <string name="store_owned">Unlocked</string>
+    <string name="store_install">Install</string>
+    <string name="store_voice_punjabi">Punjabi voice pack</string>
+    <string name="store_voice_rajasthani">Rajasthani voice pack</string>
+    <string name="store_voice_bhojpuri">Bhojpuri voice pack</string>
+    <string name="store_voice_line">Real human voice for alerts and replies</string>
+</resources>

@@ -48,10 +48,12 @@ class BluetoothStatus(context: Context) {
                     _state.value = _state.value.copy(enabled = on, connectedName = if (on) _state.value.connectedName else null)
                 }
                 BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                    (appContext as? com.vikash.ampli.drive.DriveApp)?.phoneBt?.onAcl(deviceFrom(intent), true)
                     val name = deviceFrom(intent)?.let { safeName(it) }
                     _state.value = _state.value.copy(enabled = true, connectedName = name ?: appContext.getString(R.string.bt_connected_unknown))
                 }
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    (appContext as? com.vikash.ampli.drive.DriveApp)?.phoneBt?.onAcl(deviceFrom(intent), false)
                     _state.value = _state.value.copy(connectedName = findConnectedName())
                 }
             }
