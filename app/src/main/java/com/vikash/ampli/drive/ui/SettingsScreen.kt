@@ -252,6 +252,7 @@ fun SettingsScreen(
                 onAction = onOpenEmergency,
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
+            SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)
             VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)

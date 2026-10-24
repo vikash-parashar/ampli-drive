@@ -154,6 +154,8 @@ dependencies {
     implementation(libs.billing.ktx)
     implementation(libs.haze)
     implementation(libs.media3.exoplayer)
+    // Parking-spot QR on the "Where's my car" screen.
+    implementation(libs.zxing.core)
 
     // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
     implementation(libs.vosk.android)

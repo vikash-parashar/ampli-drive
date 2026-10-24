@@ -371,6 +371,20 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 DiagRow("Voice style", style.key, null)
                 DiagRow("When the car starts", autoStart.mode.key + " · delay ${autoStart.delaySec}s" + (autoStart.btDeviceName?.let { " · BT: $it" } ?: ""), null)
             }
+            DiagSection("Start-up") {
+                // Process start to the first Home frame (cold), or activity start to it (warm).
+                val (coldMs, warmMs) = remember { com.vikash.ampli.drive.system.StartupTiming.saved(context) }
+                val now = com.vikash.ampli.drive.system.StartupTiming.last
+                DiagRow(
+                    "This start",
+                    now?.let { "${it.ms} ms (${if (it.kind == com.vikash.ampli.drive.system.StartupTiming.Kind.Cold) "cold: process start to first Home frame" else "warm: activity start to first Home frame"})" } ?: "(Home not shown yet)",
+                    now?.let { it.ms < 3000 },
+                )
+                DiagRow("Last cold start", if (coldMs > 0) "$coldMs ms" else "(not measured yet)", if (coldMs > 0) coldMs < 3000 else null)
+                if (warmMs > 0) DiagRow("Last warm start", "$warmMs ms", warmMs < 1500)
+                DiagRow("Low-memory unit", if (app.lowEnd) "yes: map and music card load after the first frame" else "no", null)
+                DiagRow("Memory released", "${com.vikash.ampli.drive.system.MemoryTrim.trims} times this run", null)
+            }
             DiagSection("Map") {
                 DiagRow("Style", map.styleUrl ?: "(not started)", null)
                 DiagRow("State", map.phase.name + (if (map.basic) " · own fallback style" else "") + (if (map.unavailable) " · TILES UNAVAILABLE" else ""), map.phase == com.vikash.ampli.drive.map.MapStatus.Phase.MapLoaded)

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.PhonelinkRing
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +70,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
  * apps, "Edit list" turns taps into add / remove. Long-press puts an app on the Phone link button.
  */
 @Composable
-fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
+fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
@@ -154,6 +155,8 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit) {
                     )
                 }
                 if (!showAll) {
+                    // Ampli Store: Pro, the MP3 Player and voice packs.
+                    item(key = "ampli-store") { StoreTile(onClick = onOpenStore) }
                     item(key = "more-apps") {
                         MoreAppsTile(locked = pinSet, onClick = {
                             if (pinSet) {
@@ -215,6 +218,29 @@ private fun MoreAppsTile(locked: Boolean, onClick: () -> Unit) {
     ) {
         Icon(if (locked) Icons.Filled.Lock else Icons.Filled.Apps, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(44.dp))
         Text(stringResource(R.string.shell_more_apps), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+/** The Ampli Store tile in the Ampli list. */
+@Composable
+private fun StoreTile(onClick: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = RoundedCornerShape(dims.d(2.2f))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 120.dp)
+            .clip(shape)
+            .background(Saffron.copy(alpha = 0.16f))
+            .border(1.dp, Saffron.copy(alpha = 0.6f), shape)
+            .clickable(onClick = onClick)
+            .padding(dims.d(1.4f)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Icon(Icons.Filled.Storefront, contentDescription = null, tint = Saffron, modifier = Modifier.size(44.dp))
+        Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
     }
 }
 

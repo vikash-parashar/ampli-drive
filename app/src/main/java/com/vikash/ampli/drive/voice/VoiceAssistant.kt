@@ -12,6 +12,7 @@ import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.cameras.CameraRepository
 import com.vikash.ampli.drive.i18n.AppLanguages
+import com.vikash.ampli.drive.nav.SavedKind
 import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.system.Launchers
 import kotlinx.coroutines.CancellationException
@@ -215,6 +216,10 @@ class VoiceAssistant(private val app: DriveApp) {
                 }
                 return search(intent.destination, res, lang)
             }
+            is VoiceIntent.GoSaved -> {
+                goSaved(intent.kind, res, lang)
+                return null
+            }
             is VoiceIntent.ChooseOption -> {
                 val place = _state.value.options.getOrNull(intent.index)
                 if (place == null) {
@@ -227,7 +232,15 @@ class VoiceAssistant(private val app: DriveApp) {
             is VoiceIntent.Unknown -> return when (expect) {
                 Expect.Destination -> {
                     val dest = VoiceIntents.destinationFrom(text, parserLang)
-                    if (dest.isEmpty()) null else search(dest, res, lang)
+                    val saved = VoiceIntents.savedKind(dest)
+                    when {
+                        dest.isEmpty() -> null
+                        saved != null -> {
+                            goSaved(saved, res, lang)
+                            null
+                        }
+                        else -> search(dest, res, lang)
+                    }
                 }
                 Expect.Choice -> {
                     // "Phoenix" instead of "the first one".
@@ -328,6 +341,22 @@ class VoiceAssistant(private val app: DriveApp) {
             }
         }
         return null
+    }
+
+    /**
+     * "Ghar chalo" / "office le chalo": straight to the saved place, no search. Not saved yet: the
+     * answer is shown and toasted too, since many units have no speech engine to say it.
+     */
+    private suspend fun goSaved(kind: SavedKind, res: Context, lang: String) {
+        val label = res.getString(if (kind == SavedKind.Office) R.string.place_office else R.string.place_home)
+        val saved = app.places.get(kind)
+        if (saved == null) {
+            val text = res.getString(R.string.place_not_set, label)
+            android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_LONG).show()
+            say(res, lang, text)
+            return
+        }
+        navigateTo(saved.toPlace(label), res, lang)
     }
 
     private suspend fun search(destination: String, res: Context, lang: String): Expect? {

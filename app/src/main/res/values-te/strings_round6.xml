@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">ఇల్లు</string>
+    <string name="place_office">ఆఫీస్</string>
+    <string name="place_not_set">%1$s ఇంకా సేవ్ చేయలేదు. ముందు ప్రదేశం వెతికి దాన్ని సేవ్ చేయండి.</string>
+    <string name="place_saved">సేవ్ అయింది: %1$s</string>
+    <string name="place_full">గరిష్ఠంగా %1$d ఇష్టమైన ప్రదేశాలు సేవ్ చేయవచ్చు. ముందు ఒకటి తీసేయండి.</string>
+    <string name="place_save_as">ఈ ప్రదేశాన్ని ఇలా సేవ్ చేయండి</string>
+    <string name="place_name">పేరు</string>
+    <string name="place_add_favourite">ఇష్టమైనవాటికి జోడించు</string>
+    <string name="places_title">సేవ్ చేసిన ప్రదేశాలు</string>
+    <string name="places_empty">శోధన ఫలితం నుండి లేదా మీరు ఇప్పుడు ఉన్న చోటు నుండి ఇల్లు, ఆఫీస్ లేదా ఇష్టమైన ప్రదేశం సేవ్ చేయండి.</string>
+    <string name="places_hint">ట్యాప్ చేస్తే దారి మొదలవుతుంది. తీసేయడానికి నొక్కి పట్టుకోండి.</string>
+    <string name="place_save_here">నేను ఉన్న చోటు సేవ్ చేయి</string>
+    <string name="place_save">సేవ్ చేయి</string>
+    <string name="trips_title">ప్రయాణ చరిత్ర</string>
+    <string name="trips_hint">ప్రతి ప్రయాణం ఈ యూనిట్‌లోనే తనంతట తానే సేవ్ అవుతుంది</string>
+    <string name="trips_week">ఈ వారం</string>
+    <string name="trips_count">ప్రయాణాలు: %1$d</string>
+    <string name="trips_fuel">≈ %1$s ఇంధనం</string>
+    <string name="trips_fuel_unknown">ఇంధన ఖర్చు చూడటానికి ఖర్చులలో రెండుసార్లు ఫుల్ ట్యాంక్ నింపినట్టు నమోదు చేయండి.</string>
+    <string name="trips_how">కారు కదలగానే GPS ద్వారా ప్రయాణం నమోదవుతుంది, ఆగగానే ముగుస్తుంది. చివరి %1$d ప్రయాణాలు ఈ యూనిట్‌లో మాత్రమే ఉంచబడతాయి.</string>
+    <string name="trips_clear">ప్రయాణ చరిత్ర తొలగించు</string>
+    <string name="trips_clear_confirm">ఈ యూనిట్ నుండి సేవ్ చేసిన అన్ని ప్రయాణాలను తొలగించాలా?</string>
+    <string name="trips_empty">ఇంకా ప్రయాణాలు లేవు. మీ ప్రయాణాలు ఇక్కడ తనంతట తానే కనిపిస్తాయి.</string>
+    <string name="trips_avg_top">సగటు %1$d · గరిష్ఠం %2$d km/h</string>
+    <string name="trips_tile_none">ఇంకా ప్రయాణాలు లేవు</string>
+    <string name="trips_tile_week">ఈ వారం %1$s km</string>
+    <string name="speed_volume_title">వేగాన్ని బట్టి వాల్యూమ్</string>
+    <string name="speed_volume_hint">30 km/h పైన రోడ్డు శబ్దం పెరిగినప్పుడు పాట కొంచెం పెద్దగా వస్తుంది, నెమ్మదించినప్పుడు మళ్లీ మునుపటిలా. మీరే వాల్యూమ్ మార్చితే అదే కొత్త స్థాయి అవుతుంది.</string>
+    <string name="speed_volume_low">తక్కువ</string>
+    <string name="speed_volume_medium">మధ్యస్థం</string>
+    <string name="speed_volume_high">ఎక్కువ</string>
+    <string name="fav_calls_title">ఇష్టమైన కాల్స్</string>
+    <string name="fav_calls_hint">కాల్ చేయడానికి పేరు ట్యాప్ చేయండి. తీసేయడానికి నొక్కి పట్టుకోండి. గరిష్ఠంగా %1$d మంది.</string>
+    <string name="fav_calls_none">మీ కాంటాక్ట్‌ల నుండి %1$d మంది వరకు జోడించండి. తర్వాత ఒక్క ట్యాప్‌తో కాల్.</string>
+    <string name="fav_calls_add">జోడించు</string>
+    <string name="fav_calls_open_phone">ఫోన్ యాప్ తెరువు</string>
+    <string name="fav_calls_failed">ఈ కాంటాక్ట్‌ను చదవలేకపోయాం</string>
+    <string name="fav_calls_full">%1$d ఇష్టమైనవి మాత్రమే. ముందు ఒకటి తీసేయండి.</string>
+    <string name="fav_calls_type_title">ఇష్టమైనది జోడించు</string>
+    <string name="fav_calls_number">ఫోన్ నంబర్</string>
+    <string name="parked_qr">మీ ఫోన్‌తో స్కాన్ చేయండి: కారు ఉన్న చోటు Google Maps‌లో తెరుచుకుంటుంది.</string>
+    <string name="store_title">Ampli స్టోర్</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player మరియు వాయిస్ ప్యాక్‌లు</string>
+    <string name="store_pro_line">Pro థీమ్‌లు, ఇంజిన్ మరియు టైర్ తనిఖీ, WhatsApp సందేశాలు చదివి వినిపించడం</string>
+    <string name="store_owned">యాక్టివ్</string>
+    <string name="store_install">ఇన్‌స్టాల్ చేయి</string>
+    <string name="store_voice_punjabi">పంజాబీ వాయిస్ ప్యాక్</string>
+    <string name="store_voice_rajasthani">రాజస్థానీ వాయిస్ ప్యాక్</string>
+    <string name="store_voice_bhojpuri">భోజ్‌పురి వాయిస్ ప్యాక్</string>
+    <string name="store_voice_line">హెచ్చరికలు మరియు జవాబులకు నిజమైన మనిషి గొంతు</string>
+</resources>

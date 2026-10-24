@@ -82,6 +82,15 @@ class DriveApp : Application() {
     /** Optional offline Hindi command model (~42 MB), downloaded only when the driver asks. */
     val hindiModel: WakeModel by lazy { WakeModel(this, com.vikash.ampli.drive.voice.VoskModelSpec.Hindi) }
 
+    /** Home, Office and favourite places (Where to? and the Home chips; "ghar chalo"). */
+    val places: com.vikash.ampli.drive.nav.SavedPlacesStore by lazy { com.vikash.ampli.drive.nav.SavedPlacesStore(this) }
+
+    /** Up to four favourite contacts on the Phone card. */
+    val favouriteCalls: com.vikash.ampli.drive.system.FavouriteCallsStore by lazy { com.vikash.ampli.drive.system.FavouriteCallsStore(this) }
+
+    /** 2 GB or less: Home draws first and the map and music card follow (DeviceClass). */
+    val lowEnd: Boolean by lazy { com.vikash.ampli.drive.prefs.DeviceClass.isLowEnd(this) }
+
     /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
     val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
 
@@ -94,6 +103,12 @@ class DriveApp : Application() {
         prefs.takeFirstRunLanguage()?.let { tag ->
             if (AppLanguages.current(this, "").isEmpty()) AppLanguages.apply(this, tag)
         }
+    }
+
+    /** Hidden or short of memory: let go of icon, QR and map tile caches (they reload on demand). */
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        com.vikash.ampli.drive.system.MemoryTrim.onTrimMemory(level)
     }
 
     /** Android 12: strings fetched through the app context follow the in-app language too. */

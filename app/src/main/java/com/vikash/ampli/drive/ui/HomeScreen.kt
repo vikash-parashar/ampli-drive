@@ -34,7 +34,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.withFrameNanos
+import com.vikash.ampli.drive.system.StartupTiming
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +82,9 @@ import com.vikash.ampli.drive.ui.theme.ThemeFamily
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+/** Low-end units: how long after the first Home frame the map and music card are added. */
+private const val HEAVY_DELAY_MS = 250L
 
 /** The map surface type was switched once this run after drawing nothing; don't flip back and forth. */
 private var mapModeFlipped = false
@@ -141,6 +147,20 @@ fun HomeScreen(
     }
     val gap = dims.d(2f)
     var linkMissing by remember { mutableStateOf(false) }
+    var phoneCard by remember { mutableStateOf(false) }
+    if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
+
+    // Fast start on 1-2 GB units: the first frame has only the light panes; the map and music
+    // card come right after it. The cold-start time (Diagnostics) is taken at that first frame.
+    var heavyReady by remember { mutableStateOf(!app.lowEnd || StartupTiming.homeShown) }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        StartupTiming.onFirstHomeFrame(context.applicationContext)
+        if (!heavyReady) {
+            delay(HEAVY_DELAY_MS)
+            heavyReady = true
+        }
+    }
     if (linkMissing) {
         PhoneLinkMissingDialog(
             onOpenApps = {
@@ -206,7 +226,7 @@ fun HomeScreen(
                 .weight(1f),
             horizontalArrangement = Arrangement.spacedBy(gap),
         ) {
-            val map = @Composable { m: Modifier, showTurn: Boolean ->
+            val liveMap = @Composable { m: Modifier, showTurn: Boolean ->
                 Box(m) {
                     val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
                     val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
@@ -228,6 +248,13 @@ fun HomeScreen(
                         nav = nav,
                         onOpenNav = onOpenNavScreen,
                     )
+                    // Home, Office and favourites: one tap starts the route (hidden while navigating).
+                    if (!nav.visible) {
+                        SavedPlaceChips(
+                            app = app,
+                            modifier = Modifier.align(Alignment.TopStart).padding(dims.d(1.4f)),
+                        )
+                    }
                     // Where the car is parked, while parked.
                     ParkedPill(
                         app = app,
@@ -235,6 +262,9 @@ fun HomeScreen(
                         modifier = Modifier.align(Alignment.BottomEnd).padding(end = dims.d(2f), bottom = dims.d(5f)),
                     )
                 }
+            }
+            val map = @Composable { m: Modifier, showTurn: Boolean ->
+                if (heavyReady) liveMap(m, showTurn) else Pane(m) {}
             }
             val obd by app.obd.state.collectAsStateWithLifecycle()
             val speed = @Composable { m: Modifier ->
@@ -245,7 +275,9 @@ fun HomeScreen(
                     modifier = m,
                 )
             }
-            val music = @Composable { m: Modifier -> MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) }
+            val music = @Composable { m: Modifier ->
+                if (heavyReady) MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) else Pane(m) {}
+            }
 
             when (theme.layout) {
                 HomeLayout.MapSpeedMusic -> {
@@ -318,7 +350,8 @@ fun HomeScreen(
             onNavigate = openNav,
             onVoice = { app.voice.start() },
             onMusic = { Launchers.openMusic(context, app.mediaHub.currentPackage()) },
-            onPhone = { Launchers.openDialer(context) },
+            // The Phone card: favourite calls and "Open phone app".
+            onPhone = { phoneCard = true },
             // Long-press Music / Phone: pick which app the button opens.
             onMusicLong = { AppChooser.ask(AppRole.Music) },
             onPhoneLong = { AppChooser.ask(AppRole.Phone) },

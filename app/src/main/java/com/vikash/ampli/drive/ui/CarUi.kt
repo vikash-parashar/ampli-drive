@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Snooze
@@ -56,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -327,7 +330,7 @@ fun ParkedPill(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
 
 // ------------------------------------------------------------------------------ Car hub
 
-enum class CarDest { Parked, Papers, Expenses, Obd, Tyres, Settings }
+enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings }
 
 @Composable
 fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
@@ -349,6 +352,8 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
     val odoKm = (odo / 10).toInt()
     val due = remember(papers, services, odoKm) { app.car.dueItems(context) }
     val avg = remember(fills) { com.vikash.ampli.drive.car.Mileage.average(fills) }
+    val trips by app.car.trips.trips.collectAsStateWithLifecycle()
+    val weekKm = remember(trips) { com.vikash.ampli.drive.car.TripMath.thisWeek(trips, System.currentTimeMillis()).distanceKm }
 
     Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(2f))) {
         ScreenHeader(
@@ -382,6 +387,17 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
                     stringResource(R.string.expenses_title), Icons.Filled.CurrencyRupee,
                     avg?.let { stringResource(R.string.expenses_avg_kmpl, "%.1f".format(it)) } ?: stringResource(R.string.expenses_tile_hint),
                     onClick = { onOpen(CarDest.Expenses) }, modifier = m,
+                )
+            },
+            { m ->
+                CarTile(
+                    stringResource(R.string.trips_title), Icons.Filled.Route,
+                    if (trips.isEmpty()) {
+                        stringResource(R.string.trips_tile_none)
+                    } else {
+                        stringResource(R.string.trips_tile_week, String.format(context.resources.configuration.locales[0], "%.0f", weekKm))
+                    },
+                    onClick = { onOpen(CarDest.Trips) }, modifier = m,
                 )
             },
             { m ->
@@ -449,9 +465,12 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
         )
         Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-            for (row in tiles.chunked(4)) {
+            // Two rows (5 + 4 tiles); the shorter row keeps the same tile width.
+            val perRow = (tiles.size + 1) / 2
+            for (row in tiles.chunked(perRow)) {
                 Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     for (tile in row) tile(Modifier.weight(1f).fillMaxHeight())
+                    repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
@@ -513,8 +532,9 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
         ScreenHeader(stringResource(R.string.parked_title), stringResource(R.string.parked_hint), onBack)
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
             Pane(Modifier.weight(1.2f).fillMaxHeight()) {
+              Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Column(
-                    Modifier.fillMaxSize().padding(dims.d(3f)),
+                    Modifier.weight(1f).fillMaxHeight().padding(dims.d(3f)),
                     verticalArrangement = Arrangement.spacedBy(dims.d(1.4f), Alignment.CenterVertically),
                 ) {
                     Icon(Icons.Filled.LocalParking, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(64.dp))
@@ -538,6 +558,8 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
                         Text("%.5f, %.5f".format(s.lat, s.lon) + (s.accuracyM?.let { " · ±${it.roundToInt()} m" } ?: ""), fontSize = dims.t(2.2f), color = theme.muted)
                     }
                 }
+                spot?.let { s -> ParkingQrBlock(s, Modifier.padding(end = dims.d(3f))) }
+              }
             }
             Column(
                 Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
@@ -572,6 +594,38 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
                 }
                 Text(stringResource(R.string.parked_how), fontSize = dims.t(2.2f), color = theme.muted)
             }
+        }
+    }
+}
+
+/**
+ * The saved spot as a QR code of its Google Maps link: scan it with the phone before walking
+ * away. Made on the unit, no internet needed. One pixel per module, scaled up without smoothing.
+ */
+@Composable
+private fun ParkingQrBlock(spot: ParkedSpot, modifier: Modifier = Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val url = spot.mapsUrl
+    val qr = remember(url) { com.vikash.ampli.drive.car.ParkingQr.bitmap(url)?.asImageBitmap() } ?: return
+    Column(
+        modifier.widthIn(max = 200.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dims.d(1f)),
+    ) {
+        Box(
+            Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp)).background(Color.White).padding(6.dp),
+        ) {
+            androidx.compose.foundation.Image(
+                bitmap = qr,
+                contentDescription = stringResource(R.string.parked_qr),
+                filterQuality = androidx.compose.ui.graphics.FilterQuality.None,
+                modifier = Modifier.size(maxOf(dims.d(24f), 120.dp)),
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Filled.QrCode2, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(20.dp))
+            Text(stringResource(R.string.parked_qr), fontSize = dims.t(2.1f, min = 13f), color = theme.muted, textAlign = TextAlign.Center)
         }
     }
 }

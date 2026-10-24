@@ -1,11 +1,15 @@
 package com.vikash.ampli.drive.voice
 
+import com.vikash.ampli.drive.nav.SavedKind
 import java.util.Locale
 
 /** What the driver asked for, after the wake word. */
 sealed interface VoiceIntent {
     /** [destination] may be empty ("navigate"), then the assistant asks where to. */
     data class Navigate(val destination: String) : VoiceIntent
+
+    /** "Ghar chalo", "go home", "office le chalo": the saved Home or Office (never a favourite). */
+    data class GoSaved(val kind: SavedKind) : VoiceIntent
 
     /** 0-based pick from the spoken list of places ("the second one" = 1). */
     data class ChooseOption(val index: Int) : VoiceIntent
@@ -94,8 +98,11 @@ object VoiceIntents {
         if (kw.call.any { has(t, it) }) {
             return VoiceIntent.CallContact(trimFillers(remove(t, kw.call), kw.fillers))
         }
+        if (words <= 6) savedPhrase(t)?.let { return VoiceIntent.GoSaved(it) }
         if (kw.navigate.any { has(t, it) }) {
-            return VoiceIntent.Navigate(trimFillers(remove(t, kw.navigate), kw.fillers + kw.placeFillers))
+            val dest = trimFillers(remove(t, kw.navigate), kw.fillers + kw.placeFillers)
+            savedKind(dest)?.let { return VoiceIntent.GoSaved(it) }
+            return VoiceIntent.Navigate(dest)
         }
         if (words <= 6 && kw.greeting.any { has(t, it) }) return VoiceIntent.Greeting
         return VoiceIntent.Unknown(text.trim())
@@ -169,6 +176,49 @@ object VoiceIntents {
         "engine status", "engine health", "check engine", "engine light", "engine problem", "engine temperature",
         "how is the engine", "fault code", "fault codes", "obd",
         "इंजन कैसा", "इंजन की हालत", "इंजन स्टेटस", "इंजन ठीक", "engine kaisa", "engine ki halat", "engine theek",
+    ).map { normalize(it) }
+
+    /**
+     * [destination] (already cleaned, e.g. after "le chalo" is removed) names the saved Home or
+     * Office: "ghar", "घर", "home", "office", "दफ्तर". Only the whole destination counts, so
+     * "office depot" or "ghar ka saman" stay normal place searches.
+     */
+    fun savedKind(destination: String): SavedKind? {
+        val d = normalize(destination)
+        return when (d) {
+            in HOME_WORDS -> SavedKind.Home
+            in OFFICE_WORDS -> SavedKind.Office
+            else -> null
+        }
+    }
+
+    /** Short commands without a navigate keyword: "go home", "head home", "घर चल". */
+    private fun savedPhrase(t: String): SavedKind? = when {
+        HOME_PHRASES.any { has(t, it) } -> SavedKind.Home
+        OFFICE_PHRASES.any { has(t, it) } -> SavedKind.Office
+        else -> null
+    }
+
+    private val HOME_WORDS = listOf(
+        "home", "my home", "my house", "house", "ghar", "gharr", "ghara", "gharan", "mera ghar", "apna ghar",
+        "घर", "घरां", "घरा", "मेरा घर", "अपना घर", "अपणा घर",
+    ).map { normalize(it) }.toSet()
+
+    private val OFFICE_WORDS = listOf(
+        "office", "the office", "my office", "work", "offis", "daftar", "dafter", "ऑफिस", "ऑफ़िस", "आफिस",
+        "दफ्तर", "दफ़्तर", "मेरा ऑफिस",
+    ).map { normalize(it) }.toSet()
+
+    private val HOME_PHRASES = listOf(
+        "go home", "going home", "head home", "drive home", "back home", "take me home", "navigate home",
+        "ghar chalo", "ghar le chalo", "ghar le chal", "ghar chal", "gharan chal", "ghar jana hai",
+        "घर चलो", "घर ले चलो", "घर ले चल", "घर चल", "घरां चाल", "घर जाना है",
+    ).map { normalize(it) }
+
+    private val OFFICE_PHRASES = listOf(
+        "go to office", "go to the office", "go to work", "take me to office", "take me to work",
+        "office chalo", "office le chalo", "office le chal", "office chal",
+        "ऑफिस चलो", "ऑफिस ले चलो", "ऑफिस ले चल", "दफ्तर चलो", "दफ्तर ले चलो",
     ).map { normalize(it) }
 
     /** The place name in a free answer such as "Phoenix Mall please" after "Where to?". */

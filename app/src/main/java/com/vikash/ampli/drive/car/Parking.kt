@@ -3,7 +3,7 @@ package com.vikash.ampli.drive.car
 /** Where the car was left, and when (epoch ms). */
 data class ParkedSpot(val lat: Double, val lon: Double, val time: Long, val accuracyM: Float? = null) {
     /** Opens in Google Maps (app or browser) on the driver's phone. */
-    val mapsUrl: String get() = "https://maps.google.com/?q=%.6f,%.6f".format(java.util.Locale.US, lat, lon)
+    val mapsUrl: String get() = ParkingQr.link(lat, lon)
 }
 
 /**

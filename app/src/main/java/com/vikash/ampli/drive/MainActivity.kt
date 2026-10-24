@@ -59,14 +59,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.vikash.ampli.drive.system.StartupTiming.onActivityCreated()
         enableEdgeToEdge()
-        // Re-checks Play for the Pro purchase (refunds, purchases on another device).
-        app.billing.start()
         // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
         app.car
-        // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
-        app.navPrompter.start()
-        app.desi.start()
+        val background = {
+            // Re-checks Play for the Pro purchase (refunds, purchases on another device).
+            app.billing.start()
+            // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
+            app.navPrompter.start()
+            app.desi.start()
+        }
+        // 1-2 GB units: Home draws first; Play Billing and the voice helpers start just after.
+        if (app.lowEnd) window.decorView.post { background() } else background()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

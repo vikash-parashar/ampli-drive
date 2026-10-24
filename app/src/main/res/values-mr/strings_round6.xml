@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">घर</string>
+    <string name="place_office">ऑफिस</string>
+    <string name="place_not_set">%1$s अजून सेव्ह केलेले नाही. आधी ठिकाण शोधून ते सेव्ह करा.</string>
+    <string name="place_saved">सेव्ह झाले: %1$s</string>
+    <string name="place_full">जास्तीत जास्त %1$d आवडती ठिकाणे सेव्ह करता येतात. आधी एक काढा.</string>
+    <string name="place_save_as">हे ठिकाण असे सेव्ह करा</string>
+    <string name="place_name">नाव</string>
+    <string name="place_add_favourite">आवडत्यांमध्ये जोडा</string>
+    <string name="places_title">सेव्ह केलेली ठिकाणे</string>
+    <string name="places_empty">शोधाच्या निकालातून किंवा तुम्ही आत्ता जिथे आहात तिथून घर, ऑफिस किंवा आवडते ठिकाण सेव्ह करा.</string>
+    <string name="places_hint">टॅप करताच मार्ग सुरू. काढण्यासाठी दाबून ठेवा.</string>
+    <string name="place_save_here">मी जिथे आहे ते सेव्ह करा</string>
+    <string name="place_save">सेव्ह करा</string>
+    <string name="trips_title">प्रवासाचा इतिहास</string>
+    <string name="trips_hint">प्रत्येक प्रवास या युनिटवर आपोआप सेव्ह होतो</string>
+    <string name="trips_week">हा आठवडा</string>
+    <string name="trips_count">प्रवास: %1$d</string>
+    <string name="trips_fuel">≈ %1$s इंधन</string>
+    <string name="trips_fuel_unknown">इंधनाचा खर्च पाहण्यासाठी खर्चाच्या पानावर दोनदा फुल टाकी भरल्याची नोंद करा.</string>
+    <string name="trips_how">गाडी चालू लागताच GPS वरून प्रवास नोंदवला जातो आणि थांबताच पूर्ण होतो. शेवटचे %1$d प्रवास फक्त या युनिटवर ठेवले जातात.</string>
+    <string name="trips_clear">प्रवासाचा इतिहास पुसा</string>
+    <string name="trips_clear_confirm">या युनिटवरील सर्व सेव्ह केलेले प्रवास पुसायचे?</string>
+    <string name="trips_empty">अजून एकही प्रवास नाही. तुमचे प्रवास इथे आपोआप दिसतील.</string>
+    <string name="trips_avg_top">सरासरी %1$d · कमाल %2$d km/h</string>
+    <string name="trips_tile_none">अजून एकही प्रवास नाही</string>
+    <string name="trips_tile_week">या आठवड्यात %1$s km</string>
+    <string name="speed_volume_title">वेगानुसार आवाज</string>
+    <string name="speed_volume_hint">30 km/h पेक्षा जास्त वेगात रस्त्याचा आवाज वाढला की गाणे थोडे मोठे होते, आणि वेग कमी झाला की पुन्हा आधीसारखे. तुम्ही स्वतः आवाज बदलला तर तोच नवा स्तर होतो.</string>
+    <string name="speed_volume_low">कमी</string>
+    <string name="speed_volume_medium">मध्यम</string>
+    <string name="speed_volume_high">जास्त</string>
+    <string name="fav_calls_title">आवडते कॉल</string>
+    <string name="fav_calls_hint">कॉल करण्यासाठी नावावर टॅप करा. काढण्यासाठी दाबून ठेवा. जास्तीत जास्त %1$d जण.</string>
+    <string name="fav_calls_none">तुमच्या कॉन्टॅक्टमधून %1$d जणांपर्यंत जोडा. मग एका टॅपमध्ये कॉल.</string>
+    <string name="fav_calls_add">जोडा</string>
+    <string name="fav_calls_open_phone">फोन अ‍ॅप उघडा</string>
+    <string name="fav_calls_failed">हा कॉन्टॅक्ट वाचता आला नाही</string>
+    <string name="fav_calls_full">फक्त %1$d आवडते बसतात. आधी एक काढा.</string>
+    <string name="fav_calls_type_title">आवडता जोडा</string>
+    <string name="fav_calls_number">फोन नंबर</string>
+    <string name="parked_qr">तुमच्या फोनने स्कॅन करा: गाडीचे ठिकाण Google Maps मध्ये उघडेल.</string>
+    <string name="store_title">Ampli स्टोअर</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player आणि आवाज पॅक</string>
+    <string name="store_pro_line">Pro थीम, इंजिन व टायर तपासणी, WhatsApp संदेश वाचून दाखवणे</string>
+    <string name="store_owned">सुरू आहे</string>
+    <string name="store_install">इन्स्टॉल करा</string>
+    <string name="store_voice_punjabi">पंजाबी आवाज पॅक</string>
+    <string name="store_voice_rajasthani">राजस्थानी आवाज पॅक</string>
+    <string name="store_voice_bhojpuri">भोजपुरी आवाज पॅक</string>
+    <string name="store_voice_line">सूचना आणि उत्तरांसाठी खऱ्या माणसाचा आवाज</string>
+</resources>

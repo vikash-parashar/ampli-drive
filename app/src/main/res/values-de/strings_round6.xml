@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">Zuhause</string>
+    <string name="place_office">Büro</string>
+    <string name="place_not_set">%1$s ist noch nicht gespeichert. Speichere den Ort zuerst in der Ortssuche.</string>
+    <string name="place_saved">Gespeichert: %1$s</string>
+    <string name="place_full">Du kannst bis zu %1$d Favoriten speichern. Entferne zuerst einen.</string>
+    <string name="place_save_as">Diesen Ort speichern als</string>
+    <string name="place_name">Name</string>
+    <string name="place_add_favourite">Zu Favoriten</string>
+    <string name="places_title">Gespeicherte Orte</string>
+    <string name="places_empty">Speichere Zuhause, Büro oder einen Favoriten aus einem Suchergebnis oder von deinem aktuellen Standort.</string>
+    <string name="places_hint">Tippen startet die Route. Gedrückt halten zum Entfernen.</string>
+    <string name="place_save_here">Meinen Standort speichern</string>
+    <string name="place_save">Speichern</string>
+    <string name="trips_title">Fahrtenbuch</string>
+    <string name="trips_hint">Jede Fahrt wird automatisch auf diesem Gerät gespeichert</string>
+    <string name="trips_week">Diese Woche</string>
+    <string name="trips_count">Fahrten: %1$d</string>
+    <string name="trips_fuel">≈ %1$s Kraftstoff</string>
+    <string name="trips_fuel_unknown">Trage unter Ausgaben zwei volle Tankfüllungen ein, um die Kraftstoffkosten zu sehen.</string>
+    <string name="trips_how">Fahrten werden per GPS aufgezeichnet, sobald das Auto fährt, und enden beim Parken. Die letzten %1$d Fahrten bleiben nur auf diesem Gerät.</string>
+    <string name="trips_clear">Fahrtenbuch löschen</string>
+    <string name="trips_clear_confirm">Alle gespeicherten Fahrten von diesem Gerät löschen?</string>
+    <string name="trips_empty">Noch keine Fahrten. Deine Fahrten erscheinen hier von selbst.</string>
+    <string name="trips_avg_top">Ø %1$d · max. %2$d km/h</string>
+    <string name="trips_tile_none">Noch keine Fahrten</string>
+    <string name="trips_tile_week">%1$s km diese Woche</string>
+    <string name="speed_volume_title">Lautstärke nach Tempo</string>
+    <string name="speed_volume_hint">Die Musik wird etwas lauter, wenn über 30 km/h die Fahrgeräusche zunehmen, und wieder leiser, wenn du langsamer wirst. Änderst du die Lautstärke selbst, gilt sie als neue Grundlautstärke.</string>
+    <string name="speed_volume_low">Niedrig</string>
+    <string name="speed_volume_medium">Mittel</string>
+    <string name="speed_volume_high">Hoch</string>
+    <string name="fav_calls_title">Favoriten-Anrufe</string>
+    <string name="fav_calls_hint">Tippe auf einen Namen, um anzurufen. Gedrückt halten zum Entfernen. Bis zu %1$d Personen.</string>
+    <string name="fav_calls_none">Füge bis zu %1$d Personen aus deinen Kontakten hinzu. Dann reicht ein Tippen zum Anrufen.</string>
+    <string name="fav_calls_add">Hinzufügen</string>
+    <string name="fav_calls_open_phone">Telefon-App öffnen</string>
+    <string name="fav_calls_failed">Dieser Kontakt konnte nicht gelesen werden</string>
+    <string name="fav_calls_full">Es passen nur %1$d Favoriten. Entferne zuerst einen.</string>
+    <string name="fav_calls_type_title">Favorit hinzufügen</string>
+    <string name="fav_calls_number">Telefonnummer</string>
+    <string name="parked_qr">Mit dem Handy scannen: Der Parkplatz öffnet sich in Google Maps.</string>
+    <string name="store_title">Ampli Store</string>
+    <string name="store_hint">Car Hub Pro, der MP3 Player und Sprachpakete</string>
+    <string name="store_pro_line">Pro-Designs, Motor- und Reifenprüfung, WhatsApp vorlesen</string>
+    <string name="store_owned">Freigeschaltet</string>
+    <string name="store_install">Installieren</string>
+    <string name="store_voice_punjabi">Sprachpaket Punjabi</string>
+    <string name="store_voice_rajasthani">Sprachpaket Rajasthani</string>
+    <string name="store_voice_bhojpuri">Sprachpaket Bhojpuri</string>
+    <string name="store_voice_line">Echte menschliche Stimme für Hinweise und Antworten</string>
+</resources>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">വീട്</string>
+    <string name="place_office">ഓഫീസ്</string>
+    <string name="place_not_set">%1$s ഇതുവരെ സേവ് ചെയ്തിട്ടില്ല. ആദ്യം സ്ഥലം തിരഞ്ഞ് അത് സേവ് ചെയ്യുക.</string>
+    <string name="place_saved">സേവ് ചെയ്തു: %1$s</string>
+    <string name="place_full">പരമാവധി %1$d പ്രിയപ്പെട്ട സ്ഥലങ്ങൾ സേവ് ചെയ്യാം. ആദ്യം ഒന്ന് നീക്കുക.</string>
+    <string name="place_save_as">ഈ സ്ഥലം ഇങ്ങനെ സേവ് ചെയ്യുക</string>
+    <string name="place_name">പേര്</string>
+    <string name="place_add_favourite">പ്രിയപ്പെട്ടവയിൽ ചേർക്കുക</string>
+    <string name="places_title">സേവ് ചെയ്ത സ്ഥലങ്ങൾ</string>
+    <string name="places_empty">തിരയൽ ഫലത്തിൽ നിന്നോ നിങ്ങൾ ഇപ്പോഴുള്ള സ്ഥലത്തു നിന്നോ വീട്, ഓഫീസ് അല്ലെങ്കിൽ പ്രിയപ്പെട്ട സ്ഥലം സേവ് ചെയ്യുക.</string>
+    <string name="places_hint">ടാപ്പ് ചെയ്താൽ റൂട്ട് തുടങ്ങും. നീക്കാൻ അമർത്തിപ്പിടിക്കുക.</string>
+    <string name="place_save_here">ഞാനുള്ള സ്ഥലം സേവ് ചെയ്യുക</string>
+    <string name="place_save">സേവ് ചെയ്യുക</string>
+    <string name="trips_title">യാത്രാ ചരിത്രം</string>
+    <string name="trips_hint">ഓരോ യാത്രയും ഈ യൂണിറ്റിൽ തനിയെ സേവ് ആകും</string>
+    <string name="trips_week">ഈ ആഴ്ച</string>
+    <string name="trips_count">യാത്രകൾ: %1$d</string>
+    <string name="trips_fuel">≈ %1$s ഇന്ധനം</string>
+    <string name="trips_fuel_unknown">ഇന്ധനച്ചെലവ് കാണാൻ ചെലവുകളിൽ രണ്ട് തവണ ഫുൾ ടാങ്ക് നിറച്ചത് രേഖപ്പെടുത്തുക.</string>
+    <string name="trips_how">കാർ നീങ്ങുമ്പോൾ GPS വഴി യാത്ര രേഖപ്പെടുത്തും, നിർത്തുമ്പോൾ അവസാനിക്കും. അവസാനത്തെ %1$d യാത്രകൾ ഈ യൂണിറ്റിൽ മാത്രം സൂക്ഷിക്കും.</string>
+    <string name="trips_clear">യാത്രാ ചരിത്രം മായ്ക്കുക</string>
+    <string name="trips_clear_confirm">ഈ യൂണിറ്റിലെ എല്ലാ യാത്രകളും മായ്ക്കണോ?</string>
+    <string name="trips_empty">ഇതുവരെ യാത്രകളില്ല. നിങ്ങളുടെ യാത്രകൾ ഇവിടെ തനിയെ കാണാം.</string>
+    <string name="trips_avg_top">ശരാശരി %1$d · പരമാവധി %2$d km/h</string>
+    <string name="trips_tile_none">ഇതുവരെ യാത്രകളില്ല</string>
+    <string name="trips_tile_week">ഈ ആഴ്ച %1$s km</string>
+    <string name="speed_volume_title">വേഗത്തിനൊത്ത ശബ്ദം</string>
+    <string name="speed_volume_hint">30 km/h ന് മുകളിൽ റോഡിലെ ശബ്ദം കൂടുമ്പോൾ സംഗീതം അൽപ്പം ഉച്ചത്തിലാകും, വേഗം കുറയുമ്പോൾ വീണ്ടും പഴയപോലെ. നിങ്ങൾ തന്നെ ശബ്ദം മാറ്റിയാൽ അതാണ് പുതിയ നില.</string>
+    <string name="speed_volume_low">കുറവ്</string>
+    <string name="speed_volume_medium">ഇടത്തരം</string>
+    <string name="speed_volume_high">കൂടുതൽ</string>
+    <string name="fav_calls_title">പ്രിയപ്പെട്ട കോളുകൾ</string>
+    <string name="fav_calls_hint">വിളിക്കാൻ പേരിൽ ടാപ്പ് ചെയ്യുക. നീക്കാൻ അമർത്തിപ്പിടിക്കുക. പരമാവധി %1$d പേർ.</string>
+    <string name="fav_calls_none">നിങ്ങളുടെ കോൺടാക്റ്റുകളിൽ നിന്ന് %1$d പേരെ വരെ ചേർക്കുക. പിന്നെ ഒറ്റ ടാപ്പിൽ കോൾ.</string>
+    <string name="fav_calls_add">ചേർക്കുക</string>
+    <string name="fav_calls_open_phone">ഫോൺ ആപ്പ് തുറക്കുക</string>
+    <string name="fav_calls_failed">ഈ കോൺടാക്റ്റ് വായിക്കാനായില്ല</string>
+    <string name="fav_calls_full">%1$d പ്രിയപ്പെട്ടവ മാത്രം. ആദ്യം ഒന്ന് നീക്കുക.</string>
+    <string name="fav_calls_type_title">പ്രിയപ്പെട്ടത് ചേർക്കുക</string>
+    <string name="fav_calls_number">ഫോൺ നമ്പർ</string>
+    <string name="parked_qr">നിങ്ങളുടെ ഫോണിൽ സ്കാൻ ചെയ്യുക: കാറിന്റെ സ്ഥലം Google Maps ൽ തുറക്കും.</string>
+    <string name="store_title">Ampli സ്റ്റോർ</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player, ശബ്ദ പായ്ക്കുകൾ</string>
+    <string name="store_pro_line">Pro തീമുകൾ, എഞ്ചിൻ, ടയർ പരിശോധന, WhatsApp സന്ദേശം വായിച്ചു കേൾപ്പിക്കൽ</string>
+    <string name="store_owned">സജീവം</string>
+    <string name="store_install">ഇൻസ്റ്റാൾ ചെയ്യുക</string>
+    <string name="store_voice_punjabi">പഞ്ചാബി ശബ്ദ പായ്ക്ക്</string>
+    <string name="store_voice_rajasthani">രാജസ്ഥാനി ശബ്ദ പായ്ക്ക്</string>
+    <string name="store_voice_bhojpuri">ഭോജ്പുരി ശബ്ദ പായ്ക്ക്</string>
+    <string name="store_voice_line">മുന്നറിയിപ്പുകൾക്കും മറുപടികൾക്കും യഥാർത്ഥ മനുഷ്യ ശബ്ദം</string>
+</resources>

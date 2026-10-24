@@ -384,6 +384,15 @@ class DrivePrefs(context: Context) {
         _pro.value = _pro.value.copy(testUnlock = value)
     }
 
+    /** Settings › Volume by speed (off by default). */
+    private val _speedVolume = MutableStateFlow(com.vikash.ampli.drive.media.SpeedVolumeLevel.from(sp.getString(KEY_SPEED_VOLUME, null)))
+    val speedVolume: StateFlow<com.vikash.ampli.drive.media.SpeedVolumeLevel> = _speedVolume.asStateFlow()
+
+    fun setSpeedVolume(value: com.vikash.ampli.drive.media.SpeedVolumeLevel) {
+        sp.edit().putString(KEY_SPEED_VOLUME, value.key).apply()
+        _speedVolume.value = value
+    }
+
     fun setReduceGlass(value: Boolean) {
         sp.edit().putBoolean(KEY_REDUCE_GLASS, value).apply()
         _reduceGlass.value = value
@@ -461,6 +470,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_CAM_DISTANCE = "camera_distance"
         private const val KEY_CAM_OVER_ONLY = "camera_over_only"
         private const val KEY_REDUCE_GLASS = "reduce_glass"
+        private const val KEY_SPEED_VOLUME = "speed_volume"
         private const val KEY_WAKE_SENS = "wake_sensitivity"
         private const val KEY_BUBBLE = "speed_bubble"
         private const val KEY_BUBBLE_X = "speed_bubble_x"
