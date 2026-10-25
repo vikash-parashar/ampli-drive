@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">گھر</string>
+    <string name="place_office">دفتر</string>
+    <string name="place_not_set">%1$s ابھی محفوظ نہیں ہے۔ پہلے جگہ تلاش کر کے اسے محفوظ کریں۔</string>
+    <string name="place_saved">محفوظ ہو گیا: %1$s</string>
+    <string name="place_full">زیادہ سے زیادہ %1$d پسندیدہ جگہیں محفوظ ہو سکتی ہیں۔ پہلے ایک ہٹائیں۔</string>
+    <string name="place_save_as">اس جگہ کو ایسے محفوظ کریں</string>
+    <string name="place_name">نام</string>
+    <string name="place_add_favourite">پسندیدہ میں شامل کریں</string>
+    <string name="places_title">محفوظ جگہیں</string>
+    <string name="places_empty">تلاش کے نتیجے سے یا آپ ابھی جہاں ہیں وہاں سے گھر، دفتر یا کوئی پسندیدہ جگہ محفوظ کریں۔</string>
+    <string name="places_hint">دباتے ہی راستہ شروع۔ ہٹانے کے لیے دبا کر رکھیں۔</string>
+    <string name="place_save_here">میں جہاں ہوں وہ محفوظ کریں</string>
+    <string name="place_save">محفوظ کریں</string>
+    <string name="trips_title">سفر کی تاریخ</string>
+    <string name="trips_hint">ہر سفر اسی یونٹ پر خود بخود محفوظ ہوتا ہے</string>
+    <string name="trips_week">اس ہفتے</string>
+    <string name="trips_count">سفر: %1$d</string>
+    <string name="trips_fuel">≈ %1$s کا ایندھن</string>
+    <string name="trips_fuel_unknown">ایندھن کا خرچ دیکھنے کے لیے اخراجات میں دو بار فل ٹینک بھروانا درج کریں۔</string>
+    <string name="trips_how">گاڑی چلتے ہی GPS سے سفر درج ہوتا ہے اور رکتے ہی مکمل ہوتا ہے۔ آخری %1$d سفر صرف اسی یونٹ پر رکھے جاتے ہیں۔</string>
+    <string name="trips_clear">سفر کی تاریخ مٹائیں</string>
+    <string name="trips_clear_confirm">اس یونٹ سے تمام محفوظ سفر مٹا دیں؟</string>
+    <string name="trips_empty">ابھی کوئی سفر نہیں۔ آپ کے سفر یہاں خود بخود نظر آئیں گے۔</string>
+    <string name="trips_avg_top">اوسط %1$d · سب سے تیز %2$d km/h</string>
+    <string name="trips_tile_none">ابھی کوئی سفر نہیں</string>
+    <string name="trips_tile_week">اس ہفتے %1$s km</string>
+    <string name="speed_volume_title">رفتار کے ساتھ آواز</string>
+    <string name="speed_volume_hint">30 km/h سے اوپر سڑک کا شور بڑھنے پر گانا تھوڑا اونچا ہوتا ہے، اور آہستہ ہونے پر پھر پہلے جیسا۔ آپ خود آواز بدلیں تو وہی نئی سطح بن جاتی ہے۔</string>
+    <string name="speed_volume_low">کم</string>
+    <string name="speed_volume_medium">درمیانہ</string>
+    <string name="speed_volume_high">زیادہ</string>
+    <string name="fav_calls_title">پسندیدہ کالیں</string>
+    <string name="fav_calls_hint">کال کرنے کے لیے نام دبائیں۔ ہٹانے کے لیے دبا کر رکھیں۔ زیادہ سے زیادہ %1$d لوگ۔</string>
+    <string name="fav_calls_none">اپنے رابطوں سے %1$d لوگوں تک شامل کریں۔ پھر ایک بار دبانے سے کال۔</string>
+    <string name="fav_calls_add">شامل کریں</string>
+    <string name="fav_calls_open_phone">فون ایپ کھولیں</string>
+    <string name="fav_calls_failed">یہ رابطہ پڑھا نہیں جا سکا</string>
+    <string name="fav_calls_full">صرف %1$d پسندیدہ آ سکتے ہیں۔ پہلے ایک ہٹائیں۔</string>
+    <string name="fav_calls_type_title">پسندیدہ شامل کریں</string>
+    <string name="fav_calls_number">فون نمبر</string>
+    <string name="parked_qr">اپنے فون سے اسکین کریں: گاڑی کی جگہ Google Maps میں کھل جائے گی۔</string>
+    <string name="store_title">Ampli اسٹور</string>
+    <string name="store_hint">Car Hub Pro، MP3 Player اور آواز پیک</string>
+    <string name="store_pro_line">Pro تھیمز، انجن اور ٹائر کی جانچ، WhatsApp پیغامات پڑھ کر سنانا</string>
+    <string name="store_owned">فعال ہے</string>
+    <string name="store_install">انسٹال کریں</string>
+    <string name="store_voice_punjabi">پنجابی آواز پیک</string>
+    <string name="store_voice_rajasthani">راجستھانی آواز پیک</string>
+    <string name="store_voice_bhojpuri">بھوجپوری آواز پیک</string>
+    <string name="store_voice_line">الرٹ اور جواب کے لیے اصلی انسانی آواز</string>
+</resources>

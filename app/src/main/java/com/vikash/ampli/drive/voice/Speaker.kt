@@ -109,11 +109,16 @@ class Speaker(context: Context) {
      * [needFocus], nothing is said when Android refuses audio focus (a call is on).
      */
     suspend fun say(text: String, appLanguage: String, needFocus: Boolean = false) {
-        if (text.isBlank()) return
+        sayChecked(text, appLanguage, needFocus)
+    }
+
+    /** [say] that returns false when nothing could be spoken (no engine, focus refused, speak failed). */
+    suspend fun sayChecked(text: String, appLanguage: String, needFocus: Boolean = false): Boolean {
+        if (text.isBlank()) return false
         val engine = engine(appLanguage) ?: run {
             // No TTS engine on this unit: leave the reply on screen long enough to read it.
             delay(2_500L + text.length * 50L)
-            return
+            return false
         }
         val id = UUID.randomUUID().toString()
         val done = CompletableDeferred<Unit>()
@@ -121,13 +126,14 @@ class Speaker(context: Context) {
         val focus = audio?.requestAudioFocus(duckFocus)
         if (needFocus && focus == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
             synchronized(pending) { pending.remove(id) }
-            return
+            return false
         }
         try {
             val params = Bundle().apply { putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1f) }
-            if (engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, id) != TextToSpeech.SUCCESS) return
+            if (engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, id) != TextToSpeech.SUCCESS) return false
             // Roughly 12 characters a second; never wait forever if the engine stays silent.
             withTimeoutOrNull(4_000L + text.length * 120L) { done.await() }
+            return true
         } finally {
             synchronized(pending) { pending.remove(id) }
             audio?.abandonAudioFocusRequest(duckFocus)

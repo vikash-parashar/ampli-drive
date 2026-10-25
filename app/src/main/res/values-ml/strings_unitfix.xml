@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player നേടൂ</string>
+    <string name="getmp3_text">Car Hub നിങ്ങളുടെ പാട്ടുകൾ Ampli MP3 Player-ൽ പ്ലേ ചെയ്യുന്നു, അത് ഇനിയും ഈ സ്ക്രീനിൽ ഇല്ല. ഒരിക്കൽ ഇൻസ്റ്റാൾ ചെയ്യൂ; പിന്നെ മ്യൂസിക് ബട്ടൺ അത് നേരിട്ട് തുറക്കും.</string>
+    <string name="getmp3_play">Play Store-ൽ നിന്ന് നേടൂ</string>
+    <string name="getmp3_download">ഡൗൺലോഡ് ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യൂ</string>
+    <string name="getmp3_downloading">ഡൗൺലോഡ് ചെയ്യുന്നു… %1$d%%</string>
+    <string name="getmp3_install">ഇപ്പോൾ ഇൻസ്റ്റാൾ ചെയ്യൂ</string>
+    <string name="getmp3_allow">തുറന്ന സ്ക്രീനിൽ Car Hub-ൽ നിന്നുള്ള ഇൻസ്റ്റാളിന് അനുമതി നൽകി, തിരികെ വന്ന്, ഇപ്പോൾ ഇൻസ്റ്റാൾ ചെയ്യൂ അമർത്തൂ.</string>
+    <string name="getmp3_failed">ഡൗൺലോഡ് പരാജയപ്പെട്ടു. ഇന്റർനെറ്റ് നോക്കി വീണ്ടും ശ്രമിക്കൂ.</string>
+    <string name="getmp3_other">മറ്റൊരു മ്യൂസിക് ആപ്പ് ഉപയോഗിക്കൂ</string>
+    <string name="getmp3_test_note">ടെസ്റ്റ് ബിൽഡ്: Ampli-യുടെ GitHub പേജിൽ നിന്ന് പുതിയ ടെസ്റ്റ് പതിപ്പ് ഡൗൺലോഡ് ചെയ്യുന്നു.</string>
+    <string name="phone_music_title">ഫോൺ പാട്ടുകൾ</string>
+    <string name="phone_music_from">%1$s-ൽ നിന്ന്, ബ്ലൂടൂത്ത് വഴി</string>
+    <string name="phone_autoplay_title">ഫോൺ കണക്റ്റ് ആയാലുടൻ അതിലെ പാട്ടുകൾ പ്ലേ ചെയ്യൂ</string>
+    <string name="phone_autoplay_hint">ഫോൺ കണക്റ്റ് ആയി കുറച്ച് സെക്കൻഡിനുള്ളിൽ അതിൽ പ്ലേ അമർത്തും. കോൾ നടക്കുമ്പോൾ ഇല്ല, കഴിഞ്ഞ ഒരു മിനിറ്റിൽ നിങ്ങൾ നിർത്തിയിട്ടുണ്ടെങ്കിലും ഇല്ല.</string>
+    <string name="mirror_app_title">സ്ക്രീൻ മിററിംഗ് ആപ്പ്</string>
+    <string name="mirror_app_none">ഒന്നുമില്ല</string>
+    <string name="plink_title">ഫോൺ ലിങ്ക്</string>
+    <string name="plink_connected">%1$s കണക്റ്റ് ചെയ്തു</string>
+    <string name="plink_not_connected">ബ്ലൂടൂത്തിൽ ഫോൺ ഒന്നും കണക്റ്റ് ചെയ്തിട്ടില്ല</string>
+    <string name="plink_calls">കോളുകൾ</string>
+    <string name="plink_music">പാട്ടുകൾ</string>
+    <string name="plink_battery">ബാറ്ററി %1$d%%</string>
+    <string name="plink_play">ഫോൺ പാട്ടുകൾ പ്ലേ ചെയ്യൂ</string>
+    <string name="plink_devices">ബ്ലൂടൂത്ത് ഉപകരണങ്ങൾ</string>
+    <string name="plink_no_devices">ജോടിയാക്കിയ ഉപകരണങ്ങൾ കാണുന്നില്ല. ഈ യൂണിറ്റ് ബ്ലൂടൂത്ത് സ്വന്തം ആപ്പിൽ വെക്കുന്നുണ്ടാകാം: ബ്ലൂടൂത്ത് ക്രമീകരണങ്ങൾ തുറക്കൂ.</string>
+    <string name="plink_now">ഇപ്പോൾ കണക്റ്റ് ചെയ്തു</string>
+    <string name="plink_paired">ജോടിയാക്കി</string>
+    <string name="plink_switch">മാറ്റൂ</string>
+    <string name="plink_switching">%1$s കണക്റ്റ് ചെയ്യാൻ യൂണിറ്റിനോട് പറഞ്ഞു…</string>
+    <string name="plink_pick_here">%1$s കണക്റ്റ് ചെയ്യാൻ ഇവിടെ തിരഞ്ഞെടുക്കൂ</string>
+    <string name="plink_bt_settings">ബ്ലൂടൂത്ത് ക്രമീകരണങ്ങൾ</string>
+    <string name="plink_mirror">സ്ക്രീൻ മിററിംഗ് ആപ്പ് തുറക്കൂ</string>
+    <string name="apps_hide">ആപ്പുകളിൽ നിന്ന് മറയ്ക്കൂ</string>
+    <string name="apps_hidden_toast">%1$s മറച്ചു. കൂടുതൽ ആപ്പുകളിൽ നിന്ന് വീണ്ടും കാണിക്കാം.</string>
+    <string name="apps_unhide_all">മറച്ചവ കാണിക്കൂ (%1$d)</string>
+    <string name="apps_mirror_use">സ്ക്രീൻ മിററിംഗിന് ഉപയോഗിക്കൂ</string>
+    <string name="apps_mirror_stop">സ്ക്രീൻ മിററിംഗിന് ഉപയോഗിക്കുന്നത് നിർത്തൂ</string>
+    <string name="greet_home_title">Car Hub ഹോം ആപ്പാക്കൂ, അപ്പോൾ വണ്ടി സ്റ്റാർട്ട് ആയാലുടൻ അതിന് നിങ്ങളെ സ്വാഗതം ചെയ്യാനാകും</string>
+</resources>

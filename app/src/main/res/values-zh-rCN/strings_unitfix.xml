@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">获取 Ampli MP3 Player</string>
+    <string name="getmp3_text">Car Hub 用 Ampli MP3 Player 播放你的歌曲，但这台屏幕上还没有安装。装一次即可，之后音乐按钮会直接打开它。</string>
+    <string name="getmp3_play">在 Play 商店获取</string>
+    <string name="getmp3_download">下载并安装</string>
+    <string name="getmp3_downloading">正在下载… %1$d%%</string>
+    <string name="getmp3_install">立即安装</string>
+    <string name="getmp3_allow">在打开的页面允许 Car Hub 安装应用，返回后点“立即安装”。</string>
+    <string name="getmp3_failed">下载失败。请检查网络后重试。</string>
+    <string name="getmp3_other">使用其他音乐应用</string>
+    <string name="getmp3_test_note">测试版：从 Ampli 的 GitHub 页面下载最新测试版本。</string>
+    <string name="phone_music_title">手机音乐</string>
+    <string name="phone_music_from">来自 %1$s（蓝牙）</string>
+    <string name="phone_autoplay_title">手机连接后自动播放手机音乐</string>
+    <string name="phone_autoplay_hint">手机连接几秒后按下播放。通话中不会播放，你在一分钟内按过暂停也不会。</string>
+    <string name="mirror_app_title">投屏应用</string>
+    <string name="mirror_app_none">无</string>
+    <string name="plink_title">手机互联</string>
+    <string name="plink_connected">%1$s 已连接</string>
+    <string name="plink_not_connected">没有手机通过蓝牙连接</string>
+    <string name="plink_calls">通话</string>
+    <string name="plink_music">音乐</string>
+    <string name="plink_battery">电量 %1$d%%</string>
+    <string name="plink_play">播放手机音乐</string>
+    <string name="plink_devices">蓝牙设备</string>
+    <string name="plink_no_devices">看不到已配对的设备。这台主机可能把蓝牙放在自带应用里：请打开蓝牙设置。</string>
+    <string name="plink_now">已连接</string>
+    <string name="plink_paired">已配对</string>
+    <string name="plink_switch">切换</string>
+    <string name="plink_switching">已请求主机连接 %1$s…</string>
+    <string name="plink_pick_here">在这里选择 %1$s 进行连接</string>
+    <string name="plink_bt_settings">蓝牙设置</string>
+    <string name="plink_mirror">打开投屏应用</string>
+    <string name="apps_hide">从应用列表隐藏</string>
+    <string name="apps_hidden_toast">已隐藏 %1$s。可在“更多应用”中重新显示。</string>
+    <string name="apps_unhide_all">显示已隐藏 (%1$d)</string>
+    <string name="apps_mirror_use">用作投屏应用</string>
+    <string name="apps_mirror_stop">不再用作投屏应用</string>
+    <string name="greet_home_title">把 Car Hub 设为主屏幕应用，开车启动时它才能向你问好</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player घेयात</string>
+    <string name="getmp3_text">Car Hub तुमचीं गितां Ampli MP3 Player हातूंत वाजयता, आनी तो अजून ह्या स्क्रीनार ना. एक फावट इंस्टॉल करात; उपरांत म्यूझिक बटण तो सरळ उगडटलें.</string>
+    <string name="getmp3_play">Play Store वयल्यान घेयात</string>
+    <string name="getmp3_download">डाउनलोड करून इंस्टॉल करात</string>
+    <string name="getmp3_downloading">डाउनलोड जाता… %1$d%%</string>
+    <string name="getmp3_install">आतां इंस्टॉल करात</string>
+    <string name="getmp3_allow">उगडिल्ल्या स्क्रीनार Car Hub वयल्यान इंस्टॉल करपाक परवानगी दियात, परत येयात, मागीर आतां इंस्टॉल करात दामात.</string>
+    <string name="getmp3_failed">डाउनलोड जालें ना. इंटरनेट तपासून परत यत्न करात.</string>
+    <string name="getmp3_other">दुसरें म्यूझिक ॲप वापरात</string>
+    <string name="getmp3_test_note">टेस्ट बिल्ड: Ampli च्या GitHub पानार सगळ्यांत नवें टेस्ट वर्जन डाउनलोड जाता.</string>
+    <string name="phone_music_title">फोनाचीं गितां</string>
+    <string name="phone_music_from">%1$s वयल्यान, ब्लूटूथार</string>
+    <string name="phone_autoplay_title">म्हजो फोन जोडटकच ताचीं गितां वाजयात</string>
+    <string name="phone_autoplay_hint">फोन जोडल्या उपरांत थोड्या सेकंदांनी ताचेर प्ले दामता. कॉल चालू आसतना ना, आनी तुमी निमाण्या मिनटांत थांबयलां जाल्यार लेगीत ना.</string>
+    <string name="mirror_app_title">स्क्रीन-मिररिंग ॲप</string>
+    <string name="mirror_app_none">कांयच ना</string>
+    <string name="plink_title">फोन लिंक</string>
+    <string name="plink_connected">%1$s जोडला</string>
+    <string name="plink_not_connected">ब्लूटूथार खंयचोच फोन जोडूंक ना</string>
+    <string name="plink_calls">कॉल</string>
+    <string name="plink_music">गितां</string>
+    <string name="plink_battery">बॅटरी %1$d%%</string>
+    <string name="plink_play">फोनाचीं गितां वाजयात</string>
+    <string name="plink_devices">ब्लूटूथ डिव्हायस</string>
+    <string name="plink_no_devices">जोडिल्लें डिव्हायस दिसना. हें युनिट ब्लूटूथ आपल्याच ॲपांत दवरता आसतलें: ब्लूटूथ सेटिंग उगडात.</string>
+    <string name="plink_now">आतां जोडला</string>
+    <string name="plink_paired">जोडिल्लें</string>
+    <string name="plink_switch">बदलात</string>
+    <string name="plink_switching">युनिटाक %1$s जोडपाक सांगलां…</string>
+    <string name="plink_pick_here">%1$s जोडपाक हांगा वेंचात</string>
+    <string name="plink_bt_settings">ब्लूटूथ सेटिंग</string>
+    <string name="plink_mirror">स्क्रीन-मिररिंग ॲप उगडात</string>
+    <string name="apps_hide">ॲप्सांतल्यान लिपयात</string>
+    <string name="apps_hidden_toast">%1$s लिपयलां. आनीक ॲप्सांतल्यान परत दाखोवंक शकतात.</string>
+    <string name="apps_unhide_all">लिपयल्लीं दाखयात (%1$d)</string>
+    <string name="apps_mirror_use">स्क्रीन मिररिंगाखातीर वापरात</string>
+    <string name="apps_mirror_stop">स्क्रीन मिररिंगाखातीर वापरप बंद करात</string>
+    <string name="greet_home_title">Car Hub होम ॲप करात, जाका लागून गाडी सुरू जातकच तें तुमचें येवकार करूंक शकता</string>
+</resources>

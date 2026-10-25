@@ -1,7 +1,9 @@
 package com.vikash.ampli.drive.voice
 
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.prefs.VoiceStyle
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,42 +44,76 @@ class WelcomeGreeter(private val app: DriveApp) {
         _card.value = null
     }
 
+    /** How a welcome went, for Settings › Diagnostics › Start log (plain English on purpose). */
+    enum class Outcome(val reason: String) {
+        Spoken(""),
+        InCall("a phone call was on"),
+        NoVoice("no recorded clip for this line and no text-to-speech engine"),
+        NoAudio("audio output was not ready (tried twice, 3 s apart)"),
+    }
+
     /** Picks, shows and speaks the welcome. Main thread (Speaker's rule). [showCard] false: voice only. */
-    suspend fun play(showCard: Boolean = true) {
+    suspend fun play(showCard: Boolean = true): Outcome {
         busy = true
         try {
-            playNow(showCard)
+            return playNow(showCard)
         } finally {
             busy = false
         }
     }
 
-    private suspend fun playNow(showCard: Boolean) {
+    private suspend fun playNow(showCard: Boolean): Outcome {
         val prefs = app.prefs
         val speaker = app.speaker
-        val voice = app.voicePlayer.voice
-        val ready = speaker.warmUp()
-        val hindiVoice = ready && speaker.hasVoice(HINDI)
+        val player = app.voicePlayer
         val screenTag = prefs.language.value.ifEmpty { Locale.getDefault().toLanguageTag() }
+        val hindiScreen = WelcomeLines.isHindiScreen(screenTag)
         val count = prefs.welcomeCount
-        val welcome = WelcomeLines.select(
-            style = prefs.voiceStyle.value,
+        val hour = LocalTime.now().hour
+        fun pick(style: VoiceStyle, hindiVoice: Boolean) = WelcomeLines.select(
+            style = style,
             name = prefs.ownerName.value,
             count = count,
             hindiVoice = hindiVoice,
-            hindiScreen = WelcomeLines.isHindiScreen(screenTag),
-            hour = LocalTime.now().hour,
+            hindiScreen = hindiScreen,
+            hour = hour,
         )
+        // Recorded clips first: they need no text-to-speech engine and no warm-up (the TS7 and
+        // many head units have no engine at all, and right after boot a real one is still starting).
+        var welcome = pick(prefs.voiceStyle.value, hindiVoice = false)
+        var recorded = player.hasRecorded(welcome.spoken)
+        if (!recorded) {
+            val ready = speaker.warmUp()
+            if (ready) {
+                welcome = pick(prefs.voiceStyle.value, hindiVoice = speaker.hasVoice(HINDI))
+            } else {
+                // Standard style has no recorded welcome: the recorded Haryanvi one beats silence.
+                val standIn = pick(VoiceStyle.Haryanvi, hindiVoice = false)
+                if (player.hasRecorded(standIn.spoken)) {
+                    welcome = welcome.copy(text = standIn.text, language = standIn.language, clips = standIn.clips)
+                    recorded = true
+                }
+            }
+            if (!ready && !recorded) {
+                prefs.welcomeCount = count + 1
+                if (showCard) _card.value = Card(welcome.card, welcome.text, System.nanoTime())
+                return Outcome.NoVoice
+            }
+        }
         prefs.welcomeCount = count + 1
         if (showCard) _card.value = Card(welcome.card, welcome.text, System.nanoTime())
-        if (speaker.inCall()) return
-        val recorded = app.voicePlayer.library.plan(voice, welcome.spoken) != null
-        if (!ready && !recorded) return
-        app.voicePlayer.say(welcome.spoken, needFocus = true)
+        if (speaker.inCall()) return Outcome.InCall
+        if (player.sayChecked(welcome.spoken, needFocus = true, preferRecorded = true)) return Outcome.Spoken
+        // Right after boot the audio service or the unit's amplifier may not be ready yet, or the
+        // vendor radio still holds audio focus: wait a moment and try once more.
+        delay(RETRY_MS)
+        if (speaker.inCall()) return Outcome.InCall
+        return if (player.sayChecked(welcome.spoken, needFocus = true, preferRecorded = true)) Outcome.Spoken else Outcome.NoAudio
     }
 
     companion object {
         const val CARD_MS = 5_000L
+        const val RETRY_MS = 3_000L
         private val HINDI: Locale = Locale.forLanguageTag("hi-IN")
     }
 }

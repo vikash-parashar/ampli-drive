@@ -80,6 +80,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -92,6 +94,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.overlay.QuickStripLogic
 import com.vikash.ampli.drive.prefs.ShellPrefs
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.Shell
@@ -125,7 +128,7 @@ internal fun rememberMakeHome(onDone: () -> Unit = {}): () -> Unit {
 
 /** Home: one row under the status bar that pushes the panes down, so nothing is covered. */
 @Composable
-internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier, title: String? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Row(
@@ -145,7 +148,7 @@ internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier
     ) {
         Icon(Icons.Filled.Home, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(30.dp))
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title ?: stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             if (!dims.compact) Text(stringResource(R.string.shell_home_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         BigButton(text = stringResource(R.string.shell_home_later), onClick = onLater, primary = false)
@@ -201,9 +204,12 @@ fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
     LaunchedEffect(isHome, moving) {
         when {
             moving -> showing = false
-            !isHome && !showing && !app.shell.homeCardDismissed -> {
+            // Once (and once more for drivers who saw the older banner): without being the home
+            // app, Car Hub may not be on screen after a power cut, so it can't greet.
+            !isHome && !showing && (!app.shell.homeCardDismissed || !app.shell.greetHomeBannerShown) -> {
                 showing = true
                 app.shell.homeCardDismissed = true
+                app.shell.greetHomeBannerShown = true
             }
         }
     }
@@ -212,7 +218,7 @@ fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
         enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
         exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
     ) {
-        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false })
+        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false }, title = stringResource(R.string.greet_home_title))
     }
 }
 
@@ -283,9 +289,12 @@ internal fun QuickControlsPanel(
     onTile: (Shell.Control) -> Unit,
     onClose: () -> Unit,
     onTileLong: ((Shell.Control) -> Unit)? = null,
+    perRow: Int = 4,
+    header: (@Composable () -> Unit)? = null,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
+    val density = LocalDensity.current.density
     val shown = remember { MutableTransitionState(false) }
     shown.targetState = visible
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
@@ -316,6 +325,20 @@ internal fun QuickControlsPanel(
                         accentEdge = false,
                         blur = false,
                     )
+                    // Swipe up on the panel closes it, like a phone's quick settings.
+                    .pointerInput(Unit) {
+                        var pulled = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = { pulled = 0f },
+                            onVerticalDrag = { _, dy ->
+                                pulled += dy
+                                if (QuickStripLogic.isCloseSwipe(pulled, density)) {
+                                    pulled = Float.POSITIVE_INFINITY
+                                    onClose()
+                                }
+                            },
+                        )
+                    }
                     .padding(dims.d(2.6f)),
                 verticalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
             ) {
@@ -334,12 +357,13 @@ internal fun QuickControlsPanel(
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = theme.muted, modifier = Modifier.size(28.dp))
                     }
                 }
-                tiles.chunked(4).forEachIndexed { row, chunk ->
+                header?.invoke()
+                tiles.chunked(perRow).forEachIndexed { row, chunk ->
                     Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                         chunk.forEachIndexed { col, tile ->
                             QuickTileView(
                                 tile,
-                                index = row * 4 + col,
+                                index = row * perRow + col,
                                 onClick = { onTile(tile.control) },
                                 modifier = Modifier.weight(1f),
                                 onLongClick = onTileLong?.let { long -> { long(tile.control) } },

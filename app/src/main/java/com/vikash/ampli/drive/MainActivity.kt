@@ -59,14 +59,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.vikash.ampli.drive.system.StartupTiming.onActivityCreated()
         enableEdgeToEdge()
-        // Re-checks Play for the Pro purchase (refunds, purchases on another device).
-        app.billing.start()
         // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
         app.car
-        // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
-        app.navPrompter.start()
-        app.desi.start()
+        val background = {
+            // Re-checks Play for the Pro purchase (refunds, purchases on another device).
+            app.billing.start()
+            // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
+            app.navPrompter.start()
+            app.desi.start()
+        }
+        // 1-2 GB units: Home draws first; Play Billing and the voice helpers start just after.
+        if (app.lowEnd) window.decorView.post { background() } else background()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -105,7 +110,7 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 app.bluetooth.state.map { it.connectedName }.distinctUntilChanged().collect { name ->
                     val wanted = app.prefs.autoStart.value.btDeviceName
-                    if (name != null && wanted != null && name == wanted) CarStart.signal(app, StartTrigger.PhoneConnected)
+                    if (name != null && wanted != null && name == wanted) CarStart.signal(app, StartTrigger.PhoneConnected, "phone connected: $name")
                 }
             }
         }
@@ -152,6 +157,9 @@ class MainActivity : ComponentActivity() {
         VoiceService.start(this)
         // Boot (or a start noticed while hidden): greeting and auto start, from the foreground.
         CarStart.launcherVisible = true
+        // Ampli MP3 Player may have just been installed: it becomes the music app (once).
+        app.prefs.applyMusicDefault { com.vikash.ampli.drive.system.AmpliMusic.installed(this) }
+        app.phoneBt.refresh()
         CarStart.takePending(this, app)?.let { trigger -> lifecycleScope.launch { CarStart.run(this@MainActivity, app, trigger) } }
     }
 
@@ -167,6 +175,8 @@ class MainActivity : ComponentActivity() {
         app.car.onBackground()
         app.mediaHub.stop()
         app.bluetooth.stop()
+        // Deep sleep (ACC off on many units) is measured from here; see CarStart.takePending.
+        CarStart.onLauncherHidden()
         inFront = false
         super.onStop()
     }

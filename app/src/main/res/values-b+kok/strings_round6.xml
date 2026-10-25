@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">घर</string>
+    <string name="place_office">ऑफिस</string>
+    <string name="place_not_set">%1$s अजून सेव ना. पयलीं सुवात सोदून ती सेव करात.</string>
+    <string name="place_saved">सेव जालें: %1$s</string>
+    <string name="place_full">चडांत चड %1$d आवडीच्यो सुवाती सेव करूं येतात. पयलीं एक काडात.</string>
+    <string name="place_save_as">ही सुवात अशी सेव करात</string>
+    <string name="place_name">नांव</string>
+    <string name="place_add_favourite">आवडीच्यांनी जोडात</string>
+    <string name="places_title">सेव केल्ल्यो सुवाती</string>
+    <string name="places_empty">सोदाच्या निकालांतल्यान वा तुमी आतां आसात थंयच्यान घर, ऑफिस वा आवडीची सुवात सेव करात.</string>
+    <string name="places_hint">दाबतकच वाट सुरू. काडपाक दाबून धरात.</string>
+    <string name="place_save_here">हांव आसां ती सुवात सेव करात</string>
+    <string name="place_save">सेव करात</string>
+    <string name="trips_title">प्रवासाचो इतिहास</string>
+    <string name="trips_hint">दर एक प्रवास ह्याच युनिटार आपसूक सेव जाता</string>
+    <string name="trips_week">हो सुमानो</string>
+    <string name="trips_count">प्रवास: %1$d</string>
+    <string name="trips_fuel">≈ %1$s इंधन</string>
+    <string name="trips_fuel_unknown">इंधनाचो खर्च पळोवंक खर्चाच्या पानार दोन फावट फुल टँक भरिल्लें नोंद करात.</string>
+    <string name="trips_how">गाडी चलतकच GPS वयल्यान प्रवास नोंद जाता आनी उबी जातकच पुराय जाता. निमणे %1$d प्रवास फकत ह्याच युनिटार दवरतात.</string>
+    <string name="trips_clear">प्रवासाचो इतिहास पुसात</string>
+    <string name="trips_clear_confirm">ह्या युनिटावयले सगळे सेव केल्ले प्रवास पुसचे?</string>
+    <string name="trips_empty">अजून प्रवास ना. तुमचे प्रवास हांगा आपसूक दिसतले.</string>
+    <string name="trips_avg_top">सरासरी %1$d · चडांत चड %2$d km/h</string>
+    <string name="trips_tile_none">अजून प्रवास ना</string>
+    <string name="trips_tile_week">ह्या सुमानांत %1$s km</string>
+    <string name="speed_volume_title">वेगा प्रमाण आवाज</string>
+    <string name="speed_volume_hint">30 km/h परस चड वेगान रस्त्याचो आवाज वाडटकच संगीत उणें मोटें जाता, आनी हळू जातकच परत पयलीं सारकें. तुमी स्वता आवाज बदल्यार तोच नवो स्तर जाता.</string>
+    <string name="speed_volume_low">उणो</string>
+    <string name="speed_volume_medium">मध्यम</string>
+    <string name="speed_volume_high">चड</string>
+    <string name="fav_calls_title">आवडीचे कॉल</string>
+    <string name="fav_calls_hint">कॉल करपाक नांव दाबात. काडपाक दाबून धरात. चडांत चड %1$d लोक.</string>
+    <string name="fav_calls_none">तुमच्या कॉन्टॅक्टांतल्यान %1$d लोकांमेरेन जोडात. मागीर एक फावट दाबतकच कॉल.</string>
+    <string name="fav_calls_add">जोडात</string>
+    <string name="fav_calls_open_phone">फोन ऍप उगडात</string>
+    <string name="fav_calls_failed">तो कॉन्टॅक्ट वाचूंक जालो ना</string>
+    <string name="fav_calls_full">फकत %1$d आवडीचे मेळटात. पयलीं एक काडात.</string>
+    <string name="fav_calls_type_title">आवडीचो जोडात</string>
+    <string name="fav_calls_number">फोन नंबर</string>
+    <string name="parked_qr">तुमच्या फोनान स्कॅन करात: गाडीची सुवात Google Maps हांगा उगडटली.</string>
+    <string name="store_title">Ampli स्टोअर</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player आनी आवाज पॅक</string>
+    <string name="store_pro_line">Pro थीम, इंजिन आनी टायर तपासणी, WhatsApp संदेश वाचून दाखोवप</string>
+    <string name="store_owned">सुरू आसा</string>
+    <string name="store_install">इंस्टॉल करात</string>
+    <string name="store_voice_punjabi">पंजाबी आवाज पॅक</string>
+    <string name="store_voice_rajasthani">राजस्थानी आवाज पॅक</string>
+    <string name="store_voice_bhojpuri">भोजपुरी आवाज पॅक</string>
+    <string name="store_voice_line">अलर्ट आनी जापां खातीर खऱ्या मनशाचो आवाज</string>
+</resources>

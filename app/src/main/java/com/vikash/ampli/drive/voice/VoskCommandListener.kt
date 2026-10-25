@@ -107,6 +107,7 @@ class VoskCommandListener(private val app: DriveApp) {
 object VoskCommands {
     val COMMANDS = listOf(
         "navigate", "navigate to", "take me home", "take me to",
+        "go home", "go to office", "take me to office", "ghar chalo", "office chalo",
         "next camera", "speed camera",
         "play music", "play", "pause", "stop music", "next song", "previous song", "resume",
         "call", "android auto", "connect my phone",
@@ -125,6 +126,7 @@ object VoskCommands {
      */
     val HINDI_COMMANDS = listOf(
         "रास्ता दिखाओ", "ले चलो", "घर ले चलो", "चलो", "ले चल", "नेविगेट करो",
+        "घर चलो", "ऑफिस चलो", "ऑफिस ले चलो", "दफ्तर चलो",
         "कैमरा", "अगला कैमरा",
         "गाना बजाओ", "गाना चलाओ", "बजाओ", "गाना बंद करो", "गाना रोको", "अगला गाना", "पिछला गाना", "गाना चालू करो",
         "फोन करो", "कॉल करो", "फोन जोड़ो",

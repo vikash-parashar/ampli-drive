@@ -59,6 +59,17 @@ class CarMonitor(private val app: DriveApp) {
     private val parking = ParkingDetector()
     private val crash = CrashDetector()
 
+    /** Trip history (Car › Trips): every drive, logged from the same fixes as the odometer. */
+    val trips = TripStore(app)
+    private val tripRecorder = TripRecorder().also { rec ->
+        rec.restore(trips.loadActive(), System.currentTimeMillis())?.let { trips.add(it) }
+        if (rec.active == null) trips.saveActive(null)
+    }
+    private var tripSavedAtM = 0.0
+
+    /** Settings › Volume by speed. */
+    private val speedVolume = com.vikash.ampli.drive.media.SpeedVolume(app)
+
     private val _foreground = MutableStateFlow(false)
     /** Launcher in front (MainActivity started), as a flow for the speed bubble. */
     val foregroundState: StateFlow<Boolean> = _foreground.asStateFlow()
@@ -193,7 +204,22 @@ class CarMonitor(private val app: DriveApp) {
         if (seatBelt.onSample(now, fatigue.driving)) app.desi.sayLater(HaryanviLines.Event.SeatBelt)
 
         // Odometer.
-        store.addDistance(odometer.onFix(location.latitude, location.longitude, if (location.hasAccuracy()) location.accuracy else null, kmh, location.elapsedRealtimeNanos / 1_000_000L))
+        val stepM = odometer.onFix(location.latitude, location.longitude, if (location.hasAccuracy()) location.accuracy else null, kmh, location.elapsedRealtimeNanos / 1_000_000L)
+        store.addDistance(stepM)
+
+        // Trip history.
+        tripRecorder.onSample(now, kmh, location.latitude, location.longitude, stepM)?.let { trips.add(it) }
+        tripRecorder.active.let { a ->
+            if (a == null) {
+                if (tripSavedAtM > 0.0) { trips.saveActive(null); tripSavedAtM = 0.0 }
+            } else if (a.distanceM - tripSavedAtM >= 250.0 || tripSavedAtM == 0.0) {
+                trips.saveActive(a)
+                tripSavedAtM = a.distanceM.coerceAtLeast(0.1)
+            }
+        }
+
+        // Music a little louder at speed (Settings › Volume by speed; off by default).
+        speedVolume.onSpeed(kmh)
 
         // Parking spot.
         parking.onSample(now, kmh, location.latitude, location.longitude, if (location.hasAccuracy()) location.accuracy else null)
@@ -216,12 +242,15 @@ class CarMonitor(private val app: DriveApp) {
         odometer.reset()
         val loc = last ?: lastLocation
         parking.onStopped(System.currentTimeMillis(), loc?.latitude, loc?.longitude, loc?.takeIf { it.hasAccuracy() }?.accuracy)?.let { park(it) }
+        endTrip(loc?.latitude, loc?.longitude)
     }
 
     /** Screen off / shutdown (ignition off on most head units). */
     fun onIgnitionOff() {
         store.flushOdometer()
-        val loc = lastLocation ?: return
+        val loc = lastLocation
+        endTrip(loc?.latitude, loc?.longitude)
+        if (loc == null) return
         parking.onStopped(System.currentTimeMillis(), loc.latitude, loc.longitude, if (loc.hasAccuracy()) loc.accuracy else null)?.let { park(it) }
     }
 
@@ -254,6 +283,15 @@ class CarMonitor(private val app: DriveApp) {
     private fun park(spot: ParkedSpot) {
         store.setParked(spot)
         store.flushOdometer()
+        endTrip(spot.lat, spot.lon)
+    }
+
+    /** The drive is over: log it (when long enough) and forget the saved in-progress copy. */
+    private fun endTrip(lat: Double?, lon: Double?) {
+        tripRecorder.finish(System.currentTimeMillis(), lat, lon)?.let { trips.add(it) }
+        trips.saveActive(null)
+        tripSavedAtM = 0.0
+        speedVolume.onSpeed(0f)
     }
 
     /** "Save spot here" on the parked-car screen. */

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick panel over other apps (swipe down from the top). Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="quick_strip_setting">वयल्यान सकयल स्वायप करात: क्विक कंट्रोल</string>
+    <string name="quick_strip_hint">Google Maps आनी हेर ऐपांचेर लेगीत चलता: वयल्या कांठाच्या मदल्यान सकयल स्वायप करात।</string>
+    <string name="quick_strip_needs_permission">हेर ऐपांचेर वापरपाक Ampli Car Hub क “हेर ऐपांचेर दाखयात” ही परवानगी दियात</string>
+    <string name="quick_strip_allow">हेर ऐपांचेर परवानगी दियात</string>
+    <string name="quick_strip_needs_monitor">हेर ऐपांचेर चलपाक वयर “%1$s” चालू करात।</string>
+    <string name="quick_ampli_music">Ampli संगीत</string>
+    <string name="quick_home">Car Hub होम</string>
+</resources>

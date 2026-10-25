@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player ले ले</string>
+    <string name="getmp3_text">Car Hub तेरे गाणे Ampli MP3 Player मैं बजावै सै, अर वो अजे इस स्क्रीन पै कोनी। एक बार इंस्टॉल कर ले; फेर म्यूज़िक बटन सीधा उसनै खोलैगा।</string>
+    <string name="getmp3_play">Play Store तै ले</string>
+    <string name="getmp3_download">डाउनलोड करकै इंस्टॉल कर</string>
+    <string name="getmp3_downloading">डाउनलोड होरया सै… %1$d%%</string>
+    <string name="getmp3_install">इब इंस्टॉल कर</string>
+    <string name="getmp3_allow">जो स्क्रीन खुली सै उड़ै Car Hub तै इंस्टॉल की इजाज़त दे, वापस आ, फेर इब इंस्टॉल कर दबा।</string>
+    <string name="getmp3_failed">डाउनलोड कोनी होया। इंटरनेट देख कै फेर कोसिस कर।</string>
+    <string name="getmp3_other">कोए और म्यूज़िक ऐप चुण</string>
+    <string name="getmp3_test_note">टेस्ट बिल्ड: Ampli के GitHub पेज तै सबतै नया टेस्ट वर्ज़न आवै सै।</string>
+    <string name="phone_music_title">फोन के गाणे</string>
+    <string name="phone_music_from">%1$s तै, ब्लूटूथ पै</string>
+    <string name="phone_autoplay_title">फोन जुड़दे ए उसके गाणे बजा</string>
+    <string name="phone_autoplay_hint">फोन जुड़ण के कुछ सेकंड पाच्छै उसपै प्ले दबावै सै। कॉल चालदे होए कोनी, अर जै तन्नै पिछले एक मिनट मैं रोक्या हो तो भी कोनी।</string>
+    <string name="mirror_app_title">स्क्रीन-मिररिंग ऐप</string>
+    <string name="mirror_app_none">कोए ना</string>
+    <string name="plink_title">फ़ोन लिंक</string>
+    <string name="plink_connected">%1$s जुड़्या होया सै</string>
+    <string name="plink_not_connected">ब्लूटूथ पै कोए फोन कोनी जुड़्या</string>
+    <string name="plink_calls">कॉल</string>
+    <string name="plink_music">गाणे</string>
+    <string name="plink_battery">बैटरी %1$d%%</string>
+    <string name="plink_play">फोन के गाणे बजा</string>
+    <string name="plink_devices">ब्लूटूथ डिवाइस</string>
+    <string name="plink_no_devices">कोए जुड़्या होया डिवाइस कोनी दीखदा। यो यूनिट ब्लूटूथ अपणे ए ऐप मैं राखता होगा: ब्लूटूथ सेटिंग खोल।</string>
+    <string name="plink_now">इब जुड़्या सै</string>
+    <string name="plink_paired">जोड़्या होया</string>
+    <string name="plink_switch">बदल</string>
+    <string name="plink_switching">यूनिट तै %1$s जोड़ण नै कह दिया…</string>
+    <string name="plink_pick_here">%1$s नै जोड़ण खातर उरै चुण</string>
+    <string name="plink_bt_settings">ब्लूटूथ सेटिंग</string>
+    <string name="plink_mirror">स्क्रीन-मिररिंग ऐप खोल</string>
+    <string name="apps_hide">ऐप्स तै ल्हको दे</string>
+    <string name="apps_hidden_toast">%1$s ल्हको दिया। और ऐप्स मैं जाकै फेर दिखा सकै सै।</string>
+    <string name="apps_unhide_all">ल्हकोए होए दिखा (%1$d)</string>
+    <string name="apps_mirror_use">स्क्रीन मिररिंग खातर चुण</string>
+    <string name="apps_mirror_stop">स्क्रीन मिररिंग तै हटा</string>
+    <string name="greet_home_title">Car Hub नै होम ऐप बणा दे, ताकि गाड्डी चालू होंदे ए यो तेरा स्वागत कर सकै</string>
+</resources>

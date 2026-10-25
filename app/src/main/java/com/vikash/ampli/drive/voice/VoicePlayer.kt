@@ -51,19 +51,35 @@ class VoicePlayer(private val app: DriveApp) {
      * audio focus (a call is on).
      */
     suspend fun say(spoken: Spoken, needFocus: Boolean = false) {
+        sayChecked(spoken, needFocus)
+    }
+
+    /**
+     * [say] that reports whether anything was heard: false when audio focus was refused, the clips
+     * failed and there is no phone voice, or the phone voice failed. [preferRecorded]: use the
+     * recorded Ampli voice even when Settings › Voice says phone voice (the car-start welcome).
+     */
+    suspend fun sayChecked(spoken: Spoken, needFocus: Boolean = false, preferRecorded: Boolean = false): Boolean {
         var v = voice
         // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
         // Ampli voice says it instead, rather than nothing at all.
-        if (!v.human && !ttsAvailable()) v = fallbackVoice()
+        if (!v.human && (preferRecorded || !ttsAvailable())) v = fallbackVoice()
         val clips = library.plan(v, spoken)
         if (clips != null && v.folder != null) {
             val uris = clips.map { Uri.parse("asset:///voice/${v.folder}/$it.ogg") }
             when (play(uris, needFocus)) {
-                Result.Played, Result.NoFocus -> return
+                Result.Played -> return true
+                Result.NoFocus -> return false
                 Result.Failed -> Unit // Fall through to TTS below.
             }
         }
-        app.speaker.say(spoken.text, spoken.language, needFocus)
+        return app.speaker.sayChecked(spoken.text, spoken.language, needFocus)
+    }
+
+    /** True when every clip of [spoken] is bundled in the recorded voice [sayChecked] would use. */
+    fun hasRecorded(spoken: Spoken): Boolean {
+        val v = voice.takeIf { it.human } ?: fallbackVoice()
+        return v.folder != null && library.plan(v, spoken) != null
     }
 
     private val _ttsMissing = MutableStateFlow(false)

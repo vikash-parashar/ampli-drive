@@ -13,6 +13,9 @@ import android.os.Build
 import android.os.IBinder
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.overlay.BubbleLogic
+import com.vikash.ampli.drive.overlay.QuickStrip
+import com.vikash.ampli.drive.overlay.QuickStripGate
+import com.vikash.ampli.drive.overlay.QuickStripLogic
 import com.vikash.ampli.drive.overlay.SpeedBubble
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -35,11 +38,28 @@ class CarMonitorService : Service() {
     private val app get() = application as DriveApp
     private val scope = MainScope()
     private var bubble: SpeedBubble? = null
+    private var quick: QuickStrip? = null
 
     /** Head units usually turn the screen off (or shut down) when the ignition goes off. */
     private val screenOff = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            app.car.onIgnitionOff()
+            when (intent.action) {
+                // Back after a long screen-off or a deep sleep: the car was started again (greeting).
+                Intent.ACTION_SCREEN_ON -> CarStart.onScreenOn(app)
+                Intent.ACTION_SCREEN_OFF -> {
+                    CarStart.onScreenOff()
+                    app.car.onIgnitionOff()
+                }
+                else -> app.car.onIgnitionOff()
+            }
+        }
+    }
+
+    /** The phone's Bluetooth link, while the launcher is hidden too (auto-play, Phone Link). */
+    private val btLink = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val device = com.vikash.ampli.drive.bluetooth.PhoneBluetooth.deviceFrom(intent)
+            app.phoneBt.onAcl(device, intent.action == android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED)
         }
     }
 
@@ -75,16 +95,23 @@ class CarMonitorService : Service() {
         try {
             val filter = IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SHUTDOWN)
+            }
+            val acl = IntentFilter().apply {
+                addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED)
+                addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED)
             }
             val vendor = IntentFilter().apply { IgnitionActions.actions.forEach { addAction(it) } }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(screenOff, filter, RECEIVER_NOT_EXPORTED)
                 // Sent by the head unit's own system apps, so it must be exported.
                 registerReceiver(vendorIgnition, vendor, RECEIVER_EXPORTED)
+                registerReceiver(btLink, acl, RECEIVER_EXPORTED)
             } else {
                 registerReceiver(screenOff, filter)
                 registerReceiver(vendorIgnition, vendor)
+                registerReceiver(btLink, acl)
             }
             registered = true
         } catch (_: Exception) {
@@ -100,6 +127,26 @@ class CarMonitorService : Service() {
             combine(app.prefs.bubble, app.car.foregroundState) { on, fg -> on && !fg }
                 .distinctUntilChanged()
                 .collect { show -> if (show) bubble?.show() else bubble?.hide() }
+        }
+        // "Swipe down from the top" over other apps: the thin strip, hidden on Car Hub's Home
+        // (it has its own pull-down), during a crash countdown / SOS and while the panel is open.
+        val strip = QuickStrip(app).also { quick = it }
+        scope.launch {
+            combine(
+                app.prefs.quickStrip,
+                app.car.foregroundState,
+                app.car.crashAt,
+                strip.panelOpen,
+                QuickStripGate.hubScreenBlocks,
+            ) { on, fg, crash, panel, blocks ->
+                QuickStripLogic.visible(on, strip.canShow(), panel, crash != null, fg, blocks)
+            }
+                .distinctUntilChanged()
+                .collect { show -> if (show) strip.showStrip() else strip.hideStrip() }
+        }
+        // A crash closes an open panel so the countdown is seen.
+        scope.launch {
+            app.car.crashAt.collect { if (it != null) strip.closePanel() }
         }
         // Free drivers have no spoken camera alerts: the notification names the next camera instead.
         scope.launch {
@@ -129,10 +176,13 @@ class CarMonitorService : Service() {
         scope.cancel()
         bubble?.hide()
         bubble = null
+        quick?.release()
+        quick = null
         if (registered) {
             try {
                 unregisterReceiver(screenOff)
                 unregisterReceiver(vendorIgnition)
+                unregisterReceiver(btLink)
             } catch (_: Exception) {
             }
         }
