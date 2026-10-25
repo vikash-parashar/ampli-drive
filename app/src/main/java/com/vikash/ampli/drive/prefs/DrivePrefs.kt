@@ -341,6 +341,18 @@ class DrivePrefs(context: Context) {
     private val _bubble = MutableStateFlow(sp.getBoolean(KEY_BUBBLE, false))
     val bubble: StateFlow<Boolean> = _bubble.asStateFlow()
 
+    /**
+     * "Swipe down from the top for quick controls" over other apps. On by default; it works only
+     * once "Display over other apps" is allowed (QuickStrip checks that itself).
+     */
+    private val _quickStrip = MutableStateFlow(sp.getBoolean(KEY_QUICK_STRIP, true))
+    val quickStrip: StateFlow<Boolean> = _quickStrip.asStateFlow()
+
+    fun setQuickStrip(value: Boolean) {
+        sp.edit().putBoolean(KEY_QUICK_STRIP, value).apply()
+        _quickStrip.value = value
+    }
+
     /** Where the bubble was dragged to, in screen pixels; -1 means not placed yet. */
     var bubbleX: Int
         get() = sp.getInt(KEY_BUBBLE_X, -1)
@@ -512,6 +524,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_SPEED_VOLUME = "speed_volume"
         private const val KEY_WAKE_SENS = "wake_sensitivity"
         private const val KEY_BUBBLE = "speed_bubble"
+        private const val KEY_QUICK_STRIP = "quick_strip"
         private const val KEY_BUBBLE_X = "speed_bubble_x"
         private const val KEY_BUBBLE_Y = "speed_bubble_y"
         private const val KEY_BG_DISCLOSURE = "disclosure_background_location"

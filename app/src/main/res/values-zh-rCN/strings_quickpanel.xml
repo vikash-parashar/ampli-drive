@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick panel over other apps (swipe down from the top). Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="quick_strip_setting">从顶部向下滑动打开快捷控制</string>
+    <string name="quick_strip_hint">在 Google 地图和其他应用上方也可用：从顶部边缘中间向下滑动。</string>
+    <string name="quick_strip_needs_permission">允许 Ampli Car Hub“显示在其他应用上层”，即可在其他应用上方使用</string>
+    <string name="quick_strip_allow">允许显示在其他应用上层</string>
+    <string name="quick_strip_needs_monitor">请先打开上方的“%1$s”，才能在其他应用上方使用。</string>
+    <string name="quick_ampli_music">Ampli 音乐</string>
+    <string name="quick_home">Car Hub 主页</string>
+</resources>

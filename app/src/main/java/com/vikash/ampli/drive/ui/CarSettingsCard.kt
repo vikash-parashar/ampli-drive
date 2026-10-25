@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
     val context = LocalContext.current
     val s by app.car.store.settings.collectAsStateWithLifecycle()
     val bubble by app.prefs.bubble.collectAsStateWithLifecycle()
+    val quickStrip by app.prefs.quickStrip.collectAsStateWithLifecycle()
     val canOverlay = remember(resumeTick) { Settings.canDrawOverlays(context) }
     val canFullScreen = remember(resumeTick) { canUseFullScreenAlert(context) }
     var askDisclosure by remember { mutableStateOf(false) }
@@ -141,6 +143,26 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
                 app.prefs.setBubble(v)
                 // Asked for only when switched on: Android's "Display over other apps" page.
                 if (v && !Settings.canDrawOverlays(context)) openOverlaySettings(context)
+            }
+            // Phone-style pull-down over Google Maps and other apps (needs "Display over other apps").
+            CarSwitch(
+                stringResource(R.string.quick_strip_setting),
+                stringResource(if (canOverlay) R.string.quick_strip_hint else R.string.quick_strip_needs_permission),
+                quickStrip && canOverlay,
+            ) { v ->
+                app.prefs.setQuickStrip(v)
+                if (v && !Settings.canDrawOverlays(context)) openOverlaySettings(context)
+            }
+            if (!canOverlay) {
+                BigButton(
+                    stringResource(R.string.quick_strip_allow),
+                    { app.prefs.setQuickStrip(true); openOverlaySettings(context) },
+                    icon = Icons.AutoMirrored.Filled.OpenInNew,
+                    primary = false,
+                )
+            }
+            if (quickStrip && canOverlay && !s.backgroundMonitor) {
+                Text(stringResource(R.string.quick_strip_needs_monitor, stringResource(R.string.monitor_setting)), fontSize = dims.t(2.2f), color = theme.warning)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                 Text(stringResource(R.string.tyres_low_setting), fontSize = dims.t(2.6f), color = theme.muted)

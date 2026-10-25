@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick panel over other apps (swipe down from the top). Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="quick_strip_setting">Von oben nach unten wischen für Schnelleinstellungen</string>
+    <string name="quick_strip_hint">Funktioniert auch über Google Maps und anderen Apps: in der Mitte des oberen Rands nach unten wischen.</string>
+    <string name="quick_strip_needs_permission">Erlaube Ampli Car Hub „Über anderen Apps einblenden“, um das über anderen Apps zu nutzen</string>
+    <string name="quick_strip_allow">Über anderen Apps erlauben</string>
+    <string name="quick_strip_needs_monitor">Schalte oben „%1$s“ ein, damit es über anderen Apps funktioniert.</string>
+    <string name="quick_ampli_music">Ampli Musik</string>
+    <string name="quick_home">Car Hub Start</string>
+</resources>

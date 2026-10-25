@@ -106,6 +106,11 @@ fun DriveRoot(
     val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
     // Keyed on the screen too: anything that leaves the countdown while it runs comes back to it.
     LaunchedEffect(crashAt, screen) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
+    // The top-edge quick strip stays off on Home (own pull-down) and on the crash / SOS screens.
+    LaunchedEffect(screen) {
+        com.vikash.ampli.drive.overlay.QuickStripGate.hubScreenBlocks.value =
+            screen == Screen.Home || screen == Screen.Crash || screen == Screen.Sos
+    }
 
     // Dark status-bar icons on the light themes.
     val view = LocalView.current

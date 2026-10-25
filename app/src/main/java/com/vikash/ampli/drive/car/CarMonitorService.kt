@@ -13,6 +13,9 @@ import android.os.Build
 import android.os.IBinder
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.overlay.BubbleLogic
+import com.vikash.ampli.drive.overlay.QuickStrip
+import com.vikash.ampli.drive.overlay.QuickStripGate
+import com.vikash.ampli.drive.overlay.QuickStripLogic
 import com.vikash.ampli.drive.overlay.SpeedBubble
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -35,6 +38,7 @@ class CarMonitorService : Service() {
     private val app get() = application as DriveApp
     private val scope = MainScope()
     private var bubble: SpeedBubble? = null
+    private var quick: QuickStrip? = null
 
     /** Head units usually turn the screen off (or shut down) when the ignition goes off. */
     private val screenOff = object : BroadcastReceiver() {
@@ -124,6 +128,26 @@ class CarMonitorService : Service() {
                 .distinctUntilChanged()
                 .collect { show -> if (show) bubble?.show() else bubble?.hide() }
         }
+        // "Swipe down from the top" over other apps: the thin strip, hidden on Car Hub's Home
+        // (it has its own pull-down), during a crash countdown / SOS and while the panel is open.
+        val strip = QuickStrip(app).also { quick = it }
+        scope.launch {
+            combine(
+                app.prefs.quickStrip,
+                app.car.foregroundState,
+                app.car.crashAt,
+                strip.panelOpen,
+                QuickStripGate.hubScreenBlocks,
+            ) { on, fg, crash, panel, blocks ->
+                QuickStripLogic.visible(on, strip.canShow(), panel, crash != null, fg, blocks)
+            }
+                .distinctUntilChanged()
+                .collect { show -> if (show) strip.showStrip() else strip.hideStrip() }
+        }
+        // A crash closes an open panel so the countdown is seen.
+        scope.launch {
+            app.car.crashAt.collect { if (it != null) strip.closePanel() }
+        }
         // Free drivers have no spoken camera alerts: the notification names the next camera instead.
         scope.launch {
             combine(app.cameraAlerts.current, app.car.foregroundState) { cam, fg ->
@@ -152,6 +176,8 @@ class CarMonitorService : Service() {
         scope.cancel()
         bubble?.hide()
         bubble = null
+        quick?.release()
+        quick = null
         if (registered) {
             try {
                 unregisterReceiver(screenOff)

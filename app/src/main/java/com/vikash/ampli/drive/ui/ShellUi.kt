@@ -80,6 +80,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -92,6 +94,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.overlay.QuickStripLogic
 import com.vikash.ampli.drive.prefs.ShellPrefs
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.Shell
@@ -286,9 +289,12 @@ internal fun QuickControlsPanel(
     onTile: (Shell.Control) -> Unit,
     onClose: () -> Unit,
     onTileLong: ((Shell.Control) -> Unit)? = null,
+    perRow: Int = 4,
+    header: (@Composable () -> Unit)? = null,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
+    val density = LocalDensity.current.density
     val shown = remember { MutableTransitionState(false) }
     shown.targetState = visible
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
@@ -319,6 +325,20 @@ internal fun QuickControlsPanel(
                         accentEdge = false,
                         blur = false,
                     )
+                    // Swipe up on the panel closes it, like a phone's quick settings.
+                    .pointerInput(Unit) {
+                        var pulled = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = { pulled = 0f },
+                            onVerticalDrag = { _, dy ->
+                                pulled += dy
+                                if (QuickStripLogic.isCloseSwipe(pulled, density)) {
+                                    pulled = Float.POSITIVE_INFINITY
+                                    onClose()
+                                }
+                            },
+                        )
+                    }
                     .padding(dims.d(2.6f)),
                 verticalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
             ) {
@@ -337,12 +357,13 @@ internal fun QuickControlsPanel(
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = theme.muted, modifier = Modifier.size(28.dp))
                     }
                 }
-                tiles.chunked(4).forEachIndexed { row, chunk ->
+                header?.invoke()
+                tiles.chunked(perRow).forEachIndexed { row, chunk ->
                     Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                         chunk.forEachIndexed { col, tile ->
                             QuickTileView(
                                 tile,
-                                index = row * 4 + col,
+                                index = row * perRow + col,
                                 onClick = { onTile(tile.control) },
                                 modifier = Modifier.weight(1f),
                                 onLongClick = onTileLong?.let { long -> { long(tile.control) } },
