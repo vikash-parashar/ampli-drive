@@ -106,6 +106,7 @@ fun SettingsScreen(
     onOpenFeedback: () -> Unit = {},
     onOpenVoiceCheck: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
+    onOpenVoiceCommands: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -272,7 +273,7 @@ fun SettingsScreen(
             SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)
-            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
+            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)
             DesiSamplesCard(app = app)

@@ -54,6 +54,9 @@ enum class Screen {
     /** Settings › Voice › Check voice, and Settings › About › Diagnostics. */
     VoiceCheck, Diagnostics,
 
+    /** Settings › Voice › What can I say? (also "Hey Ampli, what can I say?"). */
+    VoiceCommands,
+
     /** Car Hub's own turn-by-turn, and its "Where to?" search. */
     Navigation, NavSearch,
 }
@@ -191,6 +194,7 @@ fun DriveRoot(
                                 },
                                 onOpenFeedback = { onNavigate(Screen.Feedback) },
                                 onOpenVoiceCheck = { onNavigate(Screen.VoiceCheck) },
+                                onOpenVoiceCommands = { onNavigate(Screen.VoiceCommands) },
                                 onOpenDiagnostics = { onNavigate(Screen.Diagnostics) },
                             )
                         }
@@ -269,6 +273,10 @@ fun DriveRoot(
                         Screen.VoiceCheck -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }
                             VoiceCheckScreen(app = app, onBack = { onNavigate(Screen.Settings) })
+                        }
+                        Screen.VoiceCommands -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Settings) }
+                            VoiceCommandsScreen(onBack = { onNavigate(Screen.Settings) })
                         }
                         Screen.Diagnostics -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }

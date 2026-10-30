@@ -92,7 +92,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (state.reply.isNotEmpty() && state.options.isEmpty()) {
+                    if (state.reply.isNotEmpty() && state.options.isEmpty() && state.answer == null) {
                         Text(
                             state.reply,
                             color = theme.muted,
@@ -109,6 +109,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                     primary = false,
                 )
             }
+            state.answer?.let { VoiceAnswerCard(it) }
             if (state.options.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     state.options.forEachIndexed { i, place ->

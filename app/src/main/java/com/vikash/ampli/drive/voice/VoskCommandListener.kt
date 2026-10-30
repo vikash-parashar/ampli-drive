@@ -115,7 +115,17 @@ object VoskCommands {
         "sos", "help me", "emergency", "report a problem",
         "cancel", "stop", "hello",
         "how are you", "who are you", "tell me a joke",
+        // Round 7: volume, stop, time, weather, maps, brightness, Bluetooth, help.
+        "volume", "volume up", "volume down", "volume full", "volume five", "volume ten", "mute", "unmute",
+        "louder", "quieter", "play next song", "next", "previous", "preview", "stop navigation",
+        "what time is it", "what is the time", "what is the date", "how is the weather", "weather",
+        "will it rain", "what is my speed", "open maps", "brightness up", "brightness down",
+        "bluetooth settings", "what can i say",
     )
+
+    /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
+    val FOLLOW_UPS = listOf("more", "a bit more", "again")
+    val HINDI_FOLLOW_UPS = listOf("और", "थोड़ा और", "और तेज", "और कम")
 
     /** Only while a list of places is showing. */
     val CHOICES = listOf("first", "second", "third", "first one", "second one", "third one", "one", "two", "three")
@@ -134,12 +144,17 @@ object VoskCommands {
         "मदद", "बचाओ", "इमरजेंसी", "शिकायत",
         "रद्द करो", "रहने दो", "बस", "नमस्ते",
         "के हाल सै", "क्या हाल है", "तू कौन सै", "तुम कौन हो", "चुटकला सुणा", "चुटकुला सुनाओ",
+        // Round 7.
+        "आवाज बढ़ाओ", "आवाज कम करो", "आवाज पूरी करो", "आवाज बंद", "वॉल्यूम", "म्यूट", "अनम्यूट",
+        "रुको", "बंद करो", "नेविगेशन बंद करो", "रास्ता बंद करो", "कितने बजे हैं", "टाइम क्या हुआ",
+        "आज क्या तारीख है", "मौसम कैसा है", "बारिश होगी", "स्पीड कितनी है", "मैप खोलो", "नक्शा खोलो",
+        "ब्लूटूथ खोलो", "ब्राइटनेस बढ़ाओ", "ब्राइटनेस कम करो", "क्या बोल सकता हूँ",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
 
     fun grammarJson(hindi: Boolean = false): String =
-        ((if (hindi) HINDI_COMMANDS + HINDI_CHOICES else COMMANDS + CHOICES) + "[unk]").joinToString(",", "[", "]") { phrase ->
+        ((if (hindi) HINDI_COMMANDS + HINDI_CHOICES + HINDI_FOLLOW_UPS else COMMANDS + CHOICES + FOLLOW_UPS) + "[unk]").joinToString(",", "[", "]") { phrase ->
         "\"" + phrase.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
     }
 

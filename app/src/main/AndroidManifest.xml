@@ -48,6 +48,10 @@
     <!-- Boot only marks "the car started" (greeting, Settings › When the car starts); the actions run
          when the launcher shows. The wake-word microphone service is still never started from boot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- "Hey Ampli, brightness up / down": Android asks the driver once (Modify system settings). -->
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <!-- The head unit has GPS but may lack some of these; none are required to install. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />

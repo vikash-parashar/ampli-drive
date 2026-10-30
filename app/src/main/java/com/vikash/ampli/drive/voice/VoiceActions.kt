@@ -17,7 +17,11 @@ import android.os.Build
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.view.KeyEvent
+import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.media.MediaHub
+import com.vikash.ampli.drive.media.MediaTarget
+import com.vikash.ampli.drive.media.SessionInfo
+import com.vikash.ampli.drive.system.AmpliMusic
 import com.vikash.ampli.drive.service.DriveNotificationListener
 import com.vikash.ampli.drive.system.InstalledApps
 import com.vikash.ampli.drive.system.Launchers
@@ -171,31 +175,118 @@ object VoiceActions {
 
     enum class Transport { Play, Pause, Next, Previous }
 
-    /** Controls the playing session; without one, sends a media key that Android routes itself. */
-    fun transport(context: Context, action: Transport): Boolean {
-        val list = sessions(context)
-        val c = list.firstOrNull { playing(it) } ?: list.firstOrNull()
-        if (c != null) {
-            val t = c.transportControls
-            when (action) {
-                Transport.Play -> t.play()
-                Transport.Pause -> t.pause()
-                Transport.Next -> t.skipToNext()
-                Transport.Previous -> t.skipToPrevious()
-            }
-            return true
-        }
-        val audio = context.getSystemService(AudioManager::class.java) ?: return false
+    /** What played last when a command looked ([MediaTarget.PHONE] or a package). Process memory only. */
+    @Volatile private var lastSource: String? = null
+
+    private fun infos(list: List<MediaController>): List<SessionInfo> =
+        list.map { SessionInfo(it.packageName, playing(it), isBluetoothPackage(it.packageName)) }
+
+    private fun phoneConnected(app: DriveApp): Boolean = try {
+        app.phoneBt.refresh()
+        app.phoneBt.connectedPhone()?.let { it.music != false } == true
+    } catch (_: Exception) {
+        false
+    }
+
+    private fun musicActive(context: Context): Boolean = try {
+        context.getSystemService(AudioManager::class.java)?.isMusicActive == true
+    } catch (_: Exception) {
+        false
+    }
+
+    /** True while any music is audible or a session says it is playing. */
+    fun isPlaying(context: Context): Boolean = musicActive(context) || sessions(context).any { playing(it) }
+
+    /**
+     * Music keys by voice, sent to the current player ([MediaTarget.pick]): Ampli MP3 when it is
+     * the one playing, else the phone over Bluetooth or any other session, else (for play) Ampli
+     * MP3's Car mode. False when nothing could be sent.
+     */
+    fun transport(app: DriveApp, action: Transport): Boolean {
+        val list = sessions(app)
+        val info = infos(list)
+        val phone = phoneConnected(app)
+        val active = musicActive(app)
+        MediaTarget.playingSource(info, active, phone)?.let { lastSource = it }
+        val target = MediaTarget.pick(
+            sessions = info,
+            action = MediaTarget.Action.valueOf(action.name),
+            ampliPackage = AmpliMusic.PACKAGE,
+            ampliInstalled = AmpliMusic.installed(app),
+            phoneConnected = phone,
+            musicActive = active,
+            lastSource = lastSource,
+        )
         val code = when (action) {
             Transport.Play -> KeyEvent.KEYCODE_MEDIA_PLAY
             Transport.Pause -> KeyEvent.KEYCODE_MEDIA_PAUSE
             Transport.Next -> KeyEvent.KEYCODE_MEDIA_NEXT
             Transport.Previous -> KeyEvent.KEYCODE_MEDIA_PREVIOUS
         }
+        return when (target) {
+            is MediaTarget.Target.Session -> {
+                val c = list.firstOrNull { it.packageName == target.packageName } ?: return mediaKey(app, code)
+                val t = c.transportControls
+                try {
+                    when (action) {
+                        Transport.Play -> t.play()
+                        Transport.Pause -> t.pause()
+                        Transport.Next -> t.skipToNext()
+                        Transport.Previous -> t.skipToPrevious()
+                    }
+                } catch (_: Exception) {
+                    return mediaKey(app, code)
+                }
+                if (action != Transport.Pause) lastSource = if (isBluetoothPackage(c.packageName)) MediaTarget.PHONE else c.packageName
+                true
+            }
+            MediaTarget.Target.PhoneKeys -> {
+                app.phoneBt.key(code)
+                if (action != Transport.Pause) lastSource = MediaTarget.PHONE
+                true
+            }
+            MediaTarget.Target.OpenAmpli -> {
+                lastSource = AmpliMusic.PACKAGE
+                AmpliMusic.open(app, autoplay = true)
+            }
+            MediaTarget.Target.MediaKey -> mediaKey(app, code)
+        }
+    }
+
+    private fun mediaKey(context: Context, code: Int): Boolean {
+        val audio = context.getSystemService(AudioManager::class.java) ?: return false
         val now = SystemClock.uptimeMillis()
-        audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, code, 0))
-        audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, code, 0))
-        return true
+        return try {
+            audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, code, 0))
+            audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, code, 0))
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * "Play <song>" while the phone is the one playing: its Bluetooth session's own search, only
+     * when that session says it supports it (most phones over AVRCP don't). False otherwise.
+     */
+    fun phoneSearch(context: Context, query: String): Boolean {
+        val c = sessions(context).firstOrNull { playing(it) && isBluetoothPackage(it.packageName) } ?: return false
+        if ((c.playbackState?.actions ?: 0L) and PlaybackState.ACTION_PLAY_FROM_SEARCH == 0L) return false
+        return try {
+            c.transportControls.playFromSearch(query, null)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Ampli MP3 Player's own search intent, only when it declares one. */
+    fun ampliPlayFromSearch(context: Context, query: String): Boolean {
+        val intent = Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH)
+            .putExtra(SearchManager.QUERY, query)
+            .putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "vnd.android.cursor.item/*")
+            .setPackage(AmpliMusic.PACKAGE)
+        return start(context, intent)
     }
 
     // ---------------------------------------------------------------- Android Auto / phone link
