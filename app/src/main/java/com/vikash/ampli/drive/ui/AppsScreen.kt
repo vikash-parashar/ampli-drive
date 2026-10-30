@@ -283,7 +283,8 @@ private fun StoreTile(onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
-        Icon(Icons.Filled.Storefront, contentDescription = null, tint = Saffron, modifier = Modifier.size(44.dp))
+        // Soft themes: the saffron icon is too faint on the light base (under 3:1), so it takes the accent.
+        Icon(Icons.Filled.Storefront, contentDescription = null, tint = if (theme.isSoft) theme.accentSoft else Saffron, modifier = Modifier.size(44.dp))
         Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
     }
 }
