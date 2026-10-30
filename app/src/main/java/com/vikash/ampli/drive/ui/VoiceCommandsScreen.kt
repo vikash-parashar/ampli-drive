@@ -77,11 +77,11 @@ private fun CommandGroupCard(group: VoiceCommandCatalog.Group) {
                     item.examples.forEachIndexed { i, e ->
                         if (i > 0) withStyle(SpanStyle(color = theme.muted)) { append("  ·  ") }
                         withStyle(SpanStyle(color = if (i == 0) theme.text else theme.accentSoft, fontWeight = if (i == 0) FontWeight.Medium else FontWeight.Normal)) {
-                            append("“").append(e).append("”")
+                            append("“$e”")
                         }
                     }
                     if (item.followUp) {
-                        withStyle(SpanStyle(color = theme.muted)) { append("  ").append(after) }
+                        withStyle(SpanStyle(color = theme.muted)) { append("  $after") }
                     }
                 }
                 Text(line, fontSize = dims.t(2.5f, min = 15f))
