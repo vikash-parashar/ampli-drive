@@ -347,8 +347,7 @@ private fun ProgressBar(np: NowPlaying) {
         Modifier
             .fillMaxWidth()
             .height(h)
-            .clip(barShape)
-            .background(theme.track),
+            .then(if (theme.isSoft) Modifier.softWell(theme, barShape, SoftDepth.Groove) else Modifier.clip(barShape).background(theme.track)),
     ) {
         Box(
             Modifier
@@ -374,6 +373,7 @@ private fun Controls(playing: Boolean, onPrev: () -> Unit, onPlayPause: () -> Un
             onPlayPause,
             maxOf(dims.d(10f), 72.dp),
             filled = true,
+            active = playing,
         )
         RoundButton(Icons.Filled.SkipNext, stringResource(R.string.music_next), onNext, maxOf(dims.d(8f), MinTouch), filled = false)
     }
@@ -386,9 +386,20 @@ private fun RoundButton(
     onClick: () -> Unit,
     size: androidx.compose.ui.unit.Dp,
     filled: Boolean,
+    active: Boolean = false,
 ) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
+    if (theme.isSoft) {
+        // Soft key; the play/pause key stays pressed in (cyan) while music plays.
+        Box(
+            modifier = Modifier.size(size).softClickable(theme, CircleShape, onClick, active = active),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = description, tint = if (active) theme.accentSoft else theme.text, modifier = Modifier.size(size * 0.5f))
+        }
+        return
+    }
     val shape: Shape = when {
         theme.cardStyle == CardStyle.Skewed -> skewShape()
         theme.cardStyle == CardStyle.Solid && theme.isLight -> Rounded(dims.d(theme.radius * 0.6f))

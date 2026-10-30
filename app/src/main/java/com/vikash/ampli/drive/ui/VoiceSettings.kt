@@ -148,12 +148,11 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
                         stringResource(R.string.voice_sensitivity_title) + " · " + stringResource(sensitivityLabel(sensitivity)),
                         color = theme.text, fontSize = dims.t(2.6f, min = 15f),
                     )
-                    Slider(
+                    ThemedSlider(
                         value = sensitivity.toFloat(),
                         onValueChange = { app.prefs.setWakeSensitivity(it.roundToInt()) },
                         valueRange = 1f..5f,
                         steps = 3,
-                        colors = SliderDefaults.colors(thumbColor = theme.accent, activeTrackColor = theme.accent),
                     )
                     Text(stringResource(R.string.voice_sensitivity_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f))
                 }

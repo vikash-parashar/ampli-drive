@@ -166,9 +166,7 @@ internal fun PhoneLinkContent(
         Row(
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(theme.surfaceHigh)
-                .border(1.dp, if (phoneName != null) theme.ok.copy(alpha = 0.6f) else theme.border, RoundedCornerShape(16.dp))
+                .themedSurface(theme, RoundedCornerShape(16.dp), theme.surfaceHigh, if (phoneName != null) theme.ok.copy(alpha = 0.6f) else theme.border, sunk = true)
                 .padding(horizontal = dims.d(2f), vertical = dims.d(1.4f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
@@ -251,10 +249,7 @@ private fun SmallChip(text: String, onClick: () -> Unit, modifier: Modifier = Mo
     Box(
         modifier
             .heightIn(min = MinTouch)
-            .clip(CircleShape)
-            .background(theme.surfaceHigh)
-            .border(1.dp, theme.border, CircleShape)
-            .clickable(onClick = onClick)
+            .themedTap(CircleShape, theme.surfaceHigh, theme.border, borderWidth = 1.dp, onClick = onClick)
             .padding(horizontal = dims.d(2f)),
         contentAlignment = Alignment.Center,
     ) {
@@ -270,9 +265,17 @@ private fun DeviceRow(d: BtDevice, onSwitch: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .heightIn(min = MinTouch)
-            .clip(RoundedCornerShape(14.dp))
-            .background(if (d.connected) theme.accent.copy(alpha = 0.12f) else Color.Transparent)
-            .border(1.dp, if (d.connected) theme.accentSoft.copy(alpha = 0.5f) else theme.border, RoundedCornerShape(14.dp))
+            .then(
+                if (theme.isSoft) {
+                    // Soft list row: raised; the connected phone sits pressed in.
+                    Modifier.softSurface(theme, RoundedCornerShape(14.dp), if (d.connected) SoftDepth.Pressed else SoftDepth.Key).clip(RoundedCornerShape(14.dp))
+                } else {
+                    Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (d.connected) theme.accent.copy(alpha = 0.12f) else Color.Transparent)
+                        .border(1.dp, if (d.connected) theme.accentSoft.copy(alpha = 0.5f) else theme.border, RoundedCornerShape(14.dp))
+                },
+            )
             .padding(horizontal = dims.d(1.6f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),

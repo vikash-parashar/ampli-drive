@@ -258,10 +258,7 @@ private fun MoreAppsTile(locked: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
-            .clip(shape)
-            .background(theme.accent.copy(alpha = 0.14f))
-            .border(1.dp, theme.accent.copy(alpha = 0.5f), shape)
-            .clickable(onClick = onClick)
+            .themedTap(shape, theme.accent.copy(alpha = 0.14f), theme.accent.copy(alpha = 0.5f), borderWidth = 1.dp, onClick = onClick)
             .padding(dims.d(1.4f)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
@@ -281,15 +278,13 @@ private fun StoreTile(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
-            .clip(shape)
-            .background(Saffron.copy(alpha = 0.16f))
-            .border(1.dp, Saffron.copy(alpha = 0.6f), shape)
-            .clickable(onClick = onClick)
+            .themedTap(shape, Saffron.copy(alpha = 0.16f), Saffron.copy(alpha = 0.6f), borderWidth = 1.dp, onClick = onClick)
             .padding(dims.d(1.4f)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
-        Icon(Icons.Filled.Storefront, contentDescription = null, tint = Saffron, modifier = Modifier.size(44.dp))
+        // Soft themes: the saffron icon is too faint on the light base (under 3:1), so it takes the accent.
+        Icon(Icons.Filled.Storefront, contentDescription = null, tint = if (theme.isSoft) theme.accentSoft else Saffron, modifier = Modifier.size(44.dp))
         Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
     }
 }
@@ -305,9 +300,7 @@ fun ScreenHeader(title: String, hint: String?, onBack: () -> Unit) {
         Box(
             modifier = Modifier
                 .size(MinTouch)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .clickable(onClick = onBack),
+                .themedTap(CircleShape, MaterialTheme.colorScheme.surfaceContainer, onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onSurface)
@@ -334,12 +327,20 @@ private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLong
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, if (isAuto) LocalDriveTheme.current.accent else MaterialTheme.colorScheme.outlineVariant, shape)
-            .pointerInput(entry) {
-                detectTapGestures(onTap = { currentOnOpen() }, onLongPress = { currentOnLongPress() })
-            }
+            .then(
+                if (LocalDriveTheme.current.isSoft) {
+                    // Soft tile: raised, presses in; hold for the app's options.
+                    Modifier.softClickable(LocalDriveTheme.current, shape, { currentOnOpen() }, onLongClick = { currentOnLongPress() })
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .border(1.dp, if (isAuto) LocalDriveTheme.current.accent else MaterialTheme.colorScheme.outlineVariant, shape)
+                        .pointerInput(entry) {
+                            detectTapGestures(onTap = { currentOnOpen() }, onLongPress = { currentOnLongPress() })
+                        }
+                },
+            )
             .padding(dims.d(1.4f)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),

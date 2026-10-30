@@ -10,7 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vikash.ampli.drive.R
-import com.vikash.ampli.drive.prefs.DrivePrefs
+import com.vikash.ampli.drive.prefs.ThemeDefaults
 import com.vikash.ampli.drive.prefs.ThemeChoice
 
 /** How a card (pane, turn card, dock button) is painted. */
@@ -126,6 +126,11 @@ data class DriveTheme(
     // Neumorphic shadows
     val shadowDark: Color = Color.Transparent,
     val shadowLight: Color = Color.Transparent,
+    /**
+     * Soft themes: hairline edge on tappable items, at least 3:1 against [surface] (the soft
+     * shadows alone are about 1.5:1). Null uses [muted].
+     */
+    val softEdge: Color? = null,
 
     // Families (picker grouping), short code shown on the card ("01", "S2", "N4"…)
     val family: ThemeFamily = ThemeFamily.Classic,
@@ -200,7 +205,7 @@ object DriveThemes {
     )
 
     val AmpliRose = DriveTheme(
-        id = DrivePrefs.DEFAULT_NIGHT, number = 2, name = "Ampli Rose", isLight = false,
+        id = ThemeDefaults.ROSE, number = 2, name = "Ampli Rose", isLight = false,
         background = c(0xFF0F0D14), surface = c(0xFF1C1820), surfaceHigh = c(0xFF2A2530),
         border = c(0xFF2A2530), borderWidth = 1.dp, text = c(0xFFF5F3F7), muted = c(0xFFA39FAB),
         accent = c(0xFFE11D48), onAccent = Color.White, accentSoft = c(0xFFFDA4AF), accent2 = c(0xFFFB7185),
@@ -218,7 +223,7 @@ object DriveThemes {
     )
 
     val DaylightClean = DriveTheme(
-        id = DrivePrefs.DEFAULT_DAY, number = 3, name = "Daylight Clean", isLight = true,
+        id = ThemeDefaults.DAYLIGHT, number = 3, name = "Daylight Clean", isLight = true,
         background = c(0xFFEEF1F5), surface = Color.White, surfaceHigh = c(0xFFEEF1F5),
         border = c(0xFFCDD3DE), borderWidth = 1.5.dp, text = c(0xFF0B1220), muted = c(0xFF4A5568),
         accent = c(0xFF1D4ED8), onAccent = Color.White, accentSoft = c(0xFF1D4ED8), accent2 = c(0xFF1D4ED8),
@@ -375,6 +380,18 @@ object DriveThemes {
 
     // ------------------------------------------------ Soft family (.n1–.n6)
 
+    /** Ampli Soft Day: the default day theme (approved neumorphic sample). */
+    val AmpliSoftDay = ampliSoft(
+        id = ThemeDefaults.SOFT_DAY, code = "A1", name = "Ampli Soft Day", p = SoftPalettes.Day,
+        map = MapLook.Positron,
+    )
+
+    /** Ampli Soft Night: the default night theme, dark grey soft surfaces that don't glare. */
+    val AmpliSoftNight = ampliSoft(
+        id = ThemeDefaults.SOFT_NIGHT, code = "A2", name = "Ampli Soft Night", p = SoftPalettes.Night,
+        map = MapLook.Dark,
+    )
+
     val SoftNight = soft(
         id = "soft_night", code = "N2", name = "Soft Night", light = false,
         nb = 0xFF23272E, lt = 0xFF2E333B, dk = 0xFF16191E, fg = 0xFFE4E8EE, mut = 0xFF8E98A8, mut2 = 0xFFAAB3C0,
@@ -456,6 +473,7 @@ object DriveThemes {
         MidnightGlass, AmpliRose, DaylightClean, SportRed, Synthwave, MinimalMono, HudGreen,
         FrostedGlass, MidnightFrost, RoseGlass, CyanGlass, VioletGlass, SunsetGlass,
         DesiSaffron, SaffronDay, RajasthaniPink, KeralaGreen, BanarasiRoyal, HoliPop,
+        AmpliSoftDay, AmpliSoftNight,
         Neumorphic, SoftNight, SoftMint, SoftPeach, SoftLavender, SoftGlass,
     )
 
@@ -466,7 +484,7 @@ object DriveThemes {
      * back to the free theme for that time of day.
      */
     fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme =
-        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: AmpliRose
+        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: if (night) AmpliSoftNight else AmpliSoftDay
 
     private val ids: Set<String> = all.mapTo(HashSet()) { it.id }
 }
@@ -553,6 +571,18 @@ private fun soft(
     map = map, mapTint = c(mapTint), mapPuck = c(acc),
     shadowDark = c(dk), shadowLight = c(lt),
     family = ThemeFamily.Soft, code = code,
+)
+
+/** Ampli Soft Day / Night: the soft family look from a [SoftPalette], with a smaller radius. */
+private fun ampliSoft(id: String, code: String, name: String, p: SoftPalette, map: MapLook): DriveTheme = soft(
+    id = id, code = code, name = name, light = p.light,
+    nb = p.base, lt = p.highlight, dk = p.shadow, fg = p.ink, mut = p.muted, mut2 = p.muted,
+    acc = p.accent, onacc = p.onAccent, warn = p.warning, trk = p.track,
+    layout = HomeLayout.MapSpeedMusic, map = map, mapTint = p.accent and 0x00FFFFFF or 0x0C000000,
+).copy(
+    accentSoft = c(p.accentText), ok = c(p.ok), onDockActive = c(p.accentText),
+    turnTile = solid(c(p.accentText)), turnTileText = c(if (p.light) 0xFFFFFFFF else p.onAccent),
+    radius = 2.8f, softEdge = c(p.edge), danger = c(p.danger),
 )
 
 /** The active theme. Every home-screen composable reads colours and shapes from here. */

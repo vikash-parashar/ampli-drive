@@ -604,9 +604,7 @@ private fun RoundIconButton(icon: androidx.compose.ui.graphics.vector.ImageVecto
     Box(
         Modifier
             .size(MinTouch)
-            .clip(CircleShape)
-            .background(theme.surfaceHigh)
-            .clickable(onClick = onClick),
+            .themedTap(CircleShape, theme.surfaceHigh, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = label, tint = theme.text, modifier = Modifier.size(30.dp))

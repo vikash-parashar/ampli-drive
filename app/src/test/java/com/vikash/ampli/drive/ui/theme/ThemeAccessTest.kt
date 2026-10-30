@@ -10,15 +10,15 @@ import org.junit.Test
 class ThemeAccessTest {
 
     private val known = setOf(
-        "midnight_glass", DrivePrefs.DEFAULT_NIGHT, DrivePrefs.DEFAULT_DAY, "sport_red",
+        "midnight_glass", DrivePrefs.DEFAULT_NIGHT, DrivePrefs.DEFAULT_DAY, "ampli_rose", "daylight_clean", "sport_red",
         ThemeAccess.FROSTED_GLASS, ThemeAccess.MIDNIGHT_FROST, "rose_glass", "cyan_glass",
         ThemeAccess.SAFFRON_NIGHT, "saffron_day", "soft_glass",
     )
 
     @Test
-    fun exactlyFiveFreeThemes() {
+    fun exactlySevenFreeThemes() {
         assertEquals(
-            setOf("ampli_rose", "daylight_clean", "frosted_glass", "midnight_frost", "desi_saffron"),
+            setOf("ampli_soft_day", "ampli_soft_night", "ampli_rose", "daylight_clean", "frosted_glass", "midnight_frost", "desi_saffron"),
             ThemeAccess.FREE_IDS,
         )
     }

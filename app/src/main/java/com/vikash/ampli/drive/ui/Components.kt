@@ -107,6 +107,10 @@ fun Pill(
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
+    if (theme.isSoft) {
+        SoftPill(text, modifier, icon, dotColor, iconTint, background, onClick)
+        return
+    }
     if (onClick != null) {
         // A tappable pill gets a full 64 dp touch area around the slimmer visible pill.
         Box(modifier.heightIn(min = MinTouch).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
@@ -147,6 +151,48 @@ fun Pill(
     }
 }
 
+/**
+ * Soft pill: a status chip sunk into the surface (like the sample's weather and phone chips),
+ * or, when tappable, a raised key that presses in. [background] tints only non-soft themes,
+ * except emergency red, which always stays a solid red pill with white text.
+ */
+@Composable
+private fun SoftPill(
+    text: String,
+    modifier: Modifier,
+    icon: ImageVector?,
+    dotColor: Color?,
+    iconTint: Color?,
+    background: Color?,
+    onClick: (() -> Unit)?,
+) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val danger = background == theme.danger
+    val surface = when {
+        danger -> Modifier.clip(CircleShape).background(theme.danger)
+        onClick != null -> Modifier.softClickable(theme, CircleShape, onClick)
+        else -> Modifier.softWell(theme, CircleShape, SoftDepth.Pressed)
+    }
+    val content = if (danger) theme.onDanger else theme.text
+    Row(
+        modifier = modifier
+            .then(if (onClick != null) Modifier.heightIn(min = MinTouch) else Modifier)
+            .then(surface)
+            .padding(horizontal = dims.d(1.8f), vertical = dims.d(0.9f)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
+    ) {
+        if (dotColor != null) {
+            Box(Modifier.size(dims.d(1.2f)).clip(CircleShape).background(dotColor))
+        }
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = if (danger) content else iconTint ?: content, modifier = Modifier.size(dims.d(2.8f)))
+        }
+        Text(text, fontSize = dims.t(2.4f, min = 16f), color = content, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
 /** Big action button used in empty states and settings. Always >= 64 dp tall. */
 @Composable
 fun BigButton(
@@ -161,16 +207,25 @@ fun BigButton(
     val bg = if (primary) theme.accent else theme.surfaceHigh
     val fg = if (primary) theme.onAccent else theme.text
     val shape = theme.buttonShape(dims)
+    if (theme.isSoft) {
+        // Raised key that presses in; the primary action is marked by accent text, not a fill.
+        val ink = if (primary) theme.accentSoft else theme.text
+        Row(
+            modifier = modifier
+                .heightIn(min = MinTouch)
+                .softClickable(theme, shape, onClick)
+                .padding(horizontal = dims.d(3f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f), Alignment.CenterHorizontally),
+        ) {
+            if (icon != null) Icon(icon, contentDescription = null, tint = ink, modifier = Modifier.size(28.dp))
+            Text(text, color = ink, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        return
+    }
     Row(
         modifier = modifier
             .heightIn(min = MinTouch)
-            .then(
-                if (theme.cardStyle == CardStyle.Neumorphic) {
-                    Modifier.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight, 4.dp, 8.dp)
-                } else {
-                    Modifier
-                },
-            )
             .clip(shape)
             .background(bg)
             .then(if (!primary && theme.cardStyle == CardStyle.Outline) Modifier.border(1.dp, theme.border, shape) else Modifier)

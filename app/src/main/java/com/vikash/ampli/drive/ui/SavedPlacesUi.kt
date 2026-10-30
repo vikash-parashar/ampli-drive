@@ -119,10 +119,7 @@ private fun PlaceChip(text: String, icon: ImageVector, onClick: () -> Unit, onLo
     Row(
         Modifier
             .heightIn(min = MinTouch)
-            .clip(shape)
-            .background(bg)
-            .border(1.dp, theme.accent.copy(alpha = 0.6f), shape)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .themedTap(shape, bg, theme.accent.copy(alpha = 0.6f), onLongClick = onLongClick, onClick = onClick)
             .padding(horizontal = dims.d(2f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
