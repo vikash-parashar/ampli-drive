@@ -82,14 +82,12 @@ class SoftPerfTest {
             val t0 = System.nanoTime()
             app.prefs.setTheme(ThemeChoice(auto = false, dayId = id, nightId = id, fixedId = id))
             compose.mainClock.advanceTimeBy(1_000L)
-            compose.waitForIdle()
             compose.onRoot().captureToImage()
             val firstMs = (System.nanoTime() - t0) / 1_000_000
             val rendersFirst = SoftShadowCache.renders - rendersBefore
             // Idle: no recomposition of the Home root while nothing changes.
             val comps0 = homeCompositions
             compose.mainClock.advanceTimeBy(2_000L)
-            compose.waitForIdle()
             val idleComps = homeCompositions - comps0
             // Redraws: the same frame again, several times.
             repeat(3) { compose.onRoot().captureToImage() }
@@ -109,7 +107,6 @@ class SoftPerfTest {
         println(out.joinToString("\n"))
         report = out
         compose.mainClock.advanceTimeBy(500L)
-        compose.waitForIdle()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/perf-soft-home.png")
     }
 }
