@@ -12,8 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -47,7 +47,15 @@ import org.robolectric.annotation.GraphicsMode
 class SoftPerfTest {
 
     @get:Rule
-    val compose = createComposeRule()
+    val compose = createAndroidComposeRule<ComponentActivity>()
+
+    /** One full software draw of the window, as a frame would draw it. */
+    private fun drawFrame() {
+        val root = compose.activity.window.decorView
+        val bmp = android.graphics.Bitmap.createBitmap(root.width.coerceAtLeast(1), root.height.coerceAtLeast(1), android.graphics.Bitmap.Config.ARGB_8888)
+        root.draw(android.graphics.Canvas(bmp))
+        bmp.recycle()
+    }
 
     private val app: DriveApp get() = RuntimeEnvironment.getApplication() as DriveApp
 
@@ -82,7 +90,7 @@ class SoftPerfTest {
             val t0 = System.nanoTime()
             app.prefs.setTheme(ThemeChoice(auto = false, dayId = id, nightId = id, fixedId = id))
             compose.mainClock.advanceTimeBy(1_000L)
-            compose.onRoot().captureToImage()
+            drawFrame()
             val firstMs = (System.nanoTime() - t0) / 1_000_000
             val rendersFirst = SoftShadowCache.renders - rendersBefore
             // Idle: no recomposition of the Home root while nothing changes.
@@ -90,10 +98,10 @@ class SoftPerfTest {
             compose.mainClock.advanceTimeBy(2_000L)
             val idleComps = homeCompositions - comps0
             // Redraws: the same frame again, several times.
-            repeat(3) { compose.onRoot().captureToImage() }
+            repeat(3) { drawFrame() }
             val frames = 10
             val t1 = System.nanoTime()
-            repeat(frames) { compose.onRoot().captureToImage() }
+            repeat(frames) { drawFrame() }
             val frameMs = (System.nanoTime() - t1) / 1_000_000.0 / frames
             val rendersAfter = SoftShadowCache.renders - rendersBefore - rendersFirst
             out += "%-26s first frame %5d ms · redraw %6.1f ms · idle root recompositions %d".format(name, firstMs, frameMs, idleComps)
