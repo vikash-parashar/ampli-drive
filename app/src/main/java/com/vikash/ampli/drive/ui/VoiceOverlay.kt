@@ -144,17 +144,24 @@ private fun MicPulse(phase: Phase) {
                     .background(theme.accent.copy(alpha = 0.25f)),
             )
         }
+        val soft = theme.isSoft
         Box(
             Modifier
                 .size(size)
-                .clip(CircleShape)
-                .background(if (listening) theme.accent else theme.surfaceHigh),
+                .then(
+                    when {
+                        // Soft: the mic key sits pressed in (cyan) while it listens.
+                        soft && listening -> Modifier.softWell(theme, CircleShape, SoftDepth.Pressed)
+                        soft -> Modifier.softSurface(theme, CircleShape, SoftDepth.Key).clip(CircleShape)
+                        else -> Modifier.clip(CircleShape).background(if (listening) theme.accent else theme.surfaceHigh)
+                    },
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 if (phase == Phase.Speaking) Icons.Filled.GraphicEq else Icons.Filled.Mic,
                 contentDescription = null,
-                tint = if (listening) theme.onAccent else theme.accentSoft,
+                tint = if (listening && !soft) theme.onAccent else theme.accentSoft,
                 modifier = Modifier.size(size * 0.5f),
             )
         }
@@ -168,9 +175,7 @@ private fun PlaceOption(index: Int, place: Place, onClick: () -> Unit, modifier:
     Row(
         modifier = modifier
             .heightIn(min = maxOf(dims.d(14f), MinTouch))
-            .clip(theme.cardShape(dims, scale = 0.8f))
-            .background(theme.surfaceHigh)
-            .clickable(onClick = onClick)
+            .themedTap(theme.cardShape(dims, scale = 0.8f), theme.surfaceHigh, onClick = onClick)
             .padding(dims.d(1.6f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),

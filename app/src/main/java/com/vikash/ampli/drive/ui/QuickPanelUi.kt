@@ -186,9 +186,7 @@ internal fun QuickPanelExtras(
         Row(
             Modifier
                 .fillMaxWidth()
-                .clip(shape)
-                .background(theme.surfaceHigh)
-                .border(1.dp, if (phone != null) theme.ok.copy(alpha = 0.6f) else theme.border, shape)
+                .themedSurface(theme, shape, theme.surfaceHigh, if (phone != null) theme.ok.copy(alpha = 0.6f) else theme.border, sunk = true)
                 .padding(horizontal = dims.d(2f), vertical = dims.d(1.2f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
@@ -225,6 +223,7 @@ internal fun QuickPanelExtras(
             KeyButton(
                 if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                 stringResource(if (playing) R.string.music_pause else R.string.music_play),
+                active = playing,
             ) { onKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) }
             KeyButton(Icons.Filled.SkipNext, stringResource(R.string.music_next)) { onKey(KeyEvent.KEYCODE_MEDIA_NEXT) }
         }
@@ -236,17 +235,14 @@ internal fun QuickPanelExtras(
 }
 
 @Composable
-private fun KeyButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun KeyButton(icon: ImageVector, label: String, active: Boolean = false, onClick: () -> Unit) {
     val theme = LocalDriveTheme.current
     Box(
         Modifier
             .size(MinTouch)
-            .clip(CircleShape)
-            .background(theme.surface)
-            .border(1.dp, theme.border, CircleShape)
-            .clickable(onClick = onClick),
+            .themedTap(CircleShape, theme.surface, theme.border, borderWidth = 1.dp, active = active, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = label, tint = theme.text, modifier = Modifier.size(32.dp))
+        Icon(icon, contentDescription = label, tint = if (active && theme.isSoft) theme.accentSoft else theme.text, modifier = Modifier.size(32.dp))
     }
 }

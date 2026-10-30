@@ -2,6 +2,7 @@ package com.vikash.ampli.drive.ui.theme
 
 import com.vikash.ampli.drive.prefs.DrivePrefs
 import com.vikash.ampli.drive.prefs.ThemeChoice
+import com.vikash.ampli.drive.prefs.ThemeDefaults
 
 /**
  * Which themes are free and which theme shows for a saved choice. Plain Kotlin (no Compose) so
@@ -13,10 +14,12 @@ object ThemeAccess {
     const val MIDNIGHT_FROST = "midnight_frost"
     const val SAFFRON_NIGHT = "desi_saffron"
 
-    /** The five free themes. Every other theme needs Pro. */
+    /** The seven free themes. Every other theme needs Pro. */
     val FREE_IDS: Set<String> = setOf(
-        DrivePrefs.DEFAULT_NIGHT, // Ampli Rose
-        DrivePrefs.DEFAULT_DAY, // Daylight Clean
+        ThemeDefaults.SOFT_DAY, // Ampli Soft Day (default)
+        ThemeDefaults.SOFT_NIGHT, // Ampli Soft Night (default)
+        ThemeDefaults.ROSE, // Ampli Rose
+        ThemeDefaults.DAYLIGHT, // Daylight Clean
         FROSTED_GLASS,
         MIDNIGHT_FROST,
         SAFFRON_NIGHT, // S1
@@ -26,8 +29,8 @@ object ThemeAccess {
 
     /**
      * The id of the theme to show now. An unknown id, or a Pro theme without Pro (refund, test
-     * switch turned off), falls back to the free default for that time of day: Daylight Clean by
-     * day in Auto mode, Ampli Rose otherwise.
+     * switch turned off), falls back to the free default for that time of day: Ampli Soft Day by
+     * day in Auto mode, Ampli Soft Night otherwise.
      */
     fun resolveId(choice: ThemeChoice, night: Boolean, isPro: Boolean, known: Set<String>): String {
         val id = when {

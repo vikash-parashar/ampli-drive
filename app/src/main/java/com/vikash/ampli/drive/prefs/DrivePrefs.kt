@@ -485,22 +485,21 @@ class DrivePrefs(context: Context) {
         _cameraOverOnly.value = value
     }
 
-    private fun readThemeChoice(): ThemeChoice {
-        // Earlier builds stored only "Auto" / "Day" / "Night".
-        val legacy = sp.getString(KEY_THEME_LEGACY, "Auto")
-        val legacyFixed = if (legacy == "Day") DEFAULT_DAY else DEFAULT_NIGHT
-        return ThemeChoice(
-            auto = sp.getBoolean(KEY_THEME_AUTO, legacy == "Auto"),
-            dayId = sp.getString(KEY_THEME_DAY, DEFAULT_DAY) ?: DEFAULT_DAY,
-            nightId = sp.getString(KEY_THEME_NIGHT, DEFAULT_NIGHT) ?: DEFAULT_NIGHT,
-            fixedId = sp.getString(KEY_THEME_FIXED, legacyFixed) ?: legacyFixed,
-        )
-    }
+    private fun readThemeChoice(): ThemeChoice = ThemeDefaults.choiceFor(
+        StoredTheme(
+            auto = if (sp.contains(KEY_THEME_AUTO)) sp.getBoolean(KEY_THEME_AUTO, true) else null,
+            dayId = sp.getString(KEY_THEME_DAY, null),
+            nightId = sp.getString(KEY_THEME_NIGHT, null),
+            fixedId = sp.getString(KEY_THEME_FIXED, null),
+            // Earlier builds stored only "Auto" / "Day" / "Night".
+            legacyMode = sp.getString(KEY_THEME_LEGACY, null),
+        ),
+    )
 
     companion object {
-        /** Free defaults for day and night. The full free set is ThemeAccess.FREE_IDS. */
-        const val DEFAULT_DAY = "daylight_clean"
-        const val DEFAULT_NIGHT = "ampli_rose"
+        /** Free defaults for day and night (Ampli Soft). The full free set is ThemeAccess.FREE_IDS. */
+        const val DEFAULT_DAY = ThemeDefaults.SOFT_DAY
+        const val DEFAULT_NIGHT = ThemeDefaults.SOFT_NIGHT
 
         private const val FILE = "drive_prefs"
         private const val KEY_SCREEN_ON = "keep_screen_on"

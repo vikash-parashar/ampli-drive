@@ -351,7 +351,7 @@ internal fun QuickControlsPanel(
                         modifier = Modifier.weight(1f),
                     )
                     Box(
-                        Modifier.size(MinTouch).clip(CircleShape).clickable(onClick = onClose),
+                        Modifier.size(MinTouch).themedTap(CircleShape, Color.Transparent, onClick = onClose),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = theme.muted, modifier = Modifier.size(28.dp))
@@ -388,6 +388,7 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
         enter.animateTo(1f, spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow))
     }
     val shape = RoundedCornerShape(20.dp)
+    val soft = theme.isSoft
     Column(
         modifier
             .graphicsLayer {
@@ -396,18 +397,31 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
                 scaleY = 0.85f + 0.15f * enter.value
             }
             .heightIn(min = 112.dp)
-            .clip(shape)
-            .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
-            .border(1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .then(
+                if (soft) {
+                    // Soft tile: an "on" tile stays pressed in, with cyan icon and label.
+                    Modifier.softClickable(theme, shape, onClick, active = tile.on, onLongClick = onLongClick)
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
+                        .border(1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
+                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                },
+            )
             .padding(dims.d(1.8f)),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        val fg = if (tile.on) theme.onAccent else theme.text
-        Icon(tile.icon, contentDescription = null, tint = if (tile.on) theme.onAccent else theme.accentSoft, modifier = Modifier.size(32.dp))
+        val onFill = tile.on && !soft
+        val fg = when {
+            onFill -> theme.onAccent
+            soft && tile.on -> theme.accentSoft
+            else -> theme.text
+        }
+        Icon(tile.icon, contentDescription = null, tint = if (onFill) theme.onAccent else theme.accentSoft, modifier = Modifier.size(32.dp))
         Text(tile.label, color = fg, fontSize = dims.t(2.5f, min = 15f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (tile.state != null) {
-            Text(tile.state, color = if (tile.on) theme.onAccent.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(tile.state, color = if (onFill) theme.onAccent.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

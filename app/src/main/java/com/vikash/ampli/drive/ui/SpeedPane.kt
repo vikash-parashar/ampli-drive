@@ -175,7 +175,7 @@ private fun SpeedGauge(speedKmh: Float?, limitKmh: Int?, size: Dp) {
         Modifier
             .size(size)
             .then(
-                if (neumorphic) Modifier.softShadow(CircleShape, theme.surface, theme.shadowDark, theme.shadowLight) else Modifier,
+                if (neumorphic) Modifier.softSurface(theme, CircleShape, SoftDepth.Panel) else Modifier,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -497,7 +497,7 @@ private fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier) 
             .size(size)
             .then(
                 if (theme.cardStyle == CardStyle.Neumorphic) {
-                    Modifier.softShadow(CircleShape, Color.White, theme.shadowDark, theme.shadowLight, 4.dp, 8.dp)
+                    Modifier.softSurface(theme, CircleShape, SoftDepth.Key, fill = Color.White)
                 } else {
                     Modifier
                 },

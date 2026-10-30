@@ -1,7 +1,9 @@
 package com.vikash.ampli.drive.ui.theme
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
 /** Ampli brand colors, shared with the Ampli music player. */
 object Ampli {
@@ -65,8 +68,33 @@ private fun schemeFor(t: DriveTheme): ColorScheme {
         outline = t.track,
         outlineVariant = t.border,
         error = t.warning,
-    )
+    ).let { scheme ->
+        // Soft themes: text-field and outlined-button borders need 3:1 on the soft base, and
+        // dialogs and sheets sit on the same base colour as everything else.
+        val edge = t.softEdge
+        if (t.cardStyle == CardStyle.Neumorphic && edge != null) {
+            scheme.copy(
+                outline = edge,
+                surfaceContainerHigh = t.surface,
+                surfaceContainerHighest = t.surface,
+                surfaceContainerLow = t.surface,
+                surfaceContainerLowest = t.surface,
+                surfaceTint = Color.Transparent,
+            )
+        } else {
+            scheme
+        }
+    }
 }
+
+/** Soft themes: rounder dialogs, sheets and text fields, as in the approved sample. */
+private val SoftShapes = Shapes(
+    extraSmall = RoundedCornerShape(14.dp),
+    small = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(22.dp),
+    extraLarge = RoundedCornerShape(26.dp),
+)
 
 private fun TextStyle.withFont(family: FontFamily) = copy(fontFamily = family)
 
@@ -102,6 +130,10 @@ fun AmpliDriveTheme(theme: DriveTheme, content: @Composable () -> Unit) {
     val scheme = remember(theme) { schemeFor(theme) }
     val type = remember(theme) { typographyFor(theme) }
     CompositionLocalProvider(LocalDriveTheme provides theme) {
-        MaterialTheme(colorScheme = scheme, typography = type, content = content)
+        if (theme.cardStyle == CardStyle.Neumorphic && theme.softEdge != null) {
+            MaterialTheme(colorScheme = scheme, typography = type, shapes = SoftShapes, content = content)
+        } else {
+            MaterialTheme(colorScheme = scheme, typography = type, content = content)
+        }
     }
 }

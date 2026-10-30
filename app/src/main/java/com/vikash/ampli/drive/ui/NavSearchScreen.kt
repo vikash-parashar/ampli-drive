@@ -111,7 +111,7 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { search() }),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).softField(),
             )
             BigButton(text = stringResource(R.string.nav_search_button), onClick = { search() }, icon = Icons.Filled.Search)
             }

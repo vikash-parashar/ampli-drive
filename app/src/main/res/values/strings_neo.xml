@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Theme names are brand names and stay in English. -->
+<resources>
+    <string name="theme_soft_auto">Soft: auto Day/Night</string>
+    <string name="theme_soft_auto_hint">Ampli Soft Day from sunrise, Ampli Soft Night after sunset</string>
+</resources>

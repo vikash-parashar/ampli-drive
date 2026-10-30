@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_soft_auto">സോഫ്റ്റ്: ഓട്ടോ പകൽ/രാത്രി</string>
+    <string name="theme_soft_auto_hint">സൂര്യോദയം മുതൽ Ampli Soft Day, സൂര്യാസ്തമയത്തിന് ശേഷം Ampli Soft Night</string>
+</resources>

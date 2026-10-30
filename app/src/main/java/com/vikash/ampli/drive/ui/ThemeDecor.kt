@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.addOutline
@@ -103,7 +104,8 @@ fun Modifier.themedCard(
     var m = this
     val glass = theme.glass
     when (theme.cardStyle) {
-        CardStyle.Neumorphic -> m = m.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight)
+        // Cached nine-slice shadows: setShadowLayer draws nothing on hardware canvases before API 28.
+        CardStyle.Neumorphic -> m = m.softSurface(theme, shape, SoftDepth.Panel, fill = (fill as? SolidColor)?.value ?: theme.surface)
         CardStyle.NeonGlow -> m = m.neonGlow(shape, border)
         CardStyle.Glass -> m = if (glass != null) {
             // Soft, wide drop shadow, as on iOS widgets.
@@ -172,7 +174,11 @@ private fun Modifier.backdropBlur(theme: DriveTheme, glass: GlassPalette): Modif
     }
 }
 
-/** Neumorphic double shadow: dark below-right, light above-left (CSS `--up`). */
+/**
+ * Neumorphic double shadow: dark below-right, light above-left (CSS `--up`).
+ * Soft surfaces use [softSurface] instead; this one is for small round bits on [fill], and like
+ * every setShadowLayer shadow it shows only on Android 9+ hardware canvases.
+ */
 fun Modifier.softShadow(
     shape: Shape,
     fill: Color,

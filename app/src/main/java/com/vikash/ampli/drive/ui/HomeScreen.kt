@@ -563,11 +563,18 @@ private fun DockButton(
     val topBar = highlight && theme.id == "minimal_mono"
     Column(
         modifier = modifier
-            .themedCard(
-                theme,
-                shape,
-                fill = Brush.linearGradient(listOf(fill, fill)),
-                border = if (highlight && theme.cardStyle != CardStyle.Outline) Color.Transparent else theme.border,
+            .then(
+                if (theme.isSoft) {
+                    // Soft key: raised, presses in on touch with a short haptic tick.
+                    Modifier.softClickable(theme, shape, onClick, onLongClick = onLongClick)
+                } else {
+                    Modifier.themedCard(
+                        theme,
+                        shape,
+                        fill = Brush.linearGradient(listOf(fill, fill)),
+                        border = if (highlight && theme.cardStyle != CardStyle.Outline) Color.Transparent else theme.border,
+                    )
+                },
             )
             .then(
                 if (topBar) {
@@ -579,7 +586,7 @@ private fun DockButton(
                     Modifier
                 },
             )
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            .then(if (theme.isSoft) Modifier else Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
