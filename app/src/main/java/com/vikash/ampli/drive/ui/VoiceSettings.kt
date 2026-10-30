@@ -48,7 +48,7 @@ import com.vikash.ampli.drive.prefs.VoiceStyle
 
 /** Settings › Voice: the wake-word switch, its model download, and the permissions voice needs. */
 @Composable
-internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck: () -> Unit = {}) {
+internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck: () -> Unit = {}, onOpenCommands: () -> Unit = {}) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
@@ -184,6 +184,21 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
                 },
                 secondary = if (hasMic) null else stringResource(R.string.action_app_settings),
                 onSecondary = { Launchers.openAppDetails(context) },
+            )
+            // Round 7: every command, with examples in Hindi, Hinglish and English.
+            StatusLine(
+                text = stringResource(R.string.voice_commands_entry),
+                ok = true,
+                action = stringResource(R.string.voice_commands_open),
+                onAction = onOpenCommands,
+            )
+            // "Brightness up / down" needs Android's Modify system settings switch, once.
+            val canBrightness = remember(resumeTick) { com.vikash.ampli.drive.system.ScreenBrightness.allowed(context) }
+            StatusLine(
+                text = stringResource(R.string.voice_brightness_entry),
+                ok = canBrightness,
+                action = if (canBrightness) null else stringResource(R.string.action_allow),
+                onAction = { com.vikash.ampli.drive.system.ScreenBrightness.openPermission(context) },
             )
             // Settings › Voice › Check voice: mic, model, recogniser and TTS in one photo-able screen.
             StatusLine(

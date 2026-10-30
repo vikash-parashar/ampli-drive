@@ -219,6 +219,10 @@ class MainActivity : ComponentActivity() {
             VOICE_FEEDBACK -> screen.value = Screen.Feedback
             // "Hey Ampli, <place> le chal" with the Ampli map: Car Hub's own navigation.
             VOICE_NAVIGATE -> screen.value = Screen.Navigation
+            // "Open maps": the running trip, else Car Hub's "Where to?" search.
+            VOICE_MAPS -> screen.value = if (app.navigator.state.value.visible) Screen.Navigation else Screen.NavSearch
+            // "What can I say?"
+            VOICE_COMMANDS -> screen.value = Screen.VoiceCommands
             null -> Unit
             else -> screen.value = Screen.Home
         }
@@ -319,5 +323,7 @@ class MainActivity : ComponentActivity() {
         const val VOICE_CRASH = "crash"
         const val VOICE_FEEDBACK = "feedback"
         const val VOICE_NAVIGATE = "navigate"
+        const val VOICE_MAPS = "maps"
+        const val VOICE_COMMANDS = "commands"
     }
 }

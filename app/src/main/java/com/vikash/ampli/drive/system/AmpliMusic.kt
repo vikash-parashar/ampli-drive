@@ -15,9 +15,15 @@ import kotlinx.coroutines.flow.asStateFlow
 object AmpliMusic {
     const val PACKAGE = "com.vikash.ampli"
 
-    /** Ampli MP3 Player's Car mode (newer builds). Extra [EXTRA_AUTOPLAY]: resume or shuffle all. */
+    /**
+     * Ampli MP3 Player's Car mode (newer builds). Extra [EXTRA_AUTOPLAY]: resume or shuffle all.
+     * Extra [EXTRA_QUERY] (Car Hub round 7, "Hey Ampli, play Kesariya"): the spoken song, artist
+     * or album to search and play; a build that doesn't know it just autoplays. See
+     * docs/ampli-mp3-car-mode.md for the contract.
+     */
     const val ACTION_CAR_MODE = "com.vikash.ampli.action.CAR_MODE"
     const val EXTRA_AUTOPLAY = "autoplay"
+    const val EXTRA_QUERY = "query"
 
     fun installed(context: Context): Boolean = try {
         context.packageManager.getPackageInfo(PACKAGE, 0)
@@ -32,11 +38,12 @@ object AmpliMusic {
      * Opens the player: its Car mode when that build has it, else its normal start screen.
      * [autoplay] only when the driver tapped Music (not for silent background actions).
      */
-    fun open(context: Context, autoplay: Boolean): Boolean {
+    fun open(context: Context, autoplay: Boolean, query: String? = null): Boolean {
         val car = Intent(ACTION_CAR_MODE)
             .setPackage(PACKAGE)
             .putExtra(EXTRA_AUTOPLAY, autoplay)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (!query.isNullOrBlank()) car.putExtra(EXTRA_QUERY, query.trim())
         val resolves = try {
             car.resolveActivity(context.packageManager) != null
         } catch (_: Exception) {

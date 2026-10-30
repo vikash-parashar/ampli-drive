@@ -54,6 +54,9 @@ class DriveApp : Application() {
 
     val speedTracker: SpeedTracker by lazy { SpeedTracker(this, cameraAlerts) }
     val mediaHub: MediaHub by lazy { MediaHub(this) }
+
+    /** "Hey Ampli, how is the weather?" (MET Norway, or a configured Open-Meteo), cached 15 min. */
+    val nowWeather: com.vikash.ampli.drive.weather.NowWeatherRepository by lazy { com.vikash.ampli.drive.weather.NowWeatherRepository(this) }
     val bluetooth: BluetoothStatus by lazy { BluetoothStatus(this) }
 
     /** Paired devices, phone music keys, auto-play on connect, switch device (Phone Link sheet). */

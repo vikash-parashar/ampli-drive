@@ -261,6 +261,12 @@ object VoiceClips {
         for ((key, name) in PAPER_NAMES) out += Entry(paperId(key), "PaperName", "Papers", name)
         for ((id, text) in SAFETY) out += Entry(id, "Safety", "Safety", text)
         for ((id, text) in MESSAGES) out += Entry(id, "Message", "Messages", text)
+        // Round 7: time, date, weather, volume and speed answers (AnswerClips), appended so the
+        // ids above keep their order in voice/lines.json.
+        for ((id, text) in AnswerClips.ALL) {
+            val number = id.startsWith("num_")
+            out += Entry(id, if (number) "Number" else "Answer", if (number) "Number" else "Answers", text)
+        }
         return out
     }
 
