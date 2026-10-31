@@ -20,6 +20,7 @@ OUT = os.path.join(vp.ROOT, "voice-samples")
 PER_GENDER = int(os.environ.get("SAMPLES_PER_GENDER", "5"))
 CURRENT = {"male": ("7b9mYhmnp0y2qSH1FnBL", "Bunty (current)"),
            "female": ("9w21nMuk8CWXIME31V1S", "Simran (current)")}
+CURRENT_IDS = {v[0] for v in CURRENT.values()}
 LINES = [
     ("welcome", "[cheerfully] इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।",
      "इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।"),
@@ -36,6 +37,30 @@ def shared(params):
     except urllib.error.HTTPError as e:
         print(f"  shared-voices {params}: HTTP {e.code} {vp.err_text(e)}")
         return []
+
+
+STYLE = os.path.join(vp.ROOT, "voice-samples-style.json")
+
+
+def style_candidates():
+    """Voices matched by style searches ({"searches":[{"q","label","gender"}], "per_search":2})."""
+    cfg = json.load(open(STYLE))
+    seen, out = set(CURRENT_IDS), []
+    for s in cfg["searches"]:
+        got = 0
+        for v in shared({"search": s["q"], "gender": s.get("gender", "male"), "page_size": 20,
+                         "sort": "usage_character_count_1y"}):
+            if v.get("voice_id") in seen:
+                continue
+            if s.get("hindi", True) and v.get("language") not in ("hi", None, ""):
+                continue
+            seen.add(v.get("voice_id"))
+            v["_style"] = s["label"]
+            out.append(v)
+            got += 1
+            if got >= cfg.get("per_search", 2):
+                break
+    return out
 
 
 def candidates(gender):
@@ -69,7 +94,13 @@ def tts(voice_id, text, dest):
 def main():
     mine = {v.get("voice_id") for v in vp.my_voices()}
     voices = []
-    for gender in ("male", "female"):
+    if os.path.exists(STYLE):
+        for v in style_candidates():
+            voices.append({"gender": v.get("gender", "male"), "voice_id": v["voice_id"], "name": v.get("name", "?"),
+                           "owner": v.get("public_owner_id", ""), "accent": v.get("accent", ""),
+                           "age": v.get("age", ""), "style": v["_style"],
+                           "description": (v.get("description") or "")[:200], "current": False})
+    for gender in (() if os.path.exists(STYLE) else ("male", "female")):
         vid, name = CURRENT[gender]
         voices.append({"gender": gender, "voice_id": vid, "name": name, "owner": "", "accent": "indian",
                        "age": "", "description": "The voice the app uses today.", "current": True})
