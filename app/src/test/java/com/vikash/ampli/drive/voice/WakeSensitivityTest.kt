@@ -29,7 +29,20 @@ class WakeSensitivityTest {
         val words = listOf("[unk]" to 0.1, "ok" to 0.8, "ampli" to 0.7)
         assertTrue(WakeSensitivity.acceptsFinal("[unk] ok ampli", words, t))
         assertFalse(WakeSensitivity.acceptsFinal("[unk]", listOf("[unk]" to 1.0), t))
-        assertFalse(WakeSensitivity.acceptsFinal("ampli hey", listOf("ampli" to 1.0, "hey" to 1.0), t))
+        val t2 = WakeSensitivity.tuning(2)
+        assertFalse(WakeSensitivity.acceptsFinal("ampli hey", listOf("ampli" to 1.0, "hey" to 1.0), t2))
+    }
+
+    @Test
+    fun justTheNameWakesFromTheDefaultLevel() {
+        val t = WakeSensitivity.tuning(3)
+        assertTrue("ampli" in t.phrases)
+        assertTrue(WakeSensitivity.acceptsFinal("ampli", listOf("ampli" to 0.8), t))
+        assertTrue(WakeSensitivity.acceptsFinal("[unk] ampli", listOf("[unk]" to 0.2, "ampli" to 0.7), t))
+        assertFalse(WakeSensitivity.acceptsFinal("ampli", listOf("ampli" to 0.4), t))
+        assertTrue(WakeSensitivity.acceptsPartial("ampli", t))
+        // Strict levels still need "hey / ok / hello Ampli".
+        assertFalse(WakeSensitivity.acceptsFinal("ampli", listOf("ampli" to 1.0), WakeSensitivity.tuning(2)))
     }
 
     @Test
