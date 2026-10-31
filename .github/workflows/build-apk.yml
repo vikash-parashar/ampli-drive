@@ -55,6 +55,9 @@ jobs:
       - name: Fetch fuel and charging-station data
         continue-on-error: true
         timeout-minutes: 10
+        env:
+          # Optional: merges Open Charge Map EV chargers; skipped with a notice when unset.
+          OPENCHARGEMAP_KEY: ${{ secrets.OPENCHARGEMAP_KEY }}
         run: python3 scripts/fetch_fuel.py
 
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).

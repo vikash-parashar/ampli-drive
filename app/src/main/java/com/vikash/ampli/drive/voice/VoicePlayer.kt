@@ -31,6 +31,19 @@ class VoicePlayer(private val app: DriveApp) {
     private var player: ExoPlayer? = null
     private var playing: CompletableDeferred<Boolean>? = null
 
+    private val _lastLine = MutableStateFlow<String?>(null)
+
+    /**
+     * The last line Ampli said from the reviewed line bank (never message text or a search
+     * answer): Home shows it as the caption, so it is always family-safe.
+     */
+    val lastLine: StateFlow<String?> = _lastLine.asStateFlow()
+
+    /** Shows [line] as Home's caption without saying it (screen previews; only bank lines go here). */
+    internal fun showCaption(line: String) {
+        _lastLine.value = line
+    }
+
     /** What is bundled in this build. Loaded once; an APK never changes its assets. */
     val library: ClipLibrary by lazy { load() }
 
@@ -60,6 +73,7 @@ class VoicePlayer(private val app: DriveApp) {
      * recorded Ampli voice even when Settings › Voice says phone voice (the car-start welcome).
      */
     suspend fun sayChecked(spoken: Spoken, needFocus: Boolean = false, preferRecorded: Boolean = false): Boolean {
+        if (spoken.caption) _lastLine.value = spoken.text
         var v = voice
         // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
         // Ampli voice says it instead, rather than nothing at all.

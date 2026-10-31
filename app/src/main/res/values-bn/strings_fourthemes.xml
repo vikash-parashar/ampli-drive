@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">আরও</string>
+    <string name="more_say">অথবা শুধু বলুন: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">জ্বালানি ও CNG</string>
+    <string name="more_fuel_hint">পেট্রোল, CNG, EV</string>
+    <string name="more_radar">স্পিড রাডার</string>
+    <string name="more_alerts_on">সতর্কতা চালু</string>
+    <string name="more_alerts_off">সতর্কতা বন্ধ</string>
+    <string name="more_papers">গাড়ির কাগজ</string>
+    <string name="more_papers_hint">বিমা, PUC, সার্ভিস</string>
+    <string name="more_trips_hint">আপনার যাত্রা</string>
+    <string name="more_expenses">খরচ</string>
+    <string name="more_expenses_hint">মাইলেজ ও খরচ</string>
+    <string name="more_health">গাড়ির স্বাস্থ্য</string>
+    <string name="more_health_link">OBD যুক্ত করুন</string>
+    <string name="more_tyres_hint">প্রেশার পরীক্ষা</string>
+    <string name="more_phone_hint">প্রিয় কল</string>
+    <string name="more_link_hint">আপনার ফোন যুক্ত করুন</string>
+    <string name="more_apps_hint">সব অ্যাপ</string>
+    <string name="more_settings_hint">ভয়েস, ডিসপ্লে</string>
+    <string name="more_fastag_hint">ব্যালান্স ও টোল</string>
+    <string name="home_next_turn">পরের মোড়</string>
+    <string name="home_playing">চলছে</string>
+    <string name="home_now_playing">এখন চলছে</string>
+    <string name="home_limit">সীমা %1$d</string>
+    <string name="home_mic_hint">কী চাই বলুন</string>
+    <string name="home_sos_hold">3 সেকেন্ড চেপে রাখুন</string>
+    <string name="home_map">মানচিত্র</string>
+    <string name="home_toll">%1$s কাটা হয়েছে · %2$s বাকি</string>
+    <string name="theme_auto_night">রাতে নিজে থেকে: Big Glance</string>
+    <string name="theme_auto_night_hint">সূর্যাস্তের পরে হোম Big Glance-এ বদলায়, সবচেয়ে গাঢ় থিম, আর সূর্যোদয়ে ফিরে আসে</string>
+    <string name="theme_auto_night_pro">Pro: সূর্যাস্তের পরে Big Glance। ফ্রি-তে দিনরাত Map First থাকে।</string>
+</resources>

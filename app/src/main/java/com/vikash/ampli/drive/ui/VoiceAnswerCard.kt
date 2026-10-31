@@ -54,8 +54,7 @@ fun VoiceAnswerCard(answer: VoiceAnswer, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // Soft themes: a raised answer card, as in the approved sample.
-            .themedSurface(theme, theme.cardShape(dims, scale = 0.8f), theme.surfaceHigh, depth = SoftDepth.Key)
+            .themedSurface(theme, theme.cardShape(dims, scale = 0.8f), theme.surfaceHigh)
             .padding(horizontal = dims.d(2.6f), vertical = dims.d(2f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(2.6f)),
@@ -64,15 +63,8 @@ fun VoiceAnswerCard(answer: VoiceAnswer, modifier: Modifier = Modifier) {
         Box(
             Modifier
                 .size(size)
-                .then(
-                    if (theme.isSoft) {
-                        Modifier.softWell(theme, CircleShape)
-                    } else {
-                        Modifier
-                            .clip(CircleShape)
-                            .background(if (problem) theme.warning.copy(alpha = 0.22f) else theme.accent.copy(alpha = 0.22f))
-                    },
-                ),
+                .clip(CircleShape)
+                .background(if (problem) theme.warning.copy(alpha = 0.22f) else theme.accent.copy(alpha = 0.22f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

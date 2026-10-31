@@ -1,103 +1,65 @@
 package com.vikash.ampli.drive.ui.theme
 
-import com.vikash.ampli.drive.prefs.DrivePrefs
 import com.vikash.ampli.drive.prefs.ThemeChoice
+import com.vikash.ampli.drive.prefs.ThemeDefaults
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/** Free / Pro: only Map First is free; Big Glance, Bento Grid and Road Sign need Pro. */
 class ThemeAccessTest {
 
-    private val known = setOf(
-        "midnight_glass", DrivePrefs.DEFAULT_FIXED, DrivePrefs.DEFAULT_NIGHT, DrivePrefs.DEFAULT_DAY, "ampli_rose", "daylight_clean", "sport_red",
-        ThemeAccess.FROSTED_GLASS, ThemeAccess.MIDNIGHT_FROST, "rose_glass", "cyan_glass",
-        ThemeAccess.SAFFRON_NIGHT, "saffron_day", "soft_glass",
-    )
-
     @Test
-    fun exactlyEightFreeThemes() {
-        assertEquals(
-            setOf("crimson_drive", "ampli_soft_day", "ampli_soft_night", "ampli_rose", "daylight_clean", "frosted_glass", "midnight_frost", "desi_saffron"),
-            ThemeAccess.FREE_IDS,
-        )
-    }
-
-    @Test
-    fun otherThemesArePro() {
-        for (id in listOf("midnight_glass", "sport_red", "rose_glass", "cyan_glass", "violet_glass", "sunset_glass", "saffron_day", "soft_glass")) {
-            assertFalse(id, ThemeAccess.isFree(id))
+    fun onlyMapFirstIsFree() {
+        assertEquals(setOf(ThemeDefaults.MAP_FIRST), ThemeAccess.FREE_IDS)
+        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN)) {
+            assertFalse("$id should be Pro", ThemeAccess.isFree(id))
         }
     }
 
     @Test
-    fun freeThemesShowWithoutPro() {
-        val auto = ThemeChoice(auto = true, dayId = ThemeAccess.FROSTED_GLASS, nightId = ThemeAccess.SAFFRON_NIGHT, fixedId = "")
-        assertEquals(ThemeAccess.FROSTED_GLASS, ThemeAccess.resolveId(auto, night = false, isPro = false, known = known))
-        assertEquals(ThemeAccess.SAFFRON_NIGHT, ThemeAccess.resolveId(auto, night = true, isPro = false, known = known))
-        val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = ThemeAccess.MIDNIGHT_FROST)
-        assertEquals(ThemeAccess.MIDNIGHT_FROST, ThemeAccess.resolveId(fixed, night = false, isPro = false, known = known))
-    }
-
-    @Test
-    fun proThemeWithoutProFallsBackToFreeDefaultForTimeOfDay() {
-        val auto = ThemeChoice(auto = true, dayId = "cyan_glass", nightId = "rose_glass", fixedId = "")
-        assertEquals(DrivePrefs.DEFAULT_DAY, ThemeAccess.resolveId(auto, night = false, isPro = false, known = known))
-        assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(auto, night = true, isPro = false, known = known))
-        val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = "sport_red")
-        assertEquals(DrivePrefs.DEFAULT_FIXED, ThemeAccess.resolveId(fixed, night = false, isPro = false, known = known))
-    }
-
-    @Test
-    fun proThemeWithProIsKept() {
-        val auto = ThemeChoice(auto = true, dayId = "cyan_glass", nightId = "rose_glass", fixedId = "")
-        assertEquals("cyan_glass", ThemeAccess.resolveId(auto, night = false, isPro = true, known = known))
-        assertEquals("rose_glass", ThemeAccess.resolveId(auto, night = true, isPro = true, known = known))
-    }
-
-    @Test
-    fun unknownIdFallsBack() {
-        val auto = ThemeChoice(auto = true, dayId = "removed_theme", nightId = "removed_theme", fixedId = "")
-        assertEquals(DrivePrefs.DEFAULT_DAY, ThemeAccess.resolveId(auto, night = false, isPro = true, known = known))
-        assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(auto, night = true, isPro = true, known = known))
-    }
-
-    @Test
-    fun defaultsAreFree() {
-        assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_DAY))
-        assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_NIGHT))
-        assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_FIXED))
-    }
-
-    /** Head-unit report: with Pro on, picking a Pro theme must change the theme on screen. */
-    @Test
-    fun proSelectionShowsInFixedMode() {
-        val fixed = ThemeChoice(auto = false, dayId = DrivePrefs.DEFAULT_DAY, nightId = DrivePrefs.DEFAULT_NIGHT, fixedId = DrivePrefs.DEFAULT_NIGHT)
-        for (night in listOf(false, true)) {
-            val picked = ThemeAccess.select(fixed, "cyan_glass", forNight = night)
-            assertEquals("cyan_glass", ThemeAccess.resolveId(picked, night = night, isPro = true, known = known))
+    fun proThemesAreLockedWithoutPro() {
+        assertFalse(ThemeAccess.locked(ThemeDefaults.MAP_FIRST, isPro = false))
+        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN)) {
+            assertTrue(ThemeAccess.locked(id, isPro = false))
+            assertFalse(ThemeAccess.locked(id, isPro = true))
         }
     }
 
     @Test
-    fun proSelectionShowsInAutoModeForTheSlotShowingNow() {
-        val auto = ThemeChoice(auto = true, dayId = DrivePrefs.DEFAULT_DAY, nightId = DrivePrefs.DEFAULT_NIGHT, fixedId = "")
-        for (night in listOf(false, true)) {
-            // The picker's chip points at the slot showing now.
-            val picked = ThemeAccess.select(auto, "cyan_glass", forNight = night)
-            assertEquals("cyan_glass", ThemeAccess.resolveId(picked, night = night, isPro = true, known = known))
-            // And the other slot keeps its own theme.
-            assertEquals(
-                if (night) DrivePrefs.DEFAULT_DAY else DrivePrefs.DEFAULT_NIGHT,
-                ThemeAccess.resolveId(picked, night = !night, isPro = true, known = known),
-            )
-        }
+    fun aProThemeWithoutProFallsBackToMapFirst() {
+        val bento = ThemeChoice(ThemeDefaults.BENTO)
+        assertEquals(ThemeDefaults.MAP_FIRST, ThemeAccess.resolveId(bento, night = false, isPro = false))
+        assertEquals(ThemeDefaults.BENTO, ThemeAccess.resolveId(bento, night = false, isPro = true))
     }
 
     @Test
-    fun proSelectionWithoutProFallsBack() {
-        val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = DrivePrefs.DEFAULT_NIGHT)
-        val picked = ThemeAccess.select(fixed, "cyan_glass", forNight = true)
-        assertEquals(DrivePrefs.DEFAULT_FIXED, ThemeAccess.resolveId(picked, night = true, isPro = false, known = known))
+    fun unknownIdShowsMapFirst() {
+        assertEquals(ThemeDefaults.MAP_FIRST, ThemeAccess.resolveId(ThemeChoice("crimson_drive"), night = false, isPro = true))
+    }
+
+    @Test
+    fun autoNightIsProOnly() {
+        assertFalse(ThemeAccess.autoNightAvailable(isPro = false))
+        assertTrue(ThemeAccess.autoNightAvailable(isPro = true))
+        val choice = ThemeChoice(ThemeDefaults.ROAD_SIGN, autoNight = true)
+        assertEquals(ThemeDefaults.BIG_GLANCE, ThemeAccess.resolveId(choice, night = true, isPro = true))
+        assertEquals(ThemeDefaults.ROAD_SIGN, ThemeAccess.resolveId(choice, night = false, isPro = true))
+        // Free: Map First day and night, even if the switch was left on from a refunded Pro.
+        val free = ThemeChoice(ThemeDefaults.MAP_FIRST, autoNight = true)
+        assertEquals(ThemeDefaults.MAP_FIRST, ThemeAccess.resolveId(free, night = true, isPro = false))
+    }
+
+    @Test
+    fun autoNightOffKeepsTheChoiceAtNight() {
+        val choice = ThemeChoice(ThemeDefaults.BENTO, autoNight = false)
+        assertEquals(ThemeDefaults.BENTO, ThemeAccess.resolveId(choice, night = true, isPro = true))
+    }
+
+    @Test
+    fun selectKeepsAutoNight() {
+        val c = ThemeAccess.select(ThemeChoice(ThemeDefaults.MAP_FIRST, autoNight = true), ThemeDefaults.BENTO)
+        assertEquals(ThemeChoice(ThemeDefaults.BENTO, autoNight = true), c)
     }
 }

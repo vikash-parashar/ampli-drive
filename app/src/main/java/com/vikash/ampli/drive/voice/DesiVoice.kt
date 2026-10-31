@@ -43,7 +43,7 @@ class DesiVoice(private val app: DriveApp) {
         val hindi = app.speaker.hasVoice(HINDI)
         val line = picked.line
         val clips = VoiceClips.clipsFor(picked, args) { picker.pickIndexed(it) }
-        return Spoken(format(if (hindi) line.deva else line.roman, args), if (hindi) "hi" else "en-IN", clips)
+        return Spoken(format(if (hindi) line.deva else line.roman, args), if (hindi) "hi" else "en-IN", clips, caption = true)
     }
 
     /** Speaks the desi line; returns false when the style is off so the caller says the standard line. */

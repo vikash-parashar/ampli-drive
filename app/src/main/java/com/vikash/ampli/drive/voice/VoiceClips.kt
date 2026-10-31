@@ -27,12 +27,19 @@ enum class VoicePack(val key: String, val folder: String?) {
 }
 
 /** One thing to say: [text] for the screen and the TTS fallback, [clips] for the recorded voice. */
-data class Spoken(val text: String, val language: String, val clips: List<String> = emptyList()) {
+data class Spoken(
+    val text: String,
+    val language: String,
+    val clips: List<String> = emptyList(),
+    /** An Ampli line from the reviewed bank: Home shows it as the caption while it is said. */
+    val caption: Boolean = false,
+) {
     /** Said one after the other. The clips only survive when both halves have them. */
     operator fun plus(other: Spoken): Spoken = Spoken(
         text = "$text ${other.text}",
         language = language,
         clips = if (clips.isNotEmpty() && other.clips.isNotEmpty()) clips + other.clips else emptyList(),
+        caption = caption && other.caption,
     )
 }
 

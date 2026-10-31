@@ -113,9 +113,9 @@ fun SavedPlaceChips(
 private fun PlaceChip(text: String, icon: ImageVector, onClick: () -> Unit, onLongClick: (() -> Unit)?) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
+    val shape = if (theme.radius <= 0f) RectangleShape else CircleShape
     // Glass themes: the stronger tint, since chips often sit on the map (like Pill).
-    val bg = theme.glass?.let { androidx.compose.ui.graphics.Color(it.reducedPanel) } ?: theme.surfaceHigh
+    val bg = theme.overMap
     Row(
         Modifier
             .heightIn(min = MinTouch)

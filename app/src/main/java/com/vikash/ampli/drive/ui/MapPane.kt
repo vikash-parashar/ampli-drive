@@ -42,9 +42,7 @@ import com.vikash.ampli.drive.map.MapDiagnostics
 import com.vikash.ampli.drive.nav.NavSession
 import com.vikash.ampli.drive.nav.NavTurnRepository
 import com.vikash.ampli.drive.nav.NextTurn
-import com.vikash.ampli.drive.ui.theme.CardStyle
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
-import com.vikash.ampli.drive.ui.theme.ThemeFamily
 
 @Composable
 fun MapPane(
@@ -60,20 +58,25 @@ fun MapPane(
     /** Car Hub's own navigation: route on the map and a compact card instead of Maps' turn. */
     nav: NavSession = NavSession(),
     onOpenNav: () -> Unit = {},
+    /** Map First: the map fills the whole screen behind the home cards, with no card frame. */
+    fullBleed: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val location = gps.location
-    // Saffron family frames the map in a thick coloured border.
-    val frame = if (theme.family == ThemeFamily.Saffron && theme.cardStyle != CardStyle.Pop) {
-        Modifier.border(3.dp, theme.accent, theme.cardShape(dims))
+    // Bento Grid and Road Sign draw the map tile with the theme's black border.
+    val frame = if (theme.borderWidth > 0.dp && !fullBleed) {
+        Modifier.border(theme.borderWidth, theme.border, theme.cardShape(dims))
     } else {
         Modifier
     }
 
     // The map covers the pane, so there is nothing for glass to blur here.
-    Pane(modifier.then(frame), fill = theme.background, blur = false) {
+    val body: @Composable (@Composable () -> Unit) -> Unit = { content ->
+        if (fullBleed) Box(modifier.background(theme.background)) { content() } else Pane(modifier.then(frame), fill = theme.background, blur = false) { content() }
+    }
+    body {
         Box(Modifier.fillMaxSize()) {
             when {
                 !gps.hasPermission -> MapMessage(
@@ -116,7 +119,8 @@ fun MapPane(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
+                            // Full-bleed Home: the cards cover the bottom corners, so the credit sits top centre.
+                            .align(if (fullBleed) Alignment.TopCenter else Alignment.BottomEnd)
                             .padding(dims.d(1f))
                             .clip(RoundedCornerShape(6.dp))
                             .background(Color.White.copy(alpha = 0.75f))
@@ -155,7 +159,9 @@ fun MapPane(
                         .padding(dims.d(2f)),
                 )
             }
-            if (current?.subText != null) {
+            if (fullBleed) {
+                // Map First draws its own turn card and "Where to?".
+            } else if (current?.subText != null) {
                 Pill(
                     text = current.subText,
                     background = theme.surface,

@@ -35,14 +35,6 @@ object Ampli {
     val Gradient: Brush = Brush.linearGradient(listOf(Slate, Rose))
 }
 
-/** System font families that need an Android Typeface lookup. */
-object DriveFonts {
-    /** Roboto Condensed ships on every Android build as "sans-serif-condensed". */
-    val Condensed: FontFamily = FontFamily(
-        android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL),
-    )
-}
-
 private fun schemeFor(t: DriveTheme): ColorScheme {
     val base = if (t.isLight) lightColorScheme() else darkColorScheme()
     return base.copy(
@@ -65,36 +57,25 @@ private fun schemeFor(t: DriveTheme): ColorScheme {
         surfaceContainerHighest = t.surfaceHigh,
         surfaceContainerLow = t.surface,
         surfaceContainerLowest = t.background,
-        outline = t.track,
+        // Text-field and outlined-button edges: at least 3:1 on every theme.
+        outline = t.muted,
         outlineVariant = t.border,
         error = t.warning,
-    ).let { scheme ->
-        // Soft themes: text-field and outlined-button borders need 3:1 on the soft base, and
-        // dialogs and sheets sit on the same base colour as everything else.
-        val edge = t.softEdge
-        if (t.cardStyle == CardStyle.Neumorphic && edge != null) {
-            scheme.copy(
-                outline = edge,
-                surfaceContainerHigh = t.surface,
-                surfaceContainerHighest = t.surface,
-                surfaceContainerLow = t.surface,
-                surfaceContainerLowest = t.surface,
-                surfaceTint = Color.Transparent,
-            )
-        } else {
-            scheme
-        }
-    }
+    )
 }
 
-/** Soft themes: rounder dialogs, sheets and text fields, as in the approved sample. */
-private val SoftShapes = Shapes(
-    extraSmall = RoundedCornerShape(14.dp),
-    small = RoundedCornerShape(16.dp),
-    medium = RoundedCornerShape(18.dp),
-    large = RoundedCornerShape(22.dp),
-    extraLarge = RoundedCornerShape(26.dp),
-)
+/** Rounded dialogs and sheets follow the theme radius; Road Sign keeps them square. */
+private fun shapesFor(t: DriveTheme): Shapes = if (t.radius <= 0f) {
+    Shapes(
+        extraSmall = RoundedCornerShape(0.dp), small = RoundedCornerShape(0.dp), medium = RoundedCornerShape(0.dp),
+        large = RoundedCornerShape(0.dp), extraLarge = RoundedCornerShape(0.dp),
+    )
+} else {
+    Shapes(
+        extraSmall = RoundedCornerShape(10.dp), small = RoundedCornerShape(14.dp), medium = RoundedCornerShape(18.dp),
+        large = RoundedCornerShape(22.dp), extraLarge = RoundedCornerShape(28.dp),
+    )
+}
 
 private fun TextStyle.withFont(family: FontFamily) = copy(fontFamily = family)
 
@@ -129,11 +110,8 @@ private fun typographyFor(t: DriveTheme): Typography {
 fun AmpliDriveTheme(theme: DriveTheme, content: @Composable () -> Unit) {
     val scheme = remember(theme) { schemeFor(theme) }
     val type = remember(theme) { typographyFor(theme) }
+    val shapes = remember(theme) { shapesFor(theme) }
     CompositionLocalProvider(LocalDriveTheme provides theme) {
-        if (theme.cardStyle == CardStyle.Neumorphic && theme.softEdge != null) {
-            MaterialTheme(colorScheme = scheme, typography = type, shapes = SoftShapes, content = content)
-        } else {
-            MaterialTheme(colorScheme = scheme, typography = type, content = content)
-        }
+        MaterialTheme(colorScheme = scheme, typography = type, shapes = shapes, content = content)
     }
 }

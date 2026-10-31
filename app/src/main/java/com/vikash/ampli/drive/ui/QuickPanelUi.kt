@@ -86,7 +86,7 @@ fun QuickPanelOverlay(app: DriveApp, open: Boolean, onClose: () -> Unit) {
         val night = loc?.let { SunTimes.isNight(System.currentTimeMillis(), it.latitude, it.longitude) }
             ?: SunTimes.isNightByClock(LocalTime.now())
         // No blur in an overlay window: glass themes use their stronger tint.
-        DriveThemes.resolve(themeChoice, night, pro.isPro).let { if (it.glass != null) it.withoutBlur() else it }
+        DriveThemes.resolve(themeChoice, night, pro.isPro)
     }
     AmpliDriveTheme(theme) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -243,6 +243,6 @@ private fun KeyButton(icon: ImageVector, label: String, active: Boolean = false,
             .themedTap(CircleShape, theme.surface, theme.border, borderWidth = 1.dp, active = active, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = label, tint = if (active && theme.isSoft) theme.accentSoft else theme.text, modifier = Modifier.size(32.dp))
+        Icon(icon, contentDescription = label, tint = theme.text, modifier = Modifier.size(32.dp))
     }
 }

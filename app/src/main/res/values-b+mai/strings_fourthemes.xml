@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">आर</string>
+    <string name="more_say">वा बस बाजू: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">ईंधन आ CNG</string>
+    <string name="more_fuel_hint">पेट्रोल, CNG, EV</string>
+    <string name="more_radar">स्पीड रडार</string>
+    <string name="more_alerts_on">अलर्ट चालू</string>
+    <string name="more_alerts_off">अलर्ट बन्द</string>
+    <string name="more_papers">गाड़ीक कागज</string>
+    <string name="more_papers_hint">बीमा, PUC, सर्विस</string>
+    <string name="more_trips_hint">अहाँक यात्रा</string>
+    <string name="more_expenses">खर्च</string>
+    <string name="more_expenses_hint">माइलेज आ खर्च</string>
+    <string name="more_health">गाड़ीक स्वास्थ्य</string>
+    <string name="more_health_link">OBD जोड़ू</string>
+    <string name="more_tyres_hint">प्रेशर जाँच</string>
+    <string name="more_phone_hint">पसिन्दक कॉल</string>
+    <string name="more_link_hint">अपन फोन जोड़ू</string>
+    <string name="more_apps_hint">सभ ऐप</string>
+    <string name="more_settings_hint">आवाज, डिस्प्ले</string>
+    <string name="more_fastag_hint">बैलेंस आ टोल</string>
+    <string name="home_next_turn">अगिला मोड़</string>
+    <string name="home_playing">चलि रहल अछि</string>
+    <string name="home_now_playing">एखन चलि रहल अछि</string>
+    <string name="home_limit">सीमा %1$d</string>
+    <string name="home_mic_hint">बाजू की चाही</string>
+    <string name="home_sos_hold">3 सेकेंड दबाउ</string>
+    <string name="home_map">नक्शा</string>
+    <string name="home_toll">%1$s कटल · %2$s बाँचल</string>
+    <string name="theme_auto_night">राति मे अपने-आप: Big Glance</string>
+    <string name="theme_auto_night_hint">सूर्यास्तक बाद होम Big Glance पर बदलि जाइत अछि, सभसँ गाढ़ थीम, आ सूर्योदय पर वापस</string>
+    <string name="theme_auto_night_pro">Pro: सूर्यास्तक बाद Big Glance। फ्री मे दिन-राति Map First रहैत अछि।</string>
+</resources>

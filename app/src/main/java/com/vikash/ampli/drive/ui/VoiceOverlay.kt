@@ -142,38 +142,20 @@ private fun MicPulse(phase: Phase) {
                     .size(size)
                     .scale(pulse * 1.1f)
                     .clip(CircleShape)
-                    .background((theme.keys?.voice ?: theme.accent).copy(alpha = if (theme.keys != null) 0.45f else 0.25f)),
+                    .background(theme.accent.copy(alpha = 0.25f)),
             )
         }
-        val soft = theme.isSoft
-        val keys = theme.keys
         Box(
             Modifier
                 .size(size)
-                .then(
-                    when {
-                        // Crimson Drive: the green Hey Ampli key, as on the dock.
-                        keys != null && soft -> Modifier
-                            .softSurface(theme, CircleShape, if (listening) SoftDepth.Pressed else SoftDepth.Key, fill = keys.voice)
-                            .clip(CircleShape)
-                            .background(keys.voice)
-                            .border(2.dp, keys.voiceEdge, CircleShape)
-                        // Soft: the mic key sits pressed in (cyan) while it listens.
-                        soft && listening -> Modifier.softWell(theme, CircleShape, SoftDepth.Pressed)
-                        soft -> Modifier.softSurface(theme, CircleShape, SoftDepth.Key).clip(CircleShape)
-                        else -> Modifier.clip(CircleShape).background(if (listening) theme.accent else theme.surfaceHigh)
-                    },
-                ),
+                .clip(CircleShape)
+                .background(if (listening) theme.accent else theme.surfaceHigh),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 if (phase == Phase.Speaking) Icons.Filled.GraphicEq else Icons.Filled.Mic,
                 contentDescription = null,
-                tint = when {
-                    keys != null && soft -> keys.onVoice
-                    listening && !soft -> theme.onAccent
-                    else -> theme.accentSoft
-                },
+                tint = if (listening) theme.onAccent else theme.accentSoft,
                 modifier = Modifier.size(size * 0.5f),
             )
         }

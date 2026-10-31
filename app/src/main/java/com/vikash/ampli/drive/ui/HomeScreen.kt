@@ -1,13 +1,14 @@
 package com.vikash.ampli.drive.ui
 
-import android.content.Intent
-import android.provider.Settings
 import android.text.format.DateFormat
-import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,81 +16,103 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.BluetoothDisabled
-import androidx.compose.material.icons.filled.CarRepair
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.GpsFixed
-import androidx.compose.material.icons.filled.GpsNotFixed
-import androidx.compose.material.icons.filled.GpsOff
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.withFrameNanos
-import com.vikash.ampli.drive.system.StartupTiming
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.PhonelinkRing
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
-import com.vikash.ampli.drive.bluetooth.BluetoothUiState
-import com.vikash.ampli.drive.location.GpsState
+import com.vikash.ampli.drive.cameras.CameraAlert
+import com.vikash.ampli.drive.car.CarMonitor
+import com.vikash.ampli.drive.car.DueLevel
+import com.vikash.ampli.drive.fastag.FastagKind
+import com.vikash.ampli.drive.fastag.FastagStore
+import com.vikash.ampli.drive.nav.NavSession
 import com.vikash.ampli.drive.nav.NavTurnRepository
+import com.vikash.ampli.drive.nav.NextTurn
+import com.vikash.ampli.drive.nav.route.RouteStep
+import com.vikash.ampli.drive.obd.ObdState
 import com.vikash.ampli.drive.prefs.NavApp
-import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.AppChooser
 import com.vikash.ampli.drive.system.AppRole
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import com.vikash.ampli.drive.ui.theme.CardStyle
-import com.vikash.ampli.drive.ui.theme.HomeLayout
+import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.StartupTiming
+import com.vikash.ampli.drive.ui.theme.HomePalettes
+import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
-import com.vikash.ampli.drive.ui.theme.SpeedStyle
-import com.vikash.ampli.drive.ui.theme.ThemeFamily
+import com.vikash.ampli.drive.voice.VoiceAssistant
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.unit.em
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.roundToInt
 
-/** Low-end units: how long after the first Home frame the map and music card are added. */
+/** Low-end units: how long after the first Home frame the map is added. */
 private const val HEAVY_DELAY_MS = 250L
+
+/** Map First: how long Ampli's speech bubble stays over the map. */
+private const val BUBBLE_MS = 20_000L
 
 /** The map surface type was switched once this run after drawing nothing; don't flip back and forth. */
 private var mapModeFlipped = false
 
-/** Status row, the three panes (arranged per theme), then the dock. */
+/**
+ * Home: only what a driver needs at a glance. Time, speed (and the limit when known), the next
+ * turn or map, what is playing, the big "Hey Ampli" key, one alert slot, Ampli's last line and
+ * SOS. Everything else is on the More sheet (and by voice). Each of the four themes lays these
+ * out its own way: [HomeStyle].
+ */
 @Composable
 fun HomeScreen(
     app: DriveApp,
@@ -104,37 +127,25 @@ fun HomeScreen(
     /** Car Hub's own navigation: the full navigation screen, and "Where to?". */
     onOpenNavScreen: () -> Unit = {},
     onOpenNavSearch: () -> Unit = {},
-    /** Ampli Shell quick controls (pull down on the status row, or its button). */
+    /** Ampli Shell quick controls (pull down on the top row). */
     onOpenQuick: () -> Unit = {},
-    /** Shown under the status row; pushes the panes down instead of covering them. */
+    /** A screen opened from the More sheet (Fuel, Radar, Papers, Trips, Expenses, OBD, Tyres). */
+    onOpenScreen: (Screen) -> Unit = {},
+    /** Shown above the layout; pushes it down instead of covering it. */
     banner: @Composable () -> Unit = {},
 ) {
-    val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
-    val bt by app.bluetooth.state.collectAsStateWithLifecycle()
-    val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val nav by app.navigator.state.collectAsStateWithLifecycle()
     val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
-    val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
-    val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
+    val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
+    val limit by app.cameraAlerts.speedLimitKmh.collectAsStateWithLifecycle()
+    val obd by app.obd.state.collectAsStateWithLifecycle()
+    val voice by app.voice.state.collectAsStateWithLifecycle()
+    val caption by app.voicePlayer.lastLine.collectAsStateWithLifecycle()
 
-    val fastagChip: @Composable () -> Unit = {
-        FastagChip(app = app, onClick = onOpenFastag, modifier = Modifier.fillMaxHeight())
-    }
-
-    val cameraChip: @Composable () -> Unit = {
-        CameraChip(app = app, modifier = Modifier.fillMaxHeight())
-    }
-
-    // Shows only when something needs attention (weather, tyres, engine, papers/service due).
-    val carChip: @Composable () -> Unit = {
-        CarChip(app = app, onClick = onOpenCar, modifier = Modifier.fillMaxHeight())
-    }
-    val carAlert = carNeedsAttention(app)
-
-    // Navigate button and map taps: the trip in progress, else "Where to?" on the Ampli map, else
+    // Map taps and the turn tile: the trip in progress, else "Where to?" on the Ampli map, else
     // Google Maps (Settings › Navigate with).
     val openNav = {
         when {
@@ -144,17 +155,11 @@ fun HomeScreen(
         }
         Unit
     }
-    val gap = dims.d(2f)
-    // Crimson Drive: the car fills the map pane while there is no route. A tap on it (or "Show
-    // map") brings the live map; it comes back when a route ends.
-    var heroHidden by remember { mutableStateOf(false) }
-    LaunchedEffect(nav.visible) { if (!nav.visible) heroHidden = false }
-    val showHero = theme.keys?.heroCar == true && !nav.visible && !heroHidden
+
+    var more by remember { mutableStateOf(false) }
     var phoneCard by remember { mutableStateOf(false) }
-    if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
-    // Phone Link: Car Hub's own sheet (connected phone, phone music, devices), not the unit's
-    // paid mirroring app. Voice "connect my phone" opens it too.
     var phoneLink by remember { mutableStateOf(false) }
+    // Phone Link: Car Hub's own sheet. Voice "connect my phone" opens it too.
     val linkAsked by app.phoneBt.sheetRequested.collectAsStateWithLifecycle()
     LaunchedEffect(linkAsked) {
         if (linkAsked) {
@@ -162,12 +167,9 @@ fun HomeScreen(
             phoneLink = true
         }
     }
-    if (phoneLink) PhoneLinkSheet(app = app, onDismiss = { phoneLink = false }, onRequestPermissions = onRequestPermissions)
-    val btDevices by app.phoneBt.devices.collectAsStateWithLifecycle()
-    val phoneName = app.phoneBt.connectedPhone(btDevices)?.name ?: bt.connectedName
 
-    // Fast start on 1-2 GB units: the first frame has only the light panes; the map and music
-    // card come right after it. The cold-start time (Diagnostics) is taken at that first frame.
+    // Fast start on 1-2 GB units: the first frame has no map; it comes right after. The
+    // cold-start time (Diagnostics) is taken at that first frame.
     var heavyReady by remember { mutableStateOf(!app.lowEnd || StartupTiming.homeShown) }
     LaunchedEffect(Unit) {
         withFrameNanos { }
@@ -178,474 +180,1114 @@ fun HomeScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(dims.d(2.4f)),
-        verticalArrangement = Arrangement.spacedBy(gap),
-    ) {
-        StatusRow(
-            gps = gps,
-            bt = bt,
-            fastag = if (fastagOn) fastagChip else null,
-            camera = if (camerasOn) cameraChip else null,
-            car = carChip,
-            onGpsClick = {
-                when {
-                    !gps.hasPermission -> onRequestPermissions()
-                    !gps.providerEnabled -> Launchers.openLocationSettings(context)
+    val alert = homeAlert(app, onRequestPermissions, onOpenFastag, onOpenCar)
+    val ui = HomeUi(
+        speed = gps.speedKmh?.roundToInt(),
+        limit = limit,
+        over = limit != null && (gps.speedKmh ?: 0f) > limit!!,
+        rpm = obd.rpm?.roundToInt()?.takeIf { obd.phase == ObdState.Phase.Connected },
+        turn = turnUi(nav, turn),
+        music = musicUi(app),
+        alert = alert,
+        caption = caption,
+        listening = voice.phase == VoiceAssistant.Phase.Listening,
+        onMic = { app.voice.start() },
+        onMore = { more = true },
+        onHelp = { onOpenHelp(false) },
+        onSos = { onOpenHelp(true) },
+        onNav = openNav,
+        onMusicApp = { Launchers.openMusic(context) },
+        onMusicLong = { AppChooser.ask(AppRole.Music) },
+    )
+    // Pull down from the top row, like a phone's quick settings.
+    val pullDown = Modifier.pointerInput(Unit) {
+        var pulled = 0f
+        detectVerticalDragGestures(
+            onDragStart = { pulled = 0f },
+            onVerticalDrag = { _, dy ->
+                pulled += dy
+                if (pulled > 48.dp.toPx()) {
+                    pulled = Float.NEGATIVE_INFINITY
+                    onOpenQuick()
                 }
             },
-            onBtClick = {
-                if (!bt.hasPermission) {
-                    onRequestPermissions()
-                } else {
-                    try {
-                        context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                    } catch (_: Exception) {
-                    }
-                }
-            },
-            onQuickClick = onOpenQuick,
-            modifier = Modifier
-                .fillMaxWidth()
-                // 56 dp so the FASTag chip and status pills are full-size touch targets.
-                .height(maxOf(dims.d(7.5f), 56.dp))
-                // Pull down from the top bar, like a phone's quick settings.
-                .pointerInput(Unit) {
-                    var pulled = 0f
-                    detectVerticalDragGestures(
-                        onDragStart = { pulled = 0f },
-                        onVerticalDrag = { _, dy ->
-                            pulled += dy
-                            if (pulled > 48.dp.toPx()) {
-                                pulled = Float.NEGATIVE_INFINITY
-                                onOpenQuick()
-                            }
-                        },
-                    )
-                },
         )
+    }
+
+    Column(Modifier.fillMaxSize()) {
         banner()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(gap),
-        ) {
-            val liveMap = @Composable { m: Modifier, showTurn: Boolean ->
-                Box(m) {
-                    val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
-                    val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
-                    MapPane(
-                        textureMode = textureMode,
-                        onNoFrames = {
-                            // Nothing drawn: try the other surface type once per app run.
-                            if (!mapModeFlipped) {
-                                mapModeFlipped = true
-                                app.prefs.setMapTextureMode(!textureMode)
-                            }
-                        },
-                        parked = parkedSpot?.let { it.lat to it.lon },
-                        gps = gps,
-                        onOpenNavigation = openNav,
-                        onRequestPermissions = onRequestPermissions,
-                        modifier = Modifier.fillMaxSize(),
-                        showTurn = showTurn,
-                        nav = nav,
-                        onOpenNav = onOpenNavScreen,
-                    )
-                    // Home, Office and favourites: one tap starts the route (hidden while navigating).
-                    if (!nav.visible) {
-                        SavedPlaceChips(
-                            app = app,
-                            modifier = Modifier.align(Alignment.TopStart).padding(dims.d(1.4f)),
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            when (theme.style) {
+                HomeStyle.BigGlance -> BigGlanceHome(ui, pullDown)
+                HomeStyle.Bento -> BentoHome(ui, pullDown)
+                HomeStyle.RoadSign -> RoadSignHome(ui, pullDown)
+                HomeStyle.MapFirst -> MapFirstHome(ui, pullDown) {
+                    if (heavyReady) {
+                        val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
+                        val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
+                        MapPane(
+                            gps = gps,
+                            onOpenNavigation = openNav,
+                            onRequestPermissions = onRequestPermissions,
+                            modifier = Modifier.fillMaxSize(),
+                            showTurn = false,
+                            parked = parkedSpot?.let { it.lat to it.lon },
+                            textureMode = textureMode,
+                            onNoFrames = {
+                                // Nothing drawn: try the other surface type once per app run.
+                                if (!mapModeFlipped) {
+                                    mapModeFlipped = true
+                                    app.prefs.setMapTextureMode(!textureMode)
+                                }
+                            },
+                            nav = nav,
+                            onOpenNav = onOpenNavScreen,
+                            fullBleed = true,
                         )
                     }
-                    // Where the car is parked, while parked.
-                    ParkedPill(
-                        app = app,
-                        onClick = onOpenParked,
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = dims.d(2f), bottom = dims.d(5f)),
-                    )
                 }
             }
-            val map = @Composable { m: Modifier, showTurn: Boolean ->
-                when {
-                    // Crimson Drive, parked: the car picture until a route starts or the map is asked for.
-                    showHero -> CarHeroPane(
-                        app = app,
-                        onGoHome = { goToSavedPlace(app, context, it) },
-                        onWhereTo = openNav,
-                        onShowMap = { heroHidden = true },
-                        modifier = m,
-                    )
-                    heavyReady -> liveMap(m, showTurn)
-                    else -> Pane(m) {}
-                }
+            // Map First: Home, Office and favourites under the turn card while not navigating.
+            if (theme.style == HomeStyle.MapFirst && !nav.visible && ui.turn == null) {
+                val dims = LocalDims.current
+                SavedPlaceChips(app = app, modifier = Modifier.align(Alignment.TopStart).padding(start = dims.d(2.6f), top = dims.d(30f)))
             }
-            val obd by app.obd.state.collectAsStateWithLifecycle()
-            val speed = @Composable { m: Modifier ->
-                SpeedPane(
-                    gps = gps,
-                    cameraAlerts = app.cameraAlerts,
-                    rpm = obd.rpm.takeIf { obd.phase == com.vikash.ampli.drive.obd.ObdState.Phase.Connected },
-                    modifier = m,
-                )
-            }
-            val music = @Composable { m: Modifier ->
-                if (heavyReady) {
-                    MusicCard(
-                        hub = app.mediaHub,
-                        resumeTick = resumeTick,
-                        modifier = m,
-                        phoneName = phoneName,
-                        onPhoneKey = app.phoneBt::key,
-                    )
-                } else {
-                    Pane(m) {}
-                }
-            }
-
-            when (theme.layout) {
-                HomeLayout.MapSpeedMusic -> {
-                    val w = if (dims.compact) Triple(1.4f, 0.95f, 1.0f) else Triple(1.55f, 1.0f, 1.05f)
-                    map(Modifier.weight(w.first).fillMaxHeight(), true)
-                    speed(Modifier.weight(w.second).fillMaxHeight())
-                    music(Modifier.weight(w.third).fillMaxHeight())
-                }
-                HomeLayout.SpeedMapMusic -> {
-                    // HUD keeps its speed tape narrow; Rose and Neumorphic give the dial more room.
-                    val speedW = if (theme.speedStyle == SpeedStyle.Tape) 0.8f else 0.95f
-                    speed(Modifier.weight(speedW).fillMaxHeight())
-                    map(Modifier.weight(if (dims.compact) 1.35f else 1.5f).fillMaxHeight(), true)
-                    music(Modifier.weight(1.05f).fillMaxHeight())
-                }
-                HomeLayout.MusicSpeedMap -> {
-                    music(Modifier.weight(1f).fillMaxHeight())
-                    speed(Modifier.weight(0.95f).fillMaxHeight())
-                    map(Modifier.weight(if (dims.compact) 1.4f else 1.6f).fillMaxHeight(), true)
-                }
-                HomeLayout.MapTopRow -> {
-                    // Kerala Green / Soft Peach: wide map strip on top, the rest in a row below.
-                    Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
-                        map(Modifier.weight(1f).fillMaxWidth(), true)
-                        Row(Modifier.weight(0.85f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
-                            speed(Modifier.weight(0.8f).fillMaxHeight())
-                            music(Modifier.weight(1.4f).fillMaxHeight())
-                        }
-                    }
-                }
-                HomeLayout.MapStacked -> {
-                    map(Modifier.weight(1.75f).fillMaxHeight(), true)
-                    Column(
-                        Modifier.weight(1f).fillMaxHeight(),
-                        verticalArrangement = Arrangement.spacedBy(gap),
-                    ) {
-                        speed(Modifier.weight(0.85f).fillMaxWidth())
-                        music(Modifier.weight(1.15f).fillMaxWidth())
-                    }
-                }
-                HomeLayout.GiantSpeed -> {
-                    // Minimal Mono: a giant speed number and the next turn in big type on the left.
-                    Column(
-                        Modifier.weight(1.45f).fillMaxHeight(),
-                        verticalArrangement = Arrangement.spacedBy(gap),
-                    ) {
-                        speed(Modifier.weight(1f).fillMaxWidth())
-                        if (nav.visible) {
-                            NavHomeCard(session = nav, onClick = onOpenNavScreen, modifier = Modifier.fillMaxWidth(), large = !dims.compact)
-                        } else {
-                            turn?.let {
-                                NextTurnCard(turn = it, onClick = openNav, modifier = Modifier.fillMaxWidth(), large = !dims.compact)
-                            }
-                        }
-                    }
-                    Column(
-                        Modifier.weight(1f).fillMaxHeight(),
-                        verticalArrangement = Arrangement.spacedBy(gap),
-                    ) {
-                        map(Modifier.weight(1f).fillMaxWidth(), false)
-                        music(Modifier.weight(1.1f).fillMaxWidth())
-                    }
-                }
+            if (theme.style == HomeStyle.MapFirst) {
+                val dims = LocalDims.current
+                ParkedPill(app = app, onClick = onOpenParked, modifier = Modifier.align(Alignment.CenterEnd).padding(end = dims.d(2.6f)))
             }
         }
-        Dock(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(maxOf(dims.d(15f), MinTouch)),
-            onNavigate = openNav,
-            onVoice = { app.voice.start() },
-            onMusic = { Launchers.openMusic(context) },
-            // The Phone card: favourite calls and "Open phone app".
-            onPhone = { phoneCard = true },
-            // Long-press Music / Phone: pick which app the button opens.
-            onMusicLong = { AppChooser.ask(AppRole.Music) },
+    }
+
+    if (more) {
+        MoreSheet(
+            app = app,
+            onDismiss = { more = false },
+            onTile = { tile ->
+                more = false
+                when (tile) {
+                    MoreTile.Fastag -> onOpenFastag()
+                    MoreTile.Fuel -> onOpenScreen(Screen.Fuel)
+                    MoreTile.Radar -> onOpenScreen(Screen.Radar)
+                    MoreTile.Papers -> onOpenScreen(Screen.Papers)
+                    MoreTile.Trips -> onOpenScreen(Screen.Trips)
+                    MoreTile.Expenses -> onOpenScreen(Screen.Expenses)
+                    MoreTile.CarHealth -> onOpenScreen(Screen.Obd)
+                    MoreTile.Tyres -> onOpenScreen(Screen.Tyres)
+                    MoreTile.Phone -> phoneCard = true
+                    MoreTile.PhoneLink -> phoneLink = true
+                    MoreTile.Apps -> onOpenApps()
+                    MoreTile.Settings -> onOpenSettings()
+                }
+            },
             onPhoneLong = { AppChooser.ask(AppRole.Phone) },
-            // Phone link: Car Hub's own sheet (a mirroring app only when the driver picked one).
-            onAuto = { phoneLink = true },
-            onCar = onOpenCar,
-            carAlert = carAlert,
-            onApps = onOpenApps,
-            onSettings = onOpenSettings,
-            onHelp = { onOpenHelp(false) },
-            onSos = { onOpenHelp(true) },
+        )
+    }
+    if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
+    if (phoneLink) PhoneLinkSheet(app = app, onDismiss = { phoneLink = false }, onRequestPermissions = onRequestPermissions)
+}
+
+// ------------------------------------------------------------------------------ Home state
+
+/** Everything the four layouts show, worked out once per frame by [HomeScreen]. */
+internal class HomeUi(
+    val speed: Int?,
+    val limit: Int?,
+    val over: Boolean,
+    /** Engine rpm, only while an OBD adapter is connected (nothing at all otherwise). */
+    val rpm: Int?,
+    val turn: TurnUi?,
+    val music: MusicUi,
+    val alert: AlertUi?,
+    /** The last line Ampli said (bank lines only, so always family-safe). */
+    val caption: String?,
+    /** The mic ring animates only while listening: nothing else on Home moves. */
+    val listening: Boolean,
+    val onMic: () -> Unit,
+    val onMore: () -> Unit,
+    val onHelp: () -> Unit,
+    val onSos: () -> Unit,
+    val onNav: () -> Unit,
+    val onMusicApp: () -> Unit,
+    val onMusicLong: () -> Unit,
+)
+
+/** The next manoeuvre: Car Hub's own route, or Google Maps' notification. */
+internal class TurnUi(val distance: String, val text: String?, val step: RouteStep?, val arrow: ImageBitmap?)
+
+@Composable
+private fun turnUi(nav: NavSession, turn: NextTurn?): TurnUi? {
+    val context = LocalContext.current
+    val progress = nav.progress
+    val step = progress?.let { nav.route?.steps?.getOrNull(it.stepIndex) }
+    val arrow = remember(turn?.arrow) { turn?.arrow?.asImageBitmap() }
+    if (nav.visible && step != null && progress != null) {
+        return TurnUi(navDistance(context, progress.distanceToStepM), step.label ?: maneuverText(context, step), step, null)
+    }
+    if (turn == null) return null
+    return TurnUi(turn.title, turn.text, null, arrow)
+}
+
+/** What is playing, or what the music area offers instead (allow access, open music). */
+internal class MusicUi(
+    val title: String,
+    val artist: String?,
+    val playing: Boolean,
+    val art: ImageBitmap?,
+    /** Play / pause / skip keys make sense (a player or the phone is there). */
+    val controls: Boolean,
+    val onPlayPause: () -> Unit,
+    val onNext: () -> Unit,
+    val onPrevious: () -> Unit,
+    val onOpen: () -> Unit,
+)
+
+@Composable
+private fun musicUi(app: DriveApp): MusicUi {
+    val context = LocalContext.current
+    val state by app.mediaHub.state.collectAsStateWithLifecycle()
+    val bt by app.bluetooth.state.collectAsStateWithLifecycle()
+    val devices by app.phoneBt.devices.collectAsStateWithLifecycle()
+    val phoneName = app.phoneBt.connectedPhone(devices)?.name ?: bt.connectedName
+    val np = state.nowPlaying
+    val art = remember(np?.art) { np?.art?.asImageBitmap() }
+    val openMusic = { Launchers.openMusic(context); Unit }
+    return when {
+        np != null -> MusicUi(
+            title = np.title ?: stringResource(R.string.music_unknown_track),
+            artist = np.artist,
+            playing = np.isPlaying,
+            art = art,
+            controls = true,
+            onPlayPause = app.mediaHub::playPause,
+            onNext = app.mediaHub::next,
+            onPrevious = app.mediaHub::previous,
+            onOpen = openMusic,
+        )
+        phoneName != null -> MusicUi(
+            title = stringResource(R.string.phone_music_title),
+            artist = phoneName,
+            playing = false,
+            art = null,
+            controls = true,
+            onPlayPause = { app.phoneBt.key(android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) },
+            onNext = { app.phoneBt.key(android.view.KeyEvent.KEYCODE_MEDIA_NEXT) },
+            onPrevious = { app.phoneBt.key(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS) },
+            onOpen = openMusic,
+        )
+        !state.accessGranted -> MusicUi(
+            title = stringResource(R.string.allow_access),
+            artist = stringResource(R.string.music_access_text),
+            playing = false,
+            art = null,
+            controls = false,
+            onPlayPause = {},
+            onNext = {},
+            onPrevious = {},
+            onOpen = { Launchers.allowNotificationAccess(context) },
+        )
+        else -> MusicUi(
+            title = stringResource(R.string.music_nothing_playing),
+            artist = stringResource(R.string.music_open),
+            playing = false,
+            art = null,
+            controls = false,
+            onPlayPause = {},
+            onNext = {},
+            onPrevious = {},
+            onOpen = openMusic,
         )
     }
 }
 
+/** The alert slot's content and where a tap on it goes. */
+internal class AlertUi(val alert: HomeAlert, val onClick: () -> Unit)
+
+/**
+ * Every status chip of the old Home as a candidate for the one alert slot; [HomeAlerts.pick]
+ * keeps the most urgent.
+ */
 @Composable
-private fun StatusRow(
-    gps: GpsState,
-    bt: BluetoothUiState,
-    fastag: (@Composable () -> Unit)?,
-    camera: (@Composable () -> Unit)?,
-    car: (@Composable () -> Unit)?,
-    onGpsClick: () -> Unit,
-    onBtClick: () -> Unit,
-    onQuickClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val dims = LocalDims.current
-    val theme = LocalDriveTheme.current
+private fun homeAlert(app: DriveApp, onRequestPermissions: () -> Unit, onOpenFastag: () -> Unit, onOpenCar: () -> Unit): AlertUi? {
     val context = LocalContext.current
-    val locale = LocalConfiguration.current.locales[0]
+    val gps by app.speedTracker.state.collectAsStateWithLifecycle()
+    val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
+    val camera by app.cameraAlerts.current.collectAsStateWithLifecycle()
+    val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
+    val events by app.fastag.events.collectAsStateWithLifecycle()
+    val low by app.fastag.lowBalance.collectAsStateWithLifecycle()
+    val weather by app.car.weather.collectAsStateWithLifecycle()
+    val tyres by app.tpms.alerts.collectAsStateWithLifecycle()
+    val obd by app.obd.state.collectAsStateWithLifecycle()
+    val papers by app.car.store.papers.collectAsStateWithLifecycle()
+    val services by app.car.store.services.collectAsStateWithLifecycle()
+    val odo by app.car.store.odometerKm.collectAsStateWithLifecycle()
+    val pro by app.prefs.pro.collectAsStateWithLifecycle()
+    val settings by app.car.store.settings.collectAsStateWithLifecycle()
+    val now = minuteTicker()
+    val odoKm = (odo / 10).toInt()
+    val due = remember(papers, services, odoKm) { app.car.dueItems(context) }
+
+    val cam = camera?.takeIf { camerasOn }?.let { a ->
+        val title = when (a.kind) {
+            CameraAlert.Kind.Police, CameraAlert.Kind.Accident, CameraAlert.Kind.Jam -> cameraKindLabel(a.kind)
+            else -> stringResource(R.string.camera_chip_label)
+        }
+        val text = stringResource(R.string.camera_distance, a.distanceMeters / 10 * 10) + (a.limitKmh?.let { " · $it" } ?: "")
+        HomeAlert(HomeAlerts.kindFor(a), title, text, danger = a.overLimit)
+    }
+    val fastagTitle = stringResource(R.string.fastag_title)
+    val lastToll = events.firstOrNull()?.takeIf { it.kind == FastagKind.Debit && !it.passTrip && it.amount != null }
+    val toll = lastToll?.takeIf { fastagOn && HomeAlerts.tollFresh(it.time, now) }?.let { e ->
+        val text = if (e.balance != null) {
+            stringResource(R.string.home_toll, rupees(e.amount!!), rupees(e.balance))
+        } else {
+            rupees(e.amount!!)
+        }
+        HomeAlert(AlertKind.TollPaid, fastagTitle, text, danger = e.balance != null && e.balance < low)
+    }
+    val balance = FastagStore.latestBalance(events)?.balance
+    val fastagLow = if (fastagOn && balance != null && balance < low) {
+        HomeAlert(AlertKind.FastagLow, fastagTitle, stringResource(R.string.fastag_low) + " · " + rupees(balance), danger = true)
+    } else {
+        null
+    }
+    val tyre = if (pro.isPro) tyres.entries.firstOrNull { it.value.isNotEmpty() } else null
+    val tyreAlert = tyre?.let {
+        val reading = app.tpms.wheelReadings()[it.key]?.reading?.psi ?: 0.0
+        HomeAlert(AlertKind.Tyre, stringResource(R.string.tyres_title), CarMonitor.tyreAlertLine(context, it.key, it.value.first(), reading), danger = true)
+    }
+    val engine = obd.warnings.firstOrNull()?.let {
+        HomeAlert(AlertKind.Engine, stringResource(R.string.obd_title), CarMonitor.engineWarningLine(context, it), danger = true)
+    }
+    val hazard = if (settings.weatherAlerts) weather?.hazards?.firstOrNull() else null
+    val weatherAlert = hazard?.let {
+        HomeAlert(AlertKind.Weather, stringResource(R.string.status_attention), app.car.hazardLine(context, it.first, it.second))
+    }
+    val dueAlert = due.firstOrNull()?.let {
+        HomeAlert(AlertKind.Due, stringResource(R.string.papers_title), CarMonitor.dueLine(context, it), danger = it.status.level == DueLevel.Overdue)
+    }
+    val location = when {
+        !gps.hasPermission -> HomeAlert(AlertKind.LocationOff, stringResource(R.string.location_title), stringResource(R.string.gps_location_off))
+        gps.hasGps && !gps.providerEnabled -> HomeAlert(AlertKind.LocationOff, stringResource(R.string.location_title), stringResource(R.string.gps_off))
+        else -> null
+    }
+    val picked = HomeAlerts.pick(listOf(cam, tyreAlert, engine, toll, fastagLow, weatherAlert, dueAlert, location)) ?: return null
+    return AlertUi(picked) {
+        when (picked.kind) {
+            AlertKind.TollPaid, AlertKind.FastagLow -> onOpenFastag()
+            AlertKind.Tyre, AlertKind.Engine, AlertKind.Weather, AlertKind.Due -> onOpenCar()
+            AlertKind.LocationOff -> if (!gps.hasPermission) onRequestPermissions() else Launchers.openLocationSettings(context)
+            AlertKind.OverLimit, AlertKind.CameraAhead, AlertKind.ReportAhead -> Unit
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------ Shared parts
+
+/** "6:42" and "pm" (nothing in 24-hour mode), refreshed on the minute. */
+@Composable
+private fun clock(): Pair<String, String?> {
+    val context = LocalContext.current
     val now by produceState(LocalDateTime.now()) {
         while (true) {
             value = LocalDateTime.now()
-            // Wake just after the next second boundary so the minute flips on time.
-            delay(1000L - System.currentTimeMillis() % 1000L)
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
         }
     }
     val is24h = remember { DateFormat.is24HourFormat(context) }
-    val timeFmt = remember(is24h) { DateTimeFormatter.ofPattern(if (is24h) "HH:mm" else "h:mm") }
-    val dateFmt = remember(locale) { DateTimeFormatter.ofPattern("EEE, d MMM", locale) }
-    val lightClock = theme.id == "midnight_glass" || theme.id == "minimal_mono"
+    return if (is24h) {
+        now.format(DateTimeFormatter.ofPattern("HH:mm")) to null
+    } else {
+        now.format(DateTimeFormatter.ofPattern("h:mm")) to now.format(DateTimeFormatter.ofPattern("a", Locale.ENGLISH)).lowercase(Locale.ENGLISH)
+    }
+}
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f)),
+/** The largest font size (sp) that fits [chars] glyphs into [w] x [h]. */
+@Composable
+private fun fitSize(w: Dp, h: Dp, chars: Int, widthPerChar: Float = 0.6f, heightFactor: Float = 0.9f): TextUnit {
+    val density = LocalDensity.current
+    val byH = h.value * heightFactor
+    val byW = w.value / (chars.coerceAtLeast(1) * widthPerChar)
+    return with(density) { minOf(byH, byW).dp.toSp() }
+}
+
+/** Speed as text: "62", or "--" before the first GPS fix. */
+private fun speedText(speed: Int?): String = speed?.toString() ?: "--"
+
+/**
+ * Round speed-limit sign: red ring and the limit in black on white (on Big Glance, light text
+ * on the dark tile, as designed). Also on the radar screen.
+ */
+@Composable
+internal fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier, dark: Boolean = false) {
+    val theme = LocalDriveTheme.current
+    val density = LocalDensity.current
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(if (dark) Color(0xFF0B0B0D) else Color.White)
+            .border(size * 0.11f, if (dark) Color(0xFFA8332E) else Color(HomePalettes.LIMIT_RING), CircleShape),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
-            now.format(timeFmt),
-            style = theme.numberStyle(theme.text),
-            fontSize = dims.t(4.6f, min = 22f),
-            fontWeight = if (lightClock) FontWeight.Light else FontWeight.Bold,
+            limitKmh?.toString() ?: "--",
+            color = if (dark) theme.text else Color(0xFF111111),
+            fontFamily = theme.font.family,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = with(density) { (size * 0.36f).toSp() },
+            maxLines = 1,
         )
-        Text(
-            theme.label(now.format(dateFmt)),
-            style = theme.labelStyle(),
-            fontSize = dims.t(2.6f, min = 16f),
-        )
-        // Saffron family: a "have a safe trip" line in an Indian script, as in the designs.
-        theme.greeting?.let {
-            Text(
-                it,
-                color = theme.accentSoft,
-                fontSize = dims.t(3.4f, min = 18f),
-                fontWeight = FontWeight.ExtraBold,
-                maxLines = 1,
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        car?.invoke()
-        camera?.invoke()
-        fastag?.invoke()
-        if (bt.supported) {
-            val text: String
-            val icon: ImageVector?
-            val dot: Color?
-            when {
-                !bt.hasPermission -> {
-                    text = stringResource(R.string.bt_label); icon = Icons.Filled.Bluetooth; dot = null
-                }
-                !bt.enabled -> {
-                    text = stringResource(R.string.bt_off); icon = Icons.Filled.BluetoothDisabled; dot = null
-                }
-                bt.connectedName != null -> {
-                    text = stringResource(R.string.bt_connected, bt.connectedName); icon = null; dot = theme.ok
-                }
-                else -> {
-                    text = stringResource(R.string.bt_on); icon = Icons.Filled.Bluetooth; dot = null
-                }
-            }
-            Pill(text = text, icon = icon, dotColor = dot, onClick = onBtClick)
-        }
-        GpsPill(gps, onGpsClick)
-        Pill(text = stringResource(R.string.shell_quick_short), icon = Icons.Filled.Tune, onClick = onQuickClick)
     }
 }
 
 @Composable
-private fun GpsPill(gps: GpsState, onClick: () -> Unit) {
-    val theme = LocalDriveTheme.current
-    val text: String
-    val icon: ImageVector
-    val tint: Color
+private fun TurnArrow(turn: TurnUi?, color: Color, modifier: Modifier) {
     when {
-        !gps.hasPermission -> {
-            text = stringResource(R.string.gps_location_off); icon = Icons.Filled.GpsOff; tint = theme.warning
-        }
-        !gps.hasGps -> {
-            text = stringResource(R.string.gps_none); icon = Icons.Filled.GpsOff; tint = theme.warning
-        }
-        !gps.providerEnabled -> {
-            text = stringResource(R.string.gps_off); icon = Icons.Filled.GpsOff; tint = theme.warning
-        }
-        gps.speedKmh != null -> {
-            text = if (gps.satellitesUsed > 0) stringResource(R.string.gps_sats, gps.satellitesUsed) else "GPS"
-            icon = Icons.Filled.GpsFixed
-            tint = theme.accentSoft
-        }
-        else -> {
-            // Satellites in view but none used means no fix yet: say so plainly (indoors, garage,
-            // or a weak antenna) instead of a bare "Searching 0/16".
-            text = when {
-                gps.satellitesInView > 0 -> stringResource(R.string.gps_no_fix_count, gps.satellitesUsed, gps.satellitesInView)
-                gps.noFixLong -> stringResource(R.string.gps_no_fix)
-                else -> stringResource(R.string.gps_searching)
-            }
-            icon = Icons.Filled.GpsNotFixed
-            tint = theme.muted
-        }
+        turn?.step != null -> ManeuverArrow(turn.step, color, modifier)
+        turn?.arrow != null -> Image(turn.arrow, contentDescription = null, colorFilter = ColorFilter.tint(color), modifier = modifier)
+        else -> Icon(Icons.Filled.Navigation, contentDescription = null, tint = color, modifier = modifier)
     }
-    Pill(text = text, icon = icon, iconTint = tint, onClick = onClick)
 }
 
+/** A themed label ("SPEED", "NEXT TURN") in the theme's label style. */
 @Composable
-private fun Dock(
-    modifier: Modifier,
-    onNavigate: () -> Unit,
-    onVoice: () -> Unit,
-    onMusic: () -> Unit,
-    onPhone: () -> Unit,
-    onMusicLong: () -> Unit,
-    onPhoneLong: () -> Unit,
-    onAuto: () -> Unit,
-    onCar: () -> Unit,
-    carAlert: Boolean,
-    onApps: () -> Unit,
-    onSettings: () -> Unit,
-    onHelp: () -> Unit,
-    onSos: () -> Unit,
-) {
+private fun TileLabel(text: String, color: Color, size: Float = 2.6f) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val gap = if (theme.cardStyle == CardStyle.Outline && theme.radius <= 0f) dims.d(1f) else dims.d(2f)
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(gap)) {
-        val item = Modifier.weight(1f).fillMaxHeight()
-        DockButton(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, onNavigate, item, highlight = true)
-        // Same flow as the wake word; works without "Always listen" and without the model.
-        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item, voice = true)
-        DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item, onLongClick = onMusicLong)
-        DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item, onLongClick = onPhoneLong)
-        DockButton(stringResource(R.string.dock_phone_link), Icons.Filled.PhonelinkRing, onAuto, item)
-        // Car hub: parked car, papers, expenses, engine, tyres. A red dot when something is due.
-        DockButton(stringResource(R.string.dock_car), Icons.Filled.CarRepair, onCar, item, badge = carAlert)
-        DockButton(stringResource(R.string.dock_apps), Icons.Filled.Apps, onApps, item)
-        DockButton(stringResource(R.string.dock_settings), Icons.Filled.Settings, onSettings, item)
-        // Red Help on the right end, nearest the driver in right-hand-drive cars.
-        // Tap: helplines. Hold 3 s: SOS.
-        HelpDockButton(onTap = onHelp, onHold = onSos, modifier = item)
+    Text(
+        theme.label(text),
+        style = theme.labelStyle(color),
+        fontSize = dims.t(size, min = 14f),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** "km/h · limit 80 · 2400 rpm" under the speed. */
+@Composable
+private fun speedFoot(ui: HomeUi, withLimit: Boolean = true): String = listOfNotNull(
+    stringResource(R.string.speed_unit),
+    ui.limit?.takeIf { withLimit }?.let { stringResource(R.string.home_limit, it) },
+    ui.rpm?.let { stringResource(R.string.speed_rpm, it) },
+).joinToString(" · ")
+
+/**
+ * The SOS key: tap opens the Help panel, holding 3 s starts the SOS countdown (a ring fills
+ * while held). Same behaviour as before in every theme; the look follows the theme.
+ */
+@Composable
+private fun SosKey(ui: HomeUi, modifier: Modifier, shape: Shape, hint: Boolean = false, border: Color? = null, shadow: Boolean = false) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val progress = remember { androidx.compose.animation.core.Animatable(0f) }
+    val tap by androidx.compose.runtime.rememberUpdatedState(ui.onHelp)
+    val hold by androidx.compose.runtime.rememberUpdatedState(ui.onSos)
+    Box(
+        modifier
+            .heightIn(min = MinTouch)
+            .then(if (shadow) Modifier.hardShadow(shape, theme.border) else Modifier)
+            .clip(shape)
+            .background(theme.danger)
+            .then(if (border != null) Modifier.border(theme.borderWidth, border, shape) else Modifier)
+            .pointerInput(Unit) {
+                androidx.compose.foundation.gestures.detectTapGestures(
+                    onPress = {
+                        var fired = false
+                        val job = scope.launch {
+                            progress.snapTo(0f)
+                            progress.animateTo(1f, androidx.compose.animation.core.tween(HOLD_MS, easing = androidx.compose.animation.core.LinearEasing))
+                            fired = true
+                            hold()
+                        }
+                        tryAwaitRelease()
+                        if (!fired) {
+                            job.cancel()
+                            scope.launch { progress.snapTo(0f) }
+                            tap()
+                        }
+                    },
+                )
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        // Hold progress: a bar filling along the bottom edge.
+        if (progress.value > 0f) {
+            Box(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth(progress.value)
+                    .height(6.dp)
+                    .background(theme.onDanger),
+            )
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                stringResource(R.string.sos_button),
+                color = theme.onDanger,
+                fontFamily = theme.numberFont.family,
+                fontWeight = FontWeight.Black,
+                fontSize = dims.t(4.4f, min = 24f),
+                letterSpacing = 0.04.em,
+                maxLines = 1,
+            )
+            if (hint) {
+                Text(
+                    stringResource(R.string.home_sos_hold),
+                    color = theme.onDanger,
+                    fontSize = dims.t(2.3f, min = 15f),
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                )
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+/** A dock key: icon above or beside its label. */
 @Composable
-private fun DockButton(
+private fun DockKey(
     label: String,
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier,
-    highlight: Boolean = false,
-    badge: Boolean = false,
+    shape: Shape,
+    fill: Color,
+    content: Color,
+    border: Color? = null,
+    stacked: Boolean = true,
+    shadow: Boolean = false,
     onLongClick: (() -> Unit)? = null,
-    /** Hey Ampli: the green key on Crimson Drive. */
-    voice: Boolean = false,
+    textSize: Float = 2.8f,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val shape = if (theme.cardStyle == CardStyle.Skewed) skewShape(0.22f) else theme.cardShape(dims, scale = 0.9f)
-    val fill = if (highlight) theme.dockActive else theme.surface
-    val voiceKeys = theme.keys?.takeIf { voice && theme.isSoft }
-    val iconTint = when {
-        voiceKeys != null -> voiceKeys.onVoice
-        highlight -> theme.onDockActive
-        theme.cardStyle == CardStyle.NeonGlow -> theme.accent2
-        theme.id == "ampli_rose" -> theme.accentSoft
-        theme.family == ThemeFamily.Saffron -> theme.accent
-        else -> theme.text
-    }
-    val labelColor = when {
-        voiceKeys != null -> voiceKeys.onVoice
-        highlight -> theme.onDockActive
-        else -> theme.muted
-    }
-    // Minimal Mono marks the active item with a bar on top instead of a fill.
-    val topBar = highlight && theme.id == "minimal_mono"
-    Column(
-        modifier = modifier
-            .then(
-                if (voiceKeys != null) {
-                    Modifier.voiceKey(theme, voiceKeys, shape, onClick, onLongClick)
-                } else if (theme.isSoft) {
-                    // Soft key: raised, presses in on touch with a short haptic tick.
-                    Modifier.softClickable(theme, shape, onClick, onLongClick = onLongClick)
-                } else {
-                    Modifier.themedCard(
-                        theme,
-                        shape,
-                        fill = Brush.linearGradient(listOf(fill, fill)),
-                        border = if (highlight && theme.cardStyle != CardStyle.Outline) Color.Transparent else theme.border,
-                    )
-                },
-            )
-            .then(
-                if (topBar) {
-                    Modifier.drawWithContent {
-                        drawContent()
-                        drawRect(theme.accent, size = Size(size.width, 3.dp.toPx()))
-                    }
-                } else {
-                    Modifier
-                },
-            )
-            .then(if (theme.isSoft) Modifier else Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Box {
-            Icon(
-                icon,
-                contentDescription = label,
-                tint = iconTint,
-                modifier = Modifier.size(maxOf(dims.d(5f), 28.dp)),
-            )
-            if (badge) {
-                Box(
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(theme.danger),
-                )
-            }
-        }
-        Spacer(Modifier.height(dims.d(0.8f)))
+    val inner = @Composable {
+        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(maxOf(dims.d(4.6f), 28.dp)))
         Text(
             theme.label(label),
-            style = theme.labelStyle(labelColor),
-            fontSize = dims.t(2.2f, min = 16f),
-            fontWeight = if (highlight || voiceKeys != null) FontWeight.Bold else FontWeight.SemiBold,
-            // 16 sp minimum on the driving screen: a long label ("HEY AMPLI") wraps instead of "…".
-            maxLines = 2,
-            lineHeight = dims.t(2.4f, min = 18f),
+            color = content,
+            fontFamily = theme.font.family,
+            fontWeight = FontWeight.Bold,
+            fontSize = dims.t(textSize, min = 18f),
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            letterSpacing = if (theme.upperLabels) 0.04.em else androidx.compose.ui.unit.TextUnit.Unspecified,
+        )
+    }
+    Box(
+        modifier
+            .heightIn(min = MinTouch)
+            .then(if (shadow) Modifier.hardShadow(shape, theme.border) else Modifier)
+            .themedTap(shape, fill, border = border, borderWidth = if (border != null) maxOf(theme.borderWidth, 1.dp) else 1.dp, onLongClick = onLongClick, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (stacked) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dims.d(0.6f))) { inner() }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) { inner() }
+        }
+    }
+}
+
+/** The big mic key. Its ring pulses only while Ampli is listening (the one animation on Home). */
+@Composable
+private fun MicRing(listening: Boolean, color: Color, modifier: Modifier) {
+    if (!listening) return
+    val pulse = androidx.compose.animation.core.rememberInfiniteTransition(label = "mic")
+    val s by pulse.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.12f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            androidx.compose.animation.core.tween(700),
+            androidx.compose.animation.core.RepeatMode.Reverse,
+        ),
+        label = "ring",
+    )
+    Box(
+        modifier
+            .scale(s)
+            .border(6.dp, color.copy(alpha = 0.5f), CircleShape),
+    )
+}
+
+/** Round play / pause and skip keys for the music tile. */
+@Composable
+private fun MusicKey(
+    icon: ImageVector,
+    description: String,
+    onClick: () -> Unit,
+    size: Dp,
+    fill: Color,
+    tint: Color,
+    border: Color?,
+    shape: Shape = CircleShape,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier
+            .size(maxOf(size, MinTouch))
+            .clip(shape)
+            .background(fill)
+            .then(if (border != null) Modifier.border(2.dp, border, shape) else Modifier)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(maxOf(size, MinTouch) * 0.45f))
+    }
+}
+
+@Composable
+private fun playLabel(playing: Boolean) = stringResource(if (playing) R.string.music_pause else R.string.music_play)
+
+// ------------------------------------------------------------------------------ Big Glance
+
+/** Style 3: three giant tiles on true black; Hey Ampli, More and SOS below. */
+@Composable
+private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val gap = dims.d(2.2f)
+    val tile = theme.cardShape(dims)
+    Column(Modifier.fillMaxSize().padding(horizontal = dims.d(3.2f), vertical = dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(gap)) {
+        // Time, the alert slot and Ampli's last line.
+        Row(
+            Modifier.fillMaxWidth().height(maxOf(dims.d(8f), MinTouch)).then(pullDown),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f)),
+        ) {
+            val (time, ampm) = clock()
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(time, style = theme.numberStyle(theme.text), fontSize = dims.t(6.6f, min = 30f), maxLines = 1)
+                if (ampm != null) Text(" $ampm", color = theme.muted, fontSize = dims.t(2.8f, min = 16f), modifier = Modifier.padding(bottom = dims.d(0.6f)))
+            }
+            ui.alert?.let { AlertPill(it, Modifier.widthIn(max = dims.d(60f))) }
+            Spacer(Modifier.weight(0.01f))
+            CaptionLine(ui.caption, Modifier.weight(1f))
+        }
+        Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            // Speed.
+            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(if (ui.over) theme.danger else theme.surface).padding(dims.d(3.4f))) {
+                val fg = if (ui.over) theme.onDanger else theme.text
+                TileLabel(stringResource(R.string.speed_label), if (ui.over) theme.onDanger else theme.muted, 2.8f)
+                if (ui.limit != null) LimitBadge(ui.limit, dims.d(11f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(1f)), dark = true)
+                BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(5f), bottom = dims.d(4.4f)), contentAlignment = Alignment.CenterStart) {
+                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.5f, 1.05f), maxLines = 1, softWrap = false)
+                }
+                Text(
+                    speedFoot(ui),
+                    color = if (ui.over) theme.onDanger else theme.muted,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = dims.t(3f, min = 18f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.align(Alignment.BottomStart),
+                )
+            }
+            // Next turn.
+            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(theme.surface).clickable(onClick = ui.onNav).padding(dims.d(3.4f))) {
+                TileLabel(stringResource(R.string.home_next_turn), theme.muted, 2.8f)
+                val t = ui.turn
+                if (t == null) {
+                    Column(Modifier.align(Alignment.CenterStart), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                        Icon(Icons.Filled.Navigation, contentDescription = null, tint = theme.accent, modifier = Modifier.size(dims.d(12f)))
+                        Text(stringResource(R.string.nav_search_title), color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(4.6f, min = 24f))
+                    }
+                } else {
+                    TurnArrow(t, theme.accent, Modifier.padding(top = dims.d(6f)).size(dims.d(15f)))
+                    Column(Modifier.align(Alignment.BottomStart)) {
+                        Text(t.distance, style = theme.numberStyle(theme.text), fontSize = dims.t(13f, min = 40f), maxLines = 1)
+                        t.text?.let { Text(it, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    }
+                }
+            }
+            // Playing.
+            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(theme.surface).clickable(onClick = ui.music.onOpen).padding(dims.d(3.4f))) {
+                TileLabel(stringResource(R.string.home_playing), theme.muted, 2.8f)
+                if (ui.music.controls) {
+                    MusicKey(
+                        if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        playLabel(ui.music.playing),
+                        ui.music.onPlayPause,
+                        dims.d(11f),
+                        Color.Transparent,
+                        theme.accent,
+                        theme.accent,
+                        modifier = Modifier.align(Alignment.TopEnd),
+                    )
+                }
+                // Still bars: a picture of music, not an animation.
+                Row(Modifier.align(Alignment.CenterStart).padding(bottom = dims.d(6f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1f)), verticalAlignment = Alignment.Bottom) {
+                    for (h in listOf(5f, 10f, 7f, 12f, 4f, 9f, 6f)) {
+                        Box(Modifier.width(dims.d(1.8f)).height(dims.d(h)).clip(RoundedTop).background(theme.surfaceHigh.copy(alpha = 1f)))
+                    }
+                }
+                Column(Modifier.align(Alignment.BottomStart)) {
+                    Text(ui.music.title, color = theme.text, fontWeight = FontWeight.ExtraBold, fontFamily = theme.font.family, fontSize = dims.t(5f, min = 24f), maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = dims.t(5.4f, min = 26f))
+                    ui.music.artist?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth().height(maxOf(dims.d(15f), MinTouch)), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            val keyShape = theme.cardShape(dims, 0.8f)
+            Box(Modifier.weight(2.15f).fillMaxHeight()) {
+                DockKey(stringResource(R.string.voice_button), Icons.Filled.Mic, ui.onMic, Modifier.fillMaxSize(), keyShape, theme.accent, theme.onAccent, stacked = false, textSize = 3.6f)
+                MicRing(ui.listening, theme.accent, Modifier.matchParentSize())
+            }
+            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), keyShape, theme.surface, theme.text, stacked = false, textSize = 3.4f)
+            SosKey(ui, Modifier.weight(1.1f).fillMaxHeight(), keyShape)
+        }
+    }
+}
+
+private val RoundedTop = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+
+/** Big Glance's top line: a dot and Ampli's last line. */
+@Composable
+private fun CaptionLine(caption: String?, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f), Alignment.End)) {
+        Box(Modifier.size(dims.d(1.4f)).clip(CircleShape).background(theme.accent))
+        Text(
+            caption ?: stringResource(R.string.home_mic_hint),
+            color = theme.text,
+            fontSize = dims.t(2.8f, min = 22f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
 
+/** The alert slot as a pill (Big Glance, Map First). */
+@Composable
+private fun AlertPill(a: AlertUi, modifier: Modifier = Modifier, background: Color? = null) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val danger = a.alert.danger
+    val bg = when {
+        danger -> theme.danger
+        background != null -> background
+        else -> theme.warning
+    }
+    val fg = when {
+        danger -> theme.onDanger
+        background != null -> theme.text
+        theme.isLight -> Color.White
+        else -> Color(0xFF111111)
+    }
+    val shape = if (theme.radius <= 0f) RectangleShape else theme.cardShape(dims, 0.7f)
+    Row(
+        modifier
+            .heightIn(min = MinTouch)
+            .clip(shape)
+            .background(bg)
+            .clickable(onClick = a.onClick)
+            .padding(horizontal = dims.d(2.2f)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f)),
+    ) {
+        Icon(Icons.Filled.Warning, contentDescription = null, tint = if (background != null && !danger) theme.accentSoft else fg, modifier = Modifier.size(maxOf(dims.d(3.6f), 24.dp)))
+        Text(
+            a.alert.title + " · " + a.alert.text,
+            color = fg,
+            fontWeight = FontWeight.Bold,
+            fontSize = dims.t(2.8f, min = 22f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+// ------------------------------------------------------------------------------ Map First
+
+/** Style 4 (default, free): the map fills the screen; slate cards sit in the corners. */
+@Composable
+private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val card = theme.overMap
+    val shape = theme.cardShape(dims)
+    val pad = dims.d(2.6f)
+    Box(Modifier.fillMaxSize().background(Color(0xFFE8E2D4))) {
+        map()
+        // Turn card (or "Where to?") and the alert slot under it.
+        Column(Modifier.align(Alignment.TopStart).padding(pad).widthIn(max = dims.d(52f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            Row(
+                Modifier
+                    .heightIn(min = MinTouch)
+                    .clip(shape)
+                    .background(card)
+                    .clickable(onClick = ui.onNav)
+                    .padding(dims.d(2.2f)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f)),
+            ) {
+                Box(Modifier.size(dims.d(13.5f)).clip(theme.cardShape(dims, 0.6f)).background(theme.accent), contentAlignment = Alignment.Center) {
+                    TurnArrow(ui.turn, theme.onAccent, Modifier.size(dims.d(8f)))
+                }
+                Column {
+                    val t = ui.turn
+                    Text(t?.distance ?: stringResource(R.string.nav_search_title), style = theme.numberStyle(theme.text), fontSize = dims.t(7f, min = 28f), maxLines = 1)
+                    t?.text?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                }
+            }
+            ui.alert?.let { AlertPill(it, background = card) }
+        }
+        // Time and speed on the right.
+        Column(Modifier.align(Alignment.TopEnd).padding(pad).then(pullDown), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            val (time, ampm) = clock()
+            Text(
+                time + (ampm?.let { " $it" } ?: ""),
+                color = theme.text,
+                fontFamily = theme.font.family,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = dims.t(3.6f, min = 22f),
+                modifier = Modifier.clip(CircleShape).background(card).padding(horizontal = dims.d(2.6f), vertical = dims.d(1.2f)),
+            )
+            Box {
+                val size = dims.d(21f)
+                Column(
+                    Modifier.size(size).clip(CircleShape).background(if (ui.over) theme.danger else card),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(speedText(ui.speed), style = theme.numberStyle(if (ui.over) theme.onDanger else theme.text), fontSize = dims.t(9f, min = 36f), maxLines = 1)
+                    Text(speedFoot(ui, withLimit = false), color = if (ui.over) theme.onDanger else theme.muted, fontSize = dims.t(2.4f, min = 15f), maxLines = 1)
+                }
+                if (ui.limit != null) LimitBadge(ui.limit, dims.d(10f), Modifier.align(Alignment.BottomStart).offset(x = -dims.d(5f), y = dims.d(1f)))
+            }
+        }
+        // Ampli's line, as a speech bubble over the map for a short while.
+        var bubble by remember { mutableStateOf<String?>(null) }
+        LaunchedEffect(ui.caption) {
+            bubble = ui.caption
+            if (ui.caption != null) {
+                delay(BUBBLE_MS)
+                bubble = null
+            }
+        }
+        bubble?.let { line ->
+            Column(
+                Modifier
+                    .align(Alignment.Center)
+                    .widthIn(max = dims.d(48f))
+                    .clip(theme.cardShape(dims, 0.6f))
+                    .background(Color(HomePalettes.MAP_FIRST_BUBBLE))
+                    .padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f)),
+            ) {
+                Text(stringResource(R.string.home_ampli), color = theme.accent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.4f, min = 16f))
+                Text(line, color = Color(HomePalettes.MAP_FIRST_BUBBLE_INK), fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        // Now playing.
+        Row(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(pad)
+                .widthIn(max = dims.d(52f))
+                .clip(shape)
+                .background(card)
+                .clickable(onClick = ui.music.onOpen)
+                .padding(dims.d(2f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(2.2f)),
+        ) {
+            Box(
+                Modifier.size(dims.d(14f)).clip(theme.cardShape(dims, 0.5f)).background(Brush.linearGradient(listOf(theme.accent, Color(0xFF3A1E9C)))),
+                contentAlignment = Alignment.Center,
+            ) {
+                val art = ui.music.art
+                if (art != null) {
+                    Image(art, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                } else {
+                    Icon(Icons.Filled.MusicNote, contentDescription = null, tint = Color.White.copy(alpha = 0.85f), modifier = Modifier.size(dims.d(6f)))
+                }
+            }
+            Column(Modifier.weight(1f, fill = false)) {
+                Text(ui.music.title, color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(3.2f, min = 22f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                ui.music.artist?.let { Text(it, color = theme.muted, fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+            if (ui.music.controls) {
+                MusicKey(if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, playLabel(ui.music.playing), ui.music.onPlayPause, dims.d(8f), Color.White, Color(0xFF1D2A33), null)
+            }
+        }
+        // More, the round Hey Ampli key and SOS.
+        Row(
+            Modifier.align(Alignment.BottomEnd).padding(pad),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
+        ) {
+            val keyShape = theme.cardShape(dims, 0.7f)
+            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.size(dims.d(14f)), keyShape, card, theme.text, textSize = 2.4f)
+            Box(contentAlignment = Alignment.Center) {
+                val size = dims.d(19f)
+                MicRing(ui.listening, theme.accent, Modifier.size(size))
+                Column(
+                    Modifier
+                        .size(size)
+                        .clip(CircleShape)
+                        .background(theme.accent)
+                        .border(dims.d(1f), theme.accent.copy(alpha = 0.35f), CircleShape)
+                        .clickable(onClick = ui.onMic),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(6.4f)))
+                    Text(stringResource(R.string.voice_button), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.3f, min = 15f), maxLines = 1)
+                }
+            }
+            SosKey(ui, Modifier.size(dims.d(14f)), keyShape)
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------ Bento Grid
+
+/** Style 6: a magazine grid where the size of a tile is how much it matters. */
+@Composable
+private fun BentoHome(ui: HomeUi, pullDown: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val gap = dims.d(1.8f)
+    val shape = theme.cardShape(dims)
+    val edge = theme.borderWidth
+    Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(gap)) {
+        Row(Modifier.fillMaxWidth().weight(0.66f), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            // Speed: black tile.
+            Box(Modifier.weight(1f).fillMaxHeight().clip(shape).background(if (ui.over) theme.danger else theme.ink).padding(dims.d(3f))) {
+                val fg = if (ui.over) theme.onDanger else theme.onInk
+                TileLabel(stringResource(R.string.speed_label), fg.copy(alpha = 0.75f), 2.4f)
+                if (ui.limit != null) LimitBadge(ui.limit, dims.d(11.5f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(0.8f)))
+                BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(6f), bottom = dims.d(5f)), contentAlignment = Alignment.CenterStart) {
+                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.62f, 1f), maxLines = 1, softWrap = false)
+                }
+                Text(listOfNotNull(stringResource(R.string.speed_unit), ui.rpm?.let { stringResource(R.string.speed_rpm, it) }).joinToString(" · "), color = fg, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), modifier = Modifier.align(Alignment.BottomStart))
+                if (ui.limit != null) Text(stringResource(R.string.home_limit, ui.limit), color = fg.copy(alpha = 0.7f), fontSize = dims.t(3f, min = 22f), modifier = Modifier.align(Alignment.BottomEnd))
+            }
+            Column(Modifier.weight(1.04f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
+                // Next turn: blue tile.
+                Row(
+                    Modifier.fillMaxWidth().weight(1f).clip(shape).background(theme.accent).clickable(onClick = ui.onNav).padding(dims.d(3f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(3f)),
+                ) {
+                    TurnArrow(ui.turn, Color.White, Modifier.size(dims.d(11f)))
+                    Column {
+                        val t = ui.turn
+                        Text(t?.distance ?: stringResource(R.string.nav_search_title), style = theme.numberStyle(Color.White), fontSize = dims.t(7.4f, min = 28f), maxLines = 2, lineHeight = dims.t(7.4f, min = 28f))
+                        t?.text?.let { Text(it, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.8f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    }
+                }
+                // Playing: white tile with the three keys.
+                Column(Modifier.fillMaxWidth().weight(1f).clip(shape).background(theme.surface).clickable(onClick = ui.music.onOpen).padding(horizontal = dims.d(3f), vertical = dims.d(2f))) {
+                    TileLabel(stringResource(R.string.home_playing), theme.muted, 2.4f)
+                    Text(ui.music.title, color = theme.text, fontWeight = FontWeight.ExtraBold, fontFamily = theme.font.family, fontSize = dims.t(3.8f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    ui.music.artist?.let { Text(it, color = theme.muted, fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    Spacer(Modifier.weight(1f))
+                    if (ui.music.controls) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                            MusicKey(Icons.Filled.SkipPrevious, stringResource(R.string.music_previous), ui.music.onPrevious, dims.d(8f), Color.Transparent, theme.ink, theme.ink)
+                            MusicKey(if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, playLabel(ui.music.playing), ui.music.onPlayPause, dims.d(8f), theme.ink, theme.onInk, null)
+                            MusicKey(Icons.Filled.SkipNext, stringResource(R.string.music_next), ui.music.onNext, dims.d(8f), Color.Transparent, theme.ink, theme.ink)
+                        }
+                    }
+                }
+            }
+            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
+                // Clock.
+                Column(Modifier.fillMaxWidth().weight(1f).clip(shape).border(edge, theme.border, shape).then(pullDown).padding(dims.d(3f))) {
+                    val (time, ampm) = clock()
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(time, style = theme.numberStyle(theme.text), fontSize = dims.t(10f, min = 36f), maxLines = 1)
+                        if (ampm != null) Text(ampm, color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(3.2f, min = 18f), modifier = Modifier.padding(bottom = dims.d(1.4f)))
+                    }
+                    Spacer(Modifier.weight(1f))
+                    val date = remember(time) { LocalDateTime.now().format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.getDefault())) }
+                    Text(date, color = theme.text, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.6f, min = 16f))
+                }
+                // Ampli's last line.
+                Column(Modifier.fillMaxWidth().weight(1f).clip(shape).background(theme.surfaceHigh).padding(dims.d(3f))) {
+                    Text("“", color = theme.accent, fontWeight = FontWeight.Black, fontSize = dims.t(7f, min = 28f), lineHeight = dims.t(5f, min = 22f))
+                    Text(ui.caption ?: stringResource(R.string.home_mic_hint), color = theme.text, fontWeight = FontWeight.Bold, fontFamily = theme.font.family, fontSize = dims.t(3.2f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.home_ampli), color = theme.muted, fontSize = dims.t(2.4f, min = 15f))
+                }
+            }
+        }
+        // Hey Ampli, the alert tile, More and SOS.
+        Row(Modifier.fillMaxWidth().weight(0.34f), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            Box(Modifier.weight(2.3f).fillMaxHeight()) {
+                Row(
+                    Modifier.fillMaxSize().clip(shape).background(theme.accent).clickable(onClick = ui.onMic).padding(horizontal = dims.d(4f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(3f)),
+                ) {
+                    Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(7f)))
+                    Column {
+                        Text(stringResource(R.string.voice_button), color = Color(0xFFE6EBFF), fontFamily = theme.numberFont.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(5.4f, min = 26f), maxLines = 1)
+                        Text(stringResource(R.string.home_mic_hint), color = Color(0xFFC9D3FF), fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                MicRing(ui.listening, theme.accent, Modifier.matchParentSize())
+            }
+            // The alert slot; "Where to?" when nothing needs attention.
+            val a = ui.alert
+            Column(
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(shape)
+                    .background(if (a?.alert?.danger == true) theme.danger else theme.background)
+                    .dashedBorder(theme.border, shape, edge)
+                    .clickable(onClick = a?.onClick ?: ui.onNav)
+                    .padding(dims.d(2.2f)),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val fg = if (a?.alert?.danger == true) theme.onDanger else theme.text
+                Icon(if (a != null) Icons.Filled.Warning else Icons.Filled.Navigation, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4.4f)))
+                Text(a?.alert?.title ?: stringResource(R.string.nav_search_title), color = fg, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(2.8f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                a?.let { Text(it.alert.text, color = fg.copy(alpha = 0.8f), fontSize = dims.t(2.4f, min = 16f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
+            }
+            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(0.9f).fillMaxHeight(), shape, theme.ink, theme.onInk, textSize = 3f)
+            SosKey(ui, Modifier.weight(0.9f).fillMaxHeight(), shape, hint = true)
+        }
+    }
+}
+
+/** A dashed outline (Bento's alert tile), drawn once, no animation. */
+private fun Modifier.dashedBorder(color: Color, shape: Shape, width: Dp): Modifier = drawBehind {
+    val outline = shape.createOutline(size, layoutDirection, this)
+    val path = androidx.compose.ui.graphics.Path().apply { addOutline(outline) }
+    drawPath(
+        path,
+        color,
+        style = androidx.compose.ui.graphics.drawscope.Stroke(
+            width = width.toPx(),
+            pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+        ),
+    )
+}
+
+// ------------------------------------------------------------------------------ Road Sign
+
+/** Style 8: Indian road-sign language, thick black lines and hard shadows. */
+@Composable
+private fun RoadSignHome(ui: HomeUi, pullDown: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val gap = dims.d(3f)
+    val bw = theme.borderWidth
+    Column(Modifier.fillMaxSize()) {
+        // Top band: time, hazard stripes, the alert slot.
+        Row(Modifier.fillMaxWidth().height(maxOf(dims.d(8.6f), MinTouch)).background(theme.ink).then(pullDown), verticalAlignment = Alignment.CenterVertically) {
+            val (time, ampm) = clock()
+            Text(
+                (time + (ampm?.let { " $it" } ?: "")).uppercase(Locale.ENGLISH),
+                color = theme.onInk,
+                fontFamily = theme.numberFont.family,
+                fontSize = dims.t(4.4f, min = 22f),
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = dims.d(2.6f)),
+            )
+            HazardStripes(Modifier.weight(1f).fillMaxHeight())
+            ui.alert?.let { a ->
+                Row(
+                    Modifier
+                        .fillMaxHeight()
+                        .widthIn(max = dims.d(70f))
+                        .background(if (a.alert.danger) theme.danger else theme.background)
+                        .border(bw, theme.border)
+                        .clickable(onClick = a.onClick)
+                        .padding(horizontal = dims.d(2.6f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
+                ) {
+                    val fg = if (a.alert.danger) theme.onDanger else theme.text
+                    Icon(Icons.Filled.Warning, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4.4f)))
+                    Text((a.alert.title + " " + a.alert.text).uppercase(), color = fg, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth().weight(1f).padding(start = dims.d(3f), end = dims.d(3.6f), top = dims.d(3.6f), bottom = dims.d(1.6f)), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            // Speed sign.
+            Box(Modifier.weight(1f).fillMaxHeight().hardShadow(RectangleShape, theme.border).background(if (ui.over) theme.danger else theme.surface).border(bw, theme.border).padding(dims.d(3.2f))) {
+                val fg = if (ui.over) theme.onDanger else theme.text
+                TileLabel(stringResource(R.string.speed_label), fg, 3f)
+                if (ui.limit != null) LimitBadge(ui.limit, dims.d(13f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(1f)))
+                BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(7f), bottom = dims.d(5f)), contentAlignment = Alignment.CenterStart) {
+                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.72f, 0.9f), maxLines = 1, softWrap = false)
+                }
+                Text(speedFoot(ui, withLimit = false).uppercase(Locale.ENGLISH), color = fg, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3.2f, min = 22f), modifier = Modifier.align(Alignment.BottomStart))
+            }
+            // The blue direction sign.
+            Box(Modifier.weight(1f).fillMaxHeight().hardShadow(RectangleShape, theme.border).background(theme.accent).border(bw, theme.border).clickable(onClick = ui.onNav).padding(dims.d(1.4f))) {
+                Box(Modifier.fillMaxSize().border(3.dp, Color.White).padding(dims.d(3f))) {
+                    TurnArrow(ui.turn, Color.White, Modifier.size(dims.d(14f)))
+                    Column(Modifier.align(Alignment.BottomStart)) {
+                        val t = ui.turn
+                        Text((t?.distance ?: stringResource(R.string.nav_search_title)).uppercase(), style = theme.numberStyle(Color.White), fontSize = dims.t(if (t != null) 9f else 5f, min = 26f), maxLines = 2)
+                        t?.text?.let {
+                            Text(it.uppercase(), color = Color.White, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
+            }
+            Column(Modifier.weight(0.84f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
+                // Now playing: black panel, yellow title and square keys.
+                Column(Modifier.fillMaxWidth().weight(1f).hardShadow(RectangleShape, theme.border).background(theme.ink).clickable(onClick = ui.music.onOpen).padding(dims.d(2.4f))) {
+                    TileLabel(stringResource(R.string.home_now_playing), Color.White, 2.2f)
+                    Text(ui.music.title.uppercase(), color = theme.onInk, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3.8f, min = 22f), maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = dims.t(4.2f, min = 24f))
+                    ui.music.artist?.let { Text(it, color = Color.White, fontFamily = theme.font.family, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.4f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    Spacer(Modifier.weight(1f))
+                    if (ui.music.controls) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                            MusicKey(Icons.Filled.SkipPrevious, stringResource(R.string.music_previous), ui.music.onPrevious, dims.d(7f), theme.onInk, theme.ink, null, RectangleShape)
+                            MusicKey(if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, playLabel(ui.music.playing), ui.music.onPlayPause, dims.d(7f), theme.onInk, theme.ink, null, RectangleShape)
+                            MusicKey(Icons.Filled.SkipNext, stringResource(R.string.music_next), ui.music.onNext, dims.d(7f), theme.onInk, theme.ink, null, RectangleShape)
+                        }
+                    }
+                }
+                // Ampli's last line.
+                Column(Modifier.fillMaxWidth().weight(1f).hardShadow(RectangleShape, theme.border).background(theme.surface).border(bw, theme.border).padding(dims.d(2.4f))) {
+                    Text(stringResource(R.string.home_ampli).uppercase(Locale.ENGLISH) + ":", color = theme.accent, fontFamily = theme.numberFont.family, fontSize = dims.t(2.6f, min = 16f))
+                    Text(ui.caption ?: stringResource(R.string.home_mic_hint), color = theme.text, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 4, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth().height(maxOf(dims.d(13.5f), MinTouch)).padding(start = dims.d(3f), end = dims.d(3.6f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f))) {
+            DockKey(stringResource(R.string.home_map), Icons.Filled.Map, ui.onNav, Modifier.weight(1f).fillMaxHeight(), RectangleShape, theme.surface, theme.text, theme.border, stacked = false, shadow = true)
+            DockKey(stringResource(R.string.dock_music), Icons.Filled.MusicNote, ui.onMusicApp, Modifier.weight(1f).fillMaxHeight(), RectangleShape, theme.surface, theme.text, theme.border, stacked = false, shadow = true, onLongClick = ui.onMusicLong)
+            Box(Modifier.weight(1.9f).fillMaxHeight()) {
+                DockKey(stringResource(R.string.voice_button), Icons.Filled.Mic, ui.onMic, Modifier.fillMaxSize(), RectangleShape, theme.accent, Color.White, theme.border, stacked = false, shadow = true, textSize = 3.6f)
+                MicRing(ui.listening, theme.accent, Modifier.matchParentSize())
+            }
+            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), RectangleShape, theme.surface, theme.text, theme.border, stacked = false, shadow = true)
+            SosKey(ui, Modifier.weight(1f).fillMaxHeight(), RectangleShape, border = theme.border, shadow = true)
+        }
+        Spacer(Modifier.height(dims.d(2.4f)))
+    }
+}
+
+/** Black-and-yellow hazard stripes in the top band: drawn once, no animation. */
+@Composable
+private fun HazardStripes(modifier: Modifier) {
+    val theme = LocalDriveTheme.current
+    androidx.compose.foundation.Canvas(modifier.clip(RectangleShape)) {
+        val step = size.height * 0.9f
+        var x = -size.height
+        while (x < size.width + size.height) {
+            val path = androidx.compose.ui.graphics.Path().apply {
+                moveTo(x, size.height)
+                lineTo(x + size.height, 0f)
+                lineTo(x + size.height + step / 2f, 0f)
+                lineTo(x + step / 2f, size.height)
+                close()
+            }
+            drawPath(path, theme.onInk)
+            x += step
+        }
+        drawLine(theme.ink, Offset(0f, 0f), Offset(size.width, 0f), strokeWidth = 2f)
+    }
+}

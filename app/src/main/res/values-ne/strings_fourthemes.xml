@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">थप</string>
+    <string name="more_say">वा केवल भन्नुहोस्: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">इन्धन र CNG</string>
+    <string name="more_fuel_hint">पेट्रोल, CNG, EV</string>
+    <string name="more_radar">स्पिड रडार</string>
+    <string name="more_alerts_on">सूचना सक्रिय</string>
+    <string name="more_alerts_off">सूचना बन्द</string>
+    <string name="more_papers">गाडीका कागजात</string>
+    <string name="more_papers_hint">बीमा, PUC, सर्भिस</string>
+    <string name="more_trips_hint">तपाईंका यात्रा</string>
+    <string name="more_expenses">खर्च</string>
+    <string name="more_expenses_hint">माइलेज र खर्च</string>
+    <string name="more_health">गाडीको स्वास्थ्य</string>
+    <string name="more_health_link">OBD जोड्नुहोस्</string>
+    <string name="more_tyres_hint">प्रेसर जाँच</string>
+    <string name="more_phone_hint">मनपर्ने कल</string>
+    <string name="more_link_hint">आफ्नो फोन जोड्नुहोस्</string>
+    <string name="more_apps_hint">सबै एप</string>
+    <string name="more_settings_hint">आवाज, डिस्प्ले</string>
+    <string name="more_fastag_hint">ब्यालेन्स र टोल</string>
+    <string name="home_next_turn">अर्को मोड</string>
+    <string name="home_playing">बज्दै छ</string>
+    <string name="home_now_playing">अहिले बज्दै छ</string>
+    <string name="home_limit">सीमा %1$d</string>
+    <string name="home_mic_hint">के चाहियो भन्नुहोस्</string>
+    <string name="home_sos_hold">3 सेकेन्ड थिच्नुहोस्</string>
+    <string name="home_map">नक्सा</string>
+    <string name="home_toll">%1$s काटियो · %2$s बाँकी</string>
+    <string name="theme_auto_night">रातमा आफैँ: Big Glance</string>
+    <string name="theme_auto_night_hint">सूर्यास्तपछि होम Big Glance मा बदलिन्छ, सबैभन्दा गाढा थिम, र सूर्योदयमा फर्किन्छ</string>
+    <string name="theme_auto_night_pro">Pro: सूर्यास्तपछि Big Glance। फ्रीमा दिनरात Map First रहन्छ।</string>
+</resources>

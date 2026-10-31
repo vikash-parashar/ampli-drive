@@ -1,0 +1,10 @@
+[
+  {"ID": 1, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "Same as OSM (30 m away)", "Latitude": 28.61417, "Longitude": 77.20900}},
+  {"ID": 2, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "Statiq Connaught Place", "Latitude": 28.63150, "Longitude": 77.21670}},
+  {"ID": 3, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "Same as HP EV Point (40 m)", "Latitude": 19.07636, "Longitude": 72.87770}},
+  {"ID": 4, "DataProviderID": 25, "StatusTypeID": 50, "AddressInfo": {"Title": "Closed licence feed", "Latitude": 12.97160, "Longitude": 77.59460}},
+  {"ID": 5, "DataProviderID": 1, "StatusTypeID": 200, "AddressInfo": {"Title": "Removed charger", "Latitude": 13.08270, "Longitude": 80.27070}},
+  {"ID": 6, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "Jio-bp pulse Pune", "Latitude": 18.52040, "Longitude": 73.85670}},
+  {"ID": 7, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "Second OCM entry 20 m from Pune", "Latitude": 18.52058, "Longitude": 73.85670}},
+  {"ID": 8, "DataProviderID": 1, "StatusTypeID": 50, "AddressInfo": {"Title": "OSM 80 m away is a different place", "Latitude": 28.61462, "Longitude": 77.20900}}
+]

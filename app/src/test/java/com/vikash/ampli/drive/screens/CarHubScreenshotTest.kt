@@ -65,9 +65,7 @@ class CarHubScreenshotTest {
 
     @Composable
     private fun Frame(content: @Composable () -> Unit) {
-        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false).let {
-            if (it.glass != null) it.withoutBlur() else it
-        }
+        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false)
         AmpliDriveTheme(theme) {
             Box(Modifier.fillMaxSize().themeBackground(theme)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {

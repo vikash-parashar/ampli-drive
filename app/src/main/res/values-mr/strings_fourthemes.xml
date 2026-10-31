@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">आणखी</string>
+    <string name="more_say">किंवा फक्त म्हणा: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">इंधन आणि CNG</string>
+    <string name="more_fuel_hint">पेट्रोल, CNG, EV</string>
+    <string name="more_radar">स्पीड रडार</string>
+    <string name="more_alerts_on">सूचना चालू</string>
+    <string name="more_alerts_off">सूचना बंद</string>
+    <string name="more_papers">गाडीची कागदपत्रे</string>
+    <string name="more_papers_hint">विमा, PUC, सर्व्हिस</string>
+    <string name="more_trips_hint">तुमचे प्रवास</string>
+    <string name="more_expenses">खर्च</string>
+    <string name="more_expenses_hint">मायलेज आणि खर्च</string>
+    <string name="more_health">गाडीचे आरोग्य</string>
+    <string name="more_health_link">OBD जोडा</string>
+    <string name="more_tyres_hint">प्रेशर तपासणी</string>
+    <string name="more_phone_hint">आवडते कॉल</string>
+    <string name="more_link_hint">तुमचा फोन जोडा</string>
+    <string name="more_apps_hint">सर्व ॲप्स</string>
+    <string name="more_settings_hint">आवाज, डिस्प्ले</string>
+    <string name="more_fastag_hint">बॅलन्स आणि टोल</string>
+    <string name="home_next_turn">पुढचे वळण</string>
+    <string name="home_playing">सुरू आहे</string>
+    <string name="home_now_playing">आता सुरू आहे</string>
+    <string name="home_limit">मर्यादा %1$d</string>
+    <string name="home_mic_hint">काय हवे ते सांगा</string>
+    <string name="home_sos_hold">3 सेकंद दाबून ठेवा</string>
+    <string name="home_map">नकाशा</string>
+    <string name="home_toll">%1$s कापले · %2$s शिल्लक</string>
+    <string name="theme_auto_night">रात्री आपोआप: Big Glance</string>
+    <string name="theme_auto_night_hint">सूर्यास्तानंतर होम Big Glance वर बदलते, सर्वात गडद थीम, आणि सूर्योदयाला परत</string>
+    <string name="theme_auto_night_pro">Pro: सूर्यास्तानंतर Big Glance. फ्री मध्ये दिवस-रात्र Map First राहते.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">மேலும்</string>
+    <string name="more_say">அல்லது சொல்லுங்கள்: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">எரிபொருள் &amp; CNG</string>
+    <string name="more_fuel_hint">பெட்ரோல், CNG, EV</string>
+    <string name="more_radar">வேக ரேடார்</string>
+    <string name="more_alerts_on">எச்சரிக்கை ஆன்</string>
+    <string name="more_alerts_off">எச்சரிக்கை ஆஃப்</string>
+    <string name="more_papers">வாகன ஆவணங்கள்</string>
+    <string name="more_papers_hint">காப்பீடு, PUC, சர்வீஸ்</string>
+    <string name="more_trips_hint">உங்கள் பயணங்கள்</string>
+    <string name="more_expenses">செலவுகள்</string>
+    <string name="more_expenses_hint">மைலேஜ் மற்றும் செலவு</string>
+    <string name="more_health">வாகன ஆரோக்கியம்</string>
+    <string name="more_health_link">OBD இணைக்கவும்</string>
+    <string name="more_tyres_hint">அழுத்தச் சோதனை</string>
+    <string name="more_phone_hint">பிடித்த அழைப்புகள்</string>
+    <string name="more_link_hint">உங்கள் போனை இணைக்கவும்</string>
+    <string name="more_apps_hint">எல்லா ஆப்ஸ்</string>
+    <string name="more_settings_hint">குரல், திரை</string>
+    <string name="more_fastag_hint">இருப்பு மற்றும் டோல்</string>
+    <string name="home_next_turn">அடுத்த திருப்பம்</string>
+    <string name="home_playing">ஒலிக்கிறது</string>
+    <string name="home_now_playing">இப்போது ஒலிக்கிறது</string>
+    <string name="home_limit">வரம்பு %1$d</string>
+    <string name="home_mic_hint">என்ன வேண்டும் சொல்லுங்கள்</string>
+    <string name="home_sos_hold">3 வினாடி அழுத்துங்கள்</string>
+    <string name="home_map">வரைபடம்</string>
+    <string name="home_toll">%1$s கழிக்கப்பட்டது · %2$s மீதம்</string>
+    <string name="theme_auto_night">இரவில் தானாக: Big Glance</string>
+    <string name="theme_auto_night_hint">சூரியன் மறைந்ததும் முகப்பு Big Glance-க்கு மாறும், மிக இருண்ட தீம், சூரிய உதயத்தில் திரும்பும்</string>
+    <string name="theme_auto_night_pro">Pro: சூரியன் மறைந்ததும் Big Glance. இலவசத்தில் பகலும் இரவும் Map First.</string>
+</resources>

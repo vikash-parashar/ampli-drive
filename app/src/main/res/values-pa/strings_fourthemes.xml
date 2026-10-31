@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_title">ਹੋਰ</string>
+    <string name="more_say">ਜਾਂ ਬੱਸ ਬੋਲੋ: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">ਤੇਲ ਅਤੇ CNG</string>
+    <string name="more_fuel_hint">ਪੈਟਰੋਲ, CNG, EV</string>
+    <string name="more_radar">ਸਪੀਡ ਰਡਾਰ</string>
+    <string name="more_alerts_on">ਚੇਤਾਵਨੀ ਚਾਲੂ</string>
+    <string name="more_alerts_off">ਚੇਤਾਵਨੀ ਬੰਦ</string>
+    <string name="more_papers">ਗੱਡੀ ਦੇ ਕਾਗਜ਼</string>
+    <string name="more_papers_hint">ਬੀਮਾ, PUC, ਸਰਵਿਸ</string>
+    <string name="more_trips_hint">ਤੁਹਾਡੇ ਸਫ਼ਰ</string>
+    <string name="more_expenses">ਖ਼ਰਚਾ</string>
+    <string name="more_expenses_hint">ਮਾਈਲੇਜ ਅਤੇ ਖ਼ਰਚਾ</string>
+    <string name="more_health">ਗੱਡੀ ਦੀ ਸਿਹਤ</string>
+    <string name="more_health_link">OBD ਜੋੜੋ</string>
+    <string name="more_tyres_hint">ਪ੍ਰੈਸ਼ਰ ਜਾਂਚ</string>
+    <string name="more_phone_hint">ਮਨਪਸੰਦ ਕਾਲਾਂ</string>
+    <string name="more_link_hint">ਆਪਣਾ ਫ਼ੋਨ ਜੋੜੋ</string>
+    <string name="more_apps_hint">ਸਾਰੀਆਂ ਐਪਾਂ</string>
+    <string name="more_settings_hint">ਆਵਾਜ਼, ਡਿਸਪਲੇ</string>
+    <string name="more_fastag_hint">ਬੈਲੇਂਸ ਅਤੇ ਟੋਲ</string>
+    <string name="home_next_turn">ਅਗਲਾ ਮੋੜ</string>
+    <string name="home_playing">ਚੱਲ ਰਿਹਾ</string>
+    <string name="home_now_playing">ਹੁਣ ਚੱਲ ਰਿਹਾ</string>
+    <string name="home_limit">ਸੀਮਾ %1$d</string>
+    <string name="home_mic_hint">ਦੱਸੋ ਕੀ ਚਾਹੀਦਾ</string>
+    <string name="home_sos_hold">3 ਸਕਿੰਟ ਦਬਾਓ</string>
+    <string name="home_map">ਨਕਸ਼ਾ</string>
+    <string name="home_toll">%1$s ਕੱਟੇ · %2$s ਬਾਕੀ</string>
+    <string name="theme_auto_night">ਰਾਤ ਨੂੰ ਆਪਣੇ-ਆਪ: Big Glance</string>
+    <string name="theme_auto_night_hint">ਸੂਰਜ ਡੁੱਬਣ ਮਗਰੋਂ ਹੋਮ Big Glance ਤੇ ਬਦਲ ਜਾਂਦਾ ਹੈ, ਸਭ ਤੋਂ ਗੂੜ੍ਹੀ ਥੀਮ, ਅਤੇ ਸੂਰਜ ਚੜ੍ਹਨ ਤੇ ਵਾਪਸ</string>
+    <string name="theme_auto_night_pro">Pro: ਸੂਰਜ ਡੁੱਬਣ ਮਗਰੋਂ Big Glance। ਮੁਫ਼ਤ ਵਿੱਚ ਦਿਨ-ਰਾਤ Map First ਰਹਿੰਦਾ ਹੈ।</string>
+</resources>

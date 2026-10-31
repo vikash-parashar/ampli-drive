@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_soft_auto">ছফ্ট: অটো দিন/ৰাতি</string>
-    <string name="theme_soft_auto_hint">সূৰ্যোদয়ৰ পৰা Ampli Soft Day, সূৰ্যাস্তৰ পিছত Ampli Soft Night</string>
-</resources>

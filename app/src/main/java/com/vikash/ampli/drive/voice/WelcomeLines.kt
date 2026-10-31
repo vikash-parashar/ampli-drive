@@ -34,7 +34,7 @@ object WelcomeLines {
         val card: String,
         val clips: List<String> = emptyList(),
     ) {
-        val spoken: Spoken get() = Spoken(text, language, clips)
+        val spoken: Spoken get() = Spoken(text, language, clips, caption = true)
     }
 
     /**
