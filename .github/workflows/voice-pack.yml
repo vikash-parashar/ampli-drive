@@ -9,7 +9,7 @@ name: Voice pack
 # list-voices job picks the most used Hindi male / female voice from the shared library.
 
 on:
-  # Pushing to voice-pack-run records the female voice (owner's pick 2026-10-31), only the clips that are missing or changed.
+  # Pushing to voice-pack-run records both voices, only the clips that are missing or changed.
   push:
     branches: [voice-pack-run]
   workflow_dispatch:
@@ -96,9 +96,9 @@ jobs:
           FEMALE_OWNER: ${{ needs.list-voices.outputs.female_owner }}
           # Character budget per run (the Starter plan has a monthly quota). Repo variable VOICE_MAX_CHARS
           # overrides it; 0 means no limit.
-          VOICE_MAX_CHARS: ${{ vars.VOICE_MAX_CHARS || '14000' }}
+          VOICE_MAX_CHARS: ${{ vars.VOICE_MAX_CHARS || '3000' }}
         run: |
-          python3 scripts/voice_pack.py generate --voices "${{ inputs.voices || 'female' }}" \
+          python3 scripts/voice_pack.py generate --voices "${{ inputs.voices || 'male,female' }}" \
             ${{ (github.event_name == 'push' || inputs.only_missing) && '--only-missing' || '' }}
 
       - name: Open a PR with the clips
