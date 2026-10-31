@@ -157,7 +157,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.maplibre.android)
     implementation(libs.billing.ktx)
-    implementation(libs.haze)
     implementation(libs.media3.exoplayer)
     // Parking-spot QR on the "Where's my car" screen.
     implementation(libs.zxing.core)

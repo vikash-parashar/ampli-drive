@@ -15,12 +15,22 @@ class HaryanviLinesTest {
 
     private val playful = HaryanviLines.Event.entries.filter { !it.safety }
 
+    /**
+     * First round: 4 to 8 variants per event. Round 2 (lines-v2) appends up to 8 more; an event
+     * that only exists from round 2 needs at least 3.
+     */
     @Test
     fun everyPlayfulEventHasFourToEightVariants() {
         for (event in playful) {
             val lines = HaryanviLines.forEvent(event)
             assertNotNull("$event has no lines", lines)
-            assertTrue("$event has ${lines!!.size}", lines.size in 4..8)
+            val first = HaryanviLines.firstRoundCount(event)
+            if (first > 0) {
+                assertTrue("$event has $first first-round lines", first in 4..8)
+            } else {
+                assertTrue("$event has ${lines!!.size}", lines.size >= 3)
+            }
+            assertTrue("$event has ${lines!!.size}", lines.size - first <= 8)
             assertEquals("$event has duplicate lines", lines.size, lines.map { it.deva }.toSet().size)
         }
     }

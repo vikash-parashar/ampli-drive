@@ -293,7 +293,7 @@ private fun AlertPane(
                 val full = if (alert.kind == CameraAlert.Kind.AverageSpeedZone) maxOf(alert.distanceMeters, 1) else alertDistanceM.coerceAtLeast(1)
                 val fraction = (1f - alert.distanceMeters.toFloat() / full).coerceIn(0.04f, 1f)
                 Box(Modifier.fillMaxWidth().height(maxOf(dims.d(1.6f), 10.dp)).clip(RoundedCornerShape(50)).background(theme.track)) {
-                    Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(RoundedCornerShape(50)).background(if (hot) theme.danger else theme.keys?.primaryTop ?: theme.accent))
+                    Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(RoundedCornerShape(50)).background(if (hot) theme.danger else theme.accent))
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {

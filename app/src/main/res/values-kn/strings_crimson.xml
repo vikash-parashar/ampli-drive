@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_crimson_hint">ಉಚಿತ · ಡೀಫಾಲ್ಟ್ · Ampli MP3 ಕಾರ್ ಮೋಡ್ ಬಣ್ಣಗಳು, ಹೋಮ್‌ನಲ್ಲಿ ಕಾರು</string>
-    <string name="hero_ready">ಚಾಲನೆಗೆ ಸಿದ್ಧ</string>
-    <string name="hero_go_home">ಮನೆಗೆ ಹೋಗೋಣ</string>
-    <string name="hero_show_map">ನಕ್ಷೆ ತೋರಿಸಿ</string>
-</resources>

@@ -1,0 +1,5 @@
+[
+  {"type": "node", "lat": 28.61390, "lon": 77.20900, "tags": {"amenity": "charging_station", "name": "Tata Power EZ Charge"}},
+  {"type": "node", "lat": 28.70000, "lon": 77.10000, "tags": {"amenity": "fuel", "name": "Indian Oil"}},
+  {"type": "way", "center": {"lat": 19.07600, "lon": 72.87770}, "tags": {"amenity": "fuel", "fuel:electricity": "yes", "name": "HP EV Point"}}
+]

@@ -60,7 +60,7 @@ fun CameraChip(app: DriveApp, modifier: Modifier = Modifier) {
     val current by app.cameraAlerts.current.collectAsStateWithLifecycle()
     var menu by remember { mutableStateOf(false) }
     val alert = current
-    val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
+    val shape = if (theme.radius <= 0f) RectangleShape else CircleShape
     val bg = when {
         alert == null -> theme.surface
         alert.overLimit -> theme.danger

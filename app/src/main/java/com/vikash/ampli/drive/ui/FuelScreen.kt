@@ -244,6 +244,7 @@ fun FuelContent(
                         Text(stringResource(R.string.fuel_data_date, stats.dataDate, stats.count), color = theme.muted, fontSize = small, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     Text(stringResource(R.string.fuel_attribution), color = theme.muted, fontSize = small, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.fuel_attribution_ocm), color = theme.muted, fontSize = small, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -377,7 +378,7 @@ private fun FuelMap(hits: List<FuelHit>, car: Pair<Double, Double>?, selected: I
                         moveTo(c.x, c.y)
                         quadraticTo(mid.x, mid.y, p.x, p.y)
                     }
-                    drawPath(path, theme.keys?.primaryTop ?: theme.accent, style = Stroke(width = 7f, cap = StrokeCap.Round))
+                    drawPath(path, theme.accent, style = Stroke(width = 7f, cap = StrokeCap.Round))
                 }
                 shown.forEachIndexed { i, h ->
                     if (i == selected) return@forEachIndexed

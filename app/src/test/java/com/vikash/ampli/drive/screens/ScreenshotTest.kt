@@ -88,9 +88,7 @@ class ScreenshotTest {
     /** The app's theme, backdrop and 1024x600 proportions, as DriveRoot sets them up. */
     @Composable
     private fun Frame(backdrop: Boolean = true, content: @Composable () -> Unit) {
-        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false).let {
-            if (it.glass != null) it.withoutBlur() else it
-        }
+        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false)
         AmpliDriveTheme(theme) {
             Box(Modifier.fillMaxSize().then(if (backdrop) Modifier.themeBackground(theme) else Modifier)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {

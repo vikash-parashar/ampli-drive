@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_crimson_hint">സൗജന്യം · ഡിഫോൾട്ട് · Ampli MP3 കാർ മോഡ് നിറങ്ങൾ, ഹോമിൽ കാർ</string>
-    <string name="hero_ready">ഓടിക്കാൻ തയ്യാർ</string>
-    <string name="hero_go_home">വീട്ടിലേക്ക് പോകാം</string>
-    <string name="hero_show_map">മാപ്പ് കാണിക്കുക</string>
-</resources>

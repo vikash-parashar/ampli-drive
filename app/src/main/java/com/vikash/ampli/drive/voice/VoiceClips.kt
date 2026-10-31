@@ -27,12 +27,19 @@ enum class VoicePack(val key: String, val folder: String?) {
 }
 
 /** One thing to say: [text] for the screen and the TTS fallback, [clips] for the recorded voice. */
-data class Spoken(val text: String, val language: String, val clips: List<String> = emptyList()) {
+data class Spoken(
+    val text: String,
+    val language: String,
+    val clips: List<String> = emptyList(),
+    /** An Ampli line from the reviewed bank: Home shows it as the caption while it is said. */
+    val caption: Boolean = false,
+) {
     /** Said one after the other. The clips only survive when both halves have them. */
     operator fun plus(other: Spoken): Spoken = Spoken(
         text = "$text ${other.text}",
         language = language,
         clips = if (clips.isNotEmpty() && other.clips.isNotEmpty()) clips + other.clips else emptyList(),
+        caption = caption && other.caption,
     )
 }
 
@@ -172,6 +179,7 @@ object VoiceClips {
         HaryanviLines.Event.SpeedLimit -> HaryanviLines.Event.SpeedLimitPlain
         HaryanviLines.Event.TollPaid, HaryanviLines.Event.TollPaidNoBalance -> HaryanviLines.Event.TollPaidPlain
         HaryanviLines.Event.BreakReminder -> HaryanviLines.Event.BreakReminderPlain
+        HaryanviLines.Event.FastagLowBalance -> HaryanviLines.Event.FastagLowBalancePlain
         HaryanviLines.Event.MusicPlayNamed -> HaryanviLines.Event.MusicPlay
         else -> event
     }
@@ -228,8 +236,11 @@ object VoiceClips {
     fun distanceClips(meters: Int, tail: Picked?): List<String> =
         if (tail == null) emptyList() else listOf(bucket(meters).id, tail.id)
 
-    /** One clip the workflow records. [group] lets it pick a delivery tag. */
-    data class Entry(val id: String, val event: String, val group: String, val text: String) {
+    /**
+     * One clip the workflow records. [group] lets it pick a delivery tag. [voice] is "male" or
+     * "female" for a line worded per voice (only that voice records it), else null (both do).
+     */
+    data class Entry(val id: String, val event: String, val group: String, val text: String, val voice: String? = null) {
         val hash: String get() = hash(text)
     }
 
@@ -252,7 +263,12 @@ object VoiceClips {
                         out += Entry(exitId(lineId, exit), event.name, event.group.name, text)
                     }
                 } else if (recordable(line)) {
-                    out += Entry(lineId, event.name, event.group.name, line.deva)
+                    if (line.devaF != null) {
+                        out += Entry(lineId + MALE_SUFFIX, event.name, event.group.name, line.deva, VoicePack.Male.key)
+                        out += Entry(lineId + FEMALE_SUFFIX, event.name, event.group.name, line.devaF, VoicePack.Female.key)
+                    } else {
+                        out += Entry(lineId, event.name, event.group.name, line.deva)
+                    }
                 }
             }
         }
@@ -268,6 +284,21 @@ object VoiceClips {
             out += Entry(id, if (number) "Number" else "Answer", if (number) "Number" else "Answers", text)
         }
         return out
+    }
+
+    /** Clip-id endings of a line worded per voice ([HaryanviLines.Line.devaF]). */
+    const val MALE_SUFFIX = "_m"
+    const val FEMALE_SUFFIX = "_f"
+
+    /** The id [voice] has [id] under: "<id>_m" / "<id>_f" for a line worded per voice, else [id]. */
+    fun voiceId(voice: VoicePack, id: String, known: Set<String> = expectedHashes.keys): String {
+        if (id in known) return id
+        val suffix = when (voice) {
+            VoicePack.Male -> MALE_SUFFIX
+            VoicePack.Female -> FEMALE_SUFFIX
+            VoicePack.Tts -> return id
+        }
+        return if (id + suffix in known) id + suffix else id
     }
 
     /** First 12 hex digits of the SHA-1 of the UTF-8 text. */
@@ -288,6 +319,8 @@ object VoiceClips {
                 .append(", \"event\": ").append(q(e.event))
                 .append(", \"group\": ").append(q(e.group))
                 .append(", \"text\": ").append(q(e.text))
+            if (e.voice != null) sb.append(", \"voice\": ").append(q(e.voice))
+            sb
                 .append(", \"hash\": ").append(q(e.hash)).append('}')
             sb.append(if (i < manifest.size - 1) ",\n" else "\n")
         }
@@ -319,8 +352,9 @@ class ClipLibrary(
 ) {
     /** True when [id] is recorded for [voice] from the line's current text. */
     fun has(voice: VoicePack, id: String): Boolean {
-        val want = expected[id] ?: return false
-        return recorded[voice]?.get(id) == want
+        val key = VoiceClips.voiceId(voice, id, expected.keys)
+        val want = expected[key] ?: return false
+        return recorded[voice]?.get(key) == want
     }
 
     /** True when every clip in [ids] can be played (and there is at least one). */
@@ -334,7 +368,7 @@ class ClipLibrary(
      * (Phone voice picked, a line without clips, or any clip missing or out of date).
      */
     fun plan(voice: VoicePack, spoken: Spoken): List<String>? =
-        if (voice.human && hasAll(voice, spoken.clips)) spoken.clips else null
+        if (voice.human && hasAll(voice, spoken.clips)) spoken.clips.map { VoiceClips.voiceId(voice, it, expected.keys) } else null
 
     companion object {
         val EMPTY = ClipLibrary(emptyMap())

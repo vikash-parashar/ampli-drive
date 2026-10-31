@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_sheet_title">更多</string>
+    <string name="more_say">或者直接说：“Ampli, FASTag dikha”</string>
+    <string name="more_fuel">燃油和 CNG</string>
+    <string name="more_fuel_hint">汽油、CNG、电动车</string>
+    <string name="more_radar">测速雷达</string>
+    <string name="more_alerts_on">提醒已开</string>
+    <string name="more_alerts_off">提醒已关</string>
+    <string name="more_papers">车辆证件</string>
+    <string name="more_papers_hint">保险、PUC、保养</string>
+    <string name="more_trips_hint">您的行程</string>
+    <string name="more_expenses">费用</string>
+    <string name="more_expenses_hint">油耗和费用</string>
+    <string name="more_health">车况</string>
+    <string name="more_health_link">连接 OBD</string>
+    <string name="more_tyres_hint">胎压检查</string>
+    <string name="more_phone_hint">常用通话</string>
+    <string name="more_link_hint">连接您的手机</string>
+    <string name="more_apps_hint">全部应用</string>
+    <string name="more_settings_hint">语音、显示</string>
+    <string name="more_fastag_hint">余额和通行费</string>
+    <string name="home_next_turn">下一个转弯</string>
+    <string name="home_playing">正在播放</string>
+    <string name="home_now_playing">当前播放</string>
+    <string name="home_limit">限速 %1$d</string>
+    <string name="home_mic_hint">说出您需要什么</string>
+    <string name="home_sos_hold">按住 3 秒</string>
+    <string name="home_map">地图</string>
+    <string name="home_toll">已扣 %1$s · 余 %2$s</string>
+    <string name="theme_auto_night">夜间自动：Big Glance</string>
+    <string name="theme_auto_night_hint">日落后主屏切换为最暗的 Big Glance，日出时切回</string>
+    <string name="theme_auto_night_pro">Pro：日落后使用 Big Glance。免费版日夜都使用 Map First。</string>
+    <string name="home_go_home">回家</string>
+</resources>
