@@ -3,6 +3,8 @@ package com.vikash.ampli.drive.ui
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -214,9 +216,10 @@ fun FuelContent(
             }
             Pane(Modifier.weight(1f).fillMaxHeight()) {
                 Column(Modifier.fillMaxSize().padding(dims.d(1.8f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(0.8f))) {
+                    // Natural widths, scrolling sideways on narrow screens, so no label is cut.
+                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(dims.d(0.8f))) {
                         for (f in FuelFilter.entries) {
-                            Chip(fuelFilterLabel(f), f == filter, { onFilter(f) }, Modifier.weight(if (f == FuelFilter.Ev) 1.5f else 1f))
+                            Chip(fuelFilterLabel(f), f == filter, { onFilter(f) })
                         }
                     }
                     Box(Modifier.fillMaxWidth().weight(1f)) {

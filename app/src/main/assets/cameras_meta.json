@@ -1,7 +1,8 @@
 {
-  "generated": "2026-10-14",
-  "count": 512,
+  "generated": "2026-10-31",
+  "count": 533,
+  "red_light": 21,
+  "average_speed_zones": 1,
   "source": "OpenStreetMap (Overpass API)",
-  "license": "ODbL 1.0. Speed camera data © OpenStreetMap contributors",
-  "note": "Committed fallback snapshot. CI refreshes cameras.json and this file with scripts/fetch_cameras.py before each build and keeps these if Overpass is unreachable."
+  "license": "ODbL 1.0. Speed camera data © OpenStreetMap contributors"
 }
