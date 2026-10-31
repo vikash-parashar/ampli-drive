@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import voice_pack as vp  # noqa: E402
 
 OUT = os.path.join(vp.ROOT, "voice-samples")
-PER_GENDER = int(os.environ.get("SAMPLES_PER_GENDER", "6"))
+PER_GENDER = int(os.environ.get("SAMPLES_PER_GENDER", "5"))
 CURRENT = {"male": ("7b9mYhmnp0y2qSH1FnBL", "Bunty (current)"),
            "female": ("9w21nMuk8CWXIME31V1S", "Simran (current)")}
 LINES = [
@@ -101,7 +101,7 @@ def main():
                     chars += len(spoken)
                 except urllib.error.HTTPError as e:
                     msg = vp.err_text(e)
-                    print(f"  {v['name']} {lid}: HTTP {e.code} {msg}")
+                    vp.annotate("warning", "Sample", f"{v['name']} {lid}: HTTP {e.code} {msg}")
                     if "quota" in msg.lower():
                         raise SystemExit("quota")
             v.update(key=key, clips=clips)
@@ -117,7 +117,7 @@ def main():
     with open(os.path.join(OUT, "samples.json"), "w") as f:
         json.dump({"lines": [{"id": l, "text": s} for l, _, s in LINES], "voices": done,
                    "characters": chars}, f, ensure_ascii=False, indent=1)
-    print(f"Recorded {len(done)} voices, {chars} characters")
+    vp.annotate("notice", "Voice samples", f"Recorded {len(done)} voices, {chars} characters")
 
 
 if __name__ == "__main__":

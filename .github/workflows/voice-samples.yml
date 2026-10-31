@@ -1,7 +1,7 @@
 name: Voice samples
 
 # Records three Haryanvi lines in several Indian male and female voices for comparison.
-# Runs on a push to voice-samples-run and pushes the clips to voice-samples/<run>.
+# Runs on a push to voice-samples-run and pushes the clips to vsamples/<run>.
 on:
   push:
     branches: [voice-samples-run]
@@ -27,7 +27,7 @@ jobs:
         run: python3 scripts/voice_samples.py
       - name: Push the clips
         run: |
-          branch="voice-samples/${{ github.run_number }}"
+          branch="vsamples/${{ github.run_number }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
