@@ -43,7 +43,10 @@ enum class Screen {
     Help, Sos, Fastag, Emergency,
 
     /** Car hub and its screens; [Crash] is the SOS countdown started by crash detection. */
-    Car, Parked, Papers, Expenses, Obd, Tyres, Crash,
+    Car, Parked, Papers, Expenses, Trips, Obd, Tyres, Crash,
+
+    /** Ampli Store: Pro, the MP3 Player and voice packs (from Apps). */
+    Store,
 
     /** Settings › Help & feedback (also "Hey Ampli, report a problem"). */
     Feedback,
@@ -51,8 +54,14 @@ enum class Screen {
     /** Settings › Voice › Check voice, and Settings › About › Diagnostics. */
     VoiceCheck, Diagnostics,
 
+    /** Settings › Voice › What can I say? (also "Hey Ampli, what can I say?"). */
+    VoiceCommands,
+
     /** Car Hub's own turn-by-turn, and its "Where to?" search. */
     Navigation, NavSearch,
+
+    /** Fuel / CNG / EV finder and the speed-camera radar (from the Car hub, or by voice). */
+    Fuel, Radar,
 }
 
 @Composable
@@ -101,7 +110,13 @@ fun DriveRoot(
     var showQuick by remember { mutableStateOf(false) }
     // A detected crash opens the SOS countdown over whatever is showing.
     val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
-    LaunchedEffect(crashAt) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
+    // Keyed on the screen too: anything that leaves the countdown while it runs comes back to it.
+    LaunchedEffect(crashAt, screen) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
+    // The top-edge quick strip stays off on Home (own pull-down) and on the crash / SOS screens.
+    LaunchedEffect(screen) {
+        com.vikash.ampli.drive.overlay.QuickStripGate.hubScreenBlocks.value =
+            screen == Screen.Home || screen == Screen.Crash || screen == Screen.Sos
+    }
 
     // Dark status-bar icons on the light themes.
     val view = LocalView.current
@@ -164,7 +179,7 @@ fun DriveRoot(
                         }
                         Screen.Apps -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
-                            AppsScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                            AppsScreen(app = app, onBack = { onNavigate(Screen.Home) }, onOpenStore = { onNavigate(Screen.Store) })
                         }
                         Screen.Settings -> {
                             BackHandler(enabled = true) { onNavigate(settingsReturn) }
@@ -182,6 +197,7 @@ fun DriveRoot(
                                 },
                                 onOpenFeedback = { onNavigate(Screen.Feedback) },
                                 onOpenVoiceCheck = { onNavigate(Screen.VoiceCheck) },
+                                onOpenVoiceCommands = { onNavigate(Screen.VoiceCommands) },
                                 onOpenDiagnostics = { onNavigate(Screen.Diagnostics) },
                             )
                         }
@@ -211,8 +227,14 @@ fun DriveRoot(
                                     CarDest.Parked -> onNavigate(Screen.Parked)
                                     CarDest.Papers -> onNavigate(Screen.Papers)
                                     CarDest.Expenses -> onNavigate(Screen.Expenses)
+                                    CarDest.Trips -> onNavigate(Screen.Trips)
                                     CarDest.Obd -> onNavigate(Screen.Obd)
                                     CarDest.Tyres -> onNavigate(Screen.Tyres)
+                                    CarDest.Fuel -> {
+                                        app.fuel.requestedFilter.value = com.vikash.ampli.drive.fuel.FuelFilter.All
+                                        onNavigate(Screen.Fuel)
+                                    }
+                                    CarDest.Radar -> onNavigate(Screen.Radar)
                                     CarDest.Settings -> {
                                         settingsReturn = Screen.Car
                                         onNavigate(Screen.Settings)
@@ -231,6 +253,14 @@ fun DriveRoot(
                         Screen.Expenses -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Car) }
                             ExpensesScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                        }
+                        Screen.Trips -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            TripsScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                        }
+                        Screen.Store -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Apps) }
+                            StoreScreen(app = app, onBack = { onNavigate(Screen.Apps) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Obd -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Car) }
@@ -252,6 +282,10 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }
                             VoiceCheckScreen(app = app, onBack = { onNavigate(Screen.Settings) })
                         }
+                        Screen.VoiceCommands -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Settings) }
+                            VoiceCommandsScreen(onBack = { onNavigate(Screen.Settings) })
+                        }
                         Screen.Diagnostics -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Settings) }
                             DiagnosticsScreen(app = app, onBack = { onNavigate(Screen.Settings) })
@@ -265,6 +299,15 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
                             NavSearchScreen(app = app, onBack = { onNavigate(Screen.Home) })
                         }
+                        Screen.Fuel -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            val asked by app.fuel.requestedFilter.collectAsStateWithLifecycle()
+                            FuelScreen(app = app, onBack = { onNavigate(Screen.Car) }, initialFilter = asked)
+                        }
+                        Screen.Radar -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            RadarScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                        }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
@@ -277,12 +320,17 @@ fun DriveRoot(
                         val context = androidx.compose.ui.platform.LocalContext.current
                         AppChooserDialog(
                             role = req.role,
+                            automaticLabel = if (req.phoneLink) androidx.compose.ui.res.stringResource(com.vikash.ampli.drive.R.string.mirror_app_none) else null,
                             onPick = { entry ->
                                 AppChooser.done()
                                 when (req.role) {
-                                    AppRole.Music -> app.prefs.setMusicPackage(entry?.packageName)
+                                    AppRole.Music -> app.prefs.pickMusicPackage(entry?.packageName)
                                     AppRole.Phone -> app.prefs.setPhonePackage(entry?.packageName)
-                                    AppRole.Mirror -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    AppRole.Mirror -> if (req.phoneLink) {
+                                        app.prefs.setAutoPackage(entry?.packageName)
+                                    } else {
+                                        app.prefs.setAutoStart(app.prefs.autoStart.value.copy(mirrorPackage = entry?.packageName))
+                                    }
                                     AppRole.Nav -> app.prefs.setAutoStart(app.prefs.autoStart.value.copy(navPackage = entry?.packageName))
                                 }
                                 // Dock / Help panel: open the app right away. Settings choices just save.
@@ -293,6 +341,8 @@ fun DriveRoot(
                             onDismiss = { AppChooser.done() },
                         )
                     }
+                    // Music button without Ampli MP3 Player: "Get Ampli MP3 Player".
+                    GetAmpliHost()
                     // First run: "Thara naam ke sai?" over Home; the location disclosure waits for it.
                     val nameAsked by app.prefs.nameAsked.collectAsStateWithLifecycle()
                     if (!nameAsked && screen == Screen.Home) {

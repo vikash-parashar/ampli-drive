@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick panel over other apps (swipe down from the top). -->
+<resources>
+    <string name="quick_strip_setting">Swipe down from the top for quick controls</string>
+    <string name="quick_strip_hint">Works over Google Maps and other apps too: swipe down from the middle of the top edge.</string>
+    <string name="quick_strip_needs_permission">Allow “Display over other apps” for Ampli Car Hub to use this over other apps</string>
+    <string name="quick_strip_allow">Allow over other apps</string>
+    <string name="quick_strip_needs_monitor">Turn on “%1$s” above so it works over other apps.</string>
+    <string name="quick_ampli_music">Ampli Music</string>
+    <string name="quick_home">Car Hub Home</string>
+</resources>

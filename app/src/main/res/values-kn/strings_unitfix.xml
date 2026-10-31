@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player ಪಡೆಯಿರಿ</string>
+    <string name="getmp3_text">Car Hub ನಿಮ್ಮ ಹಾಡುಗಳನ್ನು Ampli MP3 Player ನಲ್ಲಿ ಪ್ಲೇ ಮಾಡುತ್ತದೆ, ಅದು ಇನ್ನೂ ಈ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇಲ್ಲ. ಒಮ್ಮೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ; ನಂತರ ಮ್ಯೂಸಿಕ್ ಬಟನ್ ಅದನ್ನು ನೇರವಾಗಿ ತೆರೆಯುತ್ತದೆ.</string>
+    <string name="getmp3_play">Play Store ನಿಂದ ಪಡೆಯಿರಿ</string>
+    <string name="getmp3_download">ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ</string>
+    <string name="getmp3_downloading">ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ… %1$d%%</string>
+    <string name="getmp3_install">ಈಗ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ</string>
+    <string name="getmp3_allow">ತೆರೆದ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ Car Hub ನಿಂದ ಇನ್‌ಸ್ಟಾಲ್‌ಗೆ ಅನುಮತಿ ನೀಡಿ, ಹಿಂತಿರುಗಿ, ನಂತರ ಈಗ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ ಒತ್ತಿರಿ.</string>
+    <string name="getmp3_failed">ಡೌನ್‌ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ನೋಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="getmp3_other">ಬೇರೆ ಮ್ಯೂಸಿಕ್ ಆ್ಯಪ್ ಬಳಸಿ</string>
+    <string name="getmp3_test_note">ಟೆಸ್ಟ್ ಬಿಲ್ಡ್: Ampli ಯ GitHub ಪುಟದಿಂದ ಹೊಸ ಟೆಸ್ಟ್ ಆವೃತ್ತಿ ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತದೆ.</string>
+    <string name="phone_music_title">ಫೋನ್ ಹಾಡುಗಳು</string>
+    <string name="phone_music_from">%1$s ನಿಂದ, ಬ್ಲೂಟೂತ್ ಮೂಲಕ</string>
+    <string name="phone_autoplay_title">ಫೋನ್ ಸಂಪರ್ಕವಾದ ತಕ್ಷಣ ಅದರ ಹಾಡುಗಳನ್ನು ಪ್ಲೇ ಮಾಡಿ</string>
+    <string name="phone_autoplay_hint">ಫೋನ್ ಸಂಪರ್ಕವಾದ ಕೆಲವು ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಅದರಲ್ಲಿ ಪ್ಲೇ ಒತ್ತುತ್ತದೆ. ಕರೆ ನಡೆಯುತ್ತಿರುವಾಗ ಅಲ್ಲ, ಕಳೆದ ಒಂದು ನಿಮಿಷದಲ್ಲಿ ನೀವು ನಿಲ್ಲಿಸಿದ್ದರೂ ಅಲ್ಲ.</string>
+    <string name="mirror_app_title">ಸ್ಕ್ರೀನ್-ಮಿರರಿಂಗ್ ಆ್ಯಪ್</string>
+    <string name="mirror_app_none">ಯಾವುದೂ ಇಲ್ಲ</string>
+    <string name="plink_title">ಫೋನ್ ಲಿಂಕ್</string>
+    <string name="plink_connected">%1$s ಸಂಪರ್ಕಗೊಂಡಿದೆ</string>
+    <string name="plink_not_connected">ಬ್ಲೂಟೂತ್‌ನಲ್ಲಿ ಯಾವ ಫೋನೂ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ</string>
+    <string name="plink_calls">ಕರೆಗಳು</string>
+    <string name="plink_music">ಹಾಡುಗಳು</string>
+    <string name="plink_battery">ಬ್ಯಾಟರಿ %1$d%%</string>
+    <string name="plink_play">ಫೋನ್ ಹಾಡುಗಳನ್ನು ಪ್ಲೇ ಮಾಡಿ</string>
+    <string name="plink_devices">ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳು</string>
+    <string name="plink_no_devices">ಜೋಡಿಸಿದ ಸಾಧನಗಳು ಕಾಣುತ್ತಿಲ್ಲ. ಈ ಯೂನಿಟ್ ಬ್ಲೂಟೂತ್ ಅನ್ನು ತನ್ನದೇ ಆ್ಯಪ್‌ನಲ್ಲಿ ಇಟ್ಟಿರಬಹುದು: ಬ್ಲೂಟೂತ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ.</string>
+    <string name="plink_now">ಈಗ ಸಂಪರ್ಕಗೊಂಡಿದೆ</string>
+    <string name="plink_paired">ಜೋಡಿಸಲಾಗಿದೆ</string>
+    <string name="plink_switch">ಬದಲಿಸಿ</string>
+    <string name="plink_switching">%1$s ಸಂಪರ್ಕಿಸಲು ಯೂನಿಟ್‌ಗೆ ಹೇಳಲಾಗಿದೆ…</string>
+    <string name="plink_pick_here">%1$s ಸಂಪರ್ಕಿಸಲು ಇಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="plink_bt_settings">ಬ್ಲೂಟೂತ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
+    <string name="plink_mirror">ಸ್ಕ್ರೀನ್-ಮಿರರಿಂಗ್ ಆ್ಯಪ್ ತೆರೆಯಿರಿ</string>
+    <string name="apps_hide">ಆ್ಯಪ್‌ಗಳಿಂದ ಮರೆಮಾಡಿ</string>
+    <string name="apps_hidden_toast">%1$s ಮರೆಮಾಡಲಾಗಿದೆ. ಇನ್ನಷ್ಟು ಆ್ಯಪ್‌ಗಳಿಂದ ಮತ್ತೆ ತೋರಿಸಬಹುದು.</string>
+    <string name="apps_unhide_all">ಮರೆಮಾಡಿದವನ್ನು ತೋರಿಸಿ (%1$d)</string>
+    <string name="apps_mirror_use">ಸ್ಕ್ರೀನ್ ಮಿರರಿಂಗ್‌ಗೆ ಬಳಸಿ</string>
+    <string name="apps_mirror_stop">ಸ್ಕ್ರೀನ್ ಮಿರರಿಂಗ್‌ಗೆ ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ</string>
+    <string name="greet_home_title">Car Hub ಅನ್ನು ಹೋಮ್ ಆ್ಯಪ್ ಮಾಡಿ, ಆಗ ಗಾಡಿ ಸ್ಟಾರ್ಟ್ ಆದ ತಕ್ಷಣ ಅದು ನಿಮ್ಮನ್ನು ಸ್ವಾಗತಿಸಬಹುದು</string>
+</resources>

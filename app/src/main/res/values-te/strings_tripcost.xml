@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">ప్రయాణ ఖర్చు</string>
+    <string name="trip_cost_example">ఉదాహరణ</string>
+    <string name="trip_cost_route">ప్లాన్ చేసిన రూట్ · %1$s km</string>
+    <string name="trip_cost_tolls">%1$d టోల్‌లు</string>
+    <string name="trip_cost_fuel">ఇంధనం</string>
+    <string name="trip_cost_fuel_unknown">ఒక ఫిల్-అప్ జోడించండి</string>
+    <string name="trip_cost_pass_saves">Annual Pass ఆదా చేసేది</string>
+    <string name="trip_cost_pass_would_save">Annual Pass ఆదా చేసేది (ఉంటే)</string>
+    <string name="trip_cost_pass_trips">%1$d పాస్ ట్రిప్పులు</string>
+    <string name="trip_cost_total">టోల్ + ఇంధనం</string>
+    <string name="trip_cost_note">అంచనా. ఇంధనం మీ సొంత మైలేజ్, చివరి ఫిల్-అప్ ధరను వాడుతుంది. టోల్ రేట్లు మారవచ్చు.</string>
+    <string name="trip_cost_example_note">ప్రివ్యూ కోసం నమూనా సంఖ్యలు, నిజమైన రూట్ కాదు.</string>
+</resources>

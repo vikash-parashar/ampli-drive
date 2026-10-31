@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -92,7 +93,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (state.reply.isNotEmpty() && state.options.isEmpty()) {
+                    if (state.reply.isNotEmpty() && state.options.isEmpty() && state.answer == null) {
                         Text(
                             state.reply,
                             color = theme.muted,
@@ -109,6 +110,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                     primary = false,
                 )
             }
+            state.answer?.let { VoiceAnswerCard(it) }
             if (state.options.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     state.options.forEachIndexed { i, place ->
@@ -140,20 +142,38 @@ private fun MicPulse(phase: Phase) {
                     .size(size)
                     .scale(pulse * 1.1f)
                     .clip(CircleShape)
-                    .background(theme.accent.copy(alpha = 0.25f)),
+                    .background((theme.keys?.voice ?: theme.accent).copy(alpha = if (theme.keys != null) 0.45f else 0.25f)),
             )
         }
+        val soft = theme.isSoft
+        val keys = theme.keys
         Box(
             Modifier
                 .size(size)
-                .clip(CircleShape)
-                .background(if (listening) theme.accent else theme.surfaceHigh),
+                .then(
+                    when {
+                        // Crimson Drive: the green Hey Ampli key, as on the dock.
+                        keys != null && soft -> Modifier
+                            .softSurface(theme, CircleShape, if (listening) SoftDepth.Pressed else SoftDepth.Key, fill = keys.voice)
+                            .clip(CircleShape)
+                            .background(keys.voice)
+                            .border(2.dp, keys.voiceEdge, CircleShape)
+                        // Soft: the mic key sits pressed in (cyan) while it listens.
+                        soft && listening -> Modifier.softWell(theme, CircleShape, SoftDepth.Pressed)
+                        soft -> Modifier.softSurface(theme, CircleShape, SoftDepth.Key).clip(CircleShape)
+                        else -> Modifier.clip(CircleShape).background(if (listening) theme.accent else theme.surfaceHigh)
+                    },
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 if (phase == Phase.Speaking) Icons.Filled.GraphicEq else Icons.Filled.Mic,
                 contentDescription = null,
-                tint = if (listening) theme.onAccent else theme.accentSoft,
+                tint = when {
+                    keys != null && soft -> keys.onVoice
+                    listening && !soft -> theme.onAccent
+                    else -> theme.accentSoft
+                },
                 modifier = Modifier.size(size * 0.5f),
             )
         }
@@ -167,9 +187,7 @@ private fun PlaceOption(index: Int, place: Place, onClick: () -> Unit, modifier:
     Row(
         modifier = modifier
             .heightIn(min = maxOf(dims.d(14f), MinTouch))
-            .clip(theme.cardShape(dims, scale = 0.8f))
-            .background(theme.surfaceHigh)
-            .clickable(onClick = onClick)
+            .themedTap(theme.cardShape(dims, scale = 0.8f), theme.surfaceHigh, onClick = onClick)
             .padding(dims.d(1.6f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),

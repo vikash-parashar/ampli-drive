@@ -1,5 +1,10 @@
 package com.vikash.ampli.drive.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,8 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +45,12 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
     val context = LocalContext.current
     val s by app.car.store.settings.collectAsStateWithLifecycle()
     val bubble by app.prefs.bubble.collectAsStateWithLifecycle()
+    val quickStrip by app.prefs.quickStrip.collectAsStateWithLifecycle()
     val canOverlay = remember(resumeTick) { Settings.canDrawOverlays(context) }
+    val canFullScreen = remember(resumeTick) { canUseFullScreenAlert(context) }
     var askDisclosure by remember { mutableStateOf(false) }
+    // Crash detection was just switched on without "Display over other apps": explain why it helps.
+    var explainOverlay by remember { mutableStateOf(false) }
     if (askDisclosure) {
         DisclosureDialog(
             kind = Disclosure.BackgroundLocation,
@@ -85,9 +93,37 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
                 stringResource(R.string.crash_setting),
                 stringResource(if (app.car.hasMotionSensor) R.string.crash_setting_hint else R.string.crash_no_sensor),
                 s.crashDetection,
-            ) { v -> update { it.copy(crashDetection = v) } }
+            ) { v ->
+                update { it.copy(crashDetection = v) }
+                explainOverlay = v && !Settings.canDrawOverlays(context)
+            }
             if (s.crashDetection) {
                 Text(stringResource(R.string.crash_tap_note), fontSize = dims.t(2.2f), color = theme.warning)
+            }
+            // Without "Display over other apps" the SOS message can't open by itself over another
+            // app after a crash: the explanation card first, then a status row until it is allowed.
+            val needsOverlay = s.crashDetection && !canOverlay
+            AnimatedVisibility(
+                visible = needsOverlay && explainOverlay,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                CrashOverlayCard(onAllow = { openOverlaySettings(context) }, onLater = { explainOverlay = false })
+            }
+            AnimatedVisibility(
+                visible = needsOverlay && !explainOverlay,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                CrashOverlayStatusRow(onAllow = { openOverlaySettings(context) })
+            }
+            // Android 14+: without this the crash SOS alert is only a heads-up notification.
+            AnimatedVisibility(
+                visible = s.crashDetection && !canFullScreen,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                CrashFullScreenStatusRow(onAllow = { openFullScreenAlertSettings(context) })
             }
             CarSwitch(stringResource(R.string.weather_setting), stringResource(R.string.weather_setting_hint), s.weatherAlerts) { v -> update { it.copy(weatherAlerts = v) } }
             CarSwitch(stringResource(R.string.monitor_setting), stringResource(R.string.monitor_setting_hint), s.backgroundMonitor) { v ->
@@ -106,9 +142,27 @@ internal fun CarSettingsCard(app: DriveApp, onOpenCar: () -> Unit, resumeTick: I
             ) { v ->
                 app.prefs.setBubble(v)
                 // Asked for only when switched on: Android's "Display over other apps" page.
-                if (v && !Settings.canDrawOverlays(context)) {
-                    startSafely(context, Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName)))
-                }
+                if (v && !Settings.canDrawOverlays(context)) openOverlaySettings(context)
+            }
+            // Phone-style pull-down over Google Maps and other apps (needs "Display over other apps").
+            CarSwitch(
+                stringResource(R.string.quick_strip_setting),
+                stringResource(if (canOverlay) R.string.quick_strip_hint else R.string.quick_strip_needs_permission),
+                quickStrip && canOverlay,
+            ) { v ->
+                app.prefs.setQuickStrip(v)
+                if (v && !Settings.canDrawOverlays(context)) openOverlaySettings(context)
+            }
+            if (!canOverlay) {
+                BigButton(
+                    stringResource(R.string.quick_strip_allow),
+                    { app.prefs.setQuickStrip(true); openOverlaySettings(context) },
+                    icon = Icons.AutoMirrored.Filled.OpenInNew,
+                    primary = false,
+                )
+            }
+            if (quickStrip && canOverlay && !s.backgroundMonitor) {
+                Text(stringResource(R.string.quick_strip_needs_monitor, stringResource(R.string.monitor_setting)), fontSize = dims.t(2.2f), color = theme.warning)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                 Text(stringResource(R.string.tyres_low_setting), fontSize = dims.t(2.6f), color = theme.muted)

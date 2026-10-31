@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp मैसेज बाजि क\' सुनाउ</string>
+    <string name="disclosure_wa_body">गाड़ी चलबैत काल अहाँक WhatsApp आ WhatsApp Business मैसेज बाजि क\' सुनएबाक लेल Car Hub ओकर नोटिफिकेशन सँ पठाबय बलाक नाम आ मैसेजक टेक्स्ट पढ़ैत अछि। एहि लेल नोटिफिकेशन एक्सेसक उपयोग होइत अछि।</string>
+    <string name="disclosure_wa_uses">प्रत्येक मैसेज एक बेर बाजल जाइत अछि आ फेर बिसरा देल जाइत अछि। ई ड्राइविंग स्क्रीन पर कहियो नहि देखाइत अछि आ कतहु सेव नहि होइत अछि। Car Hub कहियो जवाब नहि दैत अछि, SMS नहि पठबैत अछि आ चैट नहि खोलैत अछि। जाधरि अहाँ अनुमति नहि देब, ग्रुपक मैसेज छोड़ि देल जाइत अछि। जाधरि नोटिफिकेशन एक्सेस चालू अछि, Car Hub बैकग्राउंड मे रहितो ई काज करैत अछि।</string>
+    <string name="disclosure_wa_stays">Car Hub किछु सेव वा अपलोड नहि करैत अछि, आ Ampli Studio वा आन ककरो सँ किछु शेयर नहि करैत अछि। मैसेज अहाँक डिवाइसक अपन बाजय बला इंजन पढ़ैत अछि।</string>
+    <string name="disclosure_park_hint">ई पढ़बाक आ चालू करबाक लेल गाड़ी रोकू।</string>
+    <string name="wa_title">WhatsApp मैसेज बाजि कऽ सुनाउ</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">गाड़ी कहत ककर मैसेज अछि आ ओहि मे की लिखल अछि, मात्र आवाज मे।</string>
+    <string name="wa_hint_on">चालू। मात्र आवाज: मैसेजक टेक्स्ट स्क्रीन पर कहियो नहि देखाइत अछि।</string>
+    <string name="wa_hint_locked">ई Pro फीचर अछि। Pro देखबाक लेल दबाउ।</string>
+    <string name="wa_groups_title">ग्रुपक मैसेज सेहो सुनाउ</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चैट चुप रहैत अछि। मात्र अहाँ केँ सोझे पठाओल मैसेज सुनाओल जाइत अछि।</string>
+    <string name="wa_rules">20 सेकंड मे बेसी सँ बेसी एकटा मैसेज। कॉल आ मोड़क आवाजक समय चुप। Car Hub कहियो जवाब नहि दैत अछि आ किछु नहि पठबैत अछि।</string>
+    <string name="wa_needs_access">WhatsApp मैसेज सुनबाक लेल नोटिफिकेशन एक्सेस चाही।</string>
+    <string name="wa_tts_missing">एहि यूनिट मे बाजय बला इंजन (TTS) नहि अछि, तेँ मैसेज बाजि कऽ नहि सुनाओल जा सकैत अछि। आवाज जाँचू मे जा कऽ एकटा इंजन लगाउ।</string>
+    <string name="wa_park_to_turn_on">चालू करबाक लेल गाड़ी रोकू।</string>
+</resources>

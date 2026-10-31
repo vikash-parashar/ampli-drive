@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">ಮನೆ</string>
+    <string name="place_office">ಆಫೀಸ್</string>
+    <string name="place_not_set">%1$s ಇನ್ನೂ ಉಳಿಸಿಲ್ಲ. ಮೊದಲು ಸ್ಥಳ ಹುಡುಕಿ ಅದನ್ನು ಉಳಿಸಿ.</string>
+    <string name="place_saved">ಉಳಿಸಲಾಗಿದೆ: %1$s</string>
+    <string name="place_full">ಗರಿಷ್ಠ %1$d ಮೆಚ್ಚಿನ ಸ್ಥಳಗಳನ್ನು ಉಳಿಸಬಹುದು. ಮೊದಲು ಒಂದನ್ನು ತೆಗೆದುಹಾಕಿ.</string>
+    <string name="place_save_as">ಈ ಸ್ಥಳವನ್ನು ಹೀಗೆ ಉಳಿಸಿ</string>
+    <string name="place_name">ಹೆಸರು</string>
+    <string name="place_add_favourite">ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ</string>
+    <string name="places_title">ಉಳಿಸಿದ ಸ್ಥಳಗಳು</string>
+    <string name="places_empty">ಹುಡುಕಾಟದ ಫಲಿತಾಂಶದಿಂದ ಅಥವಾ ನೀವು ಈಗ ಇರುವ ಸ್ಥಳದಿಂದ ಮನೆ, ಆಫೀಸ್ ಅಥವಾ ಮೆಚ್ಚಿನ ಸ್ಥಳ ಉಳಿಸಿ.</string>
+    <string name="places_hint">ಟ್ಯಾಪ್ ಮಾಡಿದರೆ ಮಾರ್ಗ ಶುರು. ತೆಗೆಯಲು ಒತ್ತಿ ಹಿಡಿಯಿರಿ.</string>
+    <string name="place_save_here">ನಾನಿರುವ ಸ್ಥಳ ಉಳಿಸಿ</string>
+    <string name="place_save">ಉಳಿಸಿ</string>
+    <string name="trips_title">ಪ್ರಯಾಣ ಇತಿಹಾಸ</string>
+    <string name="trips_hint">ಪ್ರತಿ ಪ್ರಯಾಣ ಈ ಯೂನಿಟ್‌ನಲ್ಲೇ ತಾನಾಗಿ ಉಳಿಯುತ್ತದೆ</string>
+    <string name="trips_week">ಈ ವಾರ</string>
+    <string name="trips_count">ಪ್ರಯಾಣಗಳು: %1$d</string>
+    <string name="trips_fuel">≈ %1$s ಇಂಧನ</string>
+    <string name="trips_fuel_unknown">ಇಂಧನ ವೆಚ್ಚ ನೋಡಲು ಖರ್ಚುಗಳಲ್ಲಿ ಎರಡು ಬಾರಿ ಫುಲ್ ಟ್ಯಾಂಕ್ ತುಂಬಿಸಿದ್ದನ್ನು ದಾಖಲಿಸಿ.</string>
+    <string name="trips_how">ಕಾರು ಚಲಿಸಿದಾಗ GPS ಮೂಲಕ ಪ್ರಯಾಣ ದಾಖಲಾಗುತ್ತದೆ ಮತ್ತು ನಿಂತಾಗ ಮುಗಿಯುತ್ತದೆ. ಕೊನೆಯ %1$d ಪ್ರಯಾಣಗಳನ್ನು ಈ ಯೂನಿಟ್‌ನಲ್ಲಿ ಮಾತ್ರ ಇಡಲಾಗುತ್ತದೆ.</string>
+    <string name="trips_clear">ಪ್ರಯಾಣ ಇತಿಹಾಸ ಅಳಿಸಿ</string>
+    <string name="trips_clear_confirm">ಈ ಯೂನಿಟ್‌ನಿಂದ ಎಲ್ಲಾ ಉಳಿಸಿದ ಪ್ರಯಾಣಗಳನ್ನು ಅಳಿಸಬೇಕೆ?</string>
+    <string name="trips_empty">ಇನ್ನೂ ಯಾವುದೇ ಪ್ರಯಾಣವಿಲ್ಲ. ನಿಮ್ಮ ಪ್ರಯಾಣಗಳು ಇಲ್ಲಿ ತಾನಾಗಿ ಕಾಣುತ್ತವೆ.</string>
+    <string name="trips_avg_top">ಸರಾಸರಿ %1$d · ಗರಿಷ್ಠ %2$d km/h</string>
+    <string name="trips_tile_none">ಇನ್ನೂ ಯಾವುದೇ ಪ್ರಯಾಣವಿಲ್ಲ</string>
+    <string name="trips_tile_week">ಈ ವಾರ %1$s km</string>
+    <string name="speed_volume_title">ವೇಗಕ್ಕೆ ತಕ್ಕ ಧ್ವನಿ</string>
+    <string name="speed_volume_hint">30 km/h ಮೇಲೆ ರಸ್ತೆಯ ಸದ್ದು ಹೆಚ್ಚಾದಾಗ ಸಂಗೀತ ಸ್ವಲ್ಪ ಜೋರಾಗುತ್ತದೆ, ನಿಧಾನವಾದಾಗ ಮತ್ತೆ ಮೊದಲಿನಂತೆ. ನೀವೇ ಧ್ವನಿ ಬದಲಿಸಿದರೆ ಅದೇ ಹೊಸ ಮಟ್ಟವಾಗುತ್ತದೆ.</string>
+    <string name="speed_volume_low">ಕಡಿಮೆ</string>
+    <string name="speed_volume_medium">ಮಧ್ಯಮ</string>
+    <string name="speed_volume_high">ಹೆಚ್ಚು</string>
+    <string name="fav_calls_title">ಮೆಚ್ಚಿನ ಕರೆಗಳು</string>
+    <string name="fav_calls_hint">ಕರೆ ಮಾಡಲು ಹೆಸರನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ. ತೆಗೆಯಲು ಒತ್ತಿ ಹಿಡಿಯಿರಿ. ಗರಿಷ್ಠ %1$d ಜನ.</string>
+    <string name="fav_calls_none">ನಿಮ್ಮ ಸಂಪರ್ಕಗಳಿಂದ %1$d ಜನರವರೆಗೆ ಸೇರಿಸಿ. ನಂತರ ಒಂದು ಟ್ಯಾಪ್‌ನಲ್ಲಿ ಕರೆ.</string>
+    <string name="fav_calls_add">ಸೇರಿಸಿ</string>
+    <string name="fav_calls_open_phone">ಫೋನ್ ಆ್ಯಪ್ ತೆರೆಯಿರಿ</string>
+    <string name="fav_calls_failed">ಈ ಸಂಪರ್ಕವನ್ನು ಓದಲಾಗಲಿಲ್ಲ</string>
+    <string name="fav_calls_full">%1$d ಮೆಚ್ಚಿನವು ಮಾತ್ರ ಸಾಧ್ಯ. ಮೊದಲು ಒಂದನ್ನು ತೆಗೆದುಹಾಕಿ.</string>
+    <string name="fav_calls_type_title">ಮೆಚ್ಚಿನದು ಸೇರಿಸಿ</string>
+    <string name="fav_calls_number">ಫೋನ್ ನಂಬರ್</string>
+    <string name="parked_qr">ನಿಮ್ಮ ಫೋನ್‌ನಿಂದ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ: ಕಾರಿನ ಸ್ಥಳ Google Maps‌ನಲ್ಲಿ ತೆರೆಯುತ್ತದೆ.</string>
+    <string name="store_title">Ampli ಸ್ಟೋರ್</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player ಮತ್ತು ಧ್ವನಿ ಪ್ಯಾಕ್‌ಗಳು</string>
+    <string name="store_pro_line">Pro ಥೀಮ್‌ಗಳು, ಎಂಜಿನ್ ಮತ್ತು ಟೈರ್ ಪರಿಶೀಲನೆ, WhatsApp ಸಂದೇಶ ಓದಿ ಹೇಳುವುದು</string>
+    <string name="store_owned">ಸಕ್ರಿಯ</string>
+    <string name="store_install">ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ</string>
+    <string name="store_voice_punjabi">ಪಂಜಾಬಿ ಧ್ವನಿ ಪ್ಯಾಕ್</string>
+    <string name="store_voice_rajasthani">ರಾಜಸ್ಥಾನಿ ಧ್ವನಿ ಪ್ಯಾಕ್</string>
+    <string name="store_voice_bhojpuri">ಭೋಜ್‌ಪುರಿ ಧ್ವನಿ ಪ್ಯಾಕ್</string>
+    <string name="store_voice_line">ಎಚ್ಚರಿಕೆ ಮತ್ತು ಉತ್ತರಗಳಿಗೆ ನಿಜವಾದ ಮಾನವ ಧ್ವನಿ</string>
+</resources>

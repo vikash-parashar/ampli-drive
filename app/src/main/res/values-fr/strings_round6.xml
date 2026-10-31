@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">Maison</string>
+    <string name="place_office">Bureau</string>
+    <string name="place_not_set">%1$s n\'est pas encore enregistré. Enregistrez-le d\'abord depuis la recherche de lieux.</string>
+    <string name="place_saved">Enregistré : %1$s</string>
+    <string name="place_full">Vous pouvez enregistrer jusqu\'à %1$d favoris. Supprimez-en un d\'abord.</string>
+    <string name="place_save_as">Enregistrer ce lieu comme</string>
+    <string name="place_name">Nom</string>
+    <string name="place_add_favourite">Ajouter aux favoris</string>
+    <string name="places_title">Lieux enregistrés</string>
+    <string name="places_empty">Enregistrez Maison, Bureau ou un favori depuis un résultat de recherche ou depuis votre position actuelle.</string>
+    <string name="places_hint">Touchez pour lancer l\'itinéraire. Maintenez pour supprimer.</string>
+    <string name="place_save_here">Enregistrer ma position</string>
+    <string name="place_save">Enregistrer</string>
+    <string name="trips_title">Historique des trajets</string>
+    <string name="trips_hint">Chaque trajet est enregistré automatiquement sur cet appareil</string>
+    <string name="trips_week">Cette semaine</string>
+    <string name="trips_count">Trajets : %1$d</string>
+    <string name="trips_fuel">≈ %1$s de carburant</string>
+    <string name="trips_fuel_unknown">Ajoutez deux pleins complets dans Dépenses pour voir le coût du carburant.</string>
+    <string name="trips_how">Les trajets sont enregistrés par GPS dès que la voiture roule et se terminent quand elle est garée. Les %1$d derniers trajets sont conservés, uniquement sur cet appareil.</string>
+    <string name="trips_clear">Effacer l\'historique</string>
+    <string name="trips_clear_confirm">Supprimer tous les trajets enregistrés sur cet appareil ?</string>
+    <string name="trips_empty">Aucun trajet pour l\'instant. Vos trajets s\'afficheront ici automatiquement.</string>
+    <string name="trips_avg_top">moy. %1$d · max. %2$d km/h</string>
+    <string name="trips_tile_none">Aucun trajet pour l\'instant</string>
+    <string name="trips_tile_week">%1$s km cette semaine</string>
+    <string name="speed_volume_title">Volume selon la vitesse</string>
+    <string name="speed_volume_hint">La musique monte un peu quand le bruit de la route augmente au-dessus de 30 km/h, puis redescend quand vous ralentissez. Si vous changez le volume vous-même, il devient le nouveau niveau.</string>
+    <string name="speed_volume_low">Faible</string>
+    <string name="speed_volume_medium">Moyen</string>
+    <string name="speed_volume_high">Fort</string>
+    <string name="fav_calls_title">Appels favoris</string>
+    <string name="fav_calls_hint">Touchez un nom pour appeler. Maintenez pour le retirer. Jusqu\'à %1$d personnes.</string>
+    <string name="fav_calls_none">Ajoutez jusqu\'à %1$d personnes depuis vos contacts. Ensuite, une touche suffit pour appeler.</string>
+    <string name="fav_calls_add">Ajouter</string>
+    <string name="fav_calls_open_phone">Ouvrir l\'app Téléphone</string>
+    <string name="fav_calls_failed">Impossible de lire ce contact</string>
+    <string name="fav_calls_full">Seulement %1$d favoris possibles. Retirez-en un d\'abord.</string>
+    <string name="fav_calls_type_title">Ajouter un favori</string>
+    <string name="fav_calls_number">Numéro de téléphone</string>
+    <string name="parked_qr">Scannez avec votre téléphone : l\'emplacement s\'ouvre dans Google Maps.</string>
+    <string name="store_title">Ampli Store</string>
+    <string name="store_hint">Car Hub Pro, le lecteur MP3 et les packs de voix</string>
+    <string name="store_pro_line">Thèmes Pro, contrôle moteur et pneus, lecture des messages WhatsApp</string>
+    <string name="store_owned">Débloqué</string>
+    <string name="store_install">Installer</string>
+    <string name="store_voice_punjabi">Pack de voix pendjabi</string>
+    <string name="store_voice_rajasthani">Pack de voix rajasthani</string>
+    <string name="store_voice_bhojpuri">Pack de voix bhojpuri</string>
+    <string name="store_voice_line">Vraie voix humaine pour les alertes et les réponses</string>
+</resources>

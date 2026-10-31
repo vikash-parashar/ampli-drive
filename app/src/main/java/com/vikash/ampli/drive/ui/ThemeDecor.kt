@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.addOutline
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.CrimsonPalette
 import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
 import com.vikash.ampli.drive.ui.theme.GlassPalette
@@ -103,7 +105,8 @@ fun Modifier.themedCard(
     var m = this
     val glass = theme.glass
     when (theme.cardStyle) {
-        CardStyle.Neumorphic -> m = m.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight)
+        // Cached nine-slice shadows: setShadowLayer draws nothing on hardware canvases before API 28.
+        CardStyle.Neumorphic -> m = m.softSurface(theme, shape, SoftDepth.Panel, fill = (fill as? SolidColor)?.value ?: theme.surface)
         CardStyle.NeonGlow -> m = m.neonGlow(shape, border)
         CardStyle.Glass -> m = if (glass != null) {
             // Soft, wide drop shadow, as on iOS widgets.
@@ -172,7 +175,11 @@ private fun Modifier.backdropBlur(theme: DriveTheme, glass: GlassPalette): Modif
     }
 }
 
-/** Neumorphic double shadow: dark below-right, light above-left (CSS `--up`). */
+/**
+ * Neumorphic double shadow: dark below-right, light above-left (CSS `--up`).
+ * Soft surfaces use [softSurface] instead; this one is for small round bits on [fill], and like
+ * every setShadowLayer shadow it shows only on Android 9+ hardware canvases.
+ */
 fun Modifier.softShadow(
     shape: Shape,
     fill: Color,
@@ -289,9 +296,26 @@ fun Modifier.themeBackground(theme: DriveTheme): Modifier {
                 }
             }
             Decoration.Glass -> theme.glass?.let { drawGlassBackdrop(it) }
+            Decoration.Forest -> drawForest()
             Decoration.Scanlines, Decoration.None -> Unit
         }
     }
+}
+
+/**
+ * Crimson Drive backdrop: CSS `radial-gradient(70% 90% at 15% 30%, #0b1d14, #06110c 55%, #030806)`.
+ * One gradient rect per frame, no bitmap.
+ */
+internal fun DrawScope.drawForest() {
+    drawRect(
+        Brush.radialGradient(
+            0f to Color(CrimsonPalette.FOREST_GLOW),
+            0.55f to Color(CrimsonPalette.FOREST),
+            1f to Color(CrimsonPalette.FOREST_EDGE),
+            center = Offset(size.width * 0.15f, size.height * 0.3f),
+            radius = max(size.width, size.height) * 0.9f,
+        ),
+    )
 }
 
 /** Glass family backdrop: a vertical gradient and soft colour blobs for the panels to blur. */

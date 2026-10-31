@@ -34,7 +34,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.withFrameNanos
+import com.vikash.ampli.drive.system.StartupTiming
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -80,6 +83,9 @@ import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/** Low-end units: how long after the first Home frame the map and music card are added. */
+private const val HEAVY_DELAY_MS = 250L
+
 /** The map surface type was switched once this run after drawing nothing; don't flip back and forth. */
 private var mapModeFlipped = false
 
@@ -108,7 +114,6 @@ fun HomeScreen(
     val context = LocalContext.current
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
-    val autoPackage by app.prefs.autoPackage.collectAsStateWithLifecycle()
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
     val nav by app.navigator.state.collectAsStateWithLifecycle()
     val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
@@ -140,15 +145,37 @@ fun HomeScreen(
         Unit
     }
     val gap = dims.d(2f)
-    var linkMissing by remember { mutableStateOf(false) }
-    if (linkMissing) {
-        PhoneLinkMissingDialog(
-            onOpenApps = {
-                linkMissing = false
-                onOpenApps()
-            },
-            onDismiss = { linkMissing = false },
-        )
+    // Crimson Drive: the car fills the map pane while there is no route. A tap on it (or "Show
+    // map") brings the live map; it comes back when a route ends.
+    var heroHidden by remember { mutableStateOf(false) }
+    LaunchedEffect(nav.visible) { if (!nav.visible) heroHidden = false }
+    val showHero = theme.keys?.heroCar == true && !nav.visible && !heroHidden
+    var phoneCard by remember { mutableStateOf(false) }
+    if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
+    // Phone Link: Car Hub's own sheet (connected phone, phone music, devices), not the unit's
+    // paid mirroring app. Voice "connect my phone" opens it too.
+    var phoneLink by remember { mutableStateOf(false) }
+    val linkAsked by app.phoneBt.sheetRequested.collectAsStateWithLifecycle()
+    LaunchedEffect(linkAsked) {
+        if (linkAsked) {
+            app.phoneBt.sheetShown()
+            phoneLink = true
+        }
+    }
+    if (phoneLink) PhoneLinkSheet(app = app, onDismiss = { phoneLink = false }, onRequestPermissions = onRequestPermissions)
+    val btDevices by app.phoneBt.devices.collectAsStateWithLifecycle()
+    val phoneName = app.phoneBt.connectedPhone(btDevices)?.name ?: bt.connectedName
+
+    // Fast start on 1-2 GB units: the first frame has only the light panes; the map and music
+    // card come right after it. The cold-start time (Diagnostics) is taken at that first frame.
+    var heavyReady by remember { mutableStateOf(!app.lowEnd || StartupTiming.homeShown) }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        StartupTiming.onFirstHomeFrame(context.applicationContext)
+        if (!heavyReady) {
+            delay(HEAVY_DELAY_MS)
+            heavyReady = true
+        }
     }
 
     Column(
@@ -206,7 +233,7 @@ fun HomeScreen(
                 .weight(1f),
             horizontalArrangement = Arrangement.spacedBy(gap),
         ) {
-            val map = @Composable { m: Modifier, showTurn: Boolean ->
+            val liveMap = @Composable { m: Modifier, showTurn: Boolean ->
                 Box(m) {
                     val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
                     val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
@@ -228,12 +255,33 @@ fun HomeScreen(
                         nav = nav,
                         onOpenNav = onOpenNavScreen,
                     )
+                    // Home, Office and favourites: one tap starts the route (hidden while navigating).
+                    if (!nav.visible) {
+                        SavedPlaceChips(
+                            app = app,
+                            modifier = Modifier.align(Alignment.TopStart).padding(dims.d(1.4f)),
+                        )
+                    }
                     // Where the car is parked, while parked.
                     ParkedPill(
                         app = app,
                         onClick = onOpenParked,
                         modifier = Modifier.align(Alignment.BottomEnd).padding(end = dims.d(2f), bottom = dims.d(5f)),
                     )
+                }
+            }
+            val map = @Composable { m: Modifier, showTurn: Boolean ->
+                when {
+                    // Crimson Drive, parked: the car picture until a route starts or the map is asked for.
+                    showHero -> CarHeroPane(
+                        app = app,
+                        onGoHome = { goToSavedPlace(app, context, it) },
+                        onWhereTo = openNav,
+                        onShowMap = { heroHidden = true },
+                        modifier = m,
+                    )
+                    heavyReady -> liveMap(m, showTurn)
+                    else -> Pane(m) {}
                 }
             }
             val obd by app.obd.state.collectAsStateWithLifecycle()
@@ -245,7 +293,19 @@ fun HomeScreen(
                     modifier = m,
                 )
             }
-            val music = @Composable { m: Modifier -> MusicCard(hub = app.mediaHub, resumeTick = resumeTick, modifier = m) }
+            val music = @Composable { m: Modifier ->
+                if (heavyReady) {
+                    MusicCard(
+                        hub = app.mediaHub,
+                        resumeTick = resumeTick,
+                        modifier = m,
+                        phoneName = phoneName,
+                        onPhoneKey = app.phoneBt::key,
+                    )
+                } else {
+                    Pane(m) {}
+                }
+            }
 
             when (theme.layout) {
                 HomeLayout.MapSpeedMusic -> {
@@ -317,15 +377,14 @@ fun HomeScreen(
                 .height(maxOf(dims.d(15f), MinTouch)),
             onNavigate = openNav,
             onVoice = { app.voice.start() },
-            onMusic = { Launchers.openMusic(context, app.mediaHub.currentPackage()) },
-            onPhone = { Launchers.openDialer(context) },
+            onMusic = { Launchers.openMusic(context) },
+            // The Phone card: favourite calls and "Open phone app".
+            onPhone = { phoneCard = true },
             // Long-press Music / Phone: pick which app the button opens.
             onMusicLong = { AppChooser.ask(AppRole.Music) },
             onPhoneLong = { AppChooser.ask(AppRole.Phone) },
-            // Phone link: the screen's CarPlay / Android Auto app (Launchers.PHONE_LINK_PACKAGES).
-            onAuto = {
-                if (!Launchers.openPhoneLink(context, autoPackage)) linkMissing = true
-            },
+            // Phone link: Car Hub's own sheet (a mirroring app only when the driver picked one).
+            onAuto = { phoneLink = true },
             onCar = onOpenCar,
             carAlert = carAlert,
             onApps = onOpenApps,
@@ -378,7 +437,7 @@ private fun StatusRow(
         Text(
             theme.label(now.format(dateFmt)),
             style = theme.labelStyle(),
-            fontSize = dims.t(2.6f),
+            fontSize = dims.t(2.6f, min = 16f),
         )
         // Saffron family: a "have a safe trip" line in an Indian script, as in the designs.
         theme.greeting?.let {
@@ -479,7 +538,7 @@ private fun Dock(
         val item = Modifier.weight(1f).fillMaxHeight()
         DockButton(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, onNavigate, item, highlight = true)
         // Same flow as the wake word; works without "Always listen" and without the model.
-        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item)
+        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item, voice = true)
         DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item, onLongClick = onMusicLong)
         DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item, onLongClick = onPhoneLong)
         DockButton(stringResource(R.string.dock_phone_link), Icons.Filled.PhonelinkRing, onAuto, item)
@@ -503,28 +562,45 @@ private fun DockButton(
     highlight: Boolean = false,
     badge: Boolean = false,
     onLongClick: (() -> Unit)? = null,
+    /** Hey Ampli: the green key on Crimson Drive. */
+    voice: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.cardStyle == CardStyle.Skewed) skewShape(0.22f) else theme.cardShape(dims, scale = 0.9f)
     val fill = if (highlight) theme.dockActive else theme.surface
+    val voiceKeys = theme.keys?.takeIf { voice && theme.isSoft }
     val iconTint = when {
+        voiceKeys != null -> voiceKeys.onVoice
         highlight -> theme.onDockActive
         theme.cardStyle == CardStyle.NeonGlow -> theme.accent2
         theme.id == "ampli_rose" -> theme.accentSoft
         theme.family == ThemeFamily.Saffron -> theme.accent
         else -> theme.text
     }
-    val labelColor = if (highlight) theme.onDockActive else theme.muted
+    val labelColor = when {
+        voiceKeys != null -> voiceKeys.onVoice
+        highlight -> theme.onDockActive
+        else -> theme.muted
+    }
     // Minimal Mono marks the active item with a bar on top instead of a fill.
     val topBar = highlight && theme.id == "minimal_mono"
     Column(
         modifier = modifier
-            .themedCard(
-                theme,
-                shape,
-                fill = Brush.linearGradient(listOf(fill, fill)),
-                border = if (highlight && theme.cardStyle != CardStyle.Outline) Color.Transparent else theme.border,
+            .then(
+                if (voiceKeys != null) {
+                    Modifier.voiceKey(theme, voiceKeys, shape, onClick, onLongClick)
+                } else if (theme.isSoft) {
+                    // Soft key: raised, presses in on touch with a short haptic tick.
+                    Modifier.softClickable(theme, shape, onClick, onLongClick = onLongClick)
+                } else {
+                    Modifier.themedCard(
+                        theme,
+                        shape,
+                        fill = Brush.linearGradient(listOf(fill, fill)),
+                        border = if (highlight && theme.cardStyle != CardStyle.Outline) Color.Transparent else theme.border,
+                    )
+                },
             )
             .then(
                 if (topBar) {
@@ -536,7 +612,7 @@ private fun DockButton(
                     Modifier
                 },
             )
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            .then(if (theme.isSoft) Modifier else Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -561,9 +637,11 @@ private fun DockButton(
         Text(
             theme.label(label),
             style = theme.labelStyle(labelColor),
-            fontSize = dims.t(2.2f),
-            fontWeight = if (highlight) FontWeight.Bold else FontWeight.SemiBold,
-            maxLines = 1,
+            fontSize = dims.t(2.2f, min = 16f),
+            fontWeight = if (highlight || voiceKeys != null) FontWeight.Bold else FontWeight.SemiBold,
+            // 16 sp minimum on the driving screen: a long label ("HEY AMPLI") wraps instead of "…".
+            maxLines = 2,
+            lineHeight = dims.t(2.4f, min = 18f),
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 4.dp),

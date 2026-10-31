@@ -10,15 +10,15 @@ import org.junit.Test
 class ThemeAccessTest {
 
     private val known = setOf(
-        "midnight_glass", DrivePrefs.DEFAULT_NIGHT, DrivePrefs.DEFAULT_DAY, "sport_red",
+        "midnight_glass", DrivePrefs.DEFAULT_FIXED, DrivePrefs.DEFAULT_NIGHT, DrivePrefs.DEFAULT_DAY, "ampli_rose", "daylight_clean", "sport_red",
         ThemeAccess.FROSTED_GLASS, ThemeAccess.MIDNIGHT_FROST, "rose_glass", "cyan_glass",
         ThemeAccess.SAFFRON_NIGHT, "saffron_day", "soft_glass",
     )
 
     @Test
-    fun exactlyFiveFreeThemes() {
+    fun exactlyEightFreeThemes() {
         assertEquals(
-            setOf("ampli_rose", "daylight_clean", "frosted_glass", "midnight_frost", "desi_saffron"),
+            setOf("crimson_drive", "ampli_soft_day", "ampli_soft_night", "ampli_rose", "daylight_clean", "frosted_glass", "midnight_frost", "desi_saffron"),
             ThemeAccess.FREE_IDS,
         )
     }
@@ -45,7 +45,7 @@ class ThemeAccessTest {
         assertEquals(DrivePrefs.DEFAULT_DAY, ThemeAccess.resolveId(auto, night = false, isPro = false, known = known))
         assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(auto, night = true, isPro = false, known = known))
         val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = "sport_red")
-        assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(fixed, night = false, isPro = false, known = known))
+        assertEquals(DrivePrefs.DEFAULT_FIXED, ThemeAccess.resolveId(fixed, night = false, isPro = false, known = known))
     }
 
     @Test
@@ -66,6 +66,7 @@ class ThemeAccessTest {
     fun defaultsAreFree() {
         assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_DAY))
         assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_NIGHT))
+        assertTrue(ThemeAccess.isFree(DrivePrefs.DEFAULT_FIXED))
     }
 
     /** Head-unit report: with Pro on, picking a Pro theme must change the theme on screen. */
@@ -97,6 +98,6 @@ class ThemeAccessTest {
     fun proSelectionWithoutProFallsBack() {
         val fixed = ThemeChoice(auto = false, dayId = "", nightId = "", fixedId = DrivePrefs.DEFAULT_NIGHT)
         val picked = ThemeAccess.select(fixed, "cyan_glass", forNight = true)
-        assertEquals(DrivePrefs.DEFAULT_NIGHT, ThemeAccess.resolveId(picked, night = true, isPro = false, known = known))
+        assertEquals(DrivePrefs.DEFAULT_FIXED, ThemeAccess.resolveId(picked, night = true, isPro = false, known = known))
     }
 }

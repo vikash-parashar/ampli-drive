@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp বাৰ্তা মাতি শুনাওক</string>
+    <string name="disclosure_wa_body">গাড়ী চলাই থকাৰ সময়ত আপোনাৰ WhatsApp আৰু WhatsApp Business বাৰ্তা মাতি শুনাবলৈ Car Hub-এ সেইবোৰৰ জাননীৰ পৰা প্ৰেৰকৰ নাম আৰু বাৰ্তাৰ লিখনি পঢ়ে। ইয়াৰ বাবে জাননী এক্সেছ ব্যৱহাৰ কৰা হয়।</string>
+    <string name="disclosure_wa_uses">প্ৰতিটো বাৰ্তা এবাৰহে মাতি শুনোৱা হয়, তাৰ পিছত পাহৰি যোৱা হয়। ই কেতিয়াও ড্ৰাইভিং স্ক্ৰীনত দেখুওৱা নহয় আৰু ক\'তো ছেভ কৰা নহয়। Car Hub-এ কেতিয়াও উত্তৰ নিদিয়ে, SMS নপঠিয়ায় আৰু চেট নোখোলে। আপুনি অনুমতি নিদিয়া পৰ্যন্ত গোটৰ বাৰ্তা এৰি দিয়া হয়। জাননী এক্সেছ অন থকালৈকে Car Hub পটভূমিত থাকিলেও এইটোৱে কাম কৰে।</string>
+    <string name="disclosure_wa_stays">Car Hub-এ একো ছেভ বা আপলোড নকৰে, আৰু Ampli Studio বা আন কাৰো লগত একো শ্বেয়াৰ নকৰে। আপোনাৰ ডিভাইচৰ নিজা কথন ইঞ্জিনে বাৰ্তাটো পঢ়ে।</string>
+    <string name="disclosure_park_hint">এইটো পঢ়িবলৈ আৰু অন কৰিবলৈ গাড়ী ৰখাওক।</string>
+    <string name="wa_title">WhatsApp বাৰ্তা মাতি শুনাওক</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">কোনে লিখিছে আৰু বাৰ্তাত কি আছে, গাড়ীয়ে কয়, কেৱল মাতত।</string>
+    <string name="wa_hint_on">অন। কেৱল মাত: বাৰ্তাৰ লিখনি স্ক্ৰীনত কেতিয়াও দেখুওৱা নহয়।</string>
+    <string name="wa_hint_locked">এইটো Pro সুবিধা। Pro চাবলৈ টিপক।</string>
+    <string name="wa_groups_title">গোটৰ বাৰ্তাও পঢ়ক</string>
+    <string name="wa_groups_hint">অফ: গোট চেট মনে মনে থাকে। কেৱল পোনপটীয়াকৈ আপোনালৈ পঠোৱা বাৰ্তা পঢ়া হয়।</string>
+    <string name="wa_rules">20 ছেকেণ্ডত বেছি হ\'লে এটা বাৰ্তা। কল আৰু ঘূৰণিৰ নিৰ্দেশৰ সময়ত মনে মনে। Car Hub-এ কেতিয়াও উত্তৰ নিদিয়ে আৰু একো নপঠায়।</string>
+    <string name="wa_needs_access">WhatsApp বাৰ্তা শুনিবলৈ জাননী এক্সেছ লাগে।</string>
+    <string name="wa_tts_missing">এই ইউনিটত কথন ইঞ্জিন নাই, সেয়ে বাৰ্তা মাতি শুনাব নোৱাৰি। মাত পৰীক্ষা কৰক-ত গৈ এটা ইঞ্জিন ইনষ্টল কৰক।</string>
+    <string name="wa_park_to_turn_on">অন কৰিবলৈ গাড়ী ৰখাওক।</string>
+</resources>

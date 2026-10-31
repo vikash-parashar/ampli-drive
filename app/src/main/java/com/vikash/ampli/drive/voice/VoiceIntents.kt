@@ -1,5 +1,8 @@
 package com.vikash.ampli.drive.voice
 
+import com.vikash.ampli.drive.cameras.ReportKind
+import com.vikash.ampli.drive.fuel.FuelFilter
+import com.vikash.ampli.drive.nav.SavedKind
 import java.util.Locale
 
 /** What the driver asked for, after the wake word. */
@@ -7,9 +10,18 @@ sealed interface VoiceIntent {
     /** [destination] may be empty ("navigate"), then the assistant asks where to. */
     data class Navigate(val destination: String) : VoiceIntent
 
+    /** "Ghar chalo", "go home", "office le chalo": the saved Home or Office (never a favourite). */
+    data class GoSaved(val kind: SavedKind) : VoiceIntent
+
     /** 0-based pick from the spoken list of places ("the second one" = 1). */
     data class ChooseOption(val index: Int) : VoiceIntent
     data object NextCamera : VoiceIntent
+
+    /** "Nearest CNG pump", "petrol pump kahan hai", "charging station": the offline fuel finder. */
+    data class FindFuel(val filter: FuelFilter) : VoiceIntent
+
+    /** "Police aage hai", "accident ahead", "आगे जाम है": a road report at the car's spot (Pro). */
+    data class ReportRoad(val kind: ReportKind) : VoiceIntent
 
     /** Song from USB / SD / internal storage. Also plain "play <song>". */
     data class PlayLocal(val query: String) : VoiceIntent
@@ -42,6 +54,41 @@ sealed interface VoiceIntent {
 
     /** "Report a problem", "send feedback": opens Help & feedback (the form waits until parked). */
     data object ReportProblem : VoiceIntent
+
+    /** "Volume up", "awaaz badhao", "volume 5", "mute". [level] only for [VolumeAction.Set]. */
+    data class Volume(val action: VolumeAction, val level: Int? = null) : VoiceIntent
+
+    enum class VolumeAction { Up, Down, Max, Mute, Unmute, Set, Show }
+
+    /**
+     * A bare "stop", "ruko", "band karo": pauses the music when something is playing, otherwise
+     * ends the conversation like [Cancel]. "Stop music" is [Pause]; "stop navigation" is
+     * [StopNavigation].
+     */
+    data object Stop : VoiceIntent
+    data object StopNavigation : VoiceIntent
+
+    /** "What is the time", "kitne baje hain"; "aaj kya date hai". */
+    data object TimeNow : VoiceIntent
+    data object DateToday : VoiceIntent
+
+    /** "How is the weather", "mausam kaisa hai"; [rain] for "baarish hogi kya". */
+    data class Weather(val rain: Boolean) : VoiceIntent
+
+    /** "What's my speed", "speed kitni hai". */
+    data object Speed : VoiceIntent
+
+    /** "Open maps", "map kholo". */
+    data object OpenMaps : VoiceIntent
+
+    /** "Brightness up / down"; [up] null for a bare "brightness" (shows the level). */
+    data class Brightness(val up: Boolean?) : VoiceIntent
+
+    /** "Bluetooth settings", "Bluetooth kholo". */
+    data object BluetoothSettings : VoiceIntent
+
+    /** "What can I say?", "kya kya bol sakte hain": the full command list. */
+    data object WhatCanISay : VoiceIntent
     data object Cancel : VoiceIntent
     data class Unknown(val text: String) : VoiceIntent
 }
@@ -68,13 +115,30 @@ object VoiceIntents {
         if (expectingChoice && words <= 6) {
             ordinal(t, kw)?.let { return VoiceIntent.ChooseOption(it) }
         }
+        if (STOP_NAV.any { has(t, it) }) return VoiceIntent.StopNavigation
         if (kw.pause.any { has(t, it) }) return VoiceIntent.Pause
+        val playWord = kw.play.any { has(t, it) }
+        if (!playWord) volume(t)?.let { return it }
+        if (trimFillers(t, STOP_FILLERS) in STOP_EXACT) return VoiceIntent.Stop
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
+        // "Accident ahead" is a road report; "accident", "help me", "ambulance" alone stay SOS.
+        if (!playWord && REPORT_ACCIDENT.any { has(t, it) } && AHEAD.any { has(t, it) } && SOS_STRONG.none { has(t, it) }) {
+            roadReport(t, kw)?.let { return it }
+        }
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
         if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
+        if (!playWord) {
+            roadReport(t, kw)?.let { return it }
+            fuel(t)?.let { return it }
+        }
+        if (WHAT_CAN_I_SAY.any { has(t, it) }) return VoiceIntent.WhatCanISay
         carQuestion(t)?.let { return it }
+        // "Barish ke gaane bajao" is music and "take me to the weather station" a place.
+        if (!(playWord && kw.music.any { has(t, it) }) && kw.navigate.none { has(t, it) }) infoQuestion(t)?.let { return it }
         if (words <= 8) smallTalk(t)?.let { return it }
         if (kw.camera.any { has(t, it) }) return VoiceIntent.NextCamera
+        if (SPEED.any { has(t, it) }) return VoiceIntent.Speed
+        if (!playWord) screenCommand(t)?.let { return it }
         if (kw.auto.any { has(t, it) }) return VoiceIntent.OpenAndroidAuto
         if (kw.next.any { has(t, it) } && (words <= 4 || kw.music.any { has(t, it) })) return VoiceIntent.Next
         if (kw.previous.any { has(t, it) } && (words <= 4 || kw.music.any { has(t, it) })) return VoiceIntent.Previous
@@ -94,8 +158,11 @@ object VoiceIntents {
         if (kw.call.any { has(t, it) }) {
             return VoiceIntent.CallContact(trimFillers(remove(t, kw.call), kw.fillers))
         }
+        if (words <= 6) savedPhrase(t, kw.fillers + kw.placeFillers)?.let { return VoiceIntent.GoSaved(it) }
         if (kw.navigate.any { has(t, it) }) {
-            return VoiceIntent.Navigate(trimFillers(remove(t, kw.navigate), kw.fillers + kw.placeFillers))
+            val dest = trimFillers(remove(t, kw.navigate), kw.fillers + kw.placeFillers)
+            savedKind(dest)?.let { return VoiceIntent.GoSaved(it) }
+            return VoiceIntent.Navigate(dest)
         }
         if (words <= 6 && kw.greeting.any { has(t, it) }) return VoiceIntent.Greeting
         return VoiceIntent.Unknown(text.trim())
@@ -112,6 +179,341 @@ object VoiceIntents {
         CAR_ENGINE.any { has(t, it) } -> VoiceIntent.EngineStatus
         else -> null
     }
+
+    // --------------------------------------------------------------- Round 7: volume, time, weather
+
+    /**
+     * Volume, English / Hindi / Hinglish in any app language: "volume up", "awaaz badhao",
+     * "volume full", "mute", "unmute", "volume 5", "आवाज़ पाँच कर दो". A bare "volume" shows the
+     * level (and waits for "up" / "down" / "more"). Null when it isn't about volume.
+     */
+    private fun volume(t: String): VoiceIntent? {
+        if (UNMUTE.any { has(t, it) }) return VoiceIntent.Volume(VoiceIntent.VolumeAction.Unmute)
+        if (MUTE.any { has(t, it) }) return VoiceIntent.Volume(VoiceIntent.VolumeAction.Mute)
+        val noun = VOLUME_NOUN.any { has(t, it) }
+        if (!noun) {
+            if (LOUDER.any { has(t, it) }) return VoiceIntent.Volume(VoiceIntent.VolumeAction.Up)
+            if (QUIETER.any { has(t, it) }) return VoiceIntent.Volume(VoiceIntent.VolumeAction.Down)
+            return null
+        }
+        // Digits first ("volume up to 8" is 8), then the direction, then a number word, so
+        // "volume up kar do" stays "up".
+        digitsIn(t)?.let { return VoiceIntent.Volume(VoiceIntent.VolumeAction.Set, it) }
+        return when {
+            FULL.any { has(t, it) } -> VoiceIntent.Volume(VoiceIntent.VolumeAction.Max)
+            DOWN.any { has(t, it) } -> VoiceIntent.Volume(VoiceIntent.VolumeAction.Down)
+            UP.any { has(t, it) } -> VoiceIntent.Volume(VoiceIntent.VolumeAction.Up)
+            else -> numberWordIn(t)?.let { VoiceIntent.Volume(VoiceIntent.VolumeAction.Set, it) }
+                ?: VoiceIntent.Volume(VoiceIntent.VolumeAction.Show)
+        }
+    }
+
+    /**
+     * Right after a volume change Ampli listens once more: "aur" / "more" / "thoda aur" repeats
+     * [last] (up or down), "aur kam" / "aur tez" goes that way. Null for anything else.
+     */
+    fun volumeFollowUp(text: String, last: VoiceIntent.VolumeAction): VoiceIntent.VolumeAction? {
+        val t = stripWakeWord(normalize(text))
+        if (t.isEmpty()) return null
+        if (DOWN.any { has(t, it) } || QUIETER.any { has(t, it) }) return VoiceIntent.VolumeAction.Down
+        if (UP.any { has(t, it) } || LOUDER.any { has(t, it) }) return VoiceIntent.VolumeAction.Up
+        if (MORE.any { has(t, it) } && (last == VoiceIntent.VolumeAction.Up || last == VoiceIntent.VolumeAction.Down)) return last
+        return null
+    }
+
+    /** "What time is it", "kitne baje", "aaj kya date hai", "mausam kaisa hai", "baarish hogi kya". */
+    private fun infoQuestion(t: String): VoiceIntent? = when {
+        DATE.any { has(t, it) } -> VoiceIntent.DateToday
+        TIME.any { has(t, it) } -> VoiceIntent.TimeNow
+        RAIN.any { has(t, it) } -> VoiceIntent.Weather(rain = true)
+        WEATHER.any { has(t, it) } -> VoiceIntent.Weather(rain = false)
+        else -> null
+    }
+
+    /** "Open maps", "brightness up", "Bluetooth settings". */
+    private fun screenCommand(t: String): VoiceIntent? = when {
+        OPEN_MAPS.any { has(t, it) } -> VoiceIntent.OpenMaps
+        BRIGHTNESS.any { has(t, it) } -> VoiceIntent.Brightness(
+            when {
+                has(t, "dimmer") || DOWN.any { has(t, it) } || QUIETER.any { has(t, it) } -> false
+                has(t, "brighter") || UP.any { has(t, it) } || FULL.any { has(t, it) } -> true
+                else -> null
+            },
+        )
+        BT_SETTINGS.any { has(t, it) } -> VoiceIntent.BluetoothSettings
+        else -> null
+    }
+
+    /** A spoken level in digits ("5", "५"), 0 to 100. */
+    internal fun digitsIn(t: String): Int? {
+        for (w in t.split(' ')) {
+            val digits = w.map { c -> if (c in '०'..'९') '0' + (c - '०') else c }.joinToString("")
+            digits.toIntOrNull()?.let { if (it in 0..100) return it }
+        }
+        return null
+    }
+
+    /**
+     * A number word up to a hundred, English or Hindi; the longest match wins. Hindi "do" / "दो"
+     * (two) is left out: it is also the "kar do" in every request.
+     */
+    internal fun numberWordIn(t: String): Int? {
+        var best: Int? = null
+        var bestLen = 0
+        for ((word, n) in NUMBER_WORDS) {
+            if (word.length > bestLen && has(t, word)) {
+                best = n
+                bestLen = word.length
+            }
+        }
+        return best
+    }
+
+    /**
+     * Recognisers write Hindi letters with a dot (ज़, फ़, ड़) either as one character or as the letter
+     * plus a nukta sign, and often drop the dot. The round-7 phrases match all three spellings.
+     */
+    internal fun nuktaForms(phrase: String): List<String> {
+        val decomposed = java.text.Normalizer.normalize(phrase, java.text.Normalizer.Form.NFD)
+        val bare = decomposed.replace("\u093C", "")
+        var composed = decomposed
+        for ((pair, single) in NUKTA_PAIRS) composed = composed.replace(pair, single)
+        return listOf(phrase, decomposed, bare, composed).distinct()
+    }
+
+    private val NUKTA_PAIRS = listOf(
+        "\u0915\u093C" to "\u0958", "\u0916\u093C" to "\u0959", "\u0917\u093C" to "\u095A", "\u091C\u093C" to "\u095B",
+        "\u0921\u093C" to "\u095C", "\u0922\u093C" to "\u095D", "\u092B\u093C" to "\u095E", "\u092F\u093C" to "\u095F",
+    )
+
+    private val NUMBER_WORDS: List<Pair<String, Int>> = listOf(
+        "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5, "six" to 6, "seven" to 7,
+        "eight" to 8, "nine" to 9, "ten" to 10, "eleven" to 11, "twelve" to 12, "fifteen" to 15, "twenty" to 20,
+        "fifty" to 50, "hundred" to 100,
+        "शून्य" to 0, "एक" to 1, "तीन" to 3, "चार" to 4, "पांच" to 5, "पाँच" to 5, "छह" to 6, "छः" to 6,
+        "सात" to 7, "आठ" to 8, "नौ" to 9, "दस" to 10, "ग्यारह" to 11, "बारह" to 12, "पंद्रह" to 15, "बीस" to 20,
+        "पचास" to 50, "सौ" to 100,
+        "ek" to 1, "teen" to 3, "char" to 4, "chaar" to 4, "paanch" to 5, "panch" to 5, "chhe" to 6,
+        "chhah" to 6, "saat" to 7, "aath" to 8, "nau" to 9, "das" to 10, "gyarah" to 11, "barah" to 12,
+        "pandrah" to 15, "bees" to 20, "pachas" to 50, "sau" to 100,
+    ).map { normalize(it.first) to it.second }
+
+    private val VOLUME_NOUN = listOf(
+        "volume", "the volume", "वॉल्यूम", "वोल्यूम", "आवाज़", "आवाज", "आवाज़", "awaaz", "awaz", "aawaz",
+        "aawaaz", "avaaz", "avaz", "volum",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val UP = listOf(
+        "up", "increase", "raise", "louder", "higher", "more", "badhao", "badha do", "badhaao", "badhai", "tez",
+        "tej", "tez karo", "zyada", "jyada", "unchi", "oonchi", "upar", "बढ़ाओ", "बढ़ा दो", "बढ़ाइए", "बढ़ा", "बढाओ", "बढा दो",
+        "तेज़", "तेज", "ज़्यादा", "ज्यादा", "ऊंची", "ऊँची", "ऊपर", "बधा", "बढ़ा दे", "बधा दे",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val DOWN = listOf(
+        "down", "decrease", "lower", "reduce", "less", "softer", "quieter", "kam", "kam karo", "kam kar do", "dheemi",
+        "dheema", "dheere", "halki", "neeche", "niche", "कम", "कम करो", "कम कर दो", "धीमी", "धीमा", "धीरे", "हल्की",
+        "नीचे", "घटाओ", "ghatao", "थोड़ी कम",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FULL = listOf(
+        "full", "max", "maximum", "highest", "poori", "puri", "pura", "poora", "फुल", "फ़ुल", "पूरी", "पूरा", "सबसे तेज",
+        "full karo",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val MUTE = listOf(
+        "mute", "mute karo", "sound off", "volume off", "awaaz band", "awaz band", "aawaz band", "म्यूट", "आवाज़ बंद",
+        "आवाज बंद", "silent", "silent karo",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val UNMUTE = listOf(
+        "unmute", "un mute", "sound on", "volume on", "awaaz chalu", "awaz chalu", "awaaz wapas", "अनम्यूट", "आवाज़ चालू",
+        "आवाज चालू", "आवाज़ वापस", "आवाज वापस",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Without the word "volume": only these clear ones. */
+    private val LOUDER = listOf(
+        "louder", "turn it up", "turn up the music", "make it louder", "a bit louder", "थोड़ा तेज़", "thoda tez",
+        "gaana tez karo", "गाना तेज़ करो", "गाना तेज करो",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val QUIETER = listOf(
+        "quieter", "softer", "too loud", "turn it down", "turn down the music", "make it quieter", "थोड़ा धीरे",
+        "thoda dheere", "gaana dheere karo", "गाना धीरे करो", "gaana kam karo", "गाना कम करो",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** "More" after a volume change. */
+    private val MORE = listOf(
+        "aur", "more", "again", "thoda aur", "aur karo", "aur thoda", "ek baar aur", "और", "थोड़ा और", "और करो",
+        "और थोड़ा", "एक बार और", "one more", "a bit more", "little more", "इब और", "hor",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** A bare stop: pause the music if any, else end the conversation. */
+    private val STOP_EXACT = listOf(
+        "stop", "stop it", "stop karo", "stop kar do", "ruko", "rukko", "ruk jao", "ruk ja", "band karo", "band kar do",
+        "band kar", "रुको", "रुक जाओ", "रुक जा", "बंद करो", "बंद कर दो", "बंद कर", "स्टॉप", "स्टॉप करो", "थम जा", "tham ja",
+    ).flatMap { nuktaForms(normalize(it)) }.toSet()
+
+    private val STOP_FILLERS = listOf("please", "now", "abhi", "अभी", "jara", "zara", "ज़रा", "जरा", "प्लीज़", "प्लीज", "bhai", "भाई")
+        .map { normalize(it) }
+
+    private val STOP_NAV = listOf(
+        "stop navigation", "stop the navigation", "end navigation", "end the route", "end route", "cancel navigation",
+        "cancel the route", "stop the route", "stop route", "exit navigation", "stop directions",
+        "navigation band", "navigation band karo", "rasta band karo", "route band karo", "नेविगेशन बंद", "नेविगेशन बंद करो",
+        "रास्ता बंद करो", "रूट बंद करो", "नेविगेशन रोको",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val TIME = listOf(
+        "what time is it", "what is the time", "what s the time", "whats the time", "tell me the time", "current time",
+        "time kya hai", "time kya hua", "time kya ho gaya", "kya time hua", "kya time hai",
+        "kitne baje", "kitne baj gaye", "kitna time hua", "time batao", "time bata", "kai baje", "ke baje", "samay kya",
+        "कितने बजे", "कितने बज गए", "टाइम क्या", "क्या टाइम", "कितना टाइम हुआ", "टाइम बताओ", "समय क्या", "समय बताओ",
+        "कै बजे", "के बजे", "कै बज गे", "टैम के होया", "taim ke hoya",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val DATE = listOf(
+        "what is the date", "what s the date", "whats the date", "today s date", "todays date", "the date today",
+        "what day is it", "what day is today", "which day is it", "aaj kya date", "aaj ki date", "aaj kya tarikh",
+        "aaj ki tarikh", "aaj kaun sa din", "aaj kaunsa din", "date kya hai", "tareekh kya", "tarikh kya",
+        "आज क्या डेट", "आज की डेट", "आज क्या तारीख", "आज की तारीख", "आज कौन सा दिन", "आज कौनसा दिन", "तारीख क्या",
+        "डेट क्या", "आज के दिन सै", "आज कोणसा दिन",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val RAIN = listOf(
+        "will it rain", "is it going to rain", "going to rain", "chance of rain", "rain today", "any rain", "rain forecast",
+        "baarish", "barish", "बारिश", "baarish hogi", "barish hogi", "baarish aayegi", "barish aayegi", "baarish ke chance", "barish hogi kya",
+        "बारिश होगी", "बारिश आएगी", "बारिश आयेगी", "बारिश के", "बरसात होगी", "मींह आवैगा", "मींह", "meenh",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val WEATHER = listOf(
+        "weather", "how is the weather", "temperature outside", "outside temperature", "how hot is it", "how cold is it",
+        "mausam", "mosam", "मौसम", "तापमान", "बाहर कितनी गर्मी", "कितनी गर्मी", "कितनी ठंड", "garmi kitni", "thand kitni",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val SPEED = listOf(
+        "my speed", "what s my speed", "current speed", "how fast am i", "how fast are we", "speed kitni",
+        "kitni speed", "kitni raftar", "raftar kitni", "स्पीड कितनी", "कितनी स्पीड", "रफ़्तार कितनी", "रफ्तार कितनी",
+        "कितनी रफ्तार", "कितनी रफ़्तार", "speed kya hai", "स्पीड क्या है",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val OPEN_MAPS = listOf(
+        "open maps", "open map", "open the map", "open google maps", "open navigation", "show the map", "show map",
+        "show me the map", "maps kholo", "map kholo", "map dikhao", "naksha kholo", "naksha dikhao", "navigation kholo",
+        "मैप खोलो", "मैप दिखाओ", "नक्शा खोलो", "नक्शा दिखाओ", "नेविगेशन खोलो", "गूगल मैप खोलो", "maps open karo", "map open karo",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val BRIGHTNESS = listOf(
+        "brightness", "screen brightness", "brighter", "dimmer", "screen light", "roshni", "ब्राइटनेस", "रोशनी", "स्क्रीन की रोशनी",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val BT_SETTINGS = listOf(
+        "bluetooth settings", "bluetooth setting", "open bluetooth", "bluetooth kholo", "bluetooth on karo",
+        "ब्लूटूथ सेटिंग", "ब्लूटूथ खोलो", "ब्लूटूथ सेटिंग्स",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val WHAT_CAN_I_SAY = listOf(
+        "what can i say", "what can you do", "what can i ask", "voice commands", "list of commands", "show commands",
+        "help with commands", "kya bol sakta", "kya bol sakte", "kya kya bol", "kya kar sakti", "kya kar sakte",
+        "commands dikhao", "क्या बोल सकता", "क्या बोल सकते", "क्या क्या बोल", "क्या कर सकती", "क्या कर सकते",
+        "कमांड दिखाओ", "के के बोल सकूं", "के कर सकै",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    // ------------------------------------------------------------------ Fuel finder and road reports
+
+    /**
+     * "Nearest CNG pump", "CNG pump kahan hai", "petrol pump", "डीज़ल", "charging station". The most
+     * specific fuel wins (EV, CNG, diesel, petrol), else any pump. Not "air pump" / "hawa".
+     */
+    private fun fuel(t: String): VoiceIntent? {
+        if (FUEL_NOT.any { has(t, it) }) return null
+        return when {
+            FUEL_EV.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Ev)
+            FUEL_CNG.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Cng)
+            FUEL_DIESEL.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Diesel)
+            FUEL_PETROL.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Petrol)
+            FUEL_ANY.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.All)
+            else -> null
+        }
+    }
+
+    /**
+     * "Police aage hai", "accident ahead", "aage jam hai", "mobile camera yahan hai". Needs the
+     * thing seen plus a "there is / ahead / here" word, and is not a question ("jam hai kya?"), a
+     * place ("police station le chalo") or a call ("police ko phone karo").
+     */
+    private fun roadReport(t: String, kw: Keywords): VoiceIntent? {
+        if (REPORT_CUE.none { has(t, it) }) return null
+        if (REPORT_NOT.any { has(t, it) } || kw.call.any { has(t, it) }) return null
+        return when {
+            REPORT_MOBILE.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.MobileCamera)
+            REPORT_ACCIDENT.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Accident)
+            REPORT_JAM.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Jam)
+            REPORT_POLICE.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Police)
+            else -> null
+        }
+    }
+
+    private val FUEL_EV = listOf(
+        "charging station", "charging stations", "charging point", "charge point", "ev charger", "ev charging",
+        "e v charger", "ev station", "car charging", "electric charger", "चार्जिंग स्टेशन", "चार्जिंग पॉइंट",
+        "चार्जिंग पॉइंट", "ईवी चार्जर", "ई वी चार्जर", "गाड़ी चार्ज", "charging station kahan", "chaarging station",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_CNG = listOf(
+        "cng", "c n g", "सीएनजी", "सी एन जी", "सीएनजी पंप", "cng pump", "cng station", "सीएनजी स्टेशन",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_DIESEL = listOf("diesel", "deisel", "डीजल", "डीज़ल", "डीज़ल पंप", "diesel pump")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_PETROL = listOf(
+        "petrol", "petrol pump", "पेट्रोल", "पेट्रोल पंप", "पैट्रोल", "petrol bharwana", "पेट्रोल भरवाना",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_ANY = listOf(
+        "fuel station", "fuel pump", "filling station", "gas station", "nearest pump", "pump", "fuel", "पंप", "फ्यूल",
+        "तेल भरवाना", "तेल डलवाना", "tel bharwana", "tel dalwana", "tel bharwana hai", "तेल कित",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Not a fuel stop: tyre air, a water pump. */
+    private val FUEL_NOT = listOf("air pump", "hawa", "हवा", "tyre", "tire", "टायर", "water pump", "पानी")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_CUE = listOf(
+        "aage", "aagey", "age", "आगे", "ahead", "here", "yahan", "yaha", "यहाँ", "यहां", "ithe", "report", "रिपोर्ट",
+        "lagi", "laga", "lagi hai", "लगा", "लगी", "khadi", "khada", "खड़ी", "खड़ा", "hai", "है", "सै", "sai",
+        "ho gaya", "हो गया", "hua", "हुआ", "there is", "there s", "spotted", "mark", "chal rahi", "चल रही",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Questions, places and trips are not reports. */
+    private val REPORT_NOT = listOf(
+        "kya", "क्या", "kahan", "kaha", "कहाँ", "कहां", "kitna", "कितना", "is there", "any", "station", "thana", "थाना",
+        "chowki", "चौकी", "take me", "navigate", "go to", "le chalo", "le chal", "ले चलो", "ले चल", "जाना है",
+        "jana hai", "where", "kaisa", "kaisi", "कैसा", "कैसी", "how is", "how s",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** The accident is ahead of the car, not the car's own. */
+    private val AHEAD = listOf("aage", "aagey", "आगे", "ahead", "up ahead", "further on")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Words that keep "accident" an SOS even with "ahead" in it. */
+    private val SOS_STRONG = listOf("help", "ambulance", "sos", "emergency", "madad", "bachao", "मदद", "बचाओ", "एम्बुलेंस", "इमरजेंसी", "hurt", "injured", "चोट")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_MOBILE = listOf(
+        "mobile camera", "speed gun", "interceptor", "radar gun", "मोबाइल कैमरा", "स्पीड गन", "इंटरसेप्टर",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_ACCIDENT = listOf("accident", "एक्सीडेंट", "ऐक्सीडेंट", "दुर्घटना", "हादसा", "hadsa", "durghatna")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_JAM = listOf("traffic jam", "jam", "jaam", "जाम", "ट्रैफिक जाम", "ट्रैफ़िक जाम", "traffic", "ट्रैफिक", "ट्रैफ़िक")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_POLICE = listOf(
+        "police", "पुलिस", "naka", "नाका", "police check", "police checking", "पुलिस चेकिंग", "checking chal rahi",
+        "चेकिंग चल रही", "challan", "चालान",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     /** Small talk, Haryanvi / Hindi / English in any app language. Before "play" ("चुटकुला सुनाओ"). */
     private fun smallTalk(t: String): VoiceIntent? = when {
@@ -169,6 +571,55 @@ object VoiceIntents {
         "engine status", "engine health", "check engine", "engine light", "engine problem", "engine temperature",
         "how is the engine", "fault code", "fault codes", "obd",
         "इंजन कैसा", "इंजन की हालत", "इंजन स्टेटस", "इंजन ठीक", "engine kaisa", "engine ki halat", "engine theek",
+    ).map { normalize(it) }
+
+    /**
+     * [destination] (already cleaned, e.g. after "le chalo" is removed) names the saved Home or
+     * Office: "ghar", "घर", "home", "office", "दफ्तर". Only the whole destination counts, so
+     * "office depot" or "ghar ka saman" stay normal place searches.
+     */
+    fun savedKind(destination: String): SavedKind? {
+        val d = normalize(destination)
+        return when (d) {
+            in HOME_WORDS -> SavedKind.Home
+            in OFFICE_WORDS -> SavedKind.Office
+            else -> null
+        }
+    }
+
+    /**
+     * Short commands without a navigate keyword: "go home", "head home", "घर चल". Only when nothing
+     * but fillers is left, so "go to office depot" stays a search for Office Depot.
+     */
+    private fun savedPhrase(t: String, fillers: List<String>): SavedKind? {
+        fun only(phrases: List<String>) = phrases.any { has(t, it) && trimFillers(remove(t, listOf(it)), fillers).isBlank() }
+        return when {
+            only(HOME_PHRASES) -> SavedKind.Home
+            only(OFFICE_PHRASES) -> SavedKind.Office
+            else -> null
+        }
+    }
+
+    private val HOME_WORDS = listOf(
+        "home", "my home", "my house", "house", "ghar", "gharr", "ghara", "gharan", "mera ghar", "apna ghar",
+        "घर", "घरां", "घरा", "मेरा घर", "अपना घर", "अपणा घर",
+    ).map { normalize(it) }.toSet()
+
+    private val OFFICE_WORDS = listOf(
+        "office", "the office", "my office", "work", "offis", "daftar", "dafter", "ऑफिस", "ऑफ़िस", "आफिस",
+        "दफ्तर", "दफ़्तर", "मेरा ऑफिस",
+    ).map { normalize(it) }.toSet()
+
+    private val HOME_PHRASES = listOf(
+        "go home", "going home", "head home", "drive home", "back home", "take me home", "navigate home",
+        "ghar chalo", "ghar le chalo", "ghar le chal", "ghar chal", "gharan chal", "ghar jana hai",
+        "घर चलो", "घर ले चलो", "घर ले चल", "घर चल", "घरां चाल", "घर जाना है",
+    ).map { normalize(it) }
+
+    private val OFFICE_PHRASES = listOf(
+        "go to office", "go to the office", "go to work", "take me to office", "take me to work",
+        "office chalo", "office le chalo", "office le chal", "office chal",
+        "ऑफिस चलो", "ऑफिस ले चलो", "ऑफिस ले चल", "दफ्तर चलो", "दफ्तर ले चलो",
     ).map { normalize(it) }
 
     /** The place name in a free answer such as "Phoenix Mall please" after "Where to?". */
@@ -312,7 +763,7 @@ object VoiceIntents {
             "show me the way to", "how do i get to",
         ),
         play = listOf("play", "put on"),
-        resume = listOf("resume", "continue music", "unpause"),
+        resume = listOf("resume", "continue music", "unpause", "resume music", "continue the music", "continue playing"),
         music = listOf("song", "songs", "music", "track", "something", "some music"),
         local = listOf(
             "storage", "usb", "pen drive", "pendrive", "sd card", "memory card", "this unit",
@@ -320,9 +771,16 @@ object VoiceIntents {
         ),
         bluetooth = listOf("bluetooth", "my phone", "the phone", "phone", "mobile"),
         camera = listOf("camera", "cameras", "speed trap", "speed check"),
-        pause = listOf("pause", "stop music", "stop the music", "stop the song", "stop song", "stop playing"),
-        next = listOf("next song", "next track", "skip", "next"),
-        previous = listOf("previous song", "previous track", "previous", "last song", "play the last song"),
+        pause = listOf(
+            "pause", "stop music", "stop the music", "stop the song", "stop song", "stop playing", "pause music",
+            "stop the songs", "music stop", "song stop",
+        ),
+        next = listOf("next song", "next track", "skip", "next", "skip this", "change the song", "change song", "next one"),
+        // "Preview" is how the recogniser often hears "previous".
+        previous = listOf(
+            "previous song", "previous track", "previous", "last song", "play the last song", "preview", "previews",
+            "privious", "previous one", "go back a song", "song before",
+        ),
         cancel = listOf(
             "cancel", "stop", "never mind", "nevermind", "nothing", "no thanks", "forget it",
             "exit", "close", "bye", "quit", "that s all",
@@ -365,17 +823,24 @@ object VoiceIntents {
             "बजाओ", "बजा दो", "चलाओ", "चला दो", "सुनाओ", "लगाओ", "प्ले करो", "प्ले", "bajao", "baja do",
             "chalao", "chala do", "sunao", "lagao", "play karo",
         ),
-        resume = listOf("गाना चालू करो", "फिर से चलाओ", "gaana chalu karo"),
+        resume = listOf("गाना चालू करो", "फिर से चलाओ", "gaana chalu karo", "music chalu karo", "म्यूजिक चालू करो"),
         music = listOf("गाना", "गाने", "म्यूजिक", "म्यूज़िक", "संगीत", "gana", "gaana", "gane", "gaane", "sangeet"),
         local = listOf("स्टोरेज", "यूएसबी", "पेन ड्राइव", "पेनड्राइव", "मेमोरी", "memory"),
         bluetooth = listOf("ब्लूटूथ", "फ़ोन", "फोन", "मोबाइल"),
         camera = listOf("कैमरा", "कैमरे", "kamera"),
         pause = listOf(
             "गाना बंद", "गाना रोको", "म्यूजिक बंद", "म्यूज़िक बंद", "संगीत बंद", "gana band", "gaana band",
-            "music band", "gana roko", "gaana roko", "music roko",
+            "music band", "gana roko", "gaana roko", "music roko", "गाना रोक दो", "gaana rok do", "pause karo", "पॉज़",
+            "पॉज", "पॉज़ करो", "गाने बंद",
         ),
-        next = listOf("अगला गाना", "अगला", "agla gana", "agla gaana", "agla"),
-        previous = listOf("पिछला गाना", "पिछला", "pichla gana", "pichhla gaana", "pichla", "pichhla"),
+        next = listOf(
+            "अगला गाना", "अगला", "agla gana", "agla gaana", "agla", "अगले वाला", "aagla", "आगला", "gaana badlo", "gana badlo",
+            "गाना बदलो", "गाना बदल दो", "dusra gaana", "दूसरा गाना",
+        ),
+        previous = listOf(
+            "पिछला गाना", "पिछला", "pichla gana", "pichhla gaana", "pichla", "pichhla", "पिछले वाला", "पहले वाला गाना",
+            "pichle wala", "pehle wala gaana", "पाछला", "pachhla",
+        ),
         cancel = listOf(
             "रद्द करो", "रद्द", "कैंसल", "बस", "छोड़ो", "रहने दो", "कुछ नहीं", "बंद करो", "rehne do",
             "chhodo", "chodo", "bas", "kuch nahi", "band karo", "cancel karo",

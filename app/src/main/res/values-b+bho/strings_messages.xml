@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp मैसेज बोल के सुनाईं</string>
+    <string name="disclosure_wa_body">गाड़ी चलावत घरी रउआ WhatsApp आ WhatsApp Business मैसेज बोल के सुनावे खातिर Car Hub ओकनी के नोटिफिकेशन से भेजे वाला के नाम आ मैसेज के टेक्स्ट पढ़ेला। एकरा खातिर नोटिफिकेशन एक्सेस के इस्तेमाल होला।</string>
+    <string name="disclosure_wa_uses">हर मैसेज एक बेर बोलल जाला आ फेर भुला दिहल जाला। ऊ ड्राइविंग स्क्रीन पर कबो ना देखाला आ कहीं सेव ना होला। Car Hub कबो जवाब ना देला, SMS ना भेजेला आ चैट ना खोलेला। जब ले रउआ अनुमति ना देब, ग्रुप के मैसेज छोड़ दिहल जाला। जब ले नोटिफिकेशन एक्सेस चालू बा, Car Hub बैकग्राउंड में रहलो पर ई काम करेला।</string>
+    <string name="disclosure_wa_stays">Car Hub कुछो सेव भा अपलोड ना करेला, आ Ampli Studio भा केहू आउर से कुछो शेयर ना करेला। मैसेज रउआ डिवाइस के आपन बोले वाला इंजन पढ़ेला।</string>
+    <string name="disclosure_park_hint">ई पढ़े आ चालू करे खातिर गाड़ी रोकीं।</string>
+    <string name="wa_title">WhatsApp मैसेज बोल के सुनाईं</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">गाड़ी बताई केकर मैसेज ह आ ओह में का लिखल बा, खाली आवाज में।</string>
+    <string name="wa_hint_on">चालू। खाली आवाज: मैसेज के टेक्स्ट स्क्रीन पर कबो ना देखाला।</string>
+    <string name="wa_hint_locked">ई Pro फीचर ह। Pro देखे खातिर दबाईं।</string>
+    <string name="wa_groups_title">ग्रुप के मैसेज भी सुनाईं</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चैट चुप रहेला। खाली रउआ के सीधे भेजल मैसेज सुनावल जाला।</string>
+    <string name="wa_rules">20 सेकंड में जादे से जादे एगो मैसेज। कॉल आ मोड़ के आवाज के बेरा चुप। Car Hub कबो जवाब ना देला आ कुछो ना भेजेला।</string>
+    <string name="wa_needs_access">WhatsApp मैसेज सुने खातिर नोटिफिकेशन एक्सेस चाहीं।</string>
+    <string name="wa_tts_missing">एह यूनिट में बोले वाला इंजन (TTS) नइखे, एही से मैसेज बोल के ना सुनावल जा सकेला। आवाज जाँचीं में जा के एगो इंजन लगाईं।</string>
+    <string name="wa_park_to_turn_on">चालू करे खातिर गाड़ी रोकीं।</string>
+</resources>

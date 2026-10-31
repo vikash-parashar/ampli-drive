@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trip_cost_title">सफर का खरचा</string>
+    <string name="trip_cost_example">उदाहरण</string>
+    <string name="trip_cost_route">चुण्या होया रास्ता · %1$s किमी</string>
+    <string name="trip_cost_tolls">%1$d टोल</string>
+    <string name="trip_cost_fuel">पेट्रोल</string>
+    <string name="trip_cost_fuel_unknown">एक तेल भराई जोड़ दे</string>
+    <string name="trip_cost_pass_saves">Annual Pass तै बचत</string>
+    <string name="trip_cost_pass_would_save">Annual Pass होंदा तो बचत</string>
+    <string name="trip_cost_pass_trips">पास के %1$d ट्रिप</string>
+    <string name="trip_cost_total">टोल + पेट्रोल</string>
+    <string name="trip_cost_note">अंदाजा सै। पेट्रोल थारी आपणी माइलेज अर पाछली भराई के रेट तै। टोल के रेट बदल सकैं सैं।</string>
+    <string name="trip_cost_example_note">प्रीव्यू खातर नमूने के आंकड़े, असली रास्ता कोनी।</string>
+</resources>

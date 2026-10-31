@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_soft_auto">సాఫ్ట్: ఆటో పగలు/రాత్రి</string>
+    <string name="theme_soft_auto_hint">సూర్యోదయం నుంచి Ampli Soft Day, సూర్యాస్తమయం తర్వాత Ampli Soft Night</string>
+</resources>

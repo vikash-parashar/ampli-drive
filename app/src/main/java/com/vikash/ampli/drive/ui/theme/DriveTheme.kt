@@ -10,7 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vikash.ampli.drive.R
-import com.vikash.ampli.drive.prefs.DrivePrefs
+import com.vikash.ampli.drive.prefs.ThemeDefaults
 import com.vikash.ampli.drive.prefs.ThemeChoice
 
 /** How a card (pane, turn card, dock button) is painted. */
@@ -22,6 +22,30 @@ enum class Decoration {
 
     /** Colourful gradient with soft blobs, for glass panels to blur ([DriveTheme.glass]). */
     Glass,
+
+    /** Crimson Drive: a dark forest-green radial glow, brightest top-left. */
+    Forest,
+}
+
+/**
+ * Filled keys of Crimson Drive (Ampli MP3's Car mode): crimson for the primary action (play, "Go",
+ * the main button of a screen), green for Hey Ampli. Each fill has an edge of at least 3:1 against
+ * the charcoal. [heroCar]: Home shows the car picture in the map pane while not navigating.
+ */
+@Immutable
+data class DriveKeys(
+    val primaryTop: Color,
+    val primary: Color,
+    val primaryBottom: Color,
+    val primaryEdge: Color,
+    val onPrimary: Color,
+    val voice: Color,
+    val voiceEdge: Color,
+    val onVoice: Color,
+    val heroCar: Boolean,
+) {
+    /** The crimson fill: highlight at the top, the dark edge at the bottom (CSS radial in the sample). */
+    val primaryBrush: Brush get() = Brush.verticalGradient(0f to primaryTop, 0.55f to primary, 1f to primaryBottom)
 }
 
 /** Order and size of the three home panes. */
@@ -126,6 +150,11 @@ data class DriveTheme(
     // Neumorphic shadows
     val shadowDark: Color = Color.Transparent,
     val shadowLight: Color = Color.Transparent,
+    /**
+     * Soft themes: hairline edge on tappable items, at least 3:1 against [surface] (the soft
+     * shadows alone are about 1.5:1). Null uses [muted].
+     */
+    val softEdge: Color? = null,
 
     // Families (picker grouping), short code shown on the card ("01", "S2", "N4"…)
     val family: ThemeFamily = ThemeFamily.Classic,
@@ -152,6 +181,8 @@ data class DriveTheme(
     val glass: GlassPalette? = null,
     /** Translated name, where there is one; otherwise [name] is shown. */
     @StringRes val nameRes: Int? = null,
+    /** Filled crimson / green keys and the car on Home (Crimson Drive), or null. */
+    val keys: DriveKeys? = null,
 ) {
     /** Pro themes need the one-time purchase. The free set lives in [ThemeAccess.FREE_IDS]. */
     val isPro: Boolean get() = !ThemeAccess.isFree(id)
@@ -200,7 +231,7 @@ object DriveThemes {
     )
 
     val AmpliRose = DriveTheme(
-        id = DrivePrefs.DEFAULT_NIGHT, number = 2, name = "Ampli Rose", isLight = false,
+        id = ThemeDefaults.ROSE, number = 2, name = "Ampli Rose", isLight = false,
         background = c(0xFF0F0D14), surface = c(0xFF1C1820), surfaceHigh = c(0xFF2A2530),
         border = c(0xFF2A2530), borderWidth = 1.dp, text = c(0xFFF5F3F7), muted = c(0xFFA39FAB),
         accent = c(0xFFE11D48), onAccent = Color.White, accentSoft = c(0xFFFDA4AF), accent2 = c(0xFFFB7185),
@@ -218,7 +249,7 @@ object DriveThemes {
     )
 
     val DaylightClean = DriveTheme(
-        id = DrivePrefs.DEFAULT_DAY, number = 3, name = "Daylight Clean", isLight = true,
+        id = ThemeDefaults.DAYLIGHT, number = 3, name = "Daylight Clean", isLight = true,
         background = c(0xFFEEF1F5), surface = Color.White, surfaceHigh = c(0xFFEEF1F5),
         border = c(0xFFCDD3DE), borderWidth = 1.5.dp, text = c(0xFF0B1220), muted = c(0xFF4A5568),
         accent = c(0xFF1D4ED8), onAccent = Color.White, accentSoft = c(0xFF1D4ED8), accent2 = c(0xFF1D4ED8),
@@ -373,7 +404,50 @@ object DriveThemes {
         speedFill = 0xFFFFD23F, speedInk = 0xFF1E1030,
     )
 
+    // ------------------------------------------------ Crimson Drive (the default, free)
+
+    /**
+     * Crimson Drive: Ampli MP3's Car mode colours (charcoal soft keys over a forest glow, crimson
+     * primary actions, green Hey Ampli) and the green car on Home. Free, and the default look.
+     */
+    val CrimsonDrive = soft(
+        id = ThemeDefaults.CRIMSON, code = "C1", name = "Crimson Drive", light = false,
+        nb = CrimsonPalette.CHARCOAL, lt = CrimsonPalette.HIGHLIGHT, dk = CrimsonPalette.SHADOW,
+        fg = CrimsonPalette.INK, mut = CrimsonPalette.MUTED, mut2 = CrimsonPalette.PALE,
+        acc = CrimsonPalette.CRIMSON_HI, onacc = CrimsonPalette.ON_FILL, warn = CrimsonPalette.WARNING, trk = CrimsonPalette.TRACK,
+        layout = HomeLayout.MapSpeedMusic, map = MapLook.Dark, mapTint = 0x1406110C,
+    ).copy(
+        background = c(CrimsonPalette.FOREST),
+        accentSoft = c(CrimsonPalette.PALE), ok = c(CrimsonPalette.OK),
+        gauge = listOf(c(CrimsonPalette.CRIMSON_HI), c(CrimsonPalette.CRIMSON_HI)),
+        turnTile = Brush.verticalGradient(listOf(c(CrimsonPalette.CRIMSON_HI), c(CrimsonPalette.CRIMSON))),
+        turnTileText = c(CrimsonPalette.ON_FILL),
+        onDockActive = c(CrimsonPalette.PALE), mapPuck = c(CrimsonPalette.CRIMSON_HI),
+        radius = 2.8f, numberWeight = FontWeight.ExtraBold, labelSpacing = 0.02f,
+        decoration = Decoration.Forest, softEdge = c(CrimsonPalette.EDGE),
+        nameRes = R.string.theme_crimson_drive,
+        keys = DriveKeys(
+            primaryTop = c(CrimsonPalette.CRIMSON_HI), primary = c(CrimsonPalette.CRIMSON),
+            primaryBottom = c(CrimsonPalette.CRIMSON_DEEP), primaryEdge = c(CrimsonPalette.CRIMSON_HI),
+            onPrimary = c(CrimsonPalette.ON_FILL),
+            voice = c(CrimsonPalette.GREEN), voiceEdge = c(CrimsonPalette.GREEN_EDGE), onVoice = c(CrimsonPalette.ON_FILL),
+            heroCar = true,
+        ),
+    )
+
     // ------------------------------------------------ Soft family (.n1–.n6)
+
+    /** Ampli Soft Day: the default day theme (approved neumorphic sample). */
+    val AmpliSoftDay = ampliSoft(
+        id = ThemeDefaults.SOFT_DAY, code = "A1", name = "Ampli Soft Day", p = SoftPalettes.Day,
+        map = MapLook.Positron,
+    )
+
+    /** Ampli Soft Night: the default night theme, dark grey soft surfaces that don't glare. */
+    val AmpliSoftNight = ampliSoft(
+        id = ThemeDefaults.SOFT_NIGHT, code = "A2", name = "Ampli Soft Night", p = SoftPalettes.Night,
+        map = MapLook.Dark,
+    )
 
     val SoftNight = soft(
         id = "soft_night", code = "N2", name = "Soft Night", light = false,
@@ -449,13 +523,15 @@ object DriveThemes {
     )
 
     /**
-     * Picker order: Classic (01–06, 09), Glass family, Saffron family, Soft family.
-     * Luxury Gold (design 10) is not shipped.
+     * Picker order: Crimson Drive (the default) first, then Classic (01–06, 09), Glass family,
+     * Saffron family, Soft family. Luxury Gold (design 10) is not shipped.
      */
     val all: List<DriveTheme> = listOf(
+        CrimsonDrive,
         MidnightGlass, AmpliRose, DaylightClean, SportRed, Synthwave, MinimalMono, HudGreen,
         FrostedGlass, MidnightFrost, RoseGlass, CyanGlass, VioletGlass, SunsetGlass,
         DesiSaffron, SaffronDay, RajasthaniPink, KeralaGreen, BanarasiRoyal, HoliPop,
+        AmpliSoftDay, AmpliSoftNight,
         Neumorphic, SoftNight, SoftMint, SoftPeach, SoftLavender, SoftGlass,
     )
 
@@ -466,7 +542,7 @@ object DriveThemes {
      * back to the free theme for that time of day.
      */
     fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme =
-        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: AmpliRose
+        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: CrimsonDrive
 
     private val ids: Set<String> = all.mapTo(HashSet()) { it.id }
 }
@@ -553,6 +629,18 @@ private fun soft(
     map = map, mapTint = c(mapTint), mapPuck = c(acc),
     shadowDark = c(dk), shadowLight = c(lt),
     family = ThemeFamily.Soft, code = code,
+)
+
+/** Ampli Soft Day / Night: the soft family look from a [SoftPalette], with a smaller radius. */
+private fun ampliSoft(id: String, code: String, name: String, p: SoftPalette, map: MapLook): DriveTheme = soft(
+    id = id, code = code, name = name, light = p.light,
+    nb = p.base, lt = p.highlight, dk = p.shadow, fg = p.ink, mut = p.muted, mut2 = p.muted,
+    acc = p.accent, onacc = p.onAccent, warn = p.warning, trk = p.track,
+    layout = HomeLayout.MapSpeedMusic, map = map, mapTint = p.accent and 0x00FFFFFF or 0x0C000000,
+).copy(
+    accentSoft = c(p.accentText), ok = c(p.ok), onDockActive = c(p.accentText),
+    turnTile = solid(c(p.accentText)), turnTileText = c(if (p.light) 0xFFFFFFFF else p.onAccent),
+    radius = 2.8f, softEdge = c(p.edge), danger = c(p.danger),
 )
 
 /** The active theme. Every home-screen composable reads colours and shapes from here. */

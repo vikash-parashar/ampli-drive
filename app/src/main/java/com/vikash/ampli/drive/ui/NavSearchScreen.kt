@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -64,6 +65,8 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
     var searching by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     var searched by remember { mutableStateOf("") }
+    // "Save this place as" for a search result (its name) or the current location (no name).
+    var saving by remember { mutableStateOf<Place?>(null) }
 
     fun search() {
         val q = query.trim()
@@ -108,7 +111,7 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { search() }),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).softField(),
             )
             BigButton(text = stringResource(R.string.nav_search_button), onClick = { search() }, icon = Icons.Filled.Search)
             }
@@ -126,6 +129,19 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
             Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.2f)),
         ) {
+            // Home, Office and favourites: one tap starts the route.
+            SavedPlacesSection(
+                app = app,
+                moving = moving,
+                onSaveHere = {
+                    val here = app.speedTracker.state.value.location
+                    if (here == null) {
+                        android.widget.Toast.makeText(context, context.getString(R.string.camera_report_no_fix), android.widget.Toast.LENGTH_SHORT).show()
+                    } else {
+                        saving = Place("", null, here.latitude, here.longitude, null)
+                    }
+                },
+            )
             val list = results
             when {
                 searching -> Box(Modifier.fillMaxWidth().padding(dims.d(3f)), contentAlignment = Alignment.Center) {
@@ -148,14 +164,19 @@ fun NavSearchScreen(app: DriveApp, onBack: () -> Unit) {
                     color = theme.muted,
                     fontSize = dims.t(2.8f, min = 16f),
                 )
-                list != null -> list.forEach { place -> PlaceRow(place, onGo = { go(place) }) }
+                list != null -> list.forEach { place ->
+                    PlaceRow(place, onGo = { go(place) }, onSave = if (moving) null else ({ saving = place }))
+                }
             }
         }
+    }
+    saving?.let { p ->
+        SavePlaceDialog(app = app, name = p.name.ifEmpty { null }, lat = p.lat, lon = p.lon, onDone = { saving = null })
     }
 }
 
 @Composable
-private fun PlaceRow(place: Place, onGo: () -> Unit) {
+private fun PlaceRow(place: Place, onGo: () -> Unit, onSave: (() -> Unit)? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     SettingCard {
@@ -172,6 +193,9 @@ private fun PlaceRow(place: Place, onGo: () -> Unit) {
                     place.distanceKm?.let { String.format(Locale.getDefault(), "%.1f km", it) },
                 ).joinToString(" · ")
                 if (sub.isNotEmpty()) Text(sub, color = theme.muted, fontSize = dims.t(2.4f, min = 14f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            if (onSave != null) {
+                BigButton(text = stringResource(R.string.place_save), onClick = onSave, icon = Icons.Filled.Star, primary = false)
             }
             BigButton(text = stringResource(R.string.nav_go), onClick = onGo)
         }

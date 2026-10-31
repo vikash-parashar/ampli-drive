@@ -215,7 +215,7 @@ class FeedbackRepository(private val app: DriveApp) {
     }
 
     companion object {
-        /** Placeholder until Ampli Tech has a real support mailbox. Must be replaced before launch. */
+        /** Placeholder until Ampli Studio has a real support mailbox. Must be replaced before launch. */
         const val SUPPORT_EMAIL = "support@ampliapps.in"
         const val MAX_ATTACHMENTS = 3
         const val MAX_ATTACHMENT_BYTES = 2L * 1024 * 1024

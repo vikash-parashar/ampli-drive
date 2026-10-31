@@ -26,6 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -78,6 +80,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -90,11 +94,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
+import com.vikash.ampli.drive.overlay.QuickStripLogic
 import com.vikash.ampli.drive.prefs.ShellPrefs
 import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.Shell
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -121,7 +128,7 @@ internal fun rememberMakeHome(onDone: () -> Unit = {}): () -> Unit {
 
 /** Home: one row under the status bar that pushes the panes down, so nothing is covered. */
 @Composable
-internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier, title: String? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     Row(
@@ -141,7 +148,7 @@ internal fun DefaultHomeBanner(onMake: () -> Unit, onLater: () -> Unit, modifier
     ) {
         Icon(Icons.Filled.Home, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(30.dp))
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title ?: stringResource(R.string.shell_home_title), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             if (!dims.compact) Text(stringResource(R.string.shell_home_hint), color = theme.muted, fontSize = dims.t(2.2f, min = 13f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         BigButton(text = stringResource(R.string.shell_home_later), onClick = onLater, primary = false)
@@ -181,26 +188,37 @@ internal fun DefaultHomeCard(onMake: () -> Unit, onLater: (() -> Unit)?, modifie
     }
 }
 
-/** Home banner while Ampli is not the default home app, until "Not now". It slides open and pushes the panes down. */
+/**
+ * One-time Home prompt while Ampli is not the default home app. It appears only while parked
+ * (the speed lock says not moving), is spent as soon as it shows, and hides when the car moves.
+ * The permanent entry is Settings › Default home. It slides open and pushes the panes down.
+ */
 @Composable
 fun DefaultHomeBannerHost(app: DriveApp, resumeTick: Int) {
     val context = LocalContext.current
-    var dismissed by remember { mutableStateOf(app.shell.homeCardDismissed) }
+    val moving = isMoving(app)
     var tick by remember { mutableStateOf(0) }
     val isHome = remember(resumeTick, tick) { Launchers.isDefaultHome(context) }
     val makeHome = rememberMakeHome { tick++ }
+    var showing by remember { mutableStateOf(false) }
+    LaunchedEffect(isHome, moving) {
+        when {
+            moving -> showing = false
+            // Once (and once more for drivers who saw the older banner): without being the home
+            // app, Car Hub may not be on screen after a power cut, so it can't greet.
+            !isHome && !showing && (!app.shell.homeCardDismissed || !app.shell.greetHomeBannerShown) -> {
+                showing = true
+                app.shell.homeCardDismissed = true
+                app.shell.greetHomeBannerShown = true
+            }
+        }
+    }
     AnimatedVisibility(
-        visible = !isHome && !dismissed,
+        visible = showing && !moving && !isHome,
         enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
         exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
     ) {
-        DefaultHomeBanner(
-            onMake = makeHome,
-            onLater = {
-                app.shell.homeCardDismissed = true
-                dismissed = true
-            },
-        )
+        DefaultHomeBanner(onMake = makeHome, onLater = { showing = false }, title = stringResource(R.string.greet_home_title))
     }
 }
 
@@ -213,18 +231,31 @@ data class QuickTile(val control: Shell.Control, val icon: ImageVector, val labe
 fun QuickControlsHost(app: DriveApp, open: Boolean, onClose: () -> Unit) {
     val context = LocalContext.current
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
-    val status by produceState(Shell.status(context), open) {
+    // Read off the main thread, and only while the panel is open (the EQ lookup scans every app).
+    val status by produceState<Shell.Status?>(null, open) {
         while (open) {
-            value = Shell.status(context)
+            value = withContext(Dispatchers.IO) { Shell.status(context) }
             delay(2_000L)
         }
     }
+    var pickEq by remember { mutableStateOf(false) }
     QuickControlsPanel(
         visible = open,
-        tiles = quickTiles(status, btSupported = bt.supported, btOn = bt.enabled, btDevice = bt.connectedName),
+        tiles = quickTiles(status ?: Shell.Status(null, false, null, null, null), btSupported = bt.supported, btOn = bt.enabled, btDevice = bt.connectedName),
         onTile = { Shell.open(context, it) },
         onClose = onClose,
+        // Long press on Equalizer: pick the unit's EQ app by hand when the automatic guess is wrong.
+        onTileLong = { if (it == Shell.Control.Equalizer) pickEq = true },
     )
+    if (pickEq) {
+        EqChooserDialog(
+            onPick = { component ->
+                Shell.chooseEqualizer(context, component)
+                pickEq = false
+            },
+            onDismiss = { pickEq = false },
+        )
+    }
 }
 
 @Composable
@@ -252,9 +283,18 @@ internal fun quickTiles(status: Shell.Status, btSupported: Boolean, btOn: Boolea
 }
 
 @Composable
-internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile: (Shell.Control) -> Unit, onClose: () -> Unit) {
+internal fun QuickControlsPanel(
+    visible: Boolean,
+    tiles: List<QuickTile>,
+    onTile: (Shell.Control) -> Unit,
+    onClose: () -> Unit,
+    onTileLong: ((Shell.Control) -> Unit)? = null,
+    perRow: Int = 4,
+    header: (@Composable () -> Unit)? = null,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
+    val density = LocalDensity.current.density
     val shown = remember { MutableTransitionState(false) }
     shown.targetState = visible
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
@@ -285,6 +325,20 @@ internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile
                         accentEdge = false,
                         blur = false,
                     )
+                    // Swipe up on the panel closes it, like a phone's quick settings.
+                    .pointerInput(Unit) {
+                        var pulled = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = { pulled = 0f },
+                            onVerticalDrag = { _, dy ->
+                                pulled += dy
+                                if (QuickStripLogic.isCloseSwipe(pulled, density)) {
+                                    pulled = Float.POSITIVE_INFINITY
+                                    onClose()
+                                }
+                            },
+                        )
+                    }
                     .padding(dims.d(2.6f)),
                 verticalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
             ) {
@@ -297,16 +351,23 @@ internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile
                         modifier = Modifier.weight(1f),
                     )
                     Box(
-                        Modifier.size(MinTouch).clip(CircleShape).clickable(onClick = onClose),
+                        Modifier.size(MinTouch).themedTap(CircleShape, Color.Transparent, onClick = onClose),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = theme.muted, modifier = Modifier.size(28.dp))
                     }
                 }
-                tiles.chunked(4).forEachIndexed { row, chunk ->
+                header?.invoke()
+                tiles.chunked(perRow).forEachIndexed { row, chunk ->
                     Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                         chunk.forEachIndexed { col, tile ->
-                            QuickTileView(tile, index = row * 4 + col, onClick = { onTile(tile.control) }, modifier = Modifier.weight(1f))
+                            QuickTileView(
+                                tile,
+                                index = row * perRow + col,
+                                onClick = { onTile(tile.control) },
+                                modifier = Modifier.weight(1f),
+                                onLongClick = onTileLong?.let { long -> { long(tile.control) } },
+                            )
                         }
                     }
                 }
@@ -316,7 +377,8 @@ internal fun QuickControlsPanel(visible: Boolean, tiles: List<QuickTile>, onTile
 }
 
 @Composable
-private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier) {
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier, onLongClick: (() -> Unit)? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     // Tiles pop in one after another as the panel lands.
@@ -326,6 +388,7 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
         enter.animateTo(1f, spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow))
     }
     val shape = RoundedCornerShape(20.dp)
+    val soft = theme.isSoft
     Column(
         modifier
             .graphicsLayer {
@@ -334,18 +397,31 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
                 scaleY = 0.85f + 0.15f * enter.value
             }
             .heightIn(min = 112.dp)
-            .clip(shape)
-            .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
-            .border(1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
-            .clickable(onClick = onClick)
+            .then(
+                if (soft) {
+                    // Soft tile: an "on" tile stays pressed in, with cyan icon and label.
+                    Modifier.softClickable(theme, shape, onClick, active = tile.on, onLongClick = onLongClick)
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
+                        .border(1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
+                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                },
+            )
             .padding(dims.d(1.8f)),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        val fg = if (tile.on) theme.onAccent else theme.text
-        Icon(tile.icon, contentDescription = null, tint = if (tile.on) theme.onAccent else theme.accentSoft, modifier = Modifier.size(32.dp))
+        val onFill = tile.on && !soft
+        val fg = when {
+            onFill -> theme.onAccent
+            soft && tile.on -> theme.accentSoft
+            else -> theme.text
+        }
+        Icon(tile.icon, contentDescription = null, tint = if (onFill) theme.onAccent else theme.accentSoft, modifier = Modifier.size(32.dp))
         Text(tile.label, color = fg, fontSize = dims.t(2.5f, min = 15f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (tile.state != null) {
-            Text(tile.state, color = if (tile.on) theme.onAccent.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(tile.state, color = if (onFill) theme.onAccent.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -372,11 +448,54 @@ internal fun PhoneLinkMissingDialog(onOpenApps: () -> Unit, onDismiss: () -> Uni
     )
 }
 
+/** Every launchable app, EQ-looking ones first, plus "Automatic"; [onPick] gets "package/activity" or null. */
+@Composable
+private fun EqChooserDialog(onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val (bg, fg) = dialogColors()
+    val theme = LocalDriveTheme.current
+    val apps by produceState<List<com.vikash.ampli.drive.system.AppEntry>?>(null) {
+        value = com.vikash.ampli.drive.system.InstalledApps.load(context)
+            .filter { it.packageName != context.packageName }
+            .sortedWith(compareByDescending<com.vikash.ampli.drive.system.AppEntry> { Shell.isEqLabel(it.label) }.thenBy { it.label.lowercase() })
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = bg, titleContentColor = fg, textContentColor = fg,
+        title = { Text(stringResource(R.string.shell_eq_pick_title), fontWeight = FontWeight.Bold) },
+        text = {
+            val list = apps
+            if (list == null) {
+                Box(Modifier.fillMaxWidth().heightIn(min = 96.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = theme.accent) }
+            } else {
+                androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                    item { EqRow(stringResource(R.string.chooser_automatic)) { onPick(null) } }
+                    items(list.size) { i ->
+                        val e = list[i]
+                        EqRow(e.label) { onPick(e.packageName + "/" + e.activityName) }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+    )
+}
+
+@Composable
+private fun EqRow(label: String, onClick: () -> Unit) {
+    Box(Modifier.fillMaxWidth().heightIn(min = MinTouch).clickable(onClick = onClick), contentAlignment = Alignment.CenterStart) {
+        Text(label, fontSize = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 8.dp))
+    }
+}
+
 // ------------------------------------------------------------------------ PIN
 
-/** Four-digit PIN for "More apps": [onPin] gets it once four digits are typed and OK pressed. */
+/**
+ * Four-digit PIN for "More apps": [onPin] gets it once four digits are typed and OK pressed.
+ * While [moving] there is no keyboard: the dialog asks the driver to park first.
+ */
 @Composable
-internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, onDismiss: () -> Unit, moving: Boolean = false) {
     val (bg, fg) = dialogColors()
     val theme = LocalDriveTheme.current
     var pin by remember { mutableStateOf("") }
@@ -390,7 +509,9 @@ internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, o
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (moving) {
+                Text(stringResource(R.string.park_to_edit_hint))
+            } else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { v -> pin = v.filter { it.isDigit() }.take(4) },
@@ -403,7 +524,7 @@ internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, o
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (ShellPrefs.validPin(pin)) onPin(pin) }, enabled = ShellPrefs.validPin(pin)) {
+            TextButton(onClick = { if (!moving && ShellPrefs.validPin(pin)) onPin(pin) }, enabled = !moving && ShellPrefs.validPin(pin)) {
                 Text(stringResource(R.string.action_save))
             }
         },

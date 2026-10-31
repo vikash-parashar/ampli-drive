@@ -43,6 +43,16 @@ class SpeedBubble(private val app: DriveApp) {
 
     val isShowing: Boolean get() = view != null
 
+    companion object {
+        /**
+         * True while a bubble window is on screen. Android 15+ lets an app with "Display over
+         * other apps" start activities from the background only while its overlay is visible.
+         */
+        @Volatile
+        var visible: Boolean = false
+            private set
+    }
+
     fun canShow(): Boolean = Settings.canDrawOverlays(app)
 
     fun show() {
@@ -73,6 +83,7 @@ class SpeedBubble(private val app: DriveApp) {
         }
         view = v
         params = p
+        visible = true
         job = scope.launch {
             combine(app.speedTracker.state, app.cameraAlerts.speedLimitKmh, app.cameraAlerts.current) { gps, limit, cam ->
                 BubbleLogic.model(gps.speedKmh, limit ?: cam?.limitKmh, cam?.distanceMeters)
@@ -157,6 +168,7 @@ class SpeedBubble(private val app: DriveApp) {
         }
         view = null
         params = null
+        visible = false
     }
 
     private fun openLauncher() {
@@ -216,7 +228,10 @@ class SpeedBubble(private val app: DriveApp) {
     }
 }
 
-/** Draws the bubble: a round badge with the speed, and a strip with limit and camera distance. */
+/**
+ * Draws the bubble: a round badge with the speed (red when over the limit), the camera's limit
+ * as a road-sign roundel at the top right, and the distance countdown underneath.
+ */
 private class BubbleView(context: Context) : View(context) {
     var model: BubbleModel = BubbleModel(null, null, null, false)
         set(value) {
@@ -237,6 +252,11 @@ private class BubbleView(context: Context) : View(context) {
         textAlign = Paint.Align.CENTER
         color = Color.WHITE
     }
+    private val limitText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.CENTER
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        color = Color.rgb(0x11, 0x11, 0x11)
+    }
     private val oval = RectF()
 
     override fun onDraw(canvas: Canvas) {
@@ -254,15 +274,22 @@ private class BubbleView(context: Context) : View(context) {
         big.textSize = r * 0.72f
         canvas.drawText(m.speed?.toString() ?: "--", w / 2, h / 2 + r * 0.12f, big)
         small.textSize = r * 0.24f
-        val line = buildString {
-            if (m.limit != null) append(m.limit)
-            if (m.cameraM != null) {
-                if (isNotEmpty()) append(" · ")
-                append(BubbleLogic.distanceText(m.cameraM))
-            }
-            if (isEmpty()) append("km/h")
-        }
+        // Bottom line: the countdown to the camera, else the unit.
+        val line = if (m.cameraM != null) BubbleLogic.distanceText(m.cameraM) else "km/h"
         canvas.drawText(line, w / 2, h / 2 + r * 0.55f, small)
+        // Speed-limit roundel at the top right: white disc, red ring, the limit in black.
+        if (m.limit != null) {
+            val rr = r * 0.36f
+            val cx = w - rr
+            val cy = rr
+            fill.color = Color.WHITE
+            canvas.drawCircle(cx, cy, rr, fill)
+            ring.color = RED
+            ring.strokeWidth = rr * 0.22f
+            canvas.drawCircle(cx, cy, rr - ring.strokeWidth / 2f, ring)
+            limitText.textSize = rr * (if (m.limit >= 100) 0.78f else 0.95f)
+            canvas.drawText(m.limit.toString(), cx, cy + limitText.textSize * 0.36f, limitText)
+        }
     }
 
     override fun performClick(): Boolean = super.performClick()

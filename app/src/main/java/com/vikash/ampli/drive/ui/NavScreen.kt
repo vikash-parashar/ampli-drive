@@ -485,14 +485,14 @@ private fun TurnBanner(step: RouteStep, distanceM: Double, then: RouteStep?) {
                 Text(
                     theme.label(stringResource(R.string.nav_then)),
                     color = theme.turnMuted,
-                    fontSize = dims.t(2.4f, min = 14f),
+                    fontSize = dims.t(2.4f, min = 16f),
                     fontWeight = FontWeight.SemiBold,
                 )
                 ManeuverArrow(then, theme.turnText, Modifier.size(maxOf(dims.d(4.4f), 26.dp)))
                 Text(
                     then.label ?: maneuverText(context, then),
                     color = theme.turnMuted,
-                    fontSize = dims.t(2.4f, min = 14f),
+                    fontSize = dims.t(2.4f, min = 16f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
@@ -593,7 +593,7 @@ private fun Stat(value: String, label: String?, accent: Boolean = false) {
             maxLines = 1,
         )
         if (label != null) {
-            Text(label, style = theme.labelStyle(), fontSize = dims.t(2f, min = 12f), maxLines = 1)
+            Text(label, style = theme.labelStyle(), fontSize = dims.t(2f, min = 16f), maxLines = 1)
         }
     }
 }
@@ -604,9 +604,7 @@ private fun RoundIconButton(icon: androidx.compose.ui.graphics.vector.ImageVecto
     Box(
         Modifier
             .size(MinTouch)
-            .clip(CircleShape)
-            .background(theme.surfaceHigh)
-            .clickable(onClick = onClick),
+            .themedTap(CircleShape, theme.surfaceHigh, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = label, tint = theme.text, modifier = Modifier.size(30.dp))
@@ -720,7 +718,7 @@ fun NavHomeCard(session: NavSession, onClick: () -> Unit, modifier: Modifier = M
                     Text(
                         step.label ?: maneuverText(context, step),
                         color = theme.turnText,
-                        fontSize = dims.t(2.6f * scale, min = 14f),
+                        fontSize = dims.t(2.6f * scale, min = 16f),
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -729,7 +727,7 @@ fun NavHomeCard(session: NavSession, onClick: () -> Unit, modifier: Modifier = M
                         etaText(progress.remainingS) + " · " + navDuration(context, progress.remainingS) + " · " +
                             navDistance(context, progress.remainingM),
                         color = theme.turnMuted,
-                        fontSize = dims.t(2.2f, min = 12f),
+                        fontSize = dims.t(2.2f, min = 16f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -749,7 +747,7 @@ fun NavHomeCard(session: NavSession, onClick: () -> Unit, modifier: Modifier = M
                 Text(
                     stringResource(R.string.nav_routing, session.destination?.name.orEmpty()),
                     color = theme.turnText,
-                    fontSize = dims.t(2.8f * scale, min = 15f),
+                    fontSize = dims.t(2.8f * scale, min = 16f),
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,

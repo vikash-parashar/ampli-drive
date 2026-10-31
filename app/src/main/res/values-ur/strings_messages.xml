@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp پیغامات بول کر سنائیں</string>
+    <string name="disclosure_wa_body">گاڑی چلاتے وقت آپ کے WhatsApp اور WhatsApp Business پیغامات بول کر سنانے کے لیے Car Hub ان کی اطلاعات سے بھیجنے والے کا نام اور پیغام کا متن پڑھتا ہے۔ اس کے لیے اطلاعات تک رسائی استعمال ہوتی ہے۔</string>
+    <string name="disclosure_wa_uses">ہر پیغام ایک بار بولا جاتا ہے اور پھر بھلا دیا جاتا ہے۔ وہ ڈرائیونگ اسکرین پر کبھی نہیں دکھایا جاتا اور کہیں محفوظ نہیں ہوتا۔ Car Hub کبھی جواب نہیں دیتا، SMS نہیں بھیجتا اور چیٹ نہیں کھولتا۔ جب تک آپ اجازت نہ دیں، گروپ کے پیغامات چھوڑ دیے جاتے ہیں۔ جب تک اطلاعات تک رسائی آن ہے، Car Hub کے پس منظر میں ہونے پر بھی یہ کام کرتا ہے۔</string>
+    <string name="disclosure_wa_stays">Car Hub کچھ بھی محفوظ یا اپ لوڈ نہیں کرتا، اور Ampli Studio یا کسی اور کے ساتھ کچھ بھی شیئر نہیں کرتا۔ پیغام آپ کے آلے کا اپنا بولنے والا انجن پڑھتا ہے۔</string>
+    <string name="disclosure_park_hint">اسے پڑھنے اور آن کرنے کے لیے گاڑی روکیں۔</string>
+    <string name="wa_title">WhatsApp پیغامات بول کر سنائیں</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">کس نے لکھا اور پیغام میں کیا ہے، کار بتاتی ہے، صرف آواز میں۔</string>
+    <string name="wa_hint_on">آن۔ صرف آواز: پیغام کا متن اسکرین پر کبھی نہیں دکھتا۔</string>
+    <string name="wa_hint_locked">یہ Pro فیچر ہے۔ Pro دیکھنے کے لیے ٹیپ کریں۔</string>
+    <string name="wa_groups_title">گروپ کے پیغامات بھی سنائیں</string>
+    <string name="wa_groups_hint">بند: گروپ چیٹس خاموش رہتی ہیں۔ صرف براہِ راست آپ کو بھیجے گئے پیغامات سنائے جاتے ہیں۔</string>
+    <string name="wa_rules">20 سیکنڈ میں زیادہ سے زیادہ ایک پیغام۔ کال اور موڑ کی ہدایات کے دوران خاموش۔ Car Hub کبھی جواب نہیں دیتا اور کچھ نہیں بھیجتا۔</string>
+    <string name="wa_needs_access">WhatsApp پیغامات سننے کے لیے نوٹیفکیشن رسائی چاہیے۔</string>
+    <string name="wa_tts_missing">اس یونٹ میں بولنے والا انجن نہیں، اس لیے پیغامات بول کر نہیں سنائے جا سکتے۔ آواز جانچیں میں جا کر ایک انجن انسٹال کریں۔</string>
+    <string name="wa_park_to_turn_on">آن کرنے کے لیے گاڑی روکیں۔</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">朗读 WhatsApp 消息</string>
+    <string name="disclosure_wa_body">为了在您驾驶时朗读 WhatsApp 和 WhatsApp Business 消息，Car Hub 会从它们的通知中读取发送者姓名和消息内容。此功能需要使用通知访问权限。</string>
+    <string name="disclosure_wa_uses">每条消息只朗读一次，之后即被丢弃。消息不会显示在驾驶界面上，也不会被保存。Car Hub 从不回复、从不发送短信，也不会打开聊天。除非您允许，群组消息会被跳过。只要通知访问权限开启，Car Hub 在后台时也能使用此功能。</string>
+    <string name="disclosure_wa_stays">Car Hub 不保存、不上传任何内容，也不与 Ampli Studio 或任何人共享。消息由您设备自带的语音引擎朗读。</string>
+    <string name="disclosure_park_hint">请停车后再阅读并开启。</string>
+    <string name="wa_title">朗读 WhatsApp 消息</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">汽车会用语音说出谁发的消息以及消息内容，只用语音。</string>
+    <string name="wa_hint_on">已开启。仅语音：消息文字从不显示在屏幕上。</string>
+    <string name="wa_hint_locked">Pro 功能。点按查看 Pro。</string>
+    <string name="wa_groups_title">朗读群组消息</string>
+    <string name="wa_groups_hint">关：群聊保持安静。只朗读直接发给你的消息。</string>
+    <string name="wa_rules">每 20 秒最多一条消息。通话和转弯提示时保持安静。Car Hub 从不回复，也从不发送任何内容。</string>
+    <string name="wa_needs_access">需要通知使用权才能听到 WhatsApp 消息。</string>
+    <string name="wa_tts_missing">此设备没有语音引擎，无法朗读消息。请在\"检查语音\"中安装一个。</string>
+    <string name="wa_park_to_turn_on">停车后才能开启。</string>
+</resources>

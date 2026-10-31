@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp-Nachrichten vorlesen</string>
+    <string name="disclosure_wa_body">Um deine WhatsApp- und WhatsApp-Business-Nachrichten während der Fahrt vorzulesen, liest Car Hub den Namen des Absenders und den Nachrichtentext aus ihren Benachrichtigungen. Dafür wird der Benachrichtigungszugriff genutzt.</string>
+    <string name="disclosure_wa_uses">Jede Nachricht wird einmal vorgelesen und dann vergessen. Sie wird nie auf dem Fahrbildschirm angezeigt und nie gespeichert. Car Hub antwortet nie, sendet keine SMS und öffnet nie den Chat. Gruppennachrichten werden übersprungen, außer du erlaubst sie. Das funktioniert auch, während Car Hub im Hintergrund ist, solange der Benachrichtigungszugriff an ist.</string>
+    <string name="disclosure_wa_stays">Car Hub speichert und lädt nichts hoch und teilt nichts mit Ampli Studio oder anderen. Die Sprachausgabe deines Geräts liest die Nachricht vor.</string>
+    <string name="disclosure_park_hint">Halte an, um dies zu lesen und einzuschalten.</string>
+    <string name="wa_title">WhatsApp-Nachrichten vorlesen</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">Das Auto sagt, wer geschrieben hat und was in der Nachricht steht, nur per Stimme.</string>
+    <string name="wa_hint_on">An. Nur Stimme: der Nachrichtentext wird nie auf dem Bildschirm gezeigt.</string>
+    <string name="wa_hint_locked">Eine Pro-Funktion. Tippen, um Pro anzusehen.</string>
+    <string name="wa_groups_title">Gruppennachrichten vorlesen</string>
+    <string name="wa_groups_hint">Aus: Gruppenchats bleiben stumm. Nur direkt an dich gesendete Nachrichten werden vorgelesen.</string>
+    <string name="wa_rules">Höchstens eine Nachricht alle 20 Sekunden. Still bei Anrufen und Abbiegehinweisen. Car Hub antwortet nie und sendet nie etwas.</string>
+    <string name="wa_needs_access">Braucht Zugriff auf Benachrichtigungen, um WhatsApp-Nachrichten zu hören.</string>
+    <string name="wa_tts_missing">Dieses Gerät hat keine Sprachausgabe, daher können Nachrichten nicht vorgelesen werden. Installiere eine unter Sprache prüfen.</string>
+    <string name="wa_park_to_turn_on">Zum Einschalten anhalten.</string>
+</resources>

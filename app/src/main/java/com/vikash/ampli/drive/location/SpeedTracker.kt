@@ -1,5 +1,7 @@
 package com.vikash.ampli.drive.location
 
+import com.vikash.ampli.drive.ui.DriveLock
+import com.vikash.ampli.drive.ui.PARK_TO_EDIT_KMH
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -42,6 +44,8 @@ data class GpsState(
     val lastFixElapsedMs: Long = 0L,
     val lastFixProvider: String? = null,
     val lastFixHasSpeed: Boolean = false,
+    /** elapsedRealtime of the last fix above the park-to-edit speed; 0 = never (see DriveLock). */
+    val lastMovingElapsedMs: Long = 0L,
 )
 
 enum class LocationSource { None, LastKnown, Gps, Network, Passive, Fused }
@@ -362,6 +366,10 @@ class SpeedTracker(
         val smoothed = raw?.let { smooth(it) }
         if (smoothed != null) trip.onSpeed(lastFixAt, smoothed)
         val avg = trip.averageKmh
+        // Stamped on every fix, whichever screen is showing, so the text-entry lock still knows
+        // the car was moving when GPS then drops out (tunnel, flyover).
+        val movingAt = if (smoothed != null && smoothed > PARK_TO_EDIT_KMH) lastFixAt else 0L
+        if (movingAt != 0L) DriveLock.lastMovingAtMs = movingAt
         _state.update {
             it.copy(
                 location = location,
@@ -373,6 +381,7 @@ class SpeedTracker(
                 lastFixElapsedMs = lastFixAt,
                 lastFixProvider = location.provider,
                 lastFixHasSpeed = location.hasSpeed(),
+                lastMovingElapsedMs = if (movingAt != 0L) movingAt else it.lastMovingElapsedMs,
             )
         }
         if (smoothed != null) {

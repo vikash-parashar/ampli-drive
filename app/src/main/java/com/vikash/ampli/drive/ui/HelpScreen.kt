@@ -178,10 +178,30 @@ fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfi
     }
 
     fun sendNow() {
-        if (crash) app.car.clearCrash()
-        message = Sos.buildMessage(profile, bestLocation())
-        Sos.openSmsComposer(context, profile.contacts.map { it.phone }, message)
+        if (crash) {
+            // CarMonitor owns the crash countdown; it may already have opened the message.
+            app.car.sendCrashSos(bestLocation())?.let { message = it }
+        } else {
+            message = Sos.buildMessage(profile, bestLocation())
+            Sos.openSmsComposer(context, profile.contacts.map { it.phone }, message)
+        }
         phase = SosPhase.Ready
+    }
+
+    // The crash countdown ran out in CarMonitor (it opens the message there): show it here too.
+    val crashSos by app.car.crashSos.collectAsStateWithLifecycle()
+    LaunchedEffect(crash, crashSos) {
+        val sent = crashSos
+        if (crash && sent != null && phase == SosPhase.Countdown) {
+            message = sent
+            phase = SosPhase.Ready
+        }
+    }
+    // A crash countdown shows the time CarMonitor has left, so screen and voice agree.
+    val crashSecondsLeft = remember {
+        app.car.crashAt.value?.let { at ->
+            ((at + CRASH_COUNTDOWN_S * 1000L - System.currentTimeMillis() + 999) / 1000).toInt().coerceIn(1, CRASH_COUNTDOWN_S)
+        } ?: CRASH_COUNTDOWN_S
     }
 
     when (phase) {
@@ -193,7 +213,7 @@ fun HelpScreen(app: DriveApp, startSos: Boolean, onBack: () -> Unit, onEditProfi
             onSendNow = { sendNow() },
             onFinished = { sendNow() },
             hasFix = fix != null,
-            seconds = if (crash) CRASH_COUNTDOWN_S else COUNTDOWN_S,
+            seconds = if (crash) crashSecondsLeft else COUNTDOWN_S,
             crash = crash,
         )
         SosPhase.Ready -> SosReady(
@@ -457,7 +477,7 @@ private fun SosCountdown(
 }
 
 @Composable
-private fun SosReady(
+internal fun SosReady(
     profile: EmergencyProfile,
     message: String,
     onSmsAgain: () -> Unit,

@@ -11,7 +11,8 @@ import kotlin.math.sqrt
 
 /**
  * One enforcement point. [dir] is the bearing the camera enforces (the direction of travel it
- * watches), or null when unknown. [type] is "speed_camera", "average_speed" or "user".
+ * watches), or null when unknown. [type] is "speed_camera", "average_speed", "red_light", "user"
+ * or a road report ("rep_police"…).
  *
  * OSM-derived points come from OpenStreetMap and are © OpenStreetMap contributors, ODbL 1.0.
  */
@@ -23,7 +24,21 @@ data class SpeedCamera(
     val dir: Double?,
     val type: String,
     val userReported: Boolean = false,
-)
+) {
+    companion object {
+        const val TYPE_SPEED = "speed_camera"
+        const val TYPE_AVERAGE = "average_speed"
+
+        /** Red-light camera (OSM enforcement=traffic_signals). */
+        const val TYPE_RED_LIGHT = "red_light"
+
+        /** The driver's permanent "Report camera here". */
+        const val TYPE_USER = "user"
+
+        /** Road reports (police check, accident…), see [ReportKind]; they expire. */
+        const val REPORT_PREFIX = "rep_"
+    }
+}
 
 /** A camera with its straight-line distance from the car. */
 data class CameraAhead(val camera: SpeedCamera, val distanceMeters: Double)

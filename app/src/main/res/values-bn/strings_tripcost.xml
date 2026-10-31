@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">যাত্রার খরচ</string>
+    <string name="trip_cost_example">উদাহরণ</string>
+    <string name="trip_cost_route">পরিকল্পিত পথ · %1$s কিমি</string>
+    <string name="trip_cost_tolls">%1$d টোল</string>
+    <string name="trip_cost_fuel">জ্বালানি</string>
+    <string name="trip_cost_fuel_unknown">একবার তেল ভরা যোগ করুন</string>
+    <string name="trip_cost_pass_saves">Annual Pass-এ সাশ্রয়</string>
+    <string name="trip_cost_pass_would_save">Annual Pass থাকলে সাশ্রয়</string>
+    <string name="trip_cost_pass_trips">পাসের %1$d ট্রিপ</string>
+    <string name="trip_cost_total">টোল + জ্বালানি</string>
+    <string name="trip_cost_note">আনুমানিক। জ্বালানি আপনার নিজের মাইলেজ আর শেষবার ভরার দামে। টোলের হার বদলাতে পারে।</string>
+    <string name="trip_cost_example_note">প্রিভিউর জন্য নমুনা সংখ্যা, আসল পথ নয়।</string>
+</resources>

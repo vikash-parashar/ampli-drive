@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player holen</string>
+    <string name="getmp3_text">Car Hub spielt deine Songs im Ampli MP3 Player, und der ist noch nicht auf diesem Bildschirm. Einmal installieren; danach öffnet ihn die Musik-Taste direkt.</string>
+    <string name="getmp3_play">Im Play Store holen</string>
+    <string name="getmp3_download">Herunterladen und installieren</string>
+    <string name="getmp3_downloading">Wird geladen… %1$d%%</string>
+    <string name="getmp3_install">Jetzt installieren</string>
+    <string name="getmp3_allow">Erlaube auf der geöffneten Seite Installationen von Car Hub, komm zurück und tippe auf Jetzt installieren.</string>
+    <string name="getmp3_failed">Download fehlgeschlagen. Prüfe das Internet und versuche es erneut.</string>
+    <string name="getmp3_other">Andere Musik-App verwenden</string>
+    <string name="getmp3_test_note">Testversion: lädt die neueste Testversion von Amplis GitHub-Seite.</string>
+    <string name="phone_music_title">Handy-Musik</string>
+    <string name="phone_music_from">Von %1$s über Bluetooth</string>
+    <string name="phone_autoplay_title">Handy-Musik abspielen, wenn mein Handy sich verbindet</string>
+    <string name="phone_autoplay_hint">Drückt ein paar Sekunden nach dem Verbinden auf Play. Nie während eines Anrufs und nicht, wenn du in der letzten Minute pausiert hast.</string>
+    <string name="mirror_app_title">Bildschirmspiegelungs-App</string>
+    <string name="mirror_app_none">Keine</string>
+    <string name="plink_title">Phone Link</string>
+    <string name="plink_connected">%1$s verbunden</string>
+    <string name="plink_not_connected">Kein Handy über Bluetooth verbunden</string>
+    <string name="plink_calls">Anrufe</string>
+    <string name="plink_music">Musik</string>
+    <string name="plink_battery">Akku %1$d%%</string>
+    <string name="plink_play">Handy-Musik abspielen</string>
+    <string name="plink_devices">Bluetooth-Geräte</string>
+    <string name="plink_no_devices">Keine gekoppelten Geräte sichtbar. Dieses Gerät verwaltet Bluetooth vielleicht in seiner eigenen App: öffne die Bluetooth-Einstellungen.</string>
+    <string name="plink_now">Jetzt verbunden</string>
+    <string name="plink_paired">Gekoppelt</string>
+    <string name="plink_switch">Wechseln</string>
+    <string name="plink_switching">Gerät soll %1$s verbinden…</string>
+    <string name="plink_pick_here">Wähle hier %1$s, um es zu verbinden</string>
+    <string name="plink_bt_settings">Bluetooth-Einstellungen</string>
+    <string name="plink_mirror">Bildschirmspiegelungs-App öffnen</string>
+    <string name="apps_hide">In Apps ausblenden</string>
+    <string name="apps_hidden_toast">%1$s ist ausgeblendet. Unter Weitere Apps wieder einblenden.</string>
+    <string name="apps_unhide_all">Ausgeblendete zeigen (%1$d)</string>
+    <string name="apps_mirror_use">Für Bildschirmspiegelung verwenden</string>
+    <string name="apps_mirror_stop">Nicht mehr für Bildschirmspiegelung verwenden</string>
+    <string name="greet_home_title">Mach Car Hub zur Start-App, damit es dich nach dem Start begrüßen kann</string>
+</resources>

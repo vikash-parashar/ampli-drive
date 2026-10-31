@@ -111,6 +111,7 @@
     <string name="pro_point_once">One payment, no subscription</string>
     <string name="pro_buy_price">Buy for %1$s</string>
     <string name="pro_buy">Buy Pro</string>
+    <string name="pro_launch_line">Launch price %1$s (later %2$s)</string>
     <string name="pro_restore">Restore purchase</string>
     <string name="pro_not_now">Not now</string>
     <string name="pro_unavailable">Google Play isn\'t available on this unit. Try again later.</string>
@@ -155,6 +156,11 @@
     <string name="sos_send_again">Open SMS again</string>
     <string name="sos_share">Share via WhatsApp or other</string>
     <string name="sos_share_title">Share SOS</string>
+    <string name="sos_channel_name">Crash SOS</string>
+    <string name="sos_channel_description">Opens the SOS screen after a possible crash when another app is in front</string>
+    <string name="sos_notif_title">Possible crash: SOS message ready</string>
+    <string name="sos_notif_text">Tap to open the SOS message for your emergency contacts. Nothing is sent until you press Send.</string>
+    <string name="sos_notif_action">Open SOS</string>
     <string name="med_title">For responders</string>
     <string name="med_blood">Blood group</string>
     <string name="med_notes">Medical notes</string>
@@ -296,6 +302,8 @@
     <string name="action_refresh">Refresh</string>
     <string name="dock_car">Car</string>
     <string name="pro_point_car">Car tools: OBD-II engine data and fault codes, Bluetooth tyre pressure, CSV export of expenses</string>
+    <string name="pro_point_whatsapp">WhatsApp messages read aloud while you drive, by voice only</string>
+    <string name="pro_point_trip_cost">Trip cost: fuel and tolls for the planned route</string>
     <string name="park_to_edit">Park to edit</string>
     <string name="park_to_edit_hint">Editing is paused while the car is moving. Ask “Hey Ampli” instead.</string>
     <string name="car_distance_m">%1$d m</string>
@@ -495,6 +503,14 @@
     <string name="crash_setting_hint">Hard impact or a sudden stop from speed starts a 30 second SOS countdown</string>
     <string name="crash_no_sensor">No motion sensor found. Uses sudden GPS stops only.</string>
     <string name="crash_tap_note">The final emergency SMS still needs one tap to send.</string>
+    <string name="crash_overlay_title">Help the SOS message open faster</string>
+    <string name="crash_overlay_body">Allow “Display over other apps” for Ampli Car Hub. It helps the SOS message open faster after a crash when another app is on screen. Car Hub also shows an alert you can tap.</string>
+    <string name="crash_overlay_allow">Open setting</string>
+    <string name="crash_overlay_later">Not now</string>
+    <string name="crash_overlay_status_title">Display over other apps</string>
+    <string name="crash_overlay_status_off">Not allowed yet. It helps the SOS message open faster; without it, Car Hub shows an alert you can tap.</string>
+    <string name="crash_fsi_status_title">Full-screen SOS alert</string>
+    <string name="crash_fsi_status_off">Not allowed yet. Without it, the crash SOS alert shows only as a notification.</string>
     <string name="monitor_setting">Monitor in background</string>
     <string name="monitor_setting_hint">Keeps GPS on while other apps are open, with a notification</string>
     <string name="voice_service_unknown">No service dates are set yet. Open Car, then Papers and service.</string>
@@ -853,4 +869,7 @@
     <string name="nav_search_moving">Typing is off while driving. Tap “Say it” and say where to go.</string>
     <string name="shell_open_settings">Open settings</string>
     <string name="voice_tts_missing_hint">No phone voice installed; using Ampli voice.</string>
+    <string name="autostart_acc_note">Ignition (ACC) signals from the head unit are heard only while “Monitor in background” is on.</string>
+    <string name="about_not_affiliated">Ampli Studio is not affiliated with NPCI, NHAI, Apple or Google. FASTag, CarPlay, Android Auto and Google Maps are named only to say what works with Car Hub.</string>
+    <string name="shell_eq_pick_title">Choose your equalizer app</string>
 </resources>

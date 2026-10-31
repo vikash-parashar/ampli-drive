@@ -12,6 +12,7 @@ import com.vikash.ampli.drive.MainActivity
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.cameras.CameraRepository
 import com.vikash.ampli.drive.i18n.AppLanguages
+import com.vikash.ampli.drive.nav.SavedKind
 import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.system.Launchers
 import kotlinx.coroutines.CancellationException
@@ -37,8 +38,23 @@ data class VoiceUiState(
     val reply: String = "",
     /** Destinations waiting for "the first / second / third one" (or a tap). */
     val options: List<Place> = emptyList(),
+    /** A big answer card: the time, the weather, the volume… */
+    val answer: VoiceAnswer? = null,
 ) {
     enum class Phase { Idle, Listening, Working, Speaking }
+}
+
+/** What the answer card shows. [value] is the big line ("5:20 pm", "31°"). */
+data class VoiceAnswer(
+    val kind: Kind,
+    val title: String,
+    val value: String,
+    val detail: String = "",
+    /** Small print: the weather source credit, "say more" hints. */
+    val note: String = "",
+    val sky: com.vikash.ampli.drive.weather.Sky? = null,
+) {
+    enum class Kind { Time, Date, Weather, Volume, Speed, Brightness, Info, Problem, Fuel, Charging, Report }
 }
 
 /**
@@ -66,7 +82,10 @@ class VoiceAssistant(private val app: DriveApp) {
     /** Set by VoiceService: closes the wake-word microphone synchronously before we listen. */
     var releaseWakeMic: (() -> Unit)? = null
 
-    private enum class Expect { Nothing, Destination, Choice }
+    private enum class Expect { Nothing, Destination, Choice, MoreVolume }
+
+    /** The last volume change, for a follow-up "aur" / "more". */
+    private var lastVolume = VoiceIntent.VolumeAction.Show
 
     /** Starts a session unless one is running. */
     fun start() {
@@ -148,7 +167,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!listener.isAvailable()) {
             // Neither a system recogniser nor the offline model: start the model download so
             // the next try works, and point at Settings › Voice › Check voice.
-            app.wakeModel.ensure()
+            app.wakeModel.ensure(automatic = true)
             say(res, lang, R.string.voice_unavailable)
             return
         }
@@ -181,6 +200,8 @@ class VoiceAssistant(private val app: DriveApp) {
                 }
                 Listener.Result.Silence -> {
                     misses++
+                    // After a volume change, silence just means "that's enough".
+                    if (expect == Expect.MoreVolume) return
                     if (misses >= 2 || expect == Expect.Nothing) {
                         // Nothing said after the wake word: usually a false wake, so stay quiet.
                         if (expect != Expect.Nothing) styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
@@ -193,6 +214,8 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             _state.update { it.copy(heard = text, phase = VoiceUiState.Phase.Working) }
             val intent = VoiceIntents.parse(text, parserLang, expectingChoice = expect == Expect.Choice)
+            // A new question clears the last answer card; "aur" after a volume change keeps it.
+            if (intent !is VoiceIntent.Volume && expect != Expect.MoreVolume) _state.update { it.copy(answer = null) }
             expect = handle(intent, text, expect, res, lang, parserLang) ?: return
         }
     }
@@ -215,6 +238,10 @@ class VoiceAssistant(private val app: DriveApp) {
                 }
                 return search(intent.destination, res, lang)
             }
+            is VoiceIntent.GoSaved -> {
+                goSaved(intent.kind, res, lang)
+                return null
+            }
             is VoiceIntent.ChooseOption -> {
                 val place = _state.value.options.getOrNull(intent.index)
                 if (place == null) {
@@ -227,7 +254,15 @@ class VoiceAssistant(private val app: DriveApp) {
             is VoiceIntent.Unknown -> return when (expect) {
                 Expect.Destination -> {
                     val dest = VoiceIntents.destinationFrom(text, parserLang)
-                    if (dest.isEmpty()) null else search(dest, res, lang)
+                    val saved = VoiceIntents.savedKind(dest)
+                    when {
+                        dest.isEmpty() -> null
+                        saved != null -> {
+                            goSaved(saved, res, lang)
+                            null
+                        }
+                        else -> search(dest, res, lang)
+                    }
                 }
                 Expect.Choice -> {
                     // "Phoenix" instead of "the first one".
@@ -248,9 +283,15 @@ class VoiceAssistant(private val app: DriveApp) {
                     styled(res, lang, HaryanviLines.Event.NotUnderstood, res.getString(R.string.voice_not_understood))
                     null
                 }
+                Expect.MoreVolume -> VoiceIntents.volumeFollowUp(text, lastVolume)?.let { volume(it, null, res, lang) }
             }
             VoiceIntent.NextCamera -> {
                 nextCamera(res, lang)
+                return null
+            }
+            is VoiceIntent.FindFuel -> return findFuel(intent.filter, res, lang)
+            is VoiceIntent.ReportRoad -> {
+                reportRoad(intent.kind, res, lang)
                 return null
             }
             is VoiceIntent.PlayLocal -> {
@@ -270,8 +311,20 @@ class VoiceAssistant(private val app: DriveApp) {
             VoiceIntent.Next -> transport(VoiceActions.Transport.Next, HaryanviLines.Event.MusicNext)
             VoiceIntent.Previous -> transport(VoiceActions.Transport.Previous, HaryanviLines.Event.MusicPrevious)
             VoiceIntent.OpenAndroidAuto -> {
-                val label = VoiceActions.openPhoneLink(app, app.prefs.autoPackage.value)
-                if (label != null) {
+                // Car Hub's own Phone Link sheet, unless the driver picked a screen-mirroring app.
+                val pinned = app.prefs.autoPackage.value
+                val label = if (pinned != null) VoiceActions.openPhoneLink(app, pinned) else null
+                if (pinned == null) {
+                    app.phoneBt.requestSheet()
+                    try {
+                        app.startActivity(
+                            android.content.Intent(app, com.vikash.ampli.drive.MainActivity::class.java)
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                        )
+                    } catch (_: Exception) {
+                    }
+                    styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, res.getString(R.string.plink_title)))
+                } else if (label != null) {
                     // Haryanvi desi: "ठीक सै, कर दिया।"
                     styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, label))
                 } else {
@@ -326,8 +379,296 @@ class VoiceAssistant(private val app: DriveApp) {
                 styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
                 return null
             }
+            VoiceIntent.Stop -> {
+                // "Stop" / "ruko" / "band karo": the music if any is playing, else the conversation.
+                if (VoiceActions.isPlaying(app)) {
+                    transport(VoiceActions.Transport.Pause, HaryanviLines.Event.MusicPause)
+                } else {
+                    styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                }
+                return null
+            }
+            is VoiceIntent.Volume -> return volume(intent.action, intent.level, res, lang)
+            VoiceIntent.TimeNow -> {
+                timeAnswer(res, lang)
+                return null
+            }
+            VoiceIntent.DateToday -> {
+                dateAnswer(res, lang)
+                return null
+            }
+            is VoiceIntent.Weather -> {
+                weatherAnswer(intent.rain, res, lang)
+                return null
+            }
+            VoiceIntent.Speed -> {
+                speedAnswer(res, lang)
+                return null
+            }
+            VoiceIntent.StopNavigation -> {
+                stopNavigation(res, lang)
+                return null
+            }
+            VoiceIntent.OpenMaps -> {
+                if (app.prefs.navApp.value == NavApp.Ampli) {
+                    bringLauncherForward(MainActivity.VOICE_MAPS)
+                } else {
+                    Launchers.openNavigation(app, app.speedTracker.state.value.location)
+                }
+                styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_maps_opening))
+                return null
+            }
+            is VoiceIntent.Brightness -> {
+                brightness(intent.up, res, lang)
+                return null
+            }
+            VoiceIntent.BluetoothSettings -> {
+                app.phoneBt.openBluetoothSettings(app)
+                styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_bt_settings_opening))
+                return null
+            }
+            VoiceIntent.WhatCanISay -> {
+                bringLauncherForward(MainActivity.VOICE_COMMANDS)
+                styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_commands_opening))
+                return null
+            }
         }
         return null
+    }
+
+    // ------------------------------------------------------------------- Round 7 answers
+
+    /**
+     * Shows [a] on the answer card. When Car Hub is not in front (Google Maps on screen) the card
+     * can't be seen, so the answer is also toasted, without covering the map.
+     */
+    private fun showAnswer(a: VoiceAnswer) {
+        _state.update { it.copy(answer = a, options = emptyList()) }
+        if (!MainActivity.inFront) {
+            val line = listOf(a.title, a.value, a.detail).filter { it.isNotBlank() }.joinToString(" · ")
+            try {
+                android.widget.Toast.makeText(app, line, android.widget.Toast.LENGTH_LONG).show()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    /** Keeps the card up long enough to read once the voice is done. */
+    private suspend fun holdAnswer(shownAt: Long) {
+        val left = ANSWER_HOLD_MS - (System.currentTimeMillis() - shownAt)
+        if (left > 0) kotlinx.coroutines.delay(left)
+    }
+
+    /**
+     * Says an answer. The recorded pieces ([clips], see [AnswerClips]) in the Haryanvi style or
+     * when the unit has no TTS; else the phone voice reads [text]. No TTS and the pieces not
+     * recorded yet: the short recorded acknowledgement of [standIn] plays (the card has the answer).
+     */
+    private suspend fun speakAnswer(text: String, lang: String, clips: List<String>, standIn: HaryanviLines.Event? = HaryanviLines.Event.CommandDone) {
+        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = text) }
+        val tts = app.voicePlayer.ttsAvailable()
+        val spoken = Spoken(text, lang, clips)
+        when {
+            clips.isNotEmpty() && (app.desi.enabled || !tts) && app.voicePlayer.hasRecorded(spoken) -> app.voicePlayer.say(spoken)
+            tts -> speaker.say(text, lang)
+            standIn != null -> app.desi.line(standIn, force = true)?.let { app.voicePlayer.say(it) }
+            else -> kotlinx.coroutines.delay(1_500L)
+        }
+    }
+
+    /** Locale for dates on the card; Haryanvi, Bhojpuri and Maithili read Hindi dates. */
+    private fun dateLocale(res: Context): Locale {
+        val l = res.resources.configuration.locales[0]
+        return if (l.language in setOf("bgc", "bho", "mai")) Locale.forLanguageTag("hi-IN") else l
+    }
+
+    private suspend fun timeAnswer(res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val now = java.time.LocalDateTime.now()
+        val time = android.text.format.DateFormat.getTimeFormat(res).format(java.util.Date())
+        val date = now.toLocalDate().format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(dateLocale(res)))
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Time, res.getString(R.string.voice_answer_time), time, date))
+        speakAnswer(res.getString(R.string.voice_time_is, time), lang, AnswerClips.time(now.hour, now.minute, app.desi.enabled))
+        holdAnswer(shownAt)
+    }
+
+    private suspend fun dateAnswer(res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val today = java.time.LocalDate.now()
+        val locale = dateLocale(res)
+        val big = today.format(java.time.format.DateTimeFormatter.ofPattern("d MMMM", locale))
+        val full = today.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(locale))
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Date, res.getString(R.string.voice_answer_date), big, full))
+        speakAnswer(
+            res.getString(R.string.voice_date_is, full),
+            lang,
+            AnswerClips.date(today.dayOfWeek.value, today.dayOfMonth, today.monthValue, app.desi.enabled),
+        )
+        holdAnswer(shownAt)
+    }
+
+    private fun skyName(res: Context, sky: com.vikash.ampli.drive.weather.Sky): String = res.getString(
+        when (sky) {
+            com.vikash.ampli.drive.weather.Sky.Clear -> R.string.wx_clear
+            com.vikash.ampli.drive.weather.Sky.PartlyCloudy -> R.string.wx_partly_cloudy
+            com.vikash.ampli.drive.weather.Sky.Cloudy -> R.string.wx_cloudy
+            com.vikash.ampli.drive.weather.Sky.Rain -> R.string.wx_rain
+            com.vikash.ampli.drive.weather.Sky.HeavyRain -> R.string.wx_heavy_rain
+            com.vikash.ampli.drive.weather.Sky.Thunder -> R.string.wx_thunder
+            com.vikash.ampli.drive.weather.Sky.Fog -> R.string.wx_fog
+            com.vikash.ampli.drive.weather.Sky.Snow -> R.string.wx_snow
+        },
+    )
+
+    private suspend fun weatherAnswer(rainQuestion: Boolean, res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val desiOn = app.desi.enabled
+        val title = res.getString(R.string.voice_answer_weather)
+        val here = app.speedTracker.state.value.location
+        if (here == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        _state.update { it.copy(phase = VoiceUiState.Phase.Working, reply = res.getString(R.string.voice_weather_checking)) }
+        when (val r = app.nowWeather.get(here.latitude, here.longitude)) {
+            is com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Ok -> {
+                val w = r.weather
+                val sky = skyName(res, w.sky)
+                val temp = w.temperatureC?.let { kotlin.math.round(it).toInt() }
+                val rainLine = res.getString(if (w.rainLikely) R.string.voice_weather_rain_yes else R.string.voice_weather_rain_no)
+                val detail = buildList {
+                    add(sky)
+                    w.rainChancePct?.let { add(res.getString(R.string.weather_rain_chance, it)) }
+                    add(rainLine)
+                }.joinToString(" · ")
+                val source = res.getString(
+                    if (w.source == com.vikash.ampli.drive.weather.WeatherSource.MetNorway) R.string.weather_source_met else R.string.weather_source_openmeteo,
+                )
+                val note = if (r.stale) res.getString(R.string.weather_stale) + " · " + source else source
+                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Weather, title, temp?.let { "$it°C" } ?: sky, detail, note, w.sky))
+                val now = if (temp != null) res.getString(R.string.voice_weather_now, sky, temp) else "$sky."
+                val text = if (rainQuestion) "$rainLine $now" else "$now $rainLine"
+                val standIn = when {
+                    w.sky == com.vikash.ampli.drive.weather.Sky.Thunder -> HaryanviLines.Event.WeatherThunder
+                    w.sky == com.vikash.ampli.drive.weather.Sky.Fog -> HaryanviLines.Event.WeatherFog
+                    w.rainLikely -> HaryanviLines.Event.WeatherRain
+                    (w.temperatureC ?: 0.0) >= com.vikash.ampli.drive.weather.RouteWeather.HEAT_C -> HaryanviLines.Event.WeatherHeat
+                    else -> HaryanviLines.Event.CommandDone
+                }
+                speakAnswer(text, lang, AnswerClips.weather(w.sky, w.temperatureC, w.rainLikely, rainQuestion, desiOn), standIn)
+            }
+            com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Offline -> {
+                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_weather_offline)))
+                speakAnswer(res.getString(R.string.voice_weather_offline), lang, AnswerClips.line("wx_offline", desiOn), standIn = null)
+            }
+            com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Failed -> {
+                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_weather_failed)))
+                speakAnswer(res.getString(R.string.voice_weather_failed), lang, AnswerClips.line("wx_failed", desiOn), standIn = null)
+            }
+        }
+        holdAnswer(shownAt)
+    }
+
+    private suspend fun speedAnswer(res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val title = res.getString(R.string.voice_answer_speed)
+        val kmh = app.speedTracker.state.value.speedKmh?.let { kotlin.math.round(it).toInt() }
+        if (kmh == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+        } else {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Speed, title, res.getString(R.string.voice_speed_value, kmh)))
+            speakAnswer(res.getString(R.string.voice_speed_is, kmh), lang, AnswerClips.speed(kmh, app.desi.enabled))
+        }
+        holdAnswer(shownAt)
+    }
+
+    /** Volume by voice. Up, down and a bare "volume" wait for "aur" / "more" once more. */
+    private suspend fun volume(action: VoiceIntent.VolumeAction, level: Int?, res: Context, lang: String): Expect? {
+        val shownAt = System.currentTimeMillis()
+        val title = res.getString(R.string.voice_answer_volume)
+        val r = com.vikash.ampli.drive.media.VoiceVolume.apply(app.getSystemService(android.media.AudioManager::class.java), action, level)
+        if (r == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_volume_failed)))
+            speakAnswer(res.getString(R.string.voice_volume_failed), lang, emptyList(), standIn = null)
+            holdAnswer(shownAt)
+            return null
+        }
+        lastVolume = action
+        val tenths = com.vikash.ampli.drive.media.VolumeMath.tenths(r.level, r.max)
+        val more = action == VoiceIntent.VolumeAction.Up || action == VoiceIntent.VolumeAction.Down || action == VoiceIntent.VolumeAction.Show
+        val value = if (r.muted) res.getString(R.string.voice_volume_muted) else res.getString(R.string.voice_volume_value, tenths)
+        showAnswer(
+            VoiceAnswer(
+                VoiceAnswer.Kind.Volume,
+                title,
+                value,
+                res.getString(R.string.voice_volume_steps, r.level, r.max),
+                if (more) res.getString(R.string.voice_volume_more_hint) else "",
+            ),
+        )
+        val clip = when (action) {
+            VoiceIntent.VolumeAction.Up -> "vol_up"
+            VoiceIntent.VolumeAction.Down -> "vol_down"
+            VoiceIntent.VolumeAction.Max -> "vol_max"
+            VoiceIntent.VolumeAction.Unmute -> "vol_unmute"
+            else -> null
+        }
+        // Muted: nothing would be heard, the card and Android's volume panel say it.
+        if (action != VoiceIntent.VolumeAction.Mute && action != VoiceIntent.VolumeAction.Show) {
+            speakAnswer(value, lang, clip?.let { AnswerClips.line(it, app.desi.enabled) }.orEmpty())
+        }
+        if (more) return Expect.MoreVolume
+        holdAnswer(shownAt)
+        return null
+    }
+
+    private suspend fun stopNavigation(res: Context, lang: String) {
+        if (app.navigator.state.value.visible) {
+            app.navigator.stop()
+            speakAnswer(res.getString(R.string.voice_nav_stopped), lang, AnswerClips.line("nav_stopped", app.desi.enabled))
+            return
+        }
+        // Google Maps' guidance can't be ended from outside; say how.
+        val text = res.getString(R.string.voice_nav_stop_maps)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, res.getString(R.string.voice_answer_navigation), "", text))
+        speakAnswer(text, lang, emptyList(), standIn = null)
+        holdAnswer(System.currentTimeMillis() - ANSWER_HOLD_MS / 2)
+    }
+
+    /** "Brightness up / down": the system setting, once Car Hub may change it. */
+    private suspend fun brightness(up: Boolean?, res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val title = res.getString(R.string.voice_answer_brightness)
+        val r = com.vikash.ampli.drive.system.ScreenBrightness.change(app, up)
+        if (r == null) {
+            com.vikash.ampli.drive.system.ScreenBrightness.openPermission(app)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_brightness_permission)))
+            speakAnswer(res.getString(R.string.voice_brightness_permission), lang, emptyList(), standIn = null)
+        } else {
+            val value = res.getString(R.string.voice_brightness_value, r)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Brightness, title, value))
+            if (up != null) speakAnswer(value, lang, emptyList())
+        }
+        holdAnswer(shownAt)
+    }
+
+    /**
+     * "Ghar chalo" / "office le chalo": straight to the saved place, no search. Not saved yet: the
+     * answer is shown and toasted too, since many units have no speech engine to say it.
+     */
+    private suspend fun goSaved(kind: SavedKind, res: Context, lang: String) {
+        val label = res.getString(if (kind == SavedKind.Office) R.string.place_office else R.string.place_home)
+        val saved = app.places.get(kind)
+        if (saved == null) {
+            val text = res.getString(R.string.place_not_set, label)
+            android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_LONG).show()
+            say(res, lang, text)
+            return
+        }
+        navigateTo(saved.toPlace(label), res, lang)
     }
 
     private suspend fun search(destination: String, res: Context, lang: String): Expect? {
@@ -396,6 +737,100 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!VoiceActions.startNavigation(app, place)) say(res, lang, R.string.voice_nav_failed)
     }
 
+    // ------------------------------------------------------------------- Fuel finder and reports
+
+    /**
+     * "Nearest CNG pump": the answer card with the nearest station, the three nearest as a list
+     * to pick by voice or tap ("pehla wala" starts the route), and the fuel screen behind it.
+     */
+    private suspend fun findFuel(filter: com.vikash.ampli.drive.fuel.FuelFilter, res: Context, lang: String): Expect? {
+        val shownAt = System.currentTimeMillis()
+        val desiOn = app.desi.enabled
+        val ev = filter == com.vikash.ampli.drive.fuel.FuelFilter.Ev
+        val kind = if (ev) VoiceAnswer.Kind.Charging else VoiceAnswer.Kind.Fuel
+        val title = res.getString(R.string.voice_fuel_title) + if (filter != com.vikash.ampli.drive.fuel.FuelFilter.All) " · " + res.getString(fuelLabel(filter)) else ""
+        val here = app.speedTracker.state.value.location
+        if (here == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
+            holdAnswer(shownAt)
+            return null
+        }
+        _state.update { it.copy(phase = VoiceUiState.Phase.Working) }
+        val hits = app.fuel.nearby(here.latitude, here.longitude, filter, limit = 3)
+        // The fuel screen opens behind the card on the asked fuel.
+        app.fuel.requestedFilter.value = filter
+        bringLauncherForward(MainActivity.VOICE_FUEL)
+        val picker = com.vikash.ampli.drive.voice.LinePicker()
+        val first = hits.firstOrNull()
+        if (first == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_fuel_none)))
+            speakAnswer(
+                res.getString(R.string.voice_fuel_none), lang,
+                com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, null) { picker.pickIndexed(it) },
+                standIn = HaryanviLines.Event.FuelNone,
+            )
+            holdAnswer(shownAt)
+            return null
+        }
+        val locale = res.resources.configuration.locales[0]
+        val km = String.format(locale, "%.1f", first.distanceM / 1000.0)
+        val name = com.vikash.ampli.drive.ui.stationName(res, first.station)
+        val minutes = com.vikash.ampli.drive.fuel.FuelFinder.etaMinutes(first.distanceM)
+        showAnswer(VoiceAnswer(kind, title, res.getString(R.string.fuel_km, km), res.getString(R.string.voice_fuel_detail, name, minutes)))
+        // Tap or say "the first one" to go.
+        _state.update { s ->
+            s.copy(options = hits.map { h -> Place(com.vikash.ampli.drive.ui.stationName(res, h.station), null, h.station.lat, h.station.lon, h.distanceM / 1000.0) })
+        }
+        speakAnswer(
+            res.getString(R.string.voice_fuel_answer, name, km), lang,
+            com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, first.distanceM) { picker.pickIndexed(it) },
+            standIn = com.vikash.ampli.drive.fuel.FuelVoice.foundEvent(filter),
+        )
+        return Expect.Choice
+    }
+
+    private fun fuelLabel(f: com.vikash.ampli.drive.fuel.FuelFilter): Int = when (f) {
+        com.vikash.ampli.drive.fuel.FuelFilter.All -> R.string.fuel_filter_all
+        com.vikash.ampli.drive.fuel.FuelFilter.Cng -> R.string.fuel_filter_cng
+        com.vikash.ampli.drive.fuel.FuelFilter.Petrol -> R.string.fuel_filter_petrol
+        com.vikash.ampli.drive.fuel.FuelFilter.Diesel -> R.string.fuel_filter_diesel
+        com.vikash.ampli.drive.fuel.FuelFilter.Ev -> R.string.fuel_filter_ev
+    }
+
+    /** "Police aage hai": saves a road report here (Pro), for two hours, on this unit only. */
+    private suspend fun reportRoad(kind: com.vikash.ampli.drive.cameras.ReportKind, res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val title = res.getString(R.string.voice_report_title)
+        val label = res.getString(
+            when (kind) {
+                com.vikash.ampli.drive.cameras.ReportKind.MobileCamera -> R.string.radar_item_mobile
+                com.vikash.ampli.drive.cameras.ReportKind.Police -> R.string.radar_item_police
+                com.vikash.ampli.drive.cameras.ReportKind.Accident -> R.string.radar_item_accident
+                com.vikash.ampli.drive.cameras.ReportKind.Jam -> R.string.radar_item_jam
+            },
+        )
+        if (!com.vikash.ampli.drive.cameras.RadarTier.allowed(com.vikash.ampli.drive.cameras.RadarFeature.Reports, app.prefs.pro.value.isPro)) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, res.getString(R.string.voice_report_pro)))
+            speakAnswer(res.getString(R.string.voice_report_pro), lang, emptyList(), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        val gps = app.speedTracker.state.value
+        val here = gps.location
+        if (here == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, label, res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        app.roadReports.add(kind, here, gps.speedKmh)
+        val text = res.getString(R.string.voice_report_saved, label)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, text))
+        styled(res, lang, HaryanviLines.Event.ReportSaved, text)
+        holdAnswer(shownAt)
+    }
+
     private suspend fun nextCamera(res: Context, lang: String) {
         val locale = res.resources.configuration.locales[0]
         fun answer(meters: Double, limit: Int?): String {
@@ -427,18 +862,38 @@ class VoiceAssistant(private val app: DriveApp) {
         say(res, lang, answer(ahead.distanceMeters, ahead.camera.maxspeed))
     }
 
+    /**
+     * "Play <song>" / "<song> bajao". Ampli MP3 Player installed: the exact song when this unit
+     * has it (MediaStore), else Ampli's own search when it declares one, else its Car mode with
+     * the spoken name in the "query" extra (a build that doesn't know it just autoplays). The
+     * phone over Bluetooth only searches when its session says it can (most can't over AVRCP).
+     */
     private suspend fun playLocal(query: String, res: Context, lang: String) {
-        if (VoiceActions.hasAudioPermission(app)) {
-            val song = VoiceActions.findSong(app, query)
-            if (song != null) {
-                styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, song.title), song.title)
-                VoiceActions.playSong(app, song)
+        if (query.isEmpty()) {
+            transport(VoiceActions.Transport.Play, HaryanviLines.Event.MusicPlay)
+            return
+        }
+        if (VoiceActions.phoneSearch(app, query)) {
+            styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, query), query)
+            return
+        }
+        val song = if (VoiceActions.hasAudioPermission(app)) VoiceActions.findSong(app, query) else null
+        if (com.vikash.ampli.drive.system.AmpliMusic.installed(app)) {
+            val title = song?.title ?: query
+            val ok = (song != null && VoiceActions.playSong(app, song)) ||
+                VoiceActions.ampliPlayFromSearch(app, query) ||
+                com.vikash.ampli.drive.system.AmpliMusic.open(app, autoplay = true, query = query)
+            if (ok) {
+                styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, title), title)
                 return
             }
         }
-        if (query.isNotEmpty() &&
-            (VoiceActions.playFromSearchSession(app, query) || VoiceActions.playFromSearchIntent(app, query))
-        ) {
+        if (song != null) {
+            styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, song.title), song.title)
+            VoiceActions.playSong(app, song)
+            return
+        }
+        if (VoiceActions.playFromSearchSession(app, query) || VoiceActions.playFromSearchIntent(app, query)) {
             styled(res, lang, HaryanviLines.Event.MusicPlayNamed, res.getString(R.string.voice_playing, query), query)
             return
         }
@@ -549,6 +1004,9 @@ class VoiceAssistant(private val app: DriveApp) {
     private companion object {
         const val MAX_TURNS = 4
         const val ACK_DELAY_MS = 600L
+
+        /** The answer card stays at least this long. */
+        const val ANSWER_HOLD_MS = 6_000L
         /** The full greeting at most every three hours; otherwise just the listening beep. */
         const val GREETING_EVERY_MS = 3L * 60 * 60 * 1000
     }

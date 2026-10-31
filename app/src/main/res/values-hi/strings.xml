@@ -149,6 +149,11 @@
     <string name="sos_send_again">SMS फिर से खोलें</string>
     <string name="sos_share">WhatsApp या अन्य से भेजें</string>
     <string name="sos_share_title">SOS शेयर करें</string>
+    <string name="sos_channel_name">दुर्घटना SOS</string>
+    <string name="sos_channel_description">दूसरा ऐप सामने होने पर संभावित दुर्घटना के बाद SOS स्क्रीन खोलता है</string>
+    <string name="sos_notif_title">संभावित दुर्घटना: SOS संदेश तैयार है</string>
+    <string name="sos_notif_text">अपने आपातकालीन संपर्कों के लिए SOS संदेश खोलने के लिए टैप करें। Send दबाने तक कुछ नहीं भेजा जाता।</string>
+    <string name="sos_notif_action">SOS खोलें</string>
     <string name="med_title">बचाव दल के लिए</string>
     <string name="med_blood">ब्लड ग्रुप</string>
     <string name="med_notes">चिकित्सा नोट</string>
@@ -287,6 +292,8 @@
     <string name="action_refresh">रिफ़्रेश</string>
     <string name="dock_car">कार</string>
     <string name="pro_point_car">कार टूल: OBD-II इंजन डेटा और फ़ॉल्ट कोड, ब्लूटूथ टायर प्रेशर, खर्चों का CSV एक्सपोर्ट</string>
+    <string name="pro_point_whatsapp">WhatsApp मैसेज बोलकर सुनाए जाते हैं, सिर्फ़ आवाज़ में</string>
+    <string name="pro_point_trip_cost">सफ़र का ख़र्च: तय रास्ते का ईंधन और टोल</string>
     <string name="park_to_edit">बदलने के लिए गाड़ी रोकें</string>
     <string name="park_to_edit_hint">गाड़ी चलते समय बदलाव बंद है। “Hey Ampli” से पूछें।</string>
     <string name="car_distance_m">%1$d मीटर</string>
@@ -486,6 +493,14 @@
     <string name="crash_setting_hint">तेज़ टक्कर या अचानक रुकने पर 30 सेकंड का SOS काउंटडाउन</string>
     <string name="crash_no_sensor">मोशन सेंसर नहीं मिला। केवल GPS से अचानक रुकना देखा जाता है।</string>
     <string name="crash_tap_note">आख़िरी आपातकालीन SMS भेजने के लिए एक टैप ज़रूरी है।</string>
+    <string name="crash_overlay_title">SOS मैसेज जल्दी खुलने में मदद करें</string>
+    <string name="crash_overlay_body">Ampli Car Hub को “दूसरे ऐप के ऊपर दिखाएँ” की अनुमति दें। इससे दुर्घटना के बाद, स्क्रीन पर दूसरा ऐप होने पर भी, SOS मैसेज जल्दी खुलने में मदद मिलती है। Car Hub एक अलर्ट भी दिखाता है जिसे आप दबा सकते हैं।</string>
+    <string name="crash_overlay_allow">सेटिंग खोलें</string>
+    <string name="crash_overlay_later">अभी नहीं</string>
+    <string name="crash_overlay_status_title">दूसरे ऐप के ऊपर दिखाएँ</string>
+    <string name="crash_overlay_status_off">अभी अनुमति नहीं है। इससे SOS मैसेज जल्दी खुलता है; इसके बिना Car Hub एक अलर्ट दिखाता है जिसे आप दबा सकते हैं।</string>
+    <string name="crash_fsi_status_title">पूरी स्क्रीन SOS अलर्ट</string>
+    <string name="crash_fsi_status_off">अभी अनुमति नहीं है। इसके बिना दुर्घटना का SOS अलर्ट सिर्फ़ नोटिफ़िकेशन की तरह दिखेगा।</string>
     <string name="monitor_setting">बैकग्राउंड में निगरानी</string>
     <string name="monitor_setting_hint">दूसरी ऐप खुली होने पर भी GPS चालू रखता है, नोटिफ़िकेशन के साथ</string>
     <string name="voice_service_unknown">अभी कोई सर्विस तारीख सेट नहीं। कार, फिर कागज़ात और सर्विस खोलें।</string>
@@ -842,4 +857,8 @@
     <string name="nav_search_moving">गाड़ी चलते समय टाइपिंग बंद है। “बोलें” दबाएँ और जगह का नाम बोलें।</string>
     <string name="shell_open_settings">सेटिंग खोलें</string>
     <string name="voice_tts_missing_hint">फ़ोन की आवाज़ (TTS) इंस्टॉल नहीं है; Ampli की आवाज़ बोलेगी।</string>
+    <string name="autostart_acc_note">हेड यूनिट के इग्निशन (ACC) सिग्नल तभी मिलते हैं जब “बैकग्राउंड में निगरानी” चालू हो।</string>
+    <string name="about_not_affiliated">Ampli Studio का NPCI, NHAI, Apple या Google से कोई संबंध नहीं है। FASTag, CarPlay, Android Auto और Google Maps के नाम सिर्फ़ यह बताने के लिए हैं कि Car Hub किसके साथ चलता है।</string>
+    <string name="shell_eq_pick_title">अपना इक्वलाइज़र ऐप चुनें</string>
+    <string name="pro_launch_line">लॉन्च कीमत %1$s (बाद में %2$s)</string>
 </resources>

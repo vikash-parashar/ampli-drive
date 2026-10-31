@@ -121,13 +121,14 @@ object AppMatch {
  */
 object AppChooser {
     /** [settingOnly]: asked from Settings, so the pick is saved without opening the app. */
-    data class Request(val role: AppRole, val number: String? = null, val settingOnly: Boolean = false)
+    /** [phoneLink]: the Phone Link sheet's optional screen-mirroring app ("Automatic" means none). */
+    data class Request(val role: AppRole, val number: String? = null, val settingOnly: Boolean = false, val phoneLink: Boolean = false)
 
     private val _request = MutableStateFlow<Request?>(null)
     val request: StateFlow<Request?> = _request.asStateFlow()
 
-    fun ask(role: AppRole, number: String? = null, settingOnly: Boolean = false) {
-        _request.value = Request(role, number, settingOnly)
+    fun ask(role: AppRole, number: String? = null, settingOnly: Boolean = false, phoneLink: Boolean = false) {
+        _request.value = Request(role, number, settingOnly, phoneLink)
     }
 
     fun done() {
@@ -175,26 +176,40 @@ object AppResolver {
     }
 
     /**
-     * Music button. In order: the driver's pick, the app playing now (or the last one that had a
-     * media session), Android's default music app, an app that plays audio files, then a
-     * label/package match ("Multimedia", "BT music"…). Nothing found: the picker opens.
+     * Music button: Car Hub's music is Ampli MP3 Player. In order: an app the driver picked by
+     * hand (long-press Music or Settings), Ampli MP3 Player in its Car mode, else the "Get Ampli
+     * MP3 Player" sheet (Play Store, a test-build download, or "Use another music app"). Other
+     * players are never guessed any more: that opened Spotify for the owner.
+     * [autoplay]: the driver tapped Music, so Ampli resumes or shuffles right away.
      */
-    fun openMusic(context: Context, currentPackage: String?): Boolean {
+    fun openMusic(context: Context, autoplay: Boolean = true): Boolean {
         val app = context.applicationContext as DriveApp
-        app.prefs.musicPackage.value?.let { if (Launchers.openPackage(context, it, quiet = true)) return true }
-        val sessionPkg = currentPackage
-            ?: app.mediaHub.activePackages().firstOrNull()
-            ?: app.prefs.lastMediaPackage
-        if (sessionPkg != null && sessionPkg != context.packageName && Launchers.openPackage(context, sessionPkg, quiet = true)) return true
-        if (openFirstResolving(context, Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_MUSIC))) return true
-        val audio = Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("content://media/external/audio/media/1"), "audio/*")
-        packageFor(context, audio)?.let { if (Launchers.openPackage(context, it, quiet = true)) return true }
-        bestGuess(context, AppRole.Music)?.let {
-            if (Launchers.openComponent(context, it.packageName, it.activityName)) return true
+        app.prefs.applyMusicDefault { AmpliMusic.installed(context) }
+        val stored = app.prefs.musicPackage.value
+        val installed = AmpliMusic.installed(context)
+        when (MusicDefault.target(stored, installed)) {
+            MusicDefault.Target.Picked -> {
+                if (stored != null && Launchers.openPackage(context, stored, quiet = true)) return true
+                // The picked app was uninstalled: Ampli, or the install sheet.
+                if (installed && AmpliMusic.open(context, autoplay)) return true
+            }
+            MusicDefault.Target.Ampli -> if (AmpliMusic.open(context, autoplay)) return true
+            MusicDefault.Target.GetAmpli -> Unit
         }
-        toast(context, context.getString(R.string.choose_music_app))
-        AppChooser.ask(AppRole.Music)
+        AmpliMusic.showInstallSheet()
         return false
+    }
+
+    /**
+     * The old automatic guess (the playing app, Android's music app, "Multimedia"…), for
+     * background actions that need some player when Ampli MP3 Player is missing.
+     */
+    fun guessMusicPackage(context: Context): String? {
+        val app = context.applicationContext as DriveApp
+        val sessionPkg = app.mediaHub.activePackages().firstOrNull() ?: app.prefs.lastMediaPackage
+        if (sessionPkg != null && sessionPkg != context.packageName) return sessionPkg
+        packageFor(context, Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_MUSIC))?.let { return it }
+        return bestGuess(context, AppRole.Music)?.packageName
     }
 
     /** Phone button: the driver's pick, the system dialer, the head unit's BT phone app, else the picker. */
@@ -270,16 +285,6 @@ object AppResolver {
             .firstOrNull { it != context.packageName && it != "android" }
     } catch (_: Exception) {
         null
-    }
-
-    @Suppress("DEPRECATION")
-    private fun openFirstResolving(context: Context, intent: Intent): Boolean {
-        val found = try {
-            context.packageManager.queryIntentActivities(intent, 0).isNotEmpty()
-        } catch (_: Exception) {
-            false
-        }
-        return found && startQuiet(context, intent)
     }
 
     private fun startQuiet(context: Context, intent: Intent): Boolean = try {

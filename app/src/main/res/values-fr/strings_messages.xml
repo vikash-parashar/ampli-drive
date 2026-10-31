@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">Lire les messages WhatsApp à voix haute</string>
+    <string name="disclosure_wa_body">Pour lire à voix haute vos messages WhatsApp et WhatsApp Business pendant que vous conduisez, Car Hub lit le nom de l\'expéditeur et le texte du message dans leurs notifications. Il utilise pour cela l\'accès aux notifications.</string>
+    <string name="disclosure_wa_uses">Chaque message est lu une fois puis oublié. Il n\'est jamais affiché sur l\'écran de conduite ni enregistré. Car Hub ne répond jamais, n\'envoie jamais de SMS et n\'ouvre jamais la discussion. Les messages de groupe sont ignorés, sauf si vous les autorisez. Cela fonctionne aussi quand Car Hub est en arrière-plan, tant que l\'accès aux notifications est activé.</string>
+    <string name="disclosure_wa_stays">Car Hub n\'enregistre et n\'envoie rien, et ne partage rien avec Ampli Studio ni personne d\'autre. C\'est le moteur de synthèse vocale de votre appareil qui lit le message.</string>
+    <string name="disclosure_park_hint">Garez-vous pour lire ceci et l\'activer.</string>
+    <string name="wa_title">Lire les messages WhatsApp à voix haute</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">La voiture dit qui a écrit et ce que dit le message, uniquement à voix haute.</string>
+    <string name="wa_hint_on">Activé. Voix seulement : le texte du message n\'est jamais affiché.</string>
+    <string name="wa_hint_locked">Une fonction Pro. Touchez pour voir Pro.</string>
+    <string name="wa_groups_title">Lire les messages de groupe</string>
+    <string name="wa_groups_hint">Désactivé : les groupes restent silencieux. Seuls les messages qui vous sont adressés directement sont lus.</string>
+    <string name="wa_rules">Au plus un message toutes les 20 secondes. Silence pendant les appels et les instructions de virage. Car Hub ne répond jamais et n\'envoie jamais rien.</string>
+    <string name="wa_needs_access">Nécessite l\'accès aux notifications pour entendre les messages WhatsApp.</string>
+    <string name="wa_tts_missing">Cet appareil n\'a pas de moteur vocal, les messages ne peuvent donc pas être lus. Installez-en un dans Vérifier la voix.</string>
+    <string name="wa_park_to_turn_on">Garez-vous pour activer.</string>
+</resources>

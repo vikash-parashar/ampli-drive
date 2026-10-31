@@ -111,6 +111,7 @@ internal fun CarStartCard(app: DriveApp) {
                     }
                 }
                 Text(stringResource(R.string.autostart_limits), color = theme.muted, fontSize = dims.t(2.1f, min = 12f))
+                Text(stringResource(R.string.autostart_acc_note), color = theme.muted, fontSize = dims.t(2.1f, min = 12f))
             }
         }
     }

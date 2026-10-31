@@ -56,6 +56,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -72,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.BuildConfig
+import com.vikash.ampli.drive.billing.ProPricing
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.i18n.AppLanguages
@@ -85,11 +87,13 @@ import com.vikash.ampli.drive.ui.theme.CardStyle
 import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
 import com.vikash.ampli.drive.ui.theme.DriveThemes
+import com.vikash.ampli.drive.prefs.ThemeDefaults
 import com.vikash.ampli.drive.ui.theme.HomeLayout
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.ui.theme.ThemeFamily
 import com.vikash.ampli.drive.ui.theme.ThemeAccess
 import com.vikash.ampli.drive.system.BtPermissions
+import com.vikash.ampli.drive.tripcost.TripCostFlags
 
 @Composable
 fun SettingsScreen(
@@ -104,6 +108,7 @@ fun SettingsScreen(
     onOpenFeedback: () -> Unit = {},
     onOpenVoiceCheck: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
+    onOpenVoiceCommands: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -117,6 +122,8 @@ fun SettingsScreen(
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val musicPkg by app.prefs.musicPackage.collectAsStateWithLifecycle()
     val phonePkg by app.prefs.phonePackage.collectAsStateWithLifecycle()
+    val phoneAutoPlay by app.prefs.phoneAutoPlay.collectAsStateWithLifecycle()
+    val mirrorPkg by app.prefs.autoPackage.collectAsStateWithLifecycle()
     var showProSheet by rememberSaveable { mutableStateOf(false) }
     val fullScreen by app.shell.fullScreen.collectAsStateWithLifecycle()
     val startupAnimation by app.shell.startupAnimation.collectAsStateWithLifecycle()
@@ -191,6 +198,21 @@ fun SettingsScreen(
                 action = stringResource(R.string.action_change),
                 onAction = { AppChooser.ask(AppRole.Music, settingOnly = true) },
             )
+            // Phone music over Bluetooth: press play on the phone when it connects.
+            ToggleRow(
+                title = stringResource(R.string.phone_autoplay_title),
+                status = stringResource(R.string.phone_autoplay_hint),
+                checked = phoneAutoPlay,
+                onChange = app.prefs::setPhoneAutoPlay,
+            )
+            // Phone Link sheet: an optional screen-mirroring app at its bottom (none by default).
+            SettingRow(
+                title = stringResource(R.string.mirror_app_title),
+                status = mirrorPkg?.let { AppResolver.label(context, it) } ?: stringResource(R.string.mirror_app_none),
+                ok = true,
+                action = stringResource(R.string.action_change),
+                onAction = { AppChooser.ask(AppRole.Mirror, settingOnly = true, phoneLink = true) },
+            )
             SettingRow(
                 title = stringResource(R.string.phone_app_title),
                 status = phonePkg?.let { AppResolver.label(context, it) } ?: stringResource(R.string.app_choice_automatic),
@@ -250,15 +272,17 @@ fun SettingsScreen(
                 onAction = onOpenEmergency,
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
+            SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)
-            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck)
+            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)
             DesiSamplesCard(app = app)
             WelcomeSettingsCard(app = app)
             NavigateWithCard(app = app)
             NavPromptsCard(app = app)
+            WhatsAppReadCard(app = app, isPro = pro.isPro, resumeTick = resumeTick, onLocked = { showProSheet = true })
             CarStartCard(app = app)
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             // Settings › Display: Ampli as the whole screen.
@@ -298,7 +322,9 @@ fun SettingsScreen(
                     if (pro.isPro) stringResource(R.string.pro_active) else null,
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
+                    stringResource(R.string.fuel_attribution),
                     stringResource(R.string.weather_attribution),
+                    stringResource(R.string.about_not_affiliated),
                 ),
             )
             // Settings › About › Diagnostics: real Android version, map, GPS, network, for support photos.
@@ -329,8 +355,10 @@ fun SettingsScreen(
     }
 
     if (showProSheet) {
+        val isLaunchPrice by app.billing.isLaunchPrice.collectAsStateWithLifecycle()
         ProSheet(
             price = price,
+            isLaunchPrice = isLaunchPrice,
             onBuy = {
                 val activity = context.findActivity()
                 if (activity == null || !app.billing.purchase(activity)) {
@@ -417,11 +445,11 @@ internal fun SettingRow(
     }
 }
 
-/** Privacy policy, published from docs/privacy-policy.html with GitHub Pages. */
 /** Ampli's website (Settings › About, Help & feedback, privacy policy). */
 const val WEBSITE_URL = "https://ampliapps.in"
 
-const val PRIVACY_POLICY_URL = "https://vikash-parashar.github.io/ampli-drive/privacy-policy.html"
+/** Car Hub privacy policy on the Ampli website (source: docs/privacy-policy.html). */
+const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
 
 @Composable
 private fun LinkRow(icon: ImageVector, title: String, hint: String, action: String, onClick: () -> Unit) {
@@ -441,11 +469,21 @@ private fun LinkRow(icon: ImageVector, title: String, hint: String, action: Stri
 }
 
 @Composable
-internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) = ThemedSwitch(checked, enabled = true, onChange = onChange)
+
+/** [ThemedSwitch] that can be greyed out (for example "park to switch on"). */
+@Composable
+internal fun ThemedSwitch(checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val theme = LocalDriveTheme.current
+    if (theme.isSoft) {
+        // Inset track, raised thumb; padded to the same 48 dp touch height as a Material switch.
+        Box(Modifier.heightIn(min = 48.dp), contentAlignment = Alignment.Center) { SoftSwitch(checked, enabled, onChange) }
+        return
+    }
     Switch(
         checked = checked,
         onCheckedChange = onChange,
+        enabled = enabled,
         colors = SwitchDefaults.colors(
             checkedThumbColor = theme.onAccent,
             checkedTrackColor = theme.accent,
@@ -480,19 +518,32 @@ internal fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.radius <= 0f) androidx.compose.ui.graphics.RectangleShape else CircleShape
+    val soft = theme.isSoft
     Box(
         modifier = modifier
             .heightIn(min = MinTouch)
-            .clip(shape)
-            .background(if (selected) theme.accent else theme.surfaceHigh)
-            .border(1.dp, if (selected) theme.accent else theme.border, shape)
-            .clickable(onClick = onClick)
+            .then(
+                if (soft) {
+                    // Soft chip: raised, pressed in (cyan text) while selected.
+                    Modifier.softClickable(theme, shape, onClick, active = selected, role = Role.RadioButton)
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(if (selected) theme.accent else theme.surfaceHigh)
+                        .border(1.dp, if (selected) theme.accent else theme.border, shape)
+                        .clickable(onClick = onClick)
+                },
+            )
             .padding(horizontal = dims.d(2.4f)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text,
-            color = if (selected) theme.onAccent else theme.text,
+            color = when {
+                soft && selected -> theme.accentSoft
+                selected -> theme.onAccent
+                else -> theme.text
+            },
             fontSize = dims.t(2.6f, min = 16f),
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1,
@@ -531,6 +582,22 @@ private fun ThemePicker(
                 Icon(Icons.Filled.Palette, contentDescription = null, tint = active.accentSoft, modifier = Modifier.size(32.dp))
                 Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.theme_title), null) }
             }
+            // Crimson Drive, the default (free): Ampli MP3's Car mode colours and the car on Home.
+            QuickThemeOption(
+                selected = ThemeDefaults.isCrimson(choice),
+                title = stringResource(R.string.theme_crimson_drive),
+                hint = stringResource(R.string.theme_crimson_hint),
+                swatches = DriveThemes.CrimsonDrive.let { t -> listOf(t.surface to (t.keys?.primary ?: t.accent), t.background to (t.keys?.voice ?: t.ok)) },
+                onClick = { onChange(ThemeDefaults.crimson(choice)) },
+            )
+            // "Soft: auto Day/Night": Ampli Soft Day by day, Ampli Soft Night after sunset (free).
+            QuickThemeOption(
+                selected = ThemeDefaults.isSoftAuto(choice),
+                title = stringResource(R.string.theme_soft_auto),
+                hint = stringResource(R.string.theme_soft_auto_hint),
+                swatches = listOf(DriveThemes.AmpliSoftDay, DriveThemes.AmpliSoftNight).map { it.surface to it.accent },
+                onClick = { onChange(ThemeDefaults.softAuto(choice)) },
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -557,7 +624,8 @@ private fun ThemePicker(
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val columns = (maxWidth / 190.dp).toInt().coerceIn(2, 5)
                 Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                  for (family in ThemeFamily.entries) {
+                  // The default soft family first, then the others in their usual order.
+                  for (family in listOf(ThemeFamily.Soft, ThemeFamily.Classic, ThemeFamily.Glass, ThemeFamily.Saffron)) {
                     Text(
                         stringResource(
                             when (family) {
@@ -618,6 +686,60 @@ private fun ThemePicker(
     }
 }
 
+/**
+ * A one-tap choice at the top of the theme picker (Crimson Drive, "Soft: auto Day/Night"), with
+ * small swatches: each a (fill, dot) pair.
+ */
+@Composable
+private fun QuickThemeOption(selected: Boolean, title: String, hint: String, swatches: List<Pair<Color, Color>>, onClick: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = RoundedCornerShape(dims.d(1.8f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = MinTouch)
+            .then(
+                if (theme.isSoft) {
+                    Modifier.softClickable(theme, shape, onClick, active = selected, role = Role.RadioButton)
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(theme.surfaceHigh)
+                        .border(if (selected) 3.dp else 1.dp, if (selected) theme.accent else theme.border, shape)
+                        .clickable(onClick = onClick)
+                },
+            )
+            .padding(horizontal = dims.d(2f), vertical = dims.d(1.2f)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((fill, dot) in swatches) {
+                Box(
+                    Modifier
+                        .size(width = 44.dp, height = 30.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(fill)
+                        .border(1.dp, theme.softEdge ?: theme.border, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center,
+                ) { Box(Modifier.size(10.dp).clip(CircleShape).background(dot)) }
+            }
+        }
+        Box(Modifier.weight(1f)) {
+            CardTitle(title, hint)
+        }
+        if (selected) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = stringResource(R.string.theme_in_use),
+                tint = theme.accentSoft,
+                modifier = Modifier.size(32.dp),
+            )
+        }
+    }
+}
+
 /** Turning Auto off keeps whatever is showing now; turning it on restores the day/night pair. */
 private fun toggledAuto(choice: ThemeChoice, showing: DriveTheme): ThemeChoice =
     if (choice.auto) choice.copy(auto = false, fixedId = showing.id) else choice.copy(auto = true)
@@ -636,10 +758,20 @@ private fun ThemeCard(
     val shape = RoundedCornerShape(dims.d(1.8f))
     Column(
         modifier = modifier
-            .clip(shape)
-            .background(ui.surfaceHigh)
-            .border(if (inUse) 3.dp else 1.dp, if (inUse) ui.accent else ui.border, shape)
-            .clickable(onClick = onClick)
+            .then(
+                if (ui.isSoft) {
+                    // In use: pressed in, with a cyan ring (the only accent on the card).
+                    Modifier
+                        .softClickable(ui, shape, onClick, active = inUse)
+                        .then(if (inUse) Modifier.border(3.dp, ui.accent, shape) else Modifier)
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(ui.surfaceHigh)
+                        .border(if (inUse) 3.dp else 1.dp, if (inUse) ui.accent else ui.border, shape)
+                        .clickable(onClick = onClick)
+                },
+            )
             .padding(dims.d(1f)),
         verticalArrangement = Arrangement.spacedBy(dims.d(0.8f)),
     ) {
@@ -742,6 +874,8 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
             drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
         } else if (t.decoration == Decoration.Glass && t.glass != null) {
             drawGlassBackdrop(t.glass)
+        } else if (t.decoration == Decoration.Forest) {
+            drawForest()
         } else {
             drawRect(t.background)
         }
@@ -770,6 +904,13 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
         }
 
         fun mapPane(x: Float, y: Float, pw: Float, ph: Float) {
+            if (t.keys?.heroCar == true) {
+                // The green car on a dark pane, with the crimson "Go" key under it.
+                pane(x, y, pw, ph, Color(0xFF050A07))
+                drawRoundRect(t.keys.voice, Offset(x + pw * 0.14f, y + ph * 0.38f), Size(pw * 0.72f, ph * 0.22f), CornerRadius(ph * 0.1f))
+                drawRoundRect(t.keys.primary, Offset(x + pw * 0.1f, y + ph * 0.76f), Size(pw * 0.42f, ph * 0.12f), CornerRadius(ph * 0.06f))
+                return
+            }
             pane(x, y, pw, ph, mapColor)
             drawLine(t.accent2, Offset(x + pw * 0.2f, y + ph * 0.9f), Offset(x + pw * 0.55f, y + ph * 0.45f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
             drawLine(t.accent2, Offset(x + pw * 0.55f, y + ph * 0.45f), Offset(x + pw * 0.8f, y + ph * 0.2f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
@@ -866,7 +1007,14 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, onDismiss: () -> Unit) {
+internal fun ProSheet(
+    price: String?,
+    onBuy: () -> Unit,
+    onRestore: () -> Unit,
+    onDismiss: () -> Unit,
+    isLaunchPrice: Boolean = false,
+    launchOffer: Boolean = BuildConfig.LAUNCH_OFFER,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     ModalBottomSheet(
@@ -902,18 +1050,40 @@ internal fun ProSheet(price: String?, onBuy: () -> Unit, onRestore: () -> Unit, 
                     ) { ThemeSwatch(t, Modifier.fillMaxSize()) }
                 }
             }
-            for (point in listOf(R.string.pro_point_themes, R.string.pro_point_car, R.string.pro_point_once)) {
+            // Trip cost stays hidden until TripCostFlags.ENABLED is switched on.
+            val points = listOfNotNull(
+                R.string.pro_point_themes,
+                R.string.pro_point_car,
+                R.string.pro_point_whatsapp,
+                R.string.pro_point_trip_cost.takeIf { TripCostFlags.ENABLED },
+                R.string.pro_point_once,
+            )
+            for (point in points) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                     Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = theme.ok, modifier = Modifier.size(24.dp))
                     Text(stringResource(point), fontSize = dims.t(2.6f, min = 15f), color = theme.text)
                 }
+            }
+            // Only while the offer runs and Play really charges the launch price: never a fake discount.
+            if (launchOffer && isLaunchPrice) {
+                Text(
+                    stringResource(
+                        R.string.pro_launch_line,
+                        ProPricing.rupees(ProPricing.LAUNCH_PRICE_INR),
+                        ProPricing.rupees(ProPricing.REGULAR_PRICE_INR),
+                    ),
+                    fontSize = dims.t(2.6f, min = 16f),
+                    fontWeight = FontWeight.SemiBold,
+                    color = theme.accentSoft,
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = dims.d(1f), bottom = dims.d(3f)),
                 horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
             ) {
                 BigButton(
-                    text = if (price != null) stringResource(R.string.pro_buy_price, price) else stringResource(R.string.pro_buy),
+                    // Play's price whenever it has answered; the Console price as a fallback before that.
+                    text = stringResource(R.string.pro_buy_price, price ?: ProPricing.fallbackPrice(launchOffer)),
                     onClick = onBuy,
                     modifier = Modifier.weight(1.4f),
                 )

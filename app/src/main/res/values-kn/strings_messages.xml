@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp ಸಂದೇಶಗಳನ್ನು ಗಟ್ಟಿಯಾಗಿ ಓದಿ ಹೇಳು</string>
+    <string name="disclosure_wa_body">ನೀವು ವಾಹನ ಚಲಾಯಿಸುವಾಗ ನಿಮ್ಮ WhatsApp ಮತ್ತು WhatsApp Business ಸಂದೇಶಗಳನ್ನು ಓದಿ ಹೇಳಲು, Car Hub ಅವುಗಳ ಅಧಿಸೂಚನೆಗಳಿಂದ ಕಳುಹಿಸಿದವರ ಹೆಸರು ಮತ್ತು ಸಂದೇಶದ ಪಠ್ಯವನ್ನು ಓದುತ್ತದೆ. ಇದಕ್ಕಾಗಿ ಅಧಿಸೂಚನೆ ಪ್ರವೇಶವನ್ನು ಬಳಸುತ್ತದೆ.</string>
+    <string name="disclosure_wa_uses">ಪ್ರತಿ ಸಂದೇಶವನ್ನು ಒಮ್ಮೆ ಮಾತ್ರ ಓದಲಾಗುತ್ತದೆ, ನಂತರ ಮರೆಯಲಾಗುತ್ತದೆ. ಅದು ಡ್ರೈವಿಂಗ್ ಪರದೆಯಲ್ಲಿ ಎಂದಿಗೂ ಕಾಣಿಸುವುದಿಲ್ಲ ಮತ್ತು ಎಲ್ಲಿಯೂ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ. Car Hub ಎಂದಿಗೂ ಉತ್ತರಿಸುವುದಿಲ್ಲ, SMS ಕಳುಹಿಸುವುದಿಲ್ಲ ಮತ್ತು ಚಾಟ್ ತೆರೆಯುವುದಿಲ್ಲ. ನೀವು ಅನುಮತಿಸುವವರೆಗೆ ಗುಂಪು ಸಂದೇಶಗಳನ್ನು ಬಿಡಲಾಗುತ್ತದೆ. ಅಧಿಸೂಚನೆ ಪ್ರವೇಶ ಆನ್ ಇರುವವರೆಗೆ, Car Hub ಹಿನ್ನೆಲೆಯಲ್ಲಿದ್ದಾಗಲೂ ಇದು ಕೆಲಸ ಮಾಡುತ್ತದೆ.</string>
+    <string name="disclosure_wa_stays">Car Hub ಏನನ್ನೂ ಉಳಿಸುವುದಿಲ್ಲ ಅಥವಾ ಅಪ್‌ಲೋಡ್ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು Ampli Studio ಅಥವಾ ಬೇರೆ ಯಾರೊಂದಿಗೂ ಏನನ್ನೂ ಹಂಚಿಕೊಳ್ಳುವುದಿಲ್ಲ. ನಿಮ್ಮ ಸಾಧನದ ಸ್ವಂತ ಧ್ವನಿ ಎಂಜಿನ್ ಸಂದೇಶವನ್ನು ಓದುತ್ತದೆ.</string>
+    <string name="disclosure_park_hint">ಇದನ್ನು ಓದಿ ಆನ್ ಮಾಡಲು ವಾಹನ ನಿಲ್ಲಿಸಿ.</string>
+    <string name="wa_title">WhatsApp ಸಂದೇಶಗಳನ್ನು ಗಟ್ಟಿಯಾಗಿ ಓದಿ ಹೇಳು</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">ಯಾರು ಬರೆದರು ಮತ್ತು ಸಂದೇಶದಲ್ಲಿ ಏನಿದೆ ಎಂದು ಕಾರು ಹೇಳುತ್ತದೆ, ಧ್ವನಿಯಲ್ಲಿ ಮಾತ್ರ.</string>
+    <string name="wa_hint_on">ಆನ್. ಧ್ವನಿ ಮಾತ್ರ: ಸಂದೇಶದ ಪಠ್ಯ ಪರದೆಯ ಮೇಲೆ ಎಂದಿಗೂ ಕಾಣಿಸುವುದಿಲ್ಲ.</string>
+    <string name="wa_hint_locked">ಇದು Pro ವೈಶಿಷ್ಟ್ಯ. Pro ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
+    <string name="wa_groups_title">ಗುಂಪಿನ ಸಂದೇಶಗಳನ್ನೂ ಓದಿ</string>
+    <string name="wa_groups_hint">ಆಫ್: ಗುಂಪು ಚಾಟ್‌ಗಳು ಮೌನವಾಗಿರುತ್ತವೆ. ನೇರವಾಗಿ ನಿಮಗೆ ಕಳುಹಿಸಿದ ಸಂದೇಶಗಳನ್ನು ಮಾತ್ರ ಓದಲಾಗುತ್ತದೆ.</string>
+    <string name="wa_rules">20 ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಹೆಚ್ಚೆಂದರೆ ಒಂದು ಸಂದೇಶ. ಕರೆ ಮತ್ತು ತಿರುವು ಸೂಚನೆಗಳ ವೇಳೆ ಮೌನ. Car Hub ಎಂದಿಗೂ ಉತ್ತರಿಸುವುದಿಲ್ಲ ಮತ್ತು ಏನನ್ನೂ ಕಳುಹಿಸುವುದಿಲ್ಲ.</string>
+    <string name="wa_needs_access">WhatsApp ಸಂದೇಶಗಳನ್ನು ಕೇಳಲು ಅಧಿಸೂಚನೆ ಪ್ರವೇಶ ಬೇಕು.</string>
+    <string name="wa_tts_missing">ಈ ಯೂನಿಟ್‌ನಲ್ಲಿ ಧ್ವನಿ ಎಂಜಿನ್ ಇಲ್ಲ, ಹಾಗಾಗಿ ಸಂದೇಶಗಳನ್ನು ಓದಿ ಹೇಳಲು ಆಗುವುದಿಲ್ಲ. ಧ್ವನಿ ಪರಿಶೀಲಿಸಿ ನಲ್ಲಿ ಒಂದು ಎಂಜಿನ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ.</string>
+    <string name="wa_park_to_turn_on">ಆನ್ ಮಾಡಲು ವಾಹನ ನಿಲ್ಲಿಸಿ.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">यात्रा खर्च</string>
+    <string name="trip_cost_example">उदाहरण</string>
+    <string name="trip_cost_route">योजना गरिएको बाटो · %1$s किमि</string>
+    <string name="trip_cost_tolls">%1$d टोल</string>
+    <string name="trip_cost_fuel">इन्धन</string>
+    <string name="trip_cost_fuel_unknown">एक पटक इन्धन भरेको थप्नुहोस्</string>
+    <string name="trip_cost_pass_saves">Annual Pass ले बचत</string>
+    <string name="trip_cost_pass_would_save">Annual Pass भए बचत हुने</string>
+    <string name="trip_cost_pass_trips">पासका %1$d यात्रा</string>
+    <string name="trip_cost_total">टोल + इन्धन</string>
+    <string name="trip_cost_note">अनुमान। इन्धन तपाईंको आफ्नै माइलेज र पछिल्लो भराइको मूल्यबाट। टोल दर बदलिन सक्छ।</string>
+    <string name="trip_cost_example_note">प्रिभ्युका लागि नमुना अङ्क, वास्तविक बाटो होइन।</string>
+</resources>

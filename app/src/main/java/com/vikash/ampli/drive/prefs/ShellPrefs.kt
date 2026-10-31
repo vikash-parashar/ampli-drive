@@ -55,10 +55,38 @@ class ShellPrefs(context: Context) {
 
     fun checkPin(pin: String): Boolean = sp.getString(KEY_PIN_HASH, null)?.let { it == hash(pin) } ?: true
 
+    /** Quick controls › Equalizer (long press): the EQ app the driver picked, "package/activity"; null = automatic. */
+    var eqComponent: String?
+        get() = sp.getString(KEY_EQ_COMPONENT, null)
+        set(value) {
+            if (value == null) sp.edit().remove(KEY_EQ_COMPONENT).apply() else sp.edit().putString(KEY_EQ_COMPONENT, value).apply()
+        }
+
     /** "Not now" on the Home card; Settings still shows its card until Ampli is the home app. */
     var homeCardDismissed: Boolean
         get() = sp.getBoolean(KEY_HOME_CARD_DISMISSED, false)
         set(value) = sp.edit().putBoolean(KEY_HOME_CARD_DISMISSED, value).apply()
+
+    private val _hiddenApps = MutableStateFlow(sp.getStringSet(KEY_HIDDEN_APPS, null)?.toSet().orEmpty())
+
+    /** Apps › long-press › Hide from Apps (for example the unit's paid phone-link app). */
+    val hiddenApps: StateFlow<Set<String>> = _hiddenApps.asStateFlow()
+
+    fun setHidden(packageName: String, hidden: Boolean) {
+        val next = if (hidden) _hiddenApps.value + packageName else _hiddenApps.value - packageName
+        sp.edit().putStringSet(KEY_HIDDEN_APPS, next).apply()
+        _hiddenApps.value = next
+    }
+
+    fun unhideAll() {
+        sp.edit().remove(KEY_HIDDEN_APPS).apply()
+        _hiddenApps.value = emptySet()
+    }
+
+    /** The one-time "Set Car Hub as home app so it can greet you" banner has been shown. */
+    var greetHomeBannerShown: Boolean
+        get() = sp.getBoolean(KEY_GREET_BANNER, false)
+        set(value) = sp.edit().putBoolean(KEY_GREET_BANNER, value).apply()
 
     private fun hash(pin: String): String =
         MessageDigest.getInstance("SHA-256").digest(("ampli-shell:" + pin).toByteArray()).joinToString("") { "%02x".format(it) }
@@ -69,6 +97,9 @@ class ShellPrefs(context: Context) {
         private const val KEY_DRAWER_APPS = "drawer_apps"
         private const val KEY_PIN_HASH = "drawer_pin"
         private const val KEY_HOME_CARD_DISMISSED = "home_card_dismissed"
+        private const val KEY_EQ_COMPONENT = "eq_component"
+        private const val KEY_HIDDEN_APPS = "hidden_apps"
+        private const val KEY_GREET_BANNER = "greet_home_banner_shown"
 
         /** A PIN is exactly four digits. */
         fun validPin(pin: String): Boolean = pin.length == 4 && pin.all { it in '0'..'9' }

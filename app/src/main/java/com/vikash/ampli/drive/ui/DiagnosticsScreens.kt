@@ -371,6 +371,66 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 DiagRow("Voice style", style.key, null)
                 DiagRow("When the car starts", autoStart.mode.key + " · delay ${autoStart.delaySec}s" + (autoStart.btDeviceName?.let { " · BT: $it" } ?: ""), null)
             }
+            DiagSection("Start-up") {
+                // Process start to the first Home frame (cold), or activity start to it (warm).
+                val (coldMs, warmMs) = remember { com.vikash.ampli.drive.system.StartupTiming.saved(context) }
+                val now = com.vikash.ampli.drive.system.StartupTiming.last
+                DiagRow(
+                    "This start",
+                    now?.let { "${it.ms} ms (${if (it.kind == com.vikash.ampli.drive.system.StartupTiming.Kind.Cold) "cold: process start to first Home frame" else "warm: activity start to first Home frame"})" } ?: "(Home not shown yet)",
+                    now?.let { it.ms < 3000 },
+                )
+                DiagRow("Last cold start", if (coldMs > 0) "$coldMs ms" else "(not measured yet)", if (coldMs > 0) coldMs < 3000 else null)
+                if (warmMs > 0) DiagRow("Last warm start", "$warmMs ms", warmMs < 1500)
+                DiagRow("Low-memory unit", if (app.lowEnd) "yes: map and music card load after the first frame" else "no", null)
+                DiagRow("Memory released", "${com.vikash.ampli.drive.system.MemoryTrim.trims} times this run", null)
+                // Soft themes: shadows are drawn once into small cached bitmaps, then reused.
+                DiagRow(
+                    "Soft shadows",
+                    "${SoftShadowCache.renders} drawn in ${SoftShadowCache.renderNanos / 1_000_000} ms · ${SoftShadowCache.bytes / 1024} KB cached",
+                    null,
+                )
+            }
+            // Why the welcome did or did not play after a start (power cut, ACC on, boot).
+            DiagSection("Start log") {
+                val log by app.startLog.entries.collectAsStateWithLifecycle()
+                val isHome = remember { com.vikash.ampli.drive.system.Launchers.isDefaultHome(context) }
+                DiagRow("Default home app", if (isHome) "Car Hub" else "NO: another launcher (Car Hub may not show after a power cut)", isHome)
+                DiagRow("Boot count / uptime", "${remember { bootCountText(context) }} · up ${SystemClock.elapsedRealtime() / 60_000} min · slept ${(SystemClock.elapsedRealtime() - SystemClock.uptimeMillis()) / 60_000} min", null)
+                if (log.isEmpty()) DiagRow("Signals", "(none yet)", null)
+                val fmt = remember { java.text.SimpleDateFormat("dd MMM HH:mm:ss", Locale.US) }
+                for (e in log) {
+                    DiagRow(
+                        fmt.format(java.util.Date(e.atMs)),
+                        e.trigger + " · greeted " + yes(e.greeted) + (if (e.reason.isNotBlank()) " · " + e.reason else ""),
+                        e.greeted,
+                    )
+                }
+            }
+            DiagSection("Phone over Bluetooth") {
+                val devices by app.phoneBt.devices.collectAsStateWithLifecycle()
+                val autoPlay by app.phoneBt.lastAutoPlay.collectAsStateWithLifecycle()
+                val vendor = remember { com.vikash.ampli.drive.bluetooth.VendorBt.find(context) }
+                DiagRow("Paired devices", if (devices.isEmpty()) "(none visible to apps)" else devices.joinToString { it.name + if (it.connected) " (connected)" else "" }, devices.any { it.connected })
+                DiagRow("Unit's Bluetooth app", vendor?.let { it.label + " · " + it.packageName + "/" + it.activityName.substringAfterLast('.') } ?: "(not found)", vendor != null)
+                vendor?.let { v ->
+                    val acts = remember(v) { com.vikash.ampli.drive.bluetooth.VendorBt.exportedActivities(context, v.packageName) }
+                    DiagRow("Its music screen", com.vikash.ampli.drive.bluetooth.PhoneBtRules.musicActivity(acts)?.substringAfterLast('.') ?: "(none exported)", null)
+                }
+                DiagRow("Auto-play last time", autoPlay ?: "(no phone connected since start)", null)
+            }
+            // Vendor package names, for a support photo.
+            DiagSection("Unit apps") {
+                val rows by androidx.compose.runtime.produceState<List<com.vikash.ampli.drive.system.UnitApps.Row>?>(null) {
+                    value = withContext(Dispatchers.IO) { com.vikash.ampli.drive.system.UnitApps.list(context) }
+                }
+                val list = rows
+                when {
+                    list == null -> DiagRow("Apps", "reading…", null)
+                    list.isEmpty() -> DiagRow("Apps", "(none matched)", null)
+                    else -> for (r in list) DiagRow(r.kind, r.label + " · " + r.packageName, null)
+                }
+            }
             DiagSection("Map") {
                 DiagRow("Style", map.styleUrl ?: "(not started)", null)
                 DiagRow("State", map.phase.name + (if (map.basic) " · own fallback style" else "") + (if (map.unavailable) " · TILES UNAVAILABLE" else ""), map.phase == com.vikash.ampli.drive.map.MapStatus.Phase.MapLoaded)
@@ -454,6 +514,12 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
             }
         }
     }
+}
+
+private fun bootCountText(context: Context): String = try {
+    "boot #" + Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
+} catch (_: Exception) {
+    "boot # unknown"
 }
 
 /** The servers this build talks to (RemoteConfig over BuildConfig); unconfigured ones are skipped. */

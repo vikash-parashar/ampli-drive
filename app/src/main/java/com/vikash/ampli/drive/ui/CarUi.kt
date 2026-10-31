@@ -39,9 +39,12 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Snooze
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
@@ -56,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -97,13 +101,18 @@ object DriveLock {
         speedKmh != null -> speedKmh > PARK_TO_EDIT_KMH
         else -> lastMovingAtMs > 0L && nowMs - lastMovingAtMs in 0 until STALE_MS
     }
+
+    /** [moving] for code outside Compose (car start, receivers), from the current GPS speed. */
+    fun movingNow(speedKmh: Float?): Boolean = moving(speedKmh, lastMovingAtMs, android.os.SystemClock.elapsedRealtime())
 }
 
 @Composable
 fun isMoving(app: DriveApp): Boolean {
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
     val speed = gps.speedKmh
+    // SpeedTracker stamps every moving fix; this also covers a speed set by other means (tests).
     if (speed != null && speed > PARK_TO_EDIT_KMH) DriveLock.lastMovingAtMs = android.os.SystemClock.elapsedRealtime()
+    if (gps.lastMovingElapsedMs > DriveLock.lastMovingAtMs) DriveLock.lastMovingAtMs = gps.lastMovingElapsedMs
     // Re-checks every few seconds while there is no speed, so the lock lifts after STALE_MS.
     val now by androidx.compose.runtime.produceState(android.os.SystemClock.elapsedRealtime(), speed == null) {
         while (speed == null) {
@@ -225,14 +234,14 @@ fun CarChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
     val bg = if (danger) theme.danger else theme.warning
     val fg = if (danger) theme.onDanger else Color(0xFF111111)
-    Box(modifier.heightIn(min = 56.dp).widthIn(max = 280.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+    Box(modifier.heightIn(min = MinTouch).widthIn(max = 280.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
         Row(
             Modifier.clip(shape).background(bg).padding(horizontal = dims.d(1.8f), vertical = dims.d(0.9f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
         ) {
             Icon(Icons.Filled.Warning, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(2.8f)))
-            Text(text, fontSize = dims.t(2.4f, min = 13f), color = fg, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text, fontSize = dims.t(2.4f, min = 16f), color = fg, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -322,7 +331,7 @@ fun ParkedPill(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
 
 // ------------------------------------------------------------------------------ Car hub
 
-enum class CarDest { Parked, Papers, Expenses, Obd, Tyres, Settings }
+enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings, Fuel, Radar }
 
 @Composable
 fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
@@ -344,6 +353,8 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
     val odoKm = (odo / 10).toInt()
     val due = remember(papers, services, odoKm) { app.car.dueItems(context) }
     val avg = remember(fills) { com.vikash.ampli.drive.car.Mileage.average(fills) }
+    val trips by app.car.trips.trips.collectAsStateWithLifecycle()
+    val weekKm = remember(trips) { com.vikash.ampli.drive.car.TripMath.thisWeek(trips, System.currentTimeMillis()).distanceKm }
 
     Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(2f))) {
         ScreenHeader(
@@ -381,6 +392,17 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
             { m ->
                 CarTile(
+                    stringResource(R.string.trips_title), Icons.Filled.Route,
+                    if (trips.isEmpty()) {
+                        stringResource(R.string.trips_tile_none)
+                    } else {
+                        stringResource(R.string.trips_tile_week, String.format(context.resources.configuration.locales[0], "%.0f", weekKm))
+                    },
+                    onClick = { onOpen(CarDest.Trips) }, modifier = m,
+                )
+            },
+            { m ->
+                CarTile(
                     stringResource(R.string.obd_title), Icons.Filled.Build,
                     when {
                         !pro.isPro -> stringResource(R.string.car_pro_feature)
@@ -403,6 +425,23 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
                     },
                     alert = bad && pro.isPro, danger = bad && pro.isPro, locked = !pro.isPro,
                     onClick = { onOpen(CarDest.Tyres) }, modifier = m,
+                )
+            },
+            { m ->
+                CarTile(
+                    stringResource(R.string.fuel_title), Icons.Filled.LocalGasStation,
+                    stringResource(R.string.fuel_tile_hint),
+                    onClick = { onOpen(CarDest.Fuel) }, modifier = m,
+                )
+            },
+            { m ->
+                val cam by app.cameraAlerts.current.collectAsStateWithLifecycle()
+                CarTile(
+                    stringResource(R.string.radar_tile_title), Icons.Filled.Speed,
+                    cam?.let { stringResource(R.string.camera_distance, it.distanceMeters / 10 * 10) + " · " + cameraKindLabel(it.kind) }
+                        ?: stringResource(R.string.radar_tile_hint),
+                    alert = cam != null, danger = cam?.overLimit == true,
+                    onClick = { onOpen(CarDest.Radar) }, modifier = m,
                 )
             },
             { m ->
@@ -444,9 +483,12 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
         )
         Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-            for (row in tiles.chunked(4)) {
+            // Two rows (6 + 5 tiles); the shorter row keeps the same tile width.
+            val perRow = (tiles.size + 1) / 2
+            for (row in tiles.chunked(perRow)) {
                 Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     for (tile in row) tile(Modifier.weight(1f).fillMaxHeight())
+                    repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
@@ -508,8 +550,9 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
         ScreenHeader(stringResource(R.string.parked_title), stringResource(R.string.parked_hint), onBack)
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
             Pane(Modifier.weight(1.2f).fillMaxHeight()) {
+              Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Column(
-                    Modifier.fillMaxSize().padding(dims.d(3f)),
+                    Modifier.weight(1f).fillMaxHeight().padding(dims.d(3f)),
                     verticalArrangement = Arrangement.spacedBy(dims.d(1.4f), Alignment.CenterVertically),
                 ) {
                     Icon(Icons.Filled.LocalParking, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(64.dp))
@@ -533,6 +576,8 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
                         Text("%.5f, %.5f".format(s.lat, s.lon) + (s.accuracyM?.let { " · ±${it.roundToInt()} m" } ?: ""), fontSize = dims.t(2.2f), color = theme.muted)
                     }
                 }
+                spot?.let { s -> ParkingQrBlock(s, Modifier.padding(end = dims.d(3f))) }
+              }
             }
             Column(
                 Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
@@ -571,6 +616,38 @@ fun ParkedScreen(app: DriveApp, onBack: () -> Unit) {
     }
 }
 
+/**
+ * The saved spot as a QR code of its Google Maps link: scan it with the phone before walking
+ * away. Made on the unit, no internet needed. One pixel per module, scaled up without smoothing.
+ */
+@Composable
+private fun ParkingQrBlock(spot: ParkedSpot, modifier: Modifier = Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val url = spot.mapsUrl
+    val qr = remember(url) { com.vikash.ampli.drive.car.ParkingQr.bitmap(url)?.asImageBitmap() } ?: return
+    Column(
+        modifier.widthIn(max = 200.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dims.d(1f)),
+    ) {
+        Box(
+            Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp)).background(Color.White).padding(6.dp),
+        ) {
+            androidx.compose.foundation.Image(
+                bitmap = qr,
+                contentDescription = stringResource(R.string.parked_qr),
+                filterQuality = androidx.compose.ui.graphics.FilterQuality.None,
+                modifier = Modifier.size(maxOf(dims.d(24f), 120.dp)),
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Filled.QrCode2, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(20.dp))
+            Text(stringResource(R.string.parked_qr), fontSize = dims.t(2.1f, min = 13f), color = theme.muted, textAlign = TextAlign.Center)
+        }
+    }
+}
+
 /** Shown in place of a Pro screen on the free tier: what it does, and the unlock button. */
 @Composable
 fun ProLocked(title: String, points: List<String>, onUnlock: () -> Unit, modifier: Modifier = Modifier) {
@@ -601,8 +678,10 @@ fun ProLocked(title: String, points: List<String>, onUnlock: () -> Unit, modifie
 fun ProUnlockSheet(app: DriveApp, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val price by app.billing.price.collectAsStateWithLifecycle()
+    val isLaunchPrice by app.billing.isLaunchPrice.collectAsStateWithLifecycle()
     ProSheet(
         price = price,
+        isLaunchPrice = isLaunchPrice,
         onBuy = {
             val activity = context.findActivity()
             if (activity == null || !app.billing.purchase(activity)) {

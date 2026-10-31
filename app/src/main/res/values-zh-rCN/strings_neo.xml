@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_soft_auto">柔和：自动日夜切换</string>
+    <string name="theme_soft_auto_hint">日出后用 Ampli Soft Day，日落后用 Ampli Soft Night</string>
+</resources>

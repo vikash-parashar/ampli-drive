@@ -16,9 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.vikash.ampli.drive.emergency.Sos
+import com.vikash.ampli.drive.emergency.SosNotifier
 import com.vikash.ampli.drive.car.CarMonitorService
 import com.vikash.ampli.drive.car.CarStart
 import com.vikash.ampli.drive.car.StartTrigger
@@ -56,14 +59,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.vikash.ampli.drive.system.StartupTiming.onActivityCreated()
         enableEdgeToEdge()
-        // Re-checks Play for the Pro purchase (refunds, purchases on another device).
-        app.billing.start()
         // Hooks the car features (break timer, odometer, parking, crash) to the GPS fixes.
         app.car
-        // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
-        app.navPrompter.start()
-        app.desi.start()
+        val background = {
+            // Re-checks Play for the Pro purchase (refunds, purchases on another device).
+            app.billing.start()
+            // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
+            app.navPrompter.start()
+            app.desi.start()
+        }
+        // 1-2 GB units: Home draws first; Play Billing and the voice helpers start just after.
+        if (app.lowEnd) window.decorView.post { background() } else background()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -102,7 +110,7 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 app.bluetooth.state.map { it.connectedName }.distinctUntilChanged().collect { name ->
                     val wanted = app.prefs.autoStart.value.btDeviceName
-                    if (name != null && wanted != null && name == wanted) CarStart.signal(app, StartTrigger.PhoneConnected)
+                    if (name != null && wanted != null && name == wanted) CarStart.signal(app, StartTrigger.PhoneConnected, "phone connected: $name")
                 }
             }
         }
@@ -127,6 +135,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        inFront = true
         startSensors()
         app.car.onForeground()
         // Keeps the drive monitored while Google Maps or another app is in front.
@@ -140,12 +149,17 @@ class MainActivity : ComponentActivity() {
         // Notification access may have just been granted in Settings.
         app.mediaHub.start()
         resumeTick.intValue++
+        // The crash SOS screen is in front now: its alert has done its job.
+        if (screen.value == Screen.Crash || screen.value == Screen.Sos) SosNotifier.cancel(this)
         // "Hey Ampli" wake word. A microphone service may only start while we are in front,
         // which as the HOME app includes right after boot (see VoiceService). A missing model
         // starts downloading here too, so a failed download is retried on every return home.
         VoiceService.start(this)
         // Boot (or a start noticed while hidden): greeting and auto start, from the foreground.
         CarStart.launcherVisible = true
+        // Ampli MP3 Player may have just been installed: it becomes the music app (once).
+        app.prefs.applyMusicDefault { com.vikash.ampli.drive.system.AmpliMusic.installed(this) }
+        app.phoneBt.refresh()
         CarStart.takePending(this, app)?.let { trigger -> lifecycleScope.launch { CarStart.run(this@MainActivity, app, trigger) } }
     }
 
@@ -161,25 +175,56 @@ class MainActivity : ComponentActivity() {
         app.car.onBackground()
         app.mediaHub.stop()
         app.bluetooth.stop()
+        // Deep sleep (ACC off on many units) is measured from here; see CarStart.takePending.
+        CarStart.onLauncherHidden()
+        inFront = false
         super.onStop()
     }
 
-    /** Pressing Home while the launcher is open returns to the main screen. */
+    /**
+     * Pressing Home while the launcher is open returns to the main screen, except during a crash
+     * countdown: a brushed Home key or a vendor ignition event must not hide the SOS countdown.
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.hasCategory(Intent.CATEGORY_HOME)) screen.value = Screen.Home
+        if (intent.hasCategory(Intent.CATEGORY_HOME)) screen.value = screenAfterHome(app.car.crashAt.value != null)
         handleVoiceIntent(intent)
     }
+
+    /** The screen in front, for tests. */
+    internal val currentScreen: Screen get() = screen.value
 
     /** The assistant brings the launcher forward for the place list or the Help panel. */
     private fun handleVoiceIntent(intent: Intent?) {
         when (intent?.getStringExtra(EXTRA_VOICE_ACTION)) {
             VOICE_OPEN_HELP -> screen.value = Screen.Help
-            VOICE_CRASH -> screen.value = Screen.Crash
+            VOICE_CRASH -> {
+                screen.value = Screen.Crash
+                // From the crash SOS alert: the countdown ended while another app was in front.
+                // Now Car Hub is in front, so the composer may open (the driver still taps Send).
+                // Only within 15 minutes of the crash: an older alert would send a stale location,
+                // so a late tap just shows the Help screen.
+                if (intent?.getBooleanExtra(SosNotifier.EXTRA_OPEN_SMS, false) == true) {
+                    intent.removeExtra(SosNotifier.EXTRA_OPEN_SMS)
+                    SosNotifier.cancel(this)
+                    val message = app.car.crashSos.value
+                    if (message != null && app.car.crashSosFresh()) {
+                        Sos.openSmsComposer(this, app.emergency.profile.value.contacts.map { it.phone }, message)
+                    } else if (app.car.crashAt.value == null) {
+                        screen.value = Screen.Help
+                    }
+                }
+            }
             // The form itself waits until the car is stopped.
             VOICE_FEEDBACK -> screen.value = Screen.Feedback
             // "Hey Ampli, <place> le chal" with the Ampli map: Car Hub's own navigation.
             VOICE_NAVIGATE -> screen.value = Screen.Navigation
+            // "Open maps": the running trip, else Car Hub's "Where to?" search.
+            VOICE_MAPS -> screen.value = if (app.navigator.state.value.visible) Screen.Navigation else Screen.NavSearch
+            // "What can I say?"
+            VOICE_COMMANDS -> screen.value = Screen.VoiceCommands
+            // "Nearest CNG pump": the fuel finder, on the asked fuel (FuelRepository.requestedFilter).
+            VOICE_FUEL -> screen.value = Screen.Fuel
             null -> Unit
             else -> screen.value = Screen.Home
         }
@@ -267,10 +312,21 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        /** Where the HOME key leads: the main screen, or the crash countdown while one runs. */
+        fun screenAfterHome(crashRunning: Boolean): Screen = if (crashRunning) Screen.Crash else Screen.Home
+
+        /** True while this activity is started (visible), so activity starts are allowed. */
+        @Volatile
+        var inFront: Boolean = false
+            @VisibleForTesting internal set
+
         const val EXTRA_VOICE_ACTION = "com.vikash.ampli.drive.VOICE_ACTION"
         const val VOICE_OPEN_HELP = "help"
         const val VOICE_CRASH = "crash"
         const val VOICE_FEEDBACK = "feedback"
         const val VOICE_NAVIGATE = "navigate"
+        const val VOICE_MAPS = "maps"
+        const val VOICE_COMMANDS = "commands"
+        const val VOICE_FUEL = "fuel"
     }
 }

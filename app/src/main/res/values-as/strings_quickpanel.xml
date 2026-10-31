@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick panel over other apps (swipe down from the top). Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="quick_strip_setting">ওপৰৰ পৰা তললৈ ছোৱাইপ কৰক: কুইক কণ্ট্ৰ’ল</string>
+    <string name="quick_strip_hint">Google Maps আৰু আন এপৰ ওপৰতো চলে: ওপৰৰ দাঁতিৰ মাজৰ পৰা তললৈ ছোৱাইপ কৰক।</string>
+    <string name="quick_strip_needs_permission">আন এপৰ ওপৰত ব্যৱহাৰ কৰিবলৈ Ampli Car Hubক “আন এপৰ ওপৰত দেখুৱাওক” অনুমতি দিয়ক</string>
+    <string name="quick_strip_allow">আন এপৰ ওপৰত অনুমতি দিয়ক</string>
+    <string name="quick_strip_needs_monitor">আন এপৰ ওপৰত চলাবলৈ ওপৰত “%1$s” অন কৰক।</string>
+    <string name="quick_ampli_music">Ampli সংগীত</string>
+    <string name="quick_home">Car Hub হোম</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_soft_auto">सॉफ़्ट: ऑटो दिन/रात</string>
+    <string name="theme_soft_auto_hint">सूरज लिकड़ते ए Ampli Soft Day, छिपे पाछै Ampli Soft Night</string>
+</resources>

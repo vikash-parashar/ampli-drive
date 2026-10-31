@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro: WhatsApp messages read aloud, the prominent disclosure (ui/WhatsAppReadUi). -->
+<resources>
+    <string name="disclosure_wa_title">WhatsApp संदेश मोठ्याने वाचून दाखवा</string>
+    <string name="disclosure_wa_body">गाडी चालवताना तुमचे WhatsApp आणि WhatsApp Business संदेश मोठ्याने वाचून दाखवण्यासाठी Car Hub त्यांच्या सूचनांमधून पाठवणाऱ्याचे नाव आणि संदेशाचा मजकूर वाचते. यासाठी सूचना प्रवेश वापरला जातो.</string>
+    <string name="disclosure_wa_uses">प्रत्येक संदेश एकदाच वाचला जातो आणि नंतर विसरला जातो. तो ड्रायव्हिंग स्क्रीनवर कधीही दिसत नाही आणि कुठेही सेव्ह होत नाही. Car Hub कधीही उत्तर देत नाही, SMS पाठवत नाही आणि चॅट उघडत नाही. तुम्ही परवानगी दिल्याशिवाय ग्रुप संदेश वगळले जातात. सूचना प्रवेश चालू असेपर्यंत Car Hub बॅकग्राउंडमध्ये असतानाही हे चालते.</string>
+    <string name="disclosure_wa_stays">Car Hub काहीही सेव्ह किंवा अपलोड करत नाही, आणि Ampli Studio किंवा इतर कोणाशीही काहीही शेअर करत नाही. संदेश तुमच्या डिव्हाइसचे स्वतःचे स्पीच इंजिन वाचते.</string>
+    <string name="disclosure_park_hint">हे वाचण्यासाठी आणि चालू करण्यासाठी गाडी थांबवा.</string>
+    <string name="wa_title">WhatsApp संदेश वाचून दाखवा</string>
+    <string name="wa_pro_badge">Pro</string>
+    <string name="wa_hint_off">कोणी लिहिले आणि संदेशात काय आहे हे गाडी सांगते, फक्त आवाजात.</string>
+    <string name="wa_hint_on">सुरू. फक्त आवाज: संदेशाचा मजकूर स्क्रीनवर कधीच दिसत नाही.</string>
+    <string name="wa_hint_locked">हे Pro फीचर आहे. Pro पाहण्यासाठी टॅप करा.</string>
+    <string name="wa_groups_title">ग्रुपचे संदेशही वाचा</string>
+    <string name="wa_groups_hint">बंद: ग्रुप चॅट शांत राहतात. फक्त थेट तुम्हाला आलेले संदेश वाचले जातात.</string>
+    <string name="wa_rules">20 सेकंदांत जास्तीत जास्त एक संदेश. कॉल आणि वळणाच्या सूचनांच्या वेळी शांत. Car Hub कधीच उत्तर देत नाही आणि काहीही पाठवत नाही.</string>
+    <string name="wa_needs_access">WhatsApp संदेश ऐकण्यासाठी नोटिफिकेशन ॲक्सेस हवा.</string>
+    <string name="wa_tts_missing">या युनिटमध्ये स्पीच इंजिन नाही, त्यामुळे संदेश वाचून दाखवता येत नाहीत. आवाज तपासा मध्ये एक इंजिन इन्स्टॉल करा.</string>
+    <string name="wa_park_to_turn_on">सुरू करण्यासाठी गाडी थांबवा.</string>
+</resources>

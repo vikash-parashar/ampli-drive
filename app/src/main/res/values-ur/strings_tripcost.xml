@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Machine-assisted translation. Needs review by a native speaker before launch. -->
+<resources>
+    <string name="trip_cost_title">سفر کا خرچ</string>
+    <string name="trip_cost_example">مثال</string>
+    <string name="trip_cost_route">منصوبہ بند راستہ · %1$s کلومیٹر</string>
+    <string name="trip_cost_tolls">%1$d ٹول</string>
+    <string name="trip_cost_fuel">ایندھن</string>
+    <string name="trip_cost_fuel_unknown">ایک بار ایندھن بھروانا شامل کریں</string>
+    <string name="trip_cost_pass_saves">Annual Pass سے بچت</string>
+    <string name="trip_cost_pass_would_save">Annual Pass ہوتا تو بچت</string>
+    <string name="trip_cost_pass_trips">پاس کے %1$d ٹرپس</string>
+    <string name="trip_cost_total">ٹول + ایندھن</string>
+    <string name="trip_cost_note">اندازہ۔ ایندھن آپ کی اپنی مائلیج اور پچھلی بھرائی کی قیمت سے۔ ٹول کی شرحیں بدل سکتی ہیں۔</string>
+    <string name="trip_cost_example_note">پیش نظارہ کے لیے نمونے کے اعداد، اصل راستہ نہیں۔</string>
+</resources>

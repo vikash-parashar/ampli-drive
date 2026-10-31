@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unit fixes: Ampli MP3 Player as the music app, phone music over Bluetooth, Phone Link sheet, hide apps, greeting after a power cut. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="getmp3_title">Ampli MP3 Player பெறுங்கள்</string>
+    <string name="getmp3_text">Car Hub உங்கள் பாடல்களை Ampli MP3 Player-இல் இசைக்கிறது, அது இன்னும் இந்தத் திரையில் இல்லை. ஒருமுறை நிறுவுங்கள்; பிறகு இசை பொத்தான் அதை நேரடியாகத் திறக்கும்.</string>
+    <string name="getmp3_play">Play Store-இல் பெறுங்கள்</string>
+    <string name="getmp3_download">பதிவிறக்கி நிறுவுங்கள்</string>
+    <string name="getmp3_downloading">பதிவிறக்குகிறது… %1$d%%</string>
+    <string name="getmp3_install">இப்போது நிறுவுங்கள்</string>
+    <string name="getmp3_allow">திறந்த திரையில் Car Hub-இலிருந்து நிறுவ அனுமதி கொடுத்து, திரும்பி வந்து, இப்போது நிறுவுங்கள் என்பதைத் தட்டுங்கள்.</string>
+    <string name="getmp3_failed">பதிவிறக்கம் தோல்வி. இணையத்தைச் சரிபார்த்து மீண்டும் முயலுங்கள்.</string>
+    <string name="getmp3_other">வேறு இசை ஆப்பைப் பயன்படுத்துங்கள்</string>
+    <string name="getmp3_test_note">சோதனை பில்ட்: Ampli-யின் GitHub பக்கத்திலிருந்து புதிய சோதனை பதிப்பு பதிவிறங்கும்.</string>
+    <string name="phone_music_title">போன் பாடல்கள்</string>
+    <string name="phone_music_from">%1$s-இலிருந்து, ப்ளூடூத் வழியாக</string>
+    <string name="phone_autoplay_title">போன் இணைந்ததும் அதன் பாடல்களை இசை</string>
+    <string name="phone_autoplay_hint">போன் இணைந்த சில விநாடிகளில் அதில் பிளே அழுத்தும். அழைப்பின்போது இல்லை, கடந்த ஒரு நிமிடத்தில் நீங்கள் நிறுத்தியிருந்தாலும் இல்லை.</string>
+    <string name="mirror_app_title">திரை பிரதிபலிப்பு ஆப்</string>
+    <string name="mirror_app_none">எதுவுமில்லை</string>
+    <string name="plink_title">போன் லிங்க்</string>
+    <string name="plink_connected">%1$s இணைந்துள்ளது</string>
+    <string name="plink_not_connected">ப்ளூடூத்தில் எந்தப் போனும் இணையவில்லை</string>
+    <string name="plink_calls">அழைப்புகள்</string>
+    <string name="plink_music">இசை</string>
+    <string name="plink_battery">பேட்டரி %1$d%%</string>
+    <string name="plink_play">போன் பாடல்களை இசை</string>
+    <string name="plink_devices">ப்ளூடூத் சாதனங்கள்</string>
+    <string name="plink_no_devices">இணைத்த சாதனங்கள் தெரியவில்லை. இந்த யூனிட் ப்ளூடூத்தை தன் சொந்த ஆப்பில் வைத்திருக்கலாம்: ப்ளூடூத் அமைப்புகளைத் திறங்கள்.</string>
+    <string name="plink_now">இப்போது இணைந்துள்ளது</string>
+    <string name="plink_paired">இணைக்கப்பட்டது</string>
+    <string name="plink_switch">மாற்று</string>
+    <string name="plink_switching">%1$s-ஐ இணைக்க யூனிட்டிடம் கேட்கப்பட்டது…</string>
+    <string name="plink_pick_here">%1$s-ஐ இணைக்க இங்கே தேர்வு செய்யுங்கள்</string>
+    <string name="plink_bt_settings">ப்ளூடூத் அமைப்புகள்</string>
+    <string name="plink_mirror">திரை பிரதிபலிப்பு ஆப்பைத் திற</string>
+    <string name="apps_hide">ஆப்ஸிலிருந்து மறை</string>
+    <string name="apps_hidden_toast">%1$s மறைக்கப்பட்டது. மேலும் ஆப்ஸிலிருந்து மீண்டும் காட்டலாம்.</string>
+    <string name="apps_unhide_all">மறைத்தவற்றைக் காட்டு (%1$d)</string>
+    <string name="apps_mirror_use">திரை பிரதிபலிப்புக்குப் பயன்படுத்து</string>
+    <string name="apps_mirror_stop">திரை பிரதிபலிப்புக்குப் பயன்படுத்துவதை நிறுத்து</string>
+    <string name="greet_home_title">Car Hub-ஐ முகப்பு ஆப்பாக அமையுங்கள், அப்போதுதான் வண்டி தொடங்கியதும் அது உங்களை வரவேற்கும்</string>
+</resources>

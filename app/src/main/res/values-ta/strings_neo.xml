@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_soft_auto">சாஃப்ட்: தானியங்கி பகல்/இரவு</string>
+    <string name="theme_soft_auto_hint">சூரிய உதயம் முதல் Ampli Soft Day, சூரிய அஸ்தமனத்துக்குப் பிறகு Ampli Soft Night</string>
+</resources>

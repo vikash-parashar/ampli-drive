@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Hub round 6: saved places, trips, volume by speed, favourite calls, parking QR, Ampli Store. Machine-assisted except Hindi and Haryanvi; needs native review. -->
+<resources>
+    <string name="place_home">ঘৰ</string>
+    <string name="place_office">অফিচ</string>
+    <string name="place_not_set">%1$s এতিয়াও ছেভ কৰা হোৱা নাই। প্ৰথমে ঠাই বিচাৰি সেইটো ছেভ কৰক।</string>
+    <string name="place_saved">ছেভ হ\'ল: %1$s</string>
+    <string name="place_full">বেছিকৈ %1$d টা প্ৰিয় ঠাই ছেভ কৰিব পাৰি। প্ৰথমে এটা আঁতৰাওক।</string>
+    <string name="place_save_as">এই ঠাইখন এনেদৰে ছেভ কৰক</string>
+    <string name="place_name">নাম</string>
+    <string name="place_add_favourite">প্ৰিয়ত যোগ কৰক</string>
+    <string name="places_title">ছেভ কৰা ঠাই</string>
+    <string name="places_empty">বিচৰাৰ ফলাফলৰ পৰা বা আপুনি এতিয়া থকা ঠাইৰ পৰা ঘৰ, অফিচ বা প্ৰিয় ঠাই ছেভ কৰক।</string>
+    <string name="places_hint">টিপিলেই ৰাস্তা আৰম্ভ। আঁতৰাবলৈ টিপি ধৰি ৰাখক।</string>
+    <string name="place_save_here">মই থকা ঠাই ছেভ কৰক</string>
+    <string name="place_save">ছেভ কৰক</string>
+    <string name="trips_title">যাত্ৰাৰ ইতিহাস</string>
+    <string name="trips_hint">প্ৰতিটো যাত্ৰা এই ইউনিটতে নিজে নিজে ছেভ হয়</string>
+    <string name="trips_week">এই সপ্তাহ</string>
+    <string name="trips_count">যাত্ৰা: %1$d</string>
+    <string name="trips_fuel">≈ %1$s ইন্ধন</string>
+    <string name="trips_fuel_unknown">ইন্ধনৰ খৰচ চাবলৈ খৰচৰ পৃষ্ঠাত দুবাৰ ফুল টেংক ভৰোৱাৰ কথা লিখক।</string>
+    <string name="trips_how">গাড়ী চলিলেই GPS ৰ পৰা যাত্ৰা লিখা হয় আৰু ৰৈ গ\'লে শেষ হয়। শেষৰ %1$d টা যাত্ৰা কেৱল এই ইউনিটতে ৰখা হয়।</string>
+    <string name="trips_clear">যাত্ৰাৰ ইতিহাস মচক</string>
+    <string name="trips_clear_confirm">এই ইউনিটৰ পৰা সকলো ছেভ কৰা যাত্ৰা মচিবনে?</string>
+    <string name="trips_empty">এতিয়াও কোনো যাত্ৰা নাই। আপোনাৰ যাত্ৰা ইয়াত নিজে নিজে দেখা যাব।</string>
+    <string name="trips_avg_top">গড় %1$d · সৰ্বোচ্চ %2$d km/h</string>
+    <string name="trips_tile_none">এতিয়াও কোনো যাত্ৰা নাই</string>
+    <string name="trips_tile_week">এই সপ্তাহত %1$s km</string>
+    <string name="speed_volume_title">গতি অনুসৰি শব্দ</string>
+    <string name="speed_volume_hint">30 km/h ৰ ওপৰত ৰাস্তাৰ শব্দ বাঢ়িলে গান অলপ ডাঙৰ হয়, আৰু লাহে হ\'লে আকৌ আগৰ দৰে। আপুনি নিজে শব্দ সলালে সেইটোৱেই নতুন স্তৰ হয়।</string>
+    <string name="speed_volume_low">কম</string>
+    <string name="speed_volume_medium">মধ্যম</string>
+    <string name="speed_volume_high">বেছি</string>
+    <string name="fav_calls_title">প্ৰিয় কল</string>
+    <string name="fav_calls_hint">কল কৰিবলৈ নামত টিপক। আঁতৰাবলৈ টিপি ধৰি ৰাখক। বেছিকৈ %1$d জন।</string>
+    <string name="fav_calls_none">আপোনাৰ কন্টেক্টৰ পৰা %1$d জনলৈকে যোগ কৰক। তাৰ পিছত এবাৰ টিপিলেই কল।</string>
+    <string name="fav_calls_add">যোগ কৰক</string>
+    <string name="fav_calls_open_phone">ফোন এপ খোলক</string>
+    <string name="fav_calls_failed">এই কন্টেক্ট পঢ়িব পৰা নগ\'ল</string>
+    <string name="fav_calls_full">কেৱল %1$d টা প্ৰিয় ৰাখিব পাৰি। প্ৰথমে এটা আঁতৰাওক।</string>
+    <string name="fav_calls_type_title">প্ৰিয় যোগ কৰক</string>
+    <string name="fav_calls_number">ফোন নম্বৰ</string>
+    <string name="parked_qr">আপোনাৰ ফোনেৰে স্কেন কৰক: গাড়ীৰ ঠাই Google Maps ত খোল খাব।</string>
+    <string name="store_title">Ampli ষ্ট\'ৰ</string>
+    <string name="store_hint">Car Hub Pro, MP3 Player আৰু কণ্ঠ পেক</string>
+    <string name="store_pro_line">Pro থিম, ইঞ্জিন আৰু টায়াৰ পৰীক্ষা, WhatsApp বাৰ্তা পঢ়ি শুনোৱা</string>
+    <string name="store_owned">সক্ৰিয়</string>
+    <string name="store_install">ইনষ্টল কৰক</string>
+    <string name="store_voice_punjabi">পঞ্জাবী কণ্ঠ পেক</string>
+    <string name="store_voice_rajasthani">ৰাজস্থানী কণ্ঠ পেক</string>
+    <string name="store_voice_bhojpuri">ভোজপুৰী কণ্ঠ পেক</string>
+    <string name="store_voice_line">সতৰ্কবাণী আৰু উত্তৰৰ বাবে প্ৰকৃত মানুহৰ কণ্ঠ</string>
+</resources>

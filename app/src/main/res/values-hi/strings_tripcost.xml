@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trip_cost_title">सफ़र का ख़र्च</string>
+    <string name="trip_cost_example">उदाहरण</string>
+    <string name="trip_cost_route">चुना गया रास्ता · %1$s किमी</string>
+    <string name="trip_cost_tolls">%1$d टोल</string>
+    <string name="trip_cost_fuel">पेट्रोल</string>
+    <string name="trip_cost_fuel_unknown">एक फ़्यूल भराई जोड़ें</string>
+    <string name="trip_cost_pass_saves">Annual Pass से बचत</string>
+    <string name="trip_cost_pass_would_save">Annual Pass होता तो बचत</string>
+    <string name="trip_cost_pass_trips">पास के %1$d ट्रिप</string>
+    <string name="trip_cost_total">टोल + पेट्रोल</string>
+    <string name="trip_cost_note">अनुमान। पेट्रोल आपके अपने माइलेज और पिछली भराई के दाम से। टोल रेट बदल सकते हैं।</string>
+    <string name="trip_cost_example_note">प्रीव्यू के लिए नमूने के आँकड़े, असली रास्ता नहीं।</string>
+</resources>
