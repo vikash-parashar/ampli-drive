@@ -150,6 +150,9 @@ jobs:
       # Owner's choice: set the repository variable ALLOW_UNCONFIGURED_SERVERS=true to let this job
       # check R8 before the own servers exist. The AAB it makes is then for testing only.
       ALLOW_UNCONFIGURED_SERVERS: ${{ vars.ALLOW_UNCONFIGURED_SERVERS }}
+      UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+      UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+      UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -162,6 +165,18 @@ jobs:
 
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      # Play upload key: only when the secret exists (never on pull requests from forks).
+      - name: Upload key
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$UPLOAD_KEYSTORE_BASE64" ]; then
+            echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            echo "UPLOAD_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+          else
+            echo "::notice title=Play upload key::UPLOAD_KEYSTORE_BASE64 is not set; the AAB is unsigned."
+          fi
 
       - name: Release bundle (R8)
         # bash -eo pipefail: a failing gradlew fails the step even though its output goes through tee.
@@ -182,3 +197,14 @@ jobs:
           name: AmpliCarHub-release-aab
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
+
+      # A signed bundle from main goes on a play-N release, ready to upload in Play Console.
+      - name: Publish the signed AAB
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.UPLOAD_KEYSTORE_FILE != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/bundle/release/*.aab "AmpliCarHub-${{ github.run_number }}.aab"
+          gh release create "play-${{ github.run_number }}" "AmpliCarHub-${{ github.run_number }}.aab" \
+            --prerelease --title "Play bundle ${{ github.run_number }}" \
+            --notes "Signed with the upload key. Upload this file in Play Console > Testing > Closed testing."
