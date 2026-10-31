@@ -1,0 +1,221 @@
+{
+ "lines": [
+  {
+   "id": "welcome",
+   "text": "इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।"
+  },
+  {
+   "id": "speed",
+   "text": "धीरे कर, कैमरा आग्गै सै, ना तो चालान का लड्डू घरां पहुँचैगा।"
+  },
+  {
+   "id": "fastag",
+   "text": "फास्टैग भूखा सै, रुक कै रिचार्ज का चूरमा खुवा दिए।"
+  }
+ ],
+ "voices": [
+  {
+   "gender": "male",
+   "voice_id": "7b9mYhmnp0y2qSH1FnBL",
+   "name": "Bunty (current)",
+   "owner": "",
+   "accent": "indian",
+   "age": "",
+   "description": "The voice the app uses today.",
+   "current": true,
+   "key": "male-00",
+   "clips": {
+    "welcome": "male-00/welcome.ogg",
+    "speed": "male-00/speed.ogg",
+    "fastag": "male-00/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "31T7D6zKHWBWvJlibBzI",
+   "name": "Prayan – Energetic Haryanvi Friend",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "haryanvi",
+   "age": "young",
+   "description": "Prayan is energetic, talkative, and completely at home in casual Haryanvi. His expressive delivery feels like a conversation with a local friend — unfiltered, engaging, and naturally entertaining. Bui",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/database/workspace/ed9b05e6324c457685490352e9a1ec90/voices/31T7D6zKHWBWvJlibBzI/uYj1qF1FO2TpqgdSxrTV.mp3",
+   "current": false,
+   "key": "male-01",
+   "clips": {
+    "welcome": "male-01/welcome.ogg",
+    "speed": "male-01/speed.ogg",
+    "fastag": "male-01/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "9BHTbeEKC5ZqMmvZfLW6",
+   "name": "Prayan – Haryanvi Customer Care Agent ",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "haryanvi",
+   "age": "young",
+   "description": "Prayan brings a warm, active Haryanvi tone to customer care — friendly enough to feel familiar, respectful enough to stay professional. His voice carries the natural rhythm of local speech that Haryan",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/database/workspace/ed9b05e6324c457685490352e9a1ec90/voices/9BHTbeEKC5ZqMmvZfLW6/S0PgIzAxJDRACS40KcIP.mp3",
+   "current": false,
+   "key": "male-02",
+   "clips": {
+    "welcome": "male-02/welcome.ogg",
+    "speed": "male-02/speed.ogg",
+    "fastag": "male-02/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "nQbHGIZau1HsaJPVwuI3",
+   "name": "Anoop Lamba",
+   "owner": "fc8d6d9d4826089127ceec344daacf9bdb72227b4f365a5ded9d69c88bfe8150",
+   "accent": "haryanvi",
+   "age": "young",
+   "description": "Natural Hindi voice with an authentic Haryanvi accent — flat, factual, newsreader-style delivery. Well suited for news narration, informational content, documentary voiceover, and regional Haryana/wes",
+   "preview_url": "https://api.us.elevenlabs.io/v1/voices/nQbHGIZau1HsaJPVwuI3/previews/audio?payload=eyJ2b2ljZV9zb3VyY2UiOiJjdXN0b20iLCJ3b3Jrc3BhY2VfaWQiOiJkOThiNGI0OTJjOTQ0Nzg2YTQ4OGMyZjc3YmE3YmQwNyIsImZpbGVuYW1lIjoiOWRWWFR4bE9zMTJLcHpjblcyaDkubXAzIiwidGltZXN0YW1wIjoxNzkzNDY5NjAwMDAwMDAwfQ%3D%3D",
+   "current": false,
+   "key": "male-03",
+   "clips": {
+    "welcome": "male-03/welcome.ogg",
+    "speed": "male-03/speed.ogg",
+    "fastag": "male-03/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "WegQLl6rzQgVad58uQ2G",
+   "name": "Sumit",
+   "owner": "78f792ad71965222bda001dd73b98317cfbae2562afdc44c40014703dfdb7925",
+   "accent": "haryanvi",
+   "age": "young",
+   "description": "A clear and natural male Indian Hindi voice. Practical, approachable, and easy to understand  well-suited for everyday conversations with drivers, customers, and team communication.",
+   "preview_url": "https://api.us.elevenlabs.io/v1/voices/WegQLl6rzQgVad58uQ2G/previews/audio?payload=eyJ2b2ljZV9zb3VyY2UiOiJjdXN0b20iLCJ3b3Jrc3BhY2VfaWQiOiI5MTc5MTQwYmY4MWQ0NjlhOGEzNzgzNzY4ZjdlZGQ5NCIsImZpbGVuYW1lIjoiYjJhYzQxOGQtZTQ4YS00OGVjLWE2ZGEtZmQ0OTA5ZjcwYjE5Lm1wMyIsInRpbWVzdGFtcCI6MTc5MzQ2OTYwMDAwMDAwMH0%3D",
+   "current": false,
+   "key": "male-04",
+   "clips": {
+    "welcome": "male-04/welcome.ogg",
+    "speed": "male-04/speed.ogg",
+    "fastag": "male-04/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "zlYnhpXy5I3Cyi2AuL8r",
+   "name": "Harsh Chhikara ",
+   "owner": "9a6efaa007c01603f0ee44620842cfa63de21edb865ae977de7cac430f43b844",
+   "accent": "haryanvi",
+   "age": "young",
+   "description": "Harsh Chhikara's deep, smooth voice combines standard Hindi with a Haryanvi accent, creating an authentic North Indian tone. His warm delivery features a medium pace, natural pauses, and clear articul",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/database/workspace/b3cd6934ea744f16a79ff1ff084e514a/voices/zlYnhpXy5I3Cyi2AuL8r/b695acb8-88a3-44b3-95e1-936cb5f7080f.mp3",
+   "current": false,
+   "key": "male-05",
+   "clips": {
+    "welcome": "male-05/welcome.ogg",
+    "speed": "male-05/speed.ogg",
+    "fastag": "male-05/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "9w21nMuk8CWXIME31V1S",
+   "name": "Simran (current)",
+   "owner": "",
+   "accent": "indian",
+   "age": "",
+   "description": "The voice the app uses today.",
+   "current": true,
+   "key": "female-06",
+   "clips": {
+    "welcome": "female-06/welcome.ogg",
+    "speed": "female-06/speed.ogg",
+    "fastag": "female-06/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "amiAXapsDOAiHJqbsAZj",
+   "name": "Priya - Skeptical and Motivating",
+   "owner": "1dd04a46ee10937668617efc510badf949a7dc418f72fcfe5e946537b85725ee",
+   "accent": "indian",
+   "age": "young",
+   "description": "A Young Indian girl voice. Perfect for energetic youtube short videos.",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/custom/voices/amiAXapsDOAiHJqbsAZj/vXBYFxZ4LLNWhntRbZOd.mp3",
+   "current": false,
+   "key": "female-07",
+   "clips": {
+    "welcome": "female-07/welcome.ogg",
+    "speed": "female-07/speed.ogg",
+    "fastag": "female-07/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "2zRM7PkgwBPiau2jvVXc",
+   "name": "Monika Sogam - Deep and Natural",
+   "owner": "f87f057c2250691953ac2e6227859706764bd08c88a055a18c74261957885a51",
+   "accent": "indian",
+   "age": "young",
+   "description": "Indian English accent voice for social media videos and audiobooks",
+   "preview_url": "https://api.us.elevenlabs.io/v1/voices/2zRM7PkgwBPiau2jvVXc/previews/audio?payload=eyJ2b2ljZV9zb3VyY2UiOiJjdXN0b20iLCJ3b3Jrc3BhY2VfaWQiOiI1MTRkOTRlOTI0MWM0OGU4Yjc5MDUzNzU3MjljNDM2ZiIsImZpbGVuYW1lIjoiNkdwSHV0ZGNCcVV0VDR6RURSSXAubXAzIiwidGltZXN0YW1wIjoxNzkzNDY5NjAwMDAwMDAwfQ%3D%3D",
+   "current": false,
+   "key": "female-08",
+   "clips": {
+    "welcome": "female-08/welcome.ogg",
+    "speed": "female-08/speed.ogg",
+    "fastag": "female-08/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "90ipbRoKi4CpHXvKVtl0",
+   "name": "Anika - Customer Care Agent",
+   "owner": "f87f057c2250691953ac2e6227859706764bd08c88a055a18c74261957885a51",
+   "accent": "indian",
+   "age": "young",
+   "description": "Anika's voice is specially recorded with customer care scripts in mind. So, if you are looking for an AI customer care voice or any conversational use, this voice is the perfect fit for you. Give it a",
+   "preview_url": "https://api.us.elevenlabs.io/v1/voices/90ipbRoKi4CpHXvKVtl0/previews/audio?payload=eyJ2b2ljZV9zb3VyY2UiOiJjdXN0b20iLCJ3b3Jrc3BhY2VfaWQiOiI1MTRkOTRlOTI0MWM0OGU4Yjc5MDUzNzU3MjljNDM2ZiIsImZpbGVuYW1lIjoiUWlZejdjc0hWd1lsWjF0NTB0Ym8ubXAzIiwidGltZXN0YW1wIjoxNzkzNDY5NjAwMDAwMDAwfQ%3D%3D",
+   "current": false,
+   "key": "female-09",
+   "clips": {
+    "welcome": "female-09/welcome.ogg",
+    "speed": "female-09/speed.ogg",
+    "fastag": "female-09/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "EaBs7G1VibMrNAuz2Na7",
+   "name": "Monika Sogam - Natural Conversations",
+   "owner": "f87f057c2250691953ac2e6227859706764bd08c88a055a18c74261957885a51",
+   "accent": "indian",
+   "age": "young",
+   "description": "Monika Sogam's English narration and Hindi voice have already been loved by the audience on ElevenLabs (with more than 200 million characters generated). Since we've seen many people using her voice f",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/database/workspace/514d94e9241c48e8b7905375729c436f/voices/EaBs7G1VibMrNAuz2Na7/PFvuYioNtADsGVRLtgiE.mp3",
+   "current": false,
+   "key": "female-10",
+   "clips": {
+    "welcome": "female-10/welcome.ogg",
+    "speed": "female-10/speed.ogg",
+    "fastag": "female-10/fastag.ogg"
+   }
+  },
+  {
+   "gender": "female",
+   "voice_id": "MwUMLXurEzSN7bIfIdXF",
+   "name": "Tripti - Calm and Experienced",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "indian",
+   "age": "middle_aged",
+   "description": "A warm, professional voice designed for AI agents, IVRs, and customer support in English-first user journeys.\n\nTripti’s tone blends clarity with care — ideal for guiding users smoothly through app sup",
+   "preview_url": "https://storage.googleapis.com/eleven-public-prod/database/workspace/ed9b05e6324c457685490352e9a1ec90/voices/MwUMLXurEzSN7bIfIdXF/TrdTr9Wax8NgyefaqiuS.mp3",
+   "current": false,
+   "key": "female-11",
+   "clips": {
+    "welcome": "female-11/welcome.ogg",
+    "speed": "female-11/speed.ogg",
+    "fastag": "female-11/fastag.ogg"
+   }
+  }
+ ],
+ "characters": 2520
+}
