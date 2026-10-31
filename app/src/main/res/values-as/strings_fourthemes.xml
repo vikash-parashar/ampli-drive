@@ -32,4 +32,5 @@
     <string name="theme_auto_night">ৰাতি নিজে নিজে: Big Glance</string>
     <string name="theme_auto_night_hint">সূৰ্যাস্তৰ পিছত হোম Big Glance লৈ সলনি হয়, আটাইতকৈ গাঢ় থীম, আৰু সূৰ্যোদয়ত উভতি আহে</string>
     <string name="theme_auto_night_pro">Pro: সূৰ্যাস্তৰ পিছত Big Glance। বিনামূলীয়াত দিনে-ৰাতি Map First থাকে।</string>
+    <string name="home_go_home">ঘৰলৈ যাওঁ</string>
 </resources>

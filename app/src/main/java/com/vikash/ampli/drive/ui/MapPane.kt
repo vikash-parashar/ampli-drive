@@ -74,7 +74,8 @@ fun MapPane(
 
     // The map covers the pane, so there is nothing for glass to blur here.
     val body: @Composable (@Composable () -> Unit) -> Unit = { content ->
-        if (fullBleed) Box(modifier.background(theme.background)) { content() } else Pane(modifier.then(frame), fill = theme.background, blur = false) { content() }
+        // Full-bleed: Map First draws its drawn map underneath, so nothing here paints a background.
+        if (fullBleed) Box(modifier) { content() } else Pane(modifier.then(frame), fill = theme.background, blur = false) { content() }
     }
     body {
         Box(Modifier.fillMaxSize()) {
@@ -83,6 +84,7 @@ fun MapPane(
                     text = stringResource(R.string.map_allow_text),
                     button = stringResource(R.string.map_allow_button),
                     onClick = onRequestPermissions,
+                    card = fullBleed,
                 )
                 location == null -> MapMessage(
                     text = stringResource(
@@ -90,7 +92,12 @@ fun MapPane(
                     ),
                     button = stringResource(R.string.map_open_google_maps),
                     onClick = onOpenNavigation,
+                    card = fullBleed,
                 )
+                LocalMapPreview.current -> {
+                    MapPlaceholder(Modifier.fillMaxSize(), route = nav.visible, routeColor = theme.mapPuck)
+                    Box(Modifier.fillMaxSize().clickable(onClick = if (nav.visible) onOpenNav else onOpenNavigation))
+                }
                 else -> {
                     val navigating = nav.phase == NavSession.Phase.Active
                     GlanceMap(
@@ -128,11 +135,13 @@ fun MapPane(
                     )
                     // Theme style and fallback both failed: say so instead of a blank or grey pane.
                     if (mapStatus.unavailable) {
-                        Box(Modifier.fillMaxSize().background(theme.background)) {
+                        Box(Modifier.fillMaxSize().then(if (fullBleed) Modifier else Modifier.background(theme.background))) {
+                            if (fullBleed) MapPlaceholder(Modifier.fillMaxSize())
                             MapMessage(
                                 text = stringResource(R.string.map_tiles_unavailable),
                                 button = stringResource(R.string.map_open_google_maps),
                                 onClick = onOpenNavigation,
+                                card = fullBleed,
                             )
                         }
                     }
@@ -186,9 +195,16 @@ fun MapPane(
 }
 
 @Composable
-private fun MapMessage(text: String, button: String, onClick: () -> Unit) {
+private fun MapMessage(text: String, button: String, onClick: () -> Unit, card: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
+    if (card) {
+        // Map First: a solid card in the middle of the drawn map.
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LocationPromptCard(text, button, onClick)
+        }
+        return
+    }
     Column(
         modifier = Modifier.fillMaxSize().padding(dims.d(3f)),
         horizontalAlignment = Alignment.CenterHorizontally,

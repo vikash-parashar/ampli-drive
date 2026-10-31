@@ -54,4 +54,35 @@ class HomeAlertsTest {
         assertFalse(HomeAlerts.tollFresh(t, t + 121_000L))
         assertFalse(HomeAlerts.tollFresh(t, t - 1L))
     }
+
+    @Test
+    fun locationOffSaysItOnce() {
+        val off = HomeAlert(AlertKind.LocationOff, "Location", "Location off")
+        assertEquals("Location off", off.headline)
+        assertNull(off.detail)
+        assertEquals("Location off", off.line)
+        val toll = HomeAlert(AlertKind.TollPaid, "FASTag", "₹65 taken · ₹480 left")
+        assertEquals("FASTag", toll.headline)
+        assertEquals("FASTag · ₹65 taken · ₹480 left", toll.line)
+        assertEquals("GPS off", HomeAlert(AlertKind.LocationOff, "Location", "GPS off").line)
+    }
+
+    @Test
+    fun ampliLineGoesAfterTwelveSeconds() {
+        val t = 5_000_000L
+        assertEquals(AmpliLine.SHOWN_MS, AmpliLine.remainingMs(t, t))
+        assertEquals(12_000L, AmpliLine.SHOWN_MS)
+        assertEquals(2_000L, AmpliLine.remainingMs(t, t + 10_000L))
+        assertEquals(0L, AmpliLine.remainingMs(t, t + 12_000L))
+        assertEquals(0L, AmpliLine.remainingMs(t, t + 60_000L))
+        // Never said: nothing to show.
+        assertEquals(0L, AmpliLine.remainingMs(0L, t))
+    }
+
+    @Test
+    fun bubbleNeverCoversTheLocationCard() {
+        assertTrue(AmpliLine.bubbleShown("Bhai, aage camera sai", locationPrompt = false))
+        assertFalse(AmpliLine.bubbleShown("Bhai, aage camera sai", locationPrompt = true))
+        assertFalse(AmpliLine.bubbleShown(null, locationPrompt = false))
+    }
 }

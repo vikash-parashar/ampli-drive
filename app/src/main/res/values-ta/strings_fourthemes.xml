@@ -32,4 +32,5 @@
     <string name="theme_auto_night">இரவில் தானாக: Big Glance</string>
     <string name="theme_auto_night_hint">சூரியன் மறைந்ததும் முகப்பு Big Glance-க்கு மாறும், மிக இருண்ட தீம், சூரிய உதயத்தில் திரும்பும்</string>
     <string name="theme_auto_night_pro">Pro: சூரியன் மறைந்ததும் Big Glance. இலவசத்தில் பகலும் இரவும் Map First.</string>
+    <string name="home_go_home">வீட்டுக்குச் செல்</string>
 </resources>

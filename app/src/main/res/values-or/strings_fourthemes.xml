@@ -32,4 +32,5 @@
     <string name="theme_auto_night">ରାତିରେ ନିଜେ: Big Glance</string>
     <string name="theme_auto_night_hint">ସୂର୍ଯ୍ୟାସ୍ତ ପରେ ହୋମ Big Glance କୁ ବଦଳେ, ସବୁଠୁ ଗାଢ଼ ଥିମ୍, ଏବଂ ସୂର୍ଯ୍ୟୋଦୟରେ ଫେରେ</string>
     <string name="theme_auto_night_pro">Pro: ସୂର୍ଯ୍ୟାସ୍ତ ପରେ Big Glance। ମାଗଣାରେ ଦିନରାତି Map First ରହେ।</string>
+    <string name="home_go_home">ଘରକୁ ଚାଲନ୍ତୁ</string>
 </resources>

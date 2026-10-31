@@ -87,10 +87,13 @@ fun SavedPlaceChips(
     app: DriveApp,
     modifier: Modifier = Modifier,
     onLongPress: ((SavedPlace) -> Unit)? = null,
+    /** Map First: Home is its own "Go home" key in the turn card, so the chip would repeat it. */
+    skipHome: Boolean = false,
 ) {
     val context = LocalContext.current
     val dims = LocalDims.current
-    val places by app.places.places.collectAsStateWithLifecycle()
+    val all by app.places.places.collectAsStateWithLifecycle()
+    val places = if (skipHome) all.filter { it.kind != SavedKind.Home } else all
     if (places.isEmpty()) return
     Row(
         modifier.horizontalScroll(rememberScrollState()),

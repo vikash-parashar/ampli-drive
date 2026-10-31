@@ -32,4 +32,5 @@
     <string name="theme_auto_night">ರಾತ್ರಿ ಸ್ವಯಂ: Big Glance</string>
     <string name="theme_auto_night_hint">ಸೂರ್ಯಾಸ್ತದ ನಂತರ ಹೋಮ್ Big Glance ಗೆ ಬದಲಾಗುತ್ತದೆ, ಅತ್ಯಂತ ಗಾಢ ಥೀಮ್, ಸೂರ್ಯೋದಯಕ್ಕೆ ಮರಳುತ್ತದೆ</string>
     <string name="theme_auto_night_pro">Pro: ಸೂರ್ಯಾಸ್ತದ ನಂತರ Big Glance. ಉಚಿತದಲ್ಲಿ ಹಗಲು ರಾತ್ರಿ Map First.</string>
+    <string name="home_go_home">ಮನೆಗೆ ಹೋಗೋಣ</string>
 </resources>

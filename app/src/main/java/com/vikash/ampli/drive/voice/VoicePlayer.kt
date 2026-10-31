@@ -39,9 +39,19 @@ class VoicePlayer(private val app: DriveApp) {
      */
     val lastLine: StateFlow<String?> = _lastLine.asStateFlow()
 
+    private val _lastLineAt = MutableStateFlow(0L)
+
+    /** When [lastLine] was said (elapsedRealtime ms; 0 = never). Home hides a stale line. */
+    val lastLineAt: StateFlow<Long> = _lastLineAt.asStateFlow()
+
+    private fun setLine(line: String) {
+        _lastLine.value = line
+        _lastLineAt.value = android.os.SystemClock.elapsedRealtime().coerceAtLeast(1L)
+    }
+
     /** Shows [line] as Home's caption without saying it (screen previews; only bank lines go here). */
     internal fun showCaption(line: String) {
-        _lastLine.value = line
+        setLine(line)
     }
 
     /** What is bundled in this build. Loaded once; an APK never changes its assets. */
@@ -73,7 +83,7 @@ class VoicePlayer(private val app: DriveApp) {
      * recorded Ampli voice even when Settings › Voice says phone voice (the car-start welcome).
      */
     suspend fun sayChecked(spoken: Spoken, needFocus: Boolean = false, preferRecorded: Boolean = false): Boolean {
-        if (spoken.caption) _lastLine.value = spoken.text
+        if (spoken.caption) setLine(spoken.text)
         var v = voice
         // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
         // Ampli voice says it instead, rather than nothing at all.

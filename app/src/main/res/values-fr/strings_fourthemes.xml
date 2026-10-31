@@ -32,4 +32,5 @@
     <string name="theme_auto_night">Nuit automatique : Big Glance</string>
     <string name="theme_auto_night_hint">Après le coucher du soleil, l\'accueil passe à Big Glance, le thème le plus sombre, et revient au lever du soleil</string>
     <string name="theme_auto_night_pro">Pro : Big Glance après le coucher du soleil. La version gratuite garde Map First jour et nuit.</string>
+    <string name="home_go_home">Rentrer</string>
 </resources>

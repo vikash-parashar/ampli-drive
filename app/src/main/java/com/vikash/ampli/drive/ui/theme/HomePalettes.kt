@@ -52,10 +52,10 @@ object HomePalettes {
         warning = 0xFFFBBF24, ok = 0xFF4ADE80, track = 0xFF3A4C57,
     )
 
-    /** Map First's cards over the map: slate at 80 % (no blur, so it is cheap everywhere). */
-    const val MAP_FIRST_CARD = 0xCC17222AL
+    /** Map First's cards over the map: slate at 90 % (no blur, so it is cheap everywhere). */
+    const val MAP_FIRST_CARD = 0xE617222AL
 
-    /** The same card on Android 8.x head units: nearly solid, so text never fights the tiles. */
+    /** The same card below Android 12 (no blur there): nearly solid, so text never fights the tiles. */
     const val MAP_FIRST_CARD_SOLID = 0xF217222AL
 
     /** Ampli's speech bubble on the map. */

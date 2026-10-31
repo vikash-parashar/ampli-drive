@@ -43,7 +43,40 @@ enum class AlertKind {
  * One candidate for the slot: a short [title] ("FASTag") and [text] ("₹65 taken · ₹480 left").
  * [danger] paints it in the SOS red instead of amber.
  */
-data class HomeAlert(val kind: AlertKind, val title: String, val text: String, val danger: Boolean = false)
+data class HomeAlert(val kind: AlertKind, val title: String, val text: String, val danger: Boolean = false) {
+    /**
+     * The slot's first line. No location says just "Location off" (its title would only repeat
+     * it); everything else leads with its title.
+     */
+    val headline: String get() = if (kind == AlertKind.LocationOff || title.isBlank()) text else title
+
+    /** The second line, or null when [headline] already says it all. */
+    val detail: String? get() = text.takeIf { it != headline }
+
+    /** Both on one line: "FASTag · ₹65 taken · ₹480 left", or just "Location off". */
+    val line: String get() = listOfNotNull(headline, detail).joinToString(" · ")
+}
+
+/**
+ * Ampli's last line on Home: shown for [SHOWN_MS] after it was said, then the slot goes back to
+ * its hint (Map First hides its speech bubble). Plain Kotlin, tested (HomeAlertsTest).
+ */
+object AmpliLine {
+    const val SHOWN_MS = 12_000L
+
+    /** How much longer a line said at [saidAt] stays up at [now] (both elapsedRealtime); 0 = gone. */
+    fun remainingMs(saidAt: Long, now: Long): Long {
+        if (saidAt <= 0L) return 0L
+        val age = (now - saidAt).coerceAtLeast(0L)
+        return (SHOWN_MS - age).coerceAtLeast(0L)
+    }
+
+    /**
+     * Map First's speech bubble: only a fresh line, and never while the map asks for location
+     * (the bubble would sit on that card's button).
+     */
+    fun bubbleShown(freshLine: String?, locationPrompt: Boolean): Boolean = freshLine != null && !locationPrompt
+}
 
 object HomeAlerts {
     /** How long a toll deduction stays in the slot after the SMS arrives. */

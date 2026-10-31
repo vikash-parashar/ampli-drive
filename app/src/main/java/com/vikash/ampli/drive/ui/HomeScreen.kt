@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MusicNote
@@ -103,9 +104,6 @@ import kotlin.math.roundToInt
 /** Low-end units: how long after the first Home frame the map is added. */
 private const val HEAVY_DELAY_MS = 250L
 
-/** Map First: how long Ampli's speech bubble stays over the map. */
-private const val BUBBLE_MS = 20_000L
-
 /** The map surface type was switched once this run after drawing nothing; don't flip back and forth. */
 private var mapModeFlipped = false
 
@@ -146,6 +144,18 @@ fun HomeScreen(
     val obd by app.obd.state.collectAsStateWithLifecycle()
     val voice by app.voice.state.collectAsStateWithLifecycle()
     val caption by app.voicePlayer.lastLine.collectAsStateWithLifecycle()
+    val captionAt by app.voicePlayer.lastLineAt.collectAsStateWithLifecycle()
+    // Ampli's line stays up for AmpliLine.SHOWN_MS after it was said, then the slot shows its hint.
+    val freshCaption by produceState<String?>(null, caption, captionAt) {
+        val left = AmpliLine.remainingMs(captionAt, android.os.SystemClock.elapsedRealtime())
+        value = caption.takeIf { left > 0L }
+        if (value != null) {
+            delay(left)
+            value = null
+        }
+    }
+    val places by app.places.places.collectAsStateWithLifecycle()
+    val savedHome = places.firstOrNull { it.kind == com.vikash.ampli.drive.nav.SavedKind.Home }
 
     // Map taps and the turn tile: the trip in progress, else "Where to?" on the Ampli map, else
     // Google Maps (Settings › Navigate with).
@@ -191,7 +201,9 @@ fun HomeScreen(
         turn = turnUi(nav, turn),
         music = musicUi(app),
         alert = alert,
-        caption = caption,
+        caption = freshCaption,
+        locationPrompt = !gps.hasPermission || gps.location == null,
+        onGoHome = savedHome?.let { home -> { goToSavedPlace(app, context, home) } },
         listening = voice.phase == com.vikash.ampli.drive.voice.VoiceUiState.Phase.Listening,
         onMic = { app.voice.start() },
         onMore = { more = true },
@@ -223,7 +235,12 @@ fun HomeScreen(
                 HomeStyle.BigGlance -> BigGlanceHome(ui, pullDown)
                 HomeStyle.Bento -> BentoHome(ui, pullDown)
                 HomeStyle.RoadSign -> RoadSignHome(ui, pullDown)
-                HomeStyle.MapFirst -> MapFirstHome(ui, pullDown) {
+                HomeStyle.MapFirst -> MapFirstHome(
+                    ui,
+                    pullDown,
+                    // Office and favourites under the turn card while not navigating (Home is the card's own key).
+                    places = { if (!nav.visible && ui.turn == null) SavedPlaceChips(app = app, skipHome = true) },
+                ) {
                     if (heavyReady) {
                         val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
                         val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
@@ -248,11 +265,6 @@ fun HomeScreen(
                         )
                     }
                 }
-            }
-            // Map First: Home, Office and favourites under the turn card while not navigating.
-            if (theme.style == HomeStyle.MapFirst && !nav.visible && ui.turn == null) {
-                val dims = LocalDims.current
-                SavedPlaceChips(app = app, modifier = Modifier.align(Alignment.TopStart).padding(start = dims.d(2.6f), top = dims.d(30f)))
             }
             if (theme.style == HomeStyle.MapFirst) {
                 val dims = LocalDims.current
@@ -301,8 +313,12 @@ internal class HomeUi(
     val turn: TurnUi?,
     val music: MusicUi,
     val alert: AlertUi?,
-    /** The last line Ampli said (bank lines only, so always family-safe). */
+    /** The last line Ampli said (bank lines only, so always family-safe), while still fresh. */
     val caption: String?,
+    /** No location for the map yet: Map First shows its "Allow location" card instead. */
+    val locationPrompt: Boolean,
+    /** "Go home", when Home is saved. */
+    val onGoHome: (() -> Unit)?,
     /** The mic ring animates only while listening: nothing else on Home moves. */
     val listening: Boolean,
     val onMic: () -> Unit,
@@ -514,8 +530,22 @@ private fun fitSize(w: Dp, h: Dp, chars: Int, widthPerChar: Float = 0.6f, height
     return with(density) { minOf(byH, byW).dp.toSp() }
 }
 
-/** Speed as text: "62", or "--" before the first GPS fix. */
-private fun speedText(speed: Int?): String = speed?.toString() ?: "--"
+/**
+ * The speed numeral: "62", or a dimmed "0" in the same size and font before the first GPS fix
+ * (never dashes, which the number fonts draw as two bars).
+ */
+@Composable
+private fun SpeedNumber(speed: Int?, color: Color, fontSize: TextUnit, modifier: Modifier = Modifier) {
+    val theme = LocalDriveTheme.current
+    Text(
+        speed?.toString() ?: "0",
+        style = theme.numberStyle(if (speed == null) color.copy(alpha = 0.35f) else color),
+        fontSize = fontSize,
+        maxLines = 1,
+        softWrap = false,
+        modifier = modifier,
+    )
+}
 
 /**
  * Round speed-limit sign: red ring and the limit in black on white (on Big Glance, light text
@@ -673,7 +703,7 @@ private fun DockKey(
             color = content,
             fontFamily = theme.font.family,
             fontWeight = FontWeight.Bold,
-            fontSize = dims.t(textSize, min = 18f),
+            fontSize = dims.t(textSize, min = 22f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             letterSpacing = if (theme.upperLabels) 0.04.em else androidx.compose.ui.unit.TextUnit.Unspecified,
@@ -776,7 +806,7 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
                 TileLabel(stringResource(R.string.speed_label), if (ui.over) theme.onDanger else theme.muted, 2.8f)
                 if (ui.limit != null) LimitBadge(ui.limit, dims.d(11f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(1f)), dark = true)
                 BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(5f), bottom = dims.d(4.4f)), contentAlignment = Alignment.CenterStart) {
-                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.5f, 1.05f), maxLines = 1, softWrap = false)
+                    SpeedNumber(ui.speed, fg, fitSize(maxWidth, maxHeight, 2, 0.5f, 1.05f))
                 }
                 Text(
                     speedFoot(ui),
@@ -798,7 +828,7 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
                         Text(stringResource(R.string.nav_search_title), color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(4.6f, min = 24f))
                     }
                 } else {
-                    TurnArrow(t, theme.accent, Modifier.padding(top = dims.d(6f)).size(dims.d(15f)))
+                    TurnArrow(t, theme.accent, Modifier.padding(top = dims.d(5.4f)).size(dims.d(18f)))
                     Column(Modifier.align(Alignment.BottomStart)) {
                         Text(t.distance, style = theme.numberStyle(theme.text), fontSize = dims.t(13f, min = 40f), maxLines = 1)
                         t.text?.let { Text(it, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
@@ -893,7 +923,7 @@ private fun AlertPill(a: AlertUi, modifier: Modifier = Modifier, background: Col
     ) {
         Icon(Icons.Filled.Warning, contentDescription = null, tint = if (background != null && !danger) theme.accentSoft else fg, modifier = Modifier.size(maxOf(dims.d(3.6f), 24.dp)))
         Text(
-            a.alert.title + " · " + a.alert.text,
+            a.alert.line,
             color = fg,
             fontWeight = FontWeight.Bold,
             fontSize = dims.t(2.8f, min = 22f),
@@ -905,18 +935,25 @@ private fun AlertPill(a: AlertUi, modifier: Modifier = Modifier, background: Col
 
 // ------------------------------------------------------------------------------ Map First
 
-/** Style 4 (default, free): the map fills the screen; slate cards sit in the corners. */
+/**
+ * Style 4 (default, free): the map fills the screen and solid slate cards float over it: the next
+ * turn top left, time and speed top right, music bottom left, the dock bottom right and Ampli's
+ * bubble in its own slot above the car. Before there is a location the drawn map stands in, with
+ * the "Allow location" card in the middle (MapPane).
+ */
 @Composable
-private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> Unit) {
+private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, places: @Composable () -> Unit, map: @Composable () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val card = theme.overMap
     val shape = theme.cardShape(dims)
     val pad = dims.d(2.6f)
-    Box(Modifier.fillMaxSize().background(Color(0xFFE8E2D4))) {
+    Box(Modifier.fillMaxSize()) {
+        // The drawn map: behind the live map while it loads, and on its own without a location.
+        MapPlaceholder(Modifier.fillMaxSize())
         map()
-        // Turn card (or "Where to?") and the alert slot under it.
-        Column(Modifier.align(Alignment.TopStart).padding(pad).widthIn(max = dims.d(52f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+        // Turn card (or "Where to?" and "Go home"), the alert slot and saved places under it.
+        Column(Modifier.align(Alignment.TopStart).padding(pad).widthIn(max = dims.d(54f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
             Row(
                 Modifier
                     .heightIn(min = MinTouch)
@@ -930,13 +967,41 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> 
                 Box(Modifier.size(dims.d(13.5f)).clip(theme.cardShape(dims, 0.6f)).background(theme.accent), contentAlignment = Alignment.Center) {
                     TurnArrow(ui.turn, theme.onAccent, Modifier.size(dims.d(8f)))
                 }
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
                     val t = ui.turn
-                    Text(t?.distance ?: stringResource(R.string.nav_search_title), style = theme.numberStyle(theme.text), fontSize = dims.t(7f, min = 28f), maxLines = 1)
-                    t?.text?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    if (t != null) {
+                        Text(t.distance, style = theme.numberStyle(theme.text), fontSize = dims.t(7f, min = 28f), maxLines = 1)
+                        t.text?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    } else {
+                        // Parked: "Where to?" in full, and one tap home when Home is saved.
+                        Text(
+                            stringResource(R.string.nav_search_title),
+                            style = theme.numberStyle(theme.text),
+                            fontSize = dims.t(5f, min = 26f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        ui.onGoHome?.let { goHome ->
+                            Row(
+                                Modifier
+                                    .heightIn(min = MinTouch)
+                                    .clip(CircleShape)
+                                    .background(theme.accent)
+                                    .clickable(onClick = goHome)
+                                    .padding(horizontal = dims.d(2.2f)),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
+                            ) {
+                                Icon(Icons.Filled.Home, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(maxOf(dims.d(3.6f), 24.dp)))
+                                Text(stringResource(R.string.home_go_home), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.8f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                    }
                 }
             }
-            ui.alert?.let { AlertPill(it, background = card) }
+            // The location card in the middle already says it, with its button.
+            ui.alert?.takeUnless { ui.locationPrompt && it.alert.kind == AlertKind.LocationOff }?.let { AlertPill(it, background = card) }
+            places()
         }
         // Time and speed on the right.
         Column(Modifier.align(Alignment.TopEnd).padding(pad).then(pullDown), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -956,33 +1021,17 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> 
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Text(speedText(ui.speed), style = theme.numberStyle(if (ui.over) theme.onDanger else theme.text), fontSize = dims.t(9f, min = 36f), maxLines = 1)
+                    SpeedNumber(ui.speed, if (ui.over) theme.onDanger else theme.text, dims.t(9f, min = 36f))
                     Text(speedFoot(ui, withLimit = false), color = if (ui.over) theme.onDanger else theme.muted, fontSize = dims.t(2.4f, min = 15f), maxLines = 1)
                 }
                 if (ui.limit != null) LimitBadge(ui.limit, dims.d(10f), Modifier.align(Alignment.BottomStart).offset(x = -dims.d(5f), y = dims.d(1f)))
             }
         }
-        // Ampli's line, as a speech bubble over the map for a short while.
-        var bubble by remember { mutableStateOf<String?>(null) }
-        LaunchedEffect(ui.caption) {
-            bubble = ui.caption
-            if (ui.caption != null) {
-                delay(BUBBLE_MS)
-                bubble = null
-            }
-        }
-        bubble?.let { line ->
-            Column(
-                Modifier
-                    .align(Alignment.Center)
-                    .widthIn(max = dims.d(48f))
-                    .clip(theme.cardShape(dims, 0.6f))
-                    .background(Color(HomePalettes.MAP_FIRST_BUBBLE))
-                    .padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f)),
-            ) {
-                Text(stringResource(R.string.home_ampli), color = theme.accent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.4f, min = 16f))
-                Text(line, color = Color(HomePalettes.MAP_FIRST_BUBBLE_INK), fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis)
-            }
+        // Ampli's line: a speech bubble in its own slot above the car, between the music card and the
+        // dock, so it never sits on a control. Only while fresh, and not while the location card shows.
+        val line = ui.caption
+        if (line != null && AmpliLine.bubbleShown(line, ui.locationPrompt)) {
+            AmpliBubble(line, Modifier.align(Alignment.BottomCenter).padding(bottom = dims.d(24f)).widthIn(max = dims.d(44f)))
         }
         // Now playing.
         Row(
@@ -1046,6 +1095,34 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> 
     }
 }
 
+/** Map First's speech bubble: Ampli's line on a light card with a tail pointing down at the car. */
+@Composable
+private fun AmpliBubble(line: String, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val fill = Color(HomePalettes.MAP_FIRST_BUBBLE)
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .clip(theme.cardShape(dims, 0.6f))
+                .background(fill)
+                .padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f)),
+        ) {
+            Text(stringResource(R.string.home_ampli), color = theme.accent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.4f, min = 16f))
+            Text(line, color = Color(HomePalettes.MAP_FIRST_BUBBLE_INK), fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis)
+        }
+        androidx.compose.foundation.Canvas(Modifier.width(dims.d(3.2f)).height(dims.d(1.8f))) {
+            val tail = androidx.compose.ui.graphics.Path().apply {
+                moveTo(0f, 0f)
+                lineTo(size.width, 0f)
+                lineTo(size.width / 2f, size.height)
+                close()
+            }
+            drawPath(tail, fill)
+        }
+    }
+}
+
 // ------------------------------------------------------------------------------ Bento Grid
 
 /** Style 6: a magazine grid where the size of a tile is how much it matters. */
@@ -1064,7 +1141,7 @@ private fun BentoHome(ui: HomeUi, pullDown: Modifier) {
                 TileLabel(stringResource(R.string.speed_label), fg.copy(alpha = 0.75f), 2.4f)
                 if (ui.limit != null) LimitBadge(ui.limit, dims.d(11.5f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(0.8f)))
                 BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(6f), bottom = dims.d(5f)), contentAlignment = Alignment.CenterStart) {
-                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.62f, 1f), maxLines = 1, softWrap = false)
+                    SpeedNumber(ui.speed, fg, fitSize(maxWidth, maxHeight, 2, 0.62f, 1f))
                 }
                 Text(listOfNotNull(stringResource(R.string.speed_unit), ui.rpm?.let { stringResource(R.string.speed_rpm, it) }).joinToString(" · "), color = fg, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), modifier = Modifier.align(Alignment.BottomStart))
                 if (ui.limit != null) Text(stringResource(R.string.home_limit, ui.limit), color = fg.copy(alpha = 0.7f), fontSize = dims.t(3f, min = 22f), modifier = Modifier.align(Alignment.BottomEnd))
@@ -1149,8 +1226,8 @@ private fun BentoHome(ui: HomeUi, pullDown: Modifier) {
             ) {
                 val fg = if (a?.alert?.danger == true) theme.onDanger else theme.text
                 Icon(if (a != null) Icons.Filled.Warning else Icons.Filled.Navigation, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4.4f)))
-                Text(a?.alert?.title ?: stringResource(R.string.nav_search_title), color = fg, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(2.8f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                a?.let { Text(it.alert.text, color = fg.copy(alpha = 0.8f), fontSize = dims.t(2.4f, min = 16f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                Text(a?.alert?.headline ?: stringResource(R.string.nav_search_title), color = fg, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                a?.alert?.detail?.let { Text(it, color = fg.copy(alpha = 0.8f), fontSize = dims.t(2.4f, min = 16f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
             }
             DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(0.9f).fillMaxHeight(), shape, theme.ink, theme.onInk, textSize = 3f)
             SosKey(ui, Modifier.weight(0.9f).fillMaxHeight(), shape, hint = true)
@@ -1208,7 +1285,7 @@ private fun RoadSignHome(ui: HomeUi, pullDown: Modifier) {
                 ) {
                     val fg = if (a.alert.danger) theme.onDanger else theme.text
                     Icon(Icons.Filled.Warning, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4.4f)))
-                    Text((a.alert.title + " " + a.alert.text).uppercase(), color = fg, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(a.alert.line.uppercase(), color = fg, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -1219,14 +1296,15 @@ private fun RoadSignHome(ui: HomeUi, pullDown: Modifier) {
                 TileLabel(stringResource(R.string.speed_label), fg, 3f)
                 if (ui.limit != null) LimitBadge(ui.limit, dims.d(13f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(1f)))
                 BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(7f), bottom = dims.d(5f)), contentAlignment = Alignment.CenterStart) {
-                    Text(speedText(ui.speed), style = theme.numberStyle(fg), fontSize = fitSize(maxWidth, maxHeight, 2, 0.72f, 0.9f), maxLines = 1, softWrap = false)
+                    SpeedNumber(ui.speed, fg, fitSize(maxWidth, maxHeight, 2, 0.72f, 0.9f))
                 }
                 Text(speedFoot(ui, withLimit = false).uppercase(Locale.ENGLISH), color = fg, fontFamily = theme.font.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(3.2f, min = 22f), modifier = Modifier.align(Alignment.BottomStart))
             }
             // The blue direction sign.
             Box(Modifier.weight(1f).fillMaxHeight().hardShadow(RectangleShape, theme.border).background(theme.accent).border(bw, theme.border).clickable(onClick = ui.onNav).padding(dims.d(1.4f))) {
-                Box(Modifier.fillMaxSize().border(3.dp, Color.White).padding(dims.d(3f))) {
-                    TurnArrow(ui.turn, Color.White, Modifier.size(dims.d(14f)))
+                BoxWithConstraints(Modifier.fillMaxSize().border(3.dp, Color.White).padding(dims.d(3f))) {
+                    // As on the mock: a big arrow, about half the sign's width, above the distance.
+                    TurnArrow(ui.turn, Color.White, Modifier.size(minOf(maxWidth * 0.5f, maxHeight * 0.44f)))
                     Column(Modifier.align(Alignment.BottomStart)) {
                         val t = ui.turn
                         Text((t?.distance ?: stringResource(R.string.nav_search_title)).uppercase(), style = theme.numberStyle(Color.White), fontSize = dims.t(if (t != null) 9f else 5f, min = 26f), maxLines = 2)

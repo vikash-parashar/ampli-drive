@@ -181,8 +181,8 @@ private fun theme(
 
 object DriveThemes {
 
-    /** Android 8.x head units (SC7731E class): Map First's cards go solid there. */
-    private val OLD_UNIT = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
+    /** Below Android 12 nothing can blur behind a card: Map First's cards go solid there. */
+    private val OLD_UNIT = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
 
     /** Style 4, the default (free): the map fills the screen, slate cards in the corners. */
     val MapFirst: DriveTheme = HomePalettes.MapFirst.let { p ->

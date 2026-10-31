@@ -16,7 +16,19 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
+import android.Manifest
+import android.location.Location
+import android.location.LocationManager
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.cameras.CameraAlert
+import com.vikash.ampli.drive.location.GpsState
+import com.vikash.ampli.drive.location.LocationSource
+import com.vikash.ampli.drive.media.MediaUiState
+import com.vikash.ampli.drive.media.NowPlaying
+import com.vikash.ampli.drive.nav.SavedKind
+import com.vikash.ampli.drive.nav.SavedPlace
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.robolectric.Shadows.shadowOf
 import com.vikash.ampli.drive.nav.Maneuver
 import com.vikash.ampli.drive.nav.NavDestination
 import com.vikash.ampli.drive.nav.NavSession
@@ -30,6 +42,7 @@ import com.vikash.ampli.drive.prefs.ThemeDefaults
 import com.vikash.ampli.drive.ui.Dims
 import com.vikash.ampli.drive.ui.DriveRoot
 import com.vikash.ampli.drive.ui.LocalDims
+import com.vikash.ampli.drive.ui.LocalMapPreview
 import com.vikash.ampli.drive.ui.MoreSheet
 import com.vikash.ampli.drive.ui.Screen
 import com.vikash.ampli.drive.ui.ThemePicker
@@ -64,8 +77,11 @@ internal class FourThemeShots(private val compose: ComposeContentTestRule, priva
         assertEquals(themeId, DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = app.prefs.pro.value.isPro).id)
     }
 
-    private fun shot(name: String) {
+    private fun shot(name: String, before: () -> Unit = {}) {
+        before()
         compose.mainClock.advanceTimeBy(1_500L)
+        before()
+        compose.mainClock.advanceTimeBy(100L)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/fourthemes-$name-$size.png")
     }
 
@@ -92,11 +108,73 @@ internal class FourThemeShots(private val compose: ComposeContentTestRule, priva
 
     fun home(themeId: String, navigating: Boolean) {
         setUp(themeId)
+        // Parked: Home is saved, so Map First's card offers "Go home".
+        if (!navigating) app.places.save(SavedPlace(SavedKind.Home, "Home", 28.6517, 77.0510))
         if (navigating) app.navigator.showPreview(previewTrip())
         compose.mainClock.autoAdvance = false
         compose.setContent { DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {}) }
         shot(short(themeId) + if (navigating) "-home-nav" else "-home")
     }
+
+    /**
+     * The real driving look: location on at 62 km/h under an 80 limit, a camera 400 m ahead, the
+     * trip to Rohtak and a song playing. All fake, set only here. The live map cannot draw off a
+     * device, so the map pane draws the drawn map with the route ([LocalMapPreview]).
+     */
+    fun driving(themeId: String) {
+        setUp(themeId)
+        shadowOf(app).grantPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        app.navigator.showPreview(previewTrip())
+        val fake = {
+            val here = Location(LocationManager.GPS_PROVIDER).apply {
+                latitude = 28.6517
+                longitude = 77.0510
+                speed = 17.2f
+                bearing = 270f
+                time = System.currentTimeMillis()
+            }
+            flow<GpsState>(app.speedTracker, "_state").value = GpsState(
+                hasPermission = true,
+                providerEnabled = true,
+                location = here,
+                speedKmh = 62f,
+                satellitesUsed = 9,
+                satellitesInView = 14,
+                source = LocationSource.Gps,
+            )
+            flow<Int?>(app.cameraAlerts, "_limit").value = 80
+            flow<CameraAlert?>(app.cameraAlerts, "_current").value =
+                CameraAlert("preview", CameraAlert.Kind.FixedCamera, 400, 80, "NH 9")
+            flow<MediaUiState>(app.mediaHub, "_state").value = MediaUiState(
+                accessGranted = true,
+                nowPlaying = NowPlaying(
+                    packageName = "com.example.music",
+                    title = "Tu Cheez Lajawab",
+                    artist = "Sapna Choudhary",
+                    album = null,
+                    art = null,
+                    durationMs = 214_000L,
+                    positionMs = 61_000L,
+                    positionUpdatedAt = 0L,
+                    playbackSpeed = 1f,
+                    isPlaying = true,
+                ),
+            )
+        }
+        fake()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            CompositionLocalProvider(LocalMapPreview provides true) {
+                DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {})
+            }
+        }
+        compose.mainClock.advanceTimeBy(300L)
+        shot(short(themeId) + "-home-drive", before = fake)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> flow(owner: Any, field: String): MutableStateFlow<T> =
+        owner.javaClass.getDeclaredField(field).apply { isAccessible = true }.get(owner) as MutableStateFlow<T>
 
     fun more(themeId: String) {
         setUp(themeId)
@@ -158,6 +236,10 @@ class FourThemesScreenshot1280Test {
     @Test fun bigGlanceHome() = shots.home(ThemeDefaults.BIG_GLANCE, navigating = true)
     @Test fun bentoHome() = shots.home(ThemeDefaults.BENTO, navigating = true)
     @Test fun roadSignHome() = shots.home(ThemeDefaults.ROAD_SIGN, navigating = true)
+    @Test fun mapFirstDriving() = shots.driving(ThemeDefaults.MAP_FIRST)
+    @Test fun bigGlanceDriving() = shots.driving(ThemeDefaults.BIG_GLANCE)
+    @Test fun bentoDriving() = shots.driving(ThemeDefaults.BENTO)
+    @Test fun roadSignDriving() = shots.driving(ThemeDefaults.ROAD_SIGN)
     @Test fun mapFirstMore() = shots.more(ThemeDefaults.MAP_FIRST)
     @Test fun bigGlanceMore() = shots.more(ThemeDefaults.BIG_GLANCE)
     @Test fun bentoMore() = shots.more(ThemeDefaults.BENTO)
@@ -179,6 +261,10 @@ class FourThemesScreenshot1024Test {
     @Test fun bigGlanceHome() = shots.home(ThemeDefaults.BIG_GLANCE, navigating = true)
     @Test fun bentoHome() = shots.home(ThemeDefaults.BENTO, navigating = true)
     @Test fun roadSignHome() = shots.home(ThemeDefaults.ROAD_SIGN, navigating = true)
+    @Test fun mapFirstDriving() = shots.driving(ThemeDefaults.MAP_FIRST)
+    @Test fun bigGlanceDriving() = shots.driving(ThemeDefaults.BIG_GLANCE)
+    @Test fun bentoDriving() = shots.driving(ThemeDefaults.BENTO)
+    @Test fun roadSignDriving() = shots.driving(ThemeDefaults.ROAD_SIGN)
     @Test fun mapFirstMore() = shots.more(ThemeDefaults.MAP_FIRST)
     @Test fun roadSignMore() = shots.more(ThemeDefaults.ROAD_SIGN)
     @Test fun pickerFree() = shots.picker(ThemeDefaults.MAP_FIRST)

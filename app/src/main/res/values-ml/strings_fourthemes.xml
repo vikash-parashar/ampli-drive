@@ -32,4 +32,5 @@
     <string name="theme_auto_night">രാത്രി സ്വയം: Big Glance</string>
     <string name="theme_auto_night_hint">സൂര്യാസ്തമയത്തിന് ശേഷം ഹോം Big Glance-ലേക്ക് മാറും, ഏറ്റവും ഇരുണ്ട തീം, സൂര്യോദയത്തിൽ തിരികെ</string>
     <string name="theme_auto_night_pro">Pro: സൂര്യാസ്തമയത്തിന് ശേഷം Big Glance. സൗജന്യത്തിൽ രാവും പകലും Map First.</string>
+    <string name="home_go_home">വീട്ടിലേക്ക് പോകാം</string>
 </resources>

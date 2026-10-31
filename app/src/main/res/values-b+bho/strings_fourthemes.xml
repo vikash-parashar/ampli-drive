@@ -32,4 +32,5 @@
     <string name="theme_auto_night">रात में अपने-आप: Big Glance</string>
     <string name="theme_auto_night_hint">सूरज डूबला के बाद होम Big Glance पर बदल जाला, सबसे गहिर थीम, आ सूरज उगला पर वापस</string>
     <string name="theme_auto_night_pro">Pro: सूरज डूबला के बाद Big Glance। फ्री में दिन-रात Map First रहेला।</string>
+    <string name="home_go_home">घरे चलीं</string>
 </resources>

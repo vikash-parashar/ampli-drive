@@ -32,4 +32,5 @@
     <string name="theme_auto_night">ਰਾਤ ਨੂੰ ਆਪਣੇ-ਆਪ: Big Glance</string>
     <string name="theme_auto_night_hint">ਸੂਰਜ ਡੁੱਬਣ ਮਗਰੋਂ ਹੋਮ Big Glance ਤੇ ਬਦਲ ਜਾਂਦਾ ਹੈ, ਸਭ ਤੋਂ ਗੂੜ੍ਹੀ ਥੀਮ, ਅਤੇ ਸੂਰਜ ਚੜ੍ਹਨ ਤੇ ਵਾਪਸ</string>
     <string name="theme_auto_night_pro">Pro: ਸੂਰਜ ਡੁੱਬਣ ਮਗਰੋਂ Big Glance। ਮੁਫ਼ਤ ਵਿੱਚ ਦਿਨ-ਰਾਤ Map First ਰਹਿੰਦਾ ਹੈ।</string>
+    <string name="home_go_home">ਘਰ ਚੱਲੋ</string>
 </resources>

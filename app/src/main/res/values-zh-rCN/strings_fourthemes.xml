@@ -32,4 +32,5 @@
     <string name="theme_auto_night">夜间自动：Big Glance</string>
     <string name="theme_auto_night_hint">日落后主屏切换为最暗的 Big Glance，日出时切回</string>
     <string name="theme_auto_night_pro">Pro：日落后使用 Big Glance。免费版日夜都使用 Map First。</string>
+    <string name="home_go_home">回家</string>
 </resources>

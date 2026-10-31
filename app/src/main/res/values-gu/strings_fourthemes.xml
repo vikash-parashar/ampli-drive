@@ -32,4 +32,5 @@
     <string name="theme_auto_night">રાત્રે આપમેળે: Big Glance</string>
     <string name="theme_auto_night_hint">સૂર્યાસ્ત પછી હોમ Big Glance પર બદલાય છે, સૌથી ઘેરી થીમ, અને સૂર્યોદયે પાછું</string>
     <string name="theme_auto_night_pro">Pro: સૂર્યાસ્ત પછી Big Glance. ફ્રીમાં દિવસ-રાત Map First રહે છે.</string>
+    <string name="home_go_home">ઘરે ચાલો</string>
 </resources>

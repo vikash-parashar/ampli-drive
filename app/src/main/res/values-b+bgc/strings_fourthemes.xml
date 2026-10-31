@@ -32,4 +32,5 @@
     <string name="theme_auto_night">रात नै आप्पे: Big Glance</string>
     <string name="theme_auto_night_hint">सूरज छिपण पाछै होम Big Glance पै बदल ज्या, सबतै गहरी थीम, अर सूरज लिकड़ण पै वापस</string>
     <string name="theme_auto_night_pro">Pro: सूरज छिपण पाछै Big Glance। फ्री म्ह दिन-रात Map First रहवै।</string>
+    <string name="home_go_home">घरां चालो</string>
 </resources>

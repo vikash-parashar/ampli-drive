@@ -39,4 +39,5 @@
     <string name="theme_auto_night">Auto night: Big Glance</string>
     <string name="theme_auto_night_hint">After sunset Home switches to Big Glance, the darkest theme, and back at sunrise</string>
     <string name="theme_auto_night_pro">Pro: Big Glance after sunset. Free uses Map First day and night.</string>
+    <string name="home_go_home">Go home</string>
 </resources>
