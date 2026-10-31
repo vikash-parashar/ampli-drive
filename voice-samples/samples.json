@@ -1,0 +1,155 @@
+{
+ "lines": [
+  {
+   "id": "welcome",
+   "text": "इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।"
+  },
+  {
+   "id": "speed",
+   "text": "धीरे कर, कैमरा आग्गै सै, ना तो चालान का लड्डू घरां पहुँचैगा।"
+  },
+  {
+   "id": "fastag",
+   "text": "फास्टैग भूखा सै, रुक कै रिचार्ज का चूरमा खुवा दिए।"
+  }
+ ],
+ "voices": [
+  {
+   "gender": "male",
+   "voice_id": "MbS9nsh44HIwAcjGIOe2",
+   "name": "Aaditya - Rich, Deep and Suspenseful",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "standard",
+   "age": "middle_aged",
+   "style": "Deep filmy baritone",
+   "description": "Aaditya K is the pen name of an artist whose AI-generated voice—with its deep baritone—has already won over many fans. We recorded him in a suspenseful tone, making his voice perfect for thriller narr",
+   "current": false,
+   "key": "male-00",
+   "clips": {
+    "welcome": "male-00/welcome.ogg",
+    "speed": "male-00/speed.ogg",
+    "fastag": "male-00/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "YkAJCvEzSQvG7K2YK9kx",
+   "name": "Bharadwaj - Deep, Expressive & Horror",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "standard",
+   "age": "middle_aged",
+   "style": "Deep filmy baritone",
+   "description": "Bharadwaj's tone is heavy, gravelly baritone and distinct, deliberate articulation. Perfectly suited for horror, thriller, and dark content, including ghost stories, crime files, psychological mysteri",
+   "current": false,
+   "key": "male-01",
+   "clips": {
+    "welcome": "male-01/welcome.ogg",
+    "speed": "male-01/speed.ogg",
+    "fastag": "male-01/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "i8poXNEuNSxv1iFNrrq3",
+   "name": "Tukya - Mumbai Tapori Character Voice",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "standard",
+   "age": "young",
+   "style": "Tapori bhidu",
+   "description": "Confident, funny, and dripping with authentic Mumbai street swagger — Tukya brings the raw energy of tapori lingo to life with a personality that is impossible to ignore. His bold, engaging delivery m",
+   "current": false,
+   "key": "male-02",
+   "clips": {
+    "welcome": "male-02/welcome.ogg",
+    "speed": "male-02/speed.ogg",
+    "fastag": "male-02/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "gkLJry8W6cTsCC8g6FVn",
+   "name": "Bhidu - Tapori Slang Comedy Character",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "standard",
+   "age": "young",
+   "style": "Tapori bhidu",
+   "description": "Loud, brash and unmistakably Mumbai — Bhidu brings authentic tapori slang to life with the kind of street-smart comic energy that makes characters instantly memorable. His sharp, exaggerated Hindi del",
+   "current": false,
+   "key": "male-03",
+   "clips": {
+    "welcome": "male-03/welcome.ogg",
+    "speed": "male-03/speed.ogg",
+    "fastag": "male-03/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "WffdYtALnWHwMOtLM7Hk",
+   "name": "Jeet - Expressive Bollywood Villain",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "standard",
+   "age": "middle_aged",
+   "style": "Comic villain",
+   "description": "Cold, controlled, and quietly threatening — Jeet turns a handful of lines into a scene the hero has to fight to be remembered over. His measured menace lets tension build without ever needing to shout",
+   "current": false,
+   "key": "male-04",
+   "clips": {
+    "welcome": "male-04/welcome.ogg",
+    "speed": "male-04/speed.ogg",
+    "fastag": "male-04/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "efGTHf4ukBiG4n8lptfp",
+   "name": "Zadok - Serious and Confident",
+   "owner": "62802f41cb8005a261a048c20306c6d34899a116ad622eba8f6063660e2e84b5",
+   "accent": "standard",
+   "age": "middle_aged",
+   "style": "Comic villain",
+   "description": "Middle aged man, Hindi Language, Indian accent, good for serious character voice, villain, dark, and horror.",
+   "current": false,
+   "key": "male-05",
+   "clips": {
+    "welcome": "male-05/welcome.ogg",
+    "speed": "male-05/speed.ogg",
+    "fastag": "male-05/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "31T7D6zKHWBWvJlibBzI",
+   "name": "Prayan – Energetic Haryanvi Friend",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "haryanvi",
+   "age": "young",
+   "style": "Haryanvi desi",
+   "description": "Prayan is energetic, talkative, and completely at home in casual Haryanvi. His expressive delivery feels like a conversation with a local friend — unfiltered, engaging, and naturally entertaining. Bui",
+   "current": false,
+   "key": "male-06",
+   "clips": {
+    "welcome": "male-06/welcome.ogg",
+    "speed": "male-06/speed.ogg",
+    "fastag": "male-06/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "9BHTbeEKC5ZqMmvZfLW6",
+   "name": "Prayan – Haryanvi Customer Care Agent ",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "haryanvi",
+   "age": "young",
+   "style": "Haryanvi desi",
+   "description": "Prayan brings a warm, active Haryanvi tone to customer care — friendly enough to feel familiar, respectful enough to stay professional. His voice carries the natural rhythm of local speech that Haryan",
+   "current": false,
+   "key": "male-07",
+   "clips": {
+    "welcome": "male-07/welcome.ogg",
+    "speed": "male-07/speed.ogg",
+    "fastag": "male-07/fastag.ogg"
+   }
+  }
+ ],
+ "characters": 1680
+}
