@@ -19,8 +19,25 @@ data class CameraAlert(
     val overLimit: Boolean = false,
     /** Added by the driver with "Report camera here". */
     val userReported: Boolean = false,
+    /** Road reports: when it was reported (they expire after two hours). */
+    val reportedAt: Long? = null,
+    /** Inside an average-speed zone: the average so far, when known. */
+    val averageKmh: Int? = null,
 ) {
-    enum class Kind { FixedCamera, AverageSpeedStart, AverageSpeedZone }
+    enum class Kind { FixedCamera, AverageSpeedStart, AverageSpeedZone, RedLight, MobileCamera, Police, Accident, Jam }
+
+    companion object {
+        /** The alert kind for an enforcement point's [SpeedCamera.type]. */
+        fun kindFor(type: String): Kind = when (type) {
+            SpeedCamera.TYPE_AVERAGE -> Kind.AverageSpeedStart
+            SpeedCamera.TYPE_RED_LIGHT -> Kind.RedLight
+            ReportKind.MobileCamera.type -> Kind.MobileCamera
+            ReportKind.Police.type -> Kind.Police
+            ReportKind.Accident.type -> Kind.Accident
+            ReportKind.Jam.type -> Kind.Jam
+            else -> Kind.FixedCamera
+        }
+    }
 }
 
 /**

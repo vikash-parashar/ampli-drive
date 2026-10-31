@@ -34,6 +34,15 @@ class DriveApp : Application() {
     val cameras: CameraRepository by lazy { CameraRepository(this) }
     val cameraAlerts: CameraAlerts by lazy { LiveCameraAlerts(this) }
 
+    /** Police checks, accidents, jams and mobile cameras the driver reported (this unit only, 2 h). */
+    val roadReports: com.vikash.ampli.drive.cameras.RoadReportRepository by lazy { com.vikash.ampli.drive.cameras.RoadReportRepository(this) }
+
+    /** Offline fuel / CNG / EV-charger finder (OpenStreetMap, ODbL); loads on first use. */
+    val fuel: com.vikash.ampli.drive.fuel.FuelRepository by lazy { com.vikash.ampli.drive.fuel.FuelRepository(this) }
+
+    /** "Coming up on this road" for the radar screen, worked out while that screen is open. */
+    val radarAhead: com.vikash.ampli.drive.cameras.RadarAhead by lazy { com.vikash.ampli.drive.cameras.RadarAhead(this) }
+
     /** One text-to-speech engine for the assistant and the camera alerts. */
     val speaker: Speaker by lazy { Speaker(this) }
 

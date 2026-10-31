@@ -52,6 +52,11 @@ jobs:
         timeout-minutes: 8
         run: python3 scripts/fetch_cameras.py
 
+      - name: Fetch fuel and charging-station data
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python3 scripts/fetch_fuel.py
+
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
         shell: bash

@@ -54,7 +54,7 @@ data class VoiceAnswer(
     val note: String = "",
     val sky: com.vikash.ampli.drive.weather.Sky? = null,
 ) {
-    enum class Kind { Time, Date, Weather, Volume, Speed, Brightness, Info, Problem }
+    enum class Kind { Time, Date, Weather, Volume, Speed, Brightness, Info, Problem, Fuel, Charging, Report }
 }
 
 /**
@@ -287,6 +287,11 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             VoiceIntent.NextCamera -> {
                 nextCamera(res, lang)
+                return null
+            }
+            is VoiceIntent.FindFuel -> return findFuel(intent.filter, res, lang)
+            is VoiceIntent.ReportRoad -> {
+                reportRoad(intent.kind, res, lang)
                 return null
             }
             is VoiceIntent.PlayLocal -> {
@@ -730,6 +735,100 @@ class VoiceAssistant(private val app: DriveApp) {
         }
         styled(res, lang, HaryanviLines.Event.StartingNav, res.getString(R.string.voice_starting_nav, place.name), place.name)
         if (!VoiceActions.startNavigation(app, place)) say(res, lang, R.string.voice_nav_failed)
+    }
+
+    // ------------------------------------------------------------------- Fuel finder and reports
+
+    /**
+     * "Nearest CNG pump": the answer card with the nearest station, the three nearest as a list
+     * to pick by voice or tap ("pehla wala" starts the route), and the fuel screen behind it.
+     */
+    private suspend fun findFuel(filter: com.vikash.ampli.drive.fuel.FuelFilter, res: Context, lang: String): Expect? {
+        val shownAt = System.currentTimeMillis()
+        val desiOn = app.desi.enabled
+        val ev = filter == com.vikash.ampli.drive.fuel.FuelFilter.Ev
+        val kind = if (ev) VoiceAnswer.Kind.Charging else VoiceAnswer.Kind.Fuel
+        val title = res.getString(R.string.voice_fuel_title) + if (filter != com.vikash.ampli.drive.fuel.FuelFilter.All) " · " + res.getString(fuelLabel(filter)) else ""
+        val here = app.speedTracker.state.value.location
+        if (here == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
+            holdAnswer(shownAt)
+            return null
+        }
+        _state.update { it.copy(phase = VoiceUiState.Phase.Working) }
+        val hits = app.fuel.nearby(here.latitude, here.longitude, filter, limit = 3)
+        // The fuel screen opens behind the card on the asked fuel.
+        app.fuel.requestedFilter.value = filter
+        bringLauncherForward(MainActivity.VOICE_FUEL)
+        val picker = com.vikash.ampli.drive.voice.LinePicker()
+        val first = hits.firstOrNull()
+        if (first == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_fuel_none)))
+            speakAnswer(
+                res.getString(R.string.voice_fuel_none), lang,
+                com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, null) { picker.pickIndexed(it) },
+                standIn = HaryanviLines.Event.FuelNone,
+            )
+            holdAnswer(shownAt)
+            return null
+        }
+        val locale = res.resources.configuration.locales[0]
+        val km = String.format(locale, "%.1f", first.distanceM / 1000.0)
+        val name = com.vikash.ampli.drive.ui.stationName(res, first.station)
+        val minutes = com.vikash.ampli.drive.fuel.FuelFinder.etaMinutes(first.distanceM)
+        showAnswer(VoiceAnswer(kind, title, res.getString(R.string.fuel_km, km), res.getString(R.string.voice_fuel_detail, name, minutes)))
+        // Tap or say "the first one" to go.
+        _state.update { s ->
+            s.copy(options = hits.map { h -> Place(com.vikash.ampli.drive.ui.stationName(res, h.station), null, h.station.lat, h.station.lon, h.distanceM / 1000.0) })
+        }
+        speakAnswer(
+            res.getString(R.string.voice_fuel_answer, name, km), lang,
+            com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, first.distanceM) { picker.pickIndexed(it) },
+            standIn = com.vikash.ampli.drive.fuel.FuelVoice.foundEvent(filter),
+        )
+        return Expect.Choice
+    }
+
+    private fun fuelLabel(f: com.vikash.ampli.drive.fuel.FuelFilter): Int = when (f) {
+        com.vikash.ampli.drive.fuel.FuelFilter.All -> R.string.fuel_filter_all
+        com.vikash.ampli.drive.fuel.FuelFilter.Cng -> R.string.fuel_filter_cng
+        com.vikash.ampli.drive.fuel.FuelFilter.Petrol -> R.string.fuel_filter_petrol
+        com.vikash.ampli.drive.fuel.FuelFilter.Diesel -> R.string.fuel_filter_diesel
+        com.vikash.ampli.drive.fuel.FuelFilter.Ev -> R.string.fuel_filter_ev
+    }
+
+    /** "Police aage hai": saves a road report here (Pro), for two hours, on this unit only. */
+    private suspend fun reportRoad(kind: com.vikash.ampli.drive.cameras.ReportKind, res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val title = res.getString(R.string.voice_report_title)
+        val label = res.getString(
+            when (kind) {
+                com.vikash.ampli.drive.cameras.ReportKind.MobileCamera -> R.string.radar_item_mobile
+                com.vikash.ampli.drive.cameras.ReportKind.Police -> R.string.radar_item_police
+                com.vikash.ampli.drive.cameras.ReportKind.Accident -> R.string.radar_item_accident
+                com.vikash.ampli.drive.cameras.ReportKind.Jam -> R.string.radar_item_jam
+            },
+        )
+        if (!com.vikash.ampli.drive.cameras.RadarTier.allowed(com.vikash.ampli.drive.cameras.RadarFeature.Reports, app.prefs.pro.value.isPro)) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, res.getString(R.string.voice_report_pro)))
+            speakAnswer(res.getString(R.string.voice_report_pro), lang, emptyList(), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        val gps = app.speedTracker.state.value
+        val here = gps.location
+        if (here == null) {
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, label, res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        app.roadReports.add(kind, here, gps.speedKmh)
+        val text = res.getString(R.string.voice_report_saved, label)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, text))
+        styled(res, lang, HaryanviLines.Event.ReportSaved, text)
+        holdAnswer(shownAt)
     }
 
     private suspend fun nextCamera(res: Context, lang: String) {

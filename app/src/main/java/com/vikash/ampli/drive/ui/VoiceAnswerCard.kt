@@ -16,7 +16,10 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Dehaze
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.EvStation
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thunderstorm
@@ -122,6 +125,9 @@ private fun iconFor(a: VoiceAnswer): ImageVector = when (a.kind) {
     VoiceAnswer.Kind.Brightness -> Icons.Filled.BrightnessMedium
     VoiceAnswer.Kind.Info -> Icons.Filled.Info
     VoiceAnswer.Kind.Problem -> Icons.Filled.CloudOff
+    VoiceAnswer.Kind.Fuel -> Icons.Filled.LocalGasStation
+    VoiceAnswer.Kind.Charging -> Icons.Filled.EvStation
+    VoiceAnswer.Kind.Report -> Icons.Filled.Campaign
     VoiceAnswer.Kind.Weather -> when (a.sky) {
         Sky.Clear, null -> Icons.Filled.WbSunny
         Sky.PartlyCloudy -> Icons.Filled.WbCloudy

@@ -223,6 +223,8 @@ class MainActivity : ComponentActivity() {
             VOICE_MAPS -> screen.value = if (app.navigator.state.value.visible) Screen.Navigation else Screen.NavSearch
             // "What can I say?"
             VOICE_COMMANDS -> screen.value = Screen.VoiceCommands
+            // "Nearest CNG pump": the fuel finder, on the asked fuel (FuelRepository.requestedFilter).
+            VOICE_FUEL -> screen.value = Screen.Fuel
             null -> Unit
             else -> screen.value = Screen.Home
         }
@@ -325,5 +327,6 @@ class MainActivity : ComponentActivity() {
         const val VOICE_NAVIGATE = "navigate"
         const val VOICE_MAPS = "maps"
         const val VOICE_COMMANDS = "commands"
+        const val VOICE_FUEL = "fuel"
     }
 }

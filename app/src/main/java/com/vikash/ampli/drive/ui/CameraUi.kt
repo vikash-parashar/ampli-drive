@@ -205,6 +205,9 @@ internal fun CameraSettingsCard(app: DriveApp, isPro: Boolean, onLocked: () -> U
             }
             val small = dims.t(2.3f, min = 16f)
             Text(stringResource(R.string.cameras_stats, stats.loaded, stats.reported), color = theme.text, fontSize = small)
+            if (stats.redLight > 0 || stats.zones > 0) {
+                Text(stringResource(R.string.cameras_more_stats, stats.redLight, stats.zones), color = theme.muted, fontSize = small)
+            }
             Text(
                 stats.dataDate?.let { stringResource(R.string.cameras_data_date, it) } ?: stringResource(R.string.cameras_data_unknown),
                 color = theme.muted,
