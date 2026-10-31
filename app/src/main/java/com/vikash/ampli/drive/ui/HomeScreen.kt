@@ -5,7 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.ui.graphics.addOutline
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -87,7 +90,6 @@ import com.vikash.ampli.drive.system.StartupTiming
 import com.vikash.ampli.drive.ui.theme.HomePalettes
 import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
-import com.vikash.ampli.drive.voice.VoiceAssistant
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.scale
@@ -190,7 +192,7 @@ fun HomeScreen(
         music = musicUi(app),
         alert = alert,
         caption = caption,
-        listening = voice.phase == VoiceAssistant.Phase.Listening,
+        listening = voice.phase == com.vikash.ampli.drive.voice.VoiceUiState.Phase.Listening,
         onMic = { app.voice.start() },
         onMore = { more = true },
         onHelp = { onOpenHelp(false) },
@@ -593,7 +595,7 @@ private fun SosKey(ui: HomeUi, modifier: Modifier, shape: Shape, hint: Boolean =
             .background(theme.danger)
             .then(if (border != null) Modifier.border(theme.borderWidth, border, shape) else Modifier)
             .pointerInput(Unit) {
-                androidx.compose.foundation.gestures.detectTapGestures(
+                detectTapGestures(
                     onPress = {
                         var fired = false
                         val job = scope.launch {

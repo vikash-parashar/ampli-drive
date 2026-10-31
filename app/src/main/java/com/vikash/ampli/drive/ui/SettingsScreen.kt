@@ -90,8 +90,6 @@ import com.vikash.ampli.drive.ui.theme.DriveThemes
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.ui.theme.ThemeAccess
 import com.vikash.ampli.drive.ui.theme.HomeStyle
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.drawscope.Stroke
 import com.vikash.ampli.drive.system.BtPermissions
 import com.vikash.ampli.drive.tripcost.TripCostFlags
 

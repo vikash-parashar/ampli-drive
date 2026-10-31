@@ -384,12 +384,6 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 if (warmMs > 0) DiagRow("Last warm start", "$warmMs ms", warmMs < 1500)
                 DiagRow("Low-memory unit", if (app.lowEnd) "yes: map and music card load after the first frame" else "no", null)
                 DiagRow("Memory released", "${com.vikash.ampli.drive.system.MemoryTrim.trims} times this run", null)
-                // Soft themes: shadows are drawn once into small cached bitmaps, then reused.
-                DiagRow(
-                    "Soft shadows",
-                    "${SoftShadowCache.renders} drawn in ${SoftShadowCache.renderNanos / 1_000_000} ms · ${SoftShadowCache.bytes / 1024} KB cached",
-                    null,
-                )
             }
             // Why the welcome did or did not play after a start (power cut, ACC on, boot).
             DiagSection("Start log") {
