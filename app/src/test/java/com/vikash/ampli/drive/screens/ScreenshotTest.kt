@@ -279,9 +279,9 @@ class ScreenshotTest {
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide-before.png")
     }
 
-    /** On a phone (Android 13+, sideloaded), in English: where the owner hit "App was denied access". */
+    /** On a phone (Android 13+, sideloaded; the app is landscape-only), in English: where the owner hit "App was denied access". */
     @Test
-    @Config(sdk = [33], qualifiers = "en-w411dp-h891dp-port-xxhdpi")
+    @Config(sdk = [33], qualifiers = "en-w891dp-h411dp-land-xxhdpi")
     fun restrictedSettingsGuidePhone() {
         app.prefs.setNameAsked()
         compose.mainClock.autoAdvance = false
