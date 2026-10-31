@@ -8,7 +8,7 @@
     <string name="theme_road_sign" translatable="false">Neo-Brutal Road Sign</string>
     <string name="home_ampli" translatable="false">Ampli</string>
     <string name="fuel_attribution_ocm" translatable="false">EV charger data © Open Charge Map contributors (CC BY 4.0)</string>
-    <string name="more_title">More</string>
+    <string name="more_sheet_title">More</string>
     <string name="more_say">Or just say: “Ampli, FASTag dikha”</string>
     <string name="more_fuel">Fuel &amp; CNG</string>
     <string name="more_fuel_hint">Petrol, CNG, EV</string>

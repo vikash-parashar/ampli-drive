@@ -55,6 +55,7 @@ class CarMonitor(private val app: DriveApp) {
 
     private val fatigue = FatigueTimer()
     private val seatBelt = SeatBeltReminder()
+    private val nightDrive = NightDriveReminder()
     private val odometer = OdometerAccumulator()
     private val parking = ParkingDetector()
     private val crash = CrashDetector()
@@ -202,6 +203,8 @@ class CarMonitor(private val app: DriveApp) {
         if (!fatigue.driving && _breakDue.value) _breakDue.value = false
         // Haryanvi desi only, once per trip on first movement: "भाई सीट बेल्ट पहन ले।"
         if (seatBelt.onSample(now, fatigue.driving)) app.desi.sayLater(HaryanviLines.Event.SeatBelt)
+        // Haryanvi desi only, once a night: after 11 pm and more than 30 minutes into the drive.
+        if (nightDrive.onSample(now, java.time.LocalTime.now().hour, _drivingMs.value)) app.desi.sayLater(HaryanviLines.Event.NightDrive)
 
         // Odometer.
         val stepM = odometer.onFix(location.latitude, location.longitude, if (location.hasAccuracy()) location.accuracy else null, kmh, location.elapsedRealtimeNanos / 1_000_000L)

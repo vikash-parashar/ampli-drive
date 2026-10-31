@@ -67,10 +67,16 @@ object WelcomeLines {
         }
     }
 
-    /** The [i]th line of [event], wrapping: consecutive [i] never give the same line. */
+    /**
+     * The [i]th usable line of [event], wrapping: consecutive [i] never give the same line. Round-2
+     * lines join the rotation once the recorded voice has them (the welcome prefers that voice).
+     */
     private fun rotate(event: HaryanviLines.Event, i: Int): Picked {
         val lines = HaryanviLines.forEvent(event)!!
-        val index = i % lines.size
+        // No clip check yet (nothing loaded): first-round lines only, which every pack has.
+        val check = VoiceGate.recordedHasClip ?: { _: String -> false }
+        val usable = VoiceGate.usable(event, check).ifEmpty { lines.indices.toList() }
+        val index = usable[i % usable.size]
         return Picked(event, index, lines[index])
     }
 

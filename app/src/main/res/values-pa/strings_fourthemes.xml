@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Four home themes, the simpler Home and its More sheet. -->
 <resources>
-    <string name="more_title">ਹੋਰ</string>
+    <string name="more_sheet_title">ਹੋਰ</string>
     <string name="more_say">ਜਾਂ ਬੱਸ ਬੋਲੋ: “Ampli, FASTag dikha”</string>
     <string name="more_fuel">ਤੇਲ ਅਤੇ CNG</string>
     <string name="more_fuel_hint">ਪੈਟਰੋਲ, CNG, EV</string>

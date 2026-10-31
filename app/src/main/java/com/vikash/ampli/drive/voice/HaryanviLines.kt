@@ -28,7 +28,21 @@ import kotlin.random.Random
  */
 object HaryanviLines {
 
-    data class Line(val deva: String, val roman: String, val en: String = "")
+    /**
+     * One variant. [devaF] / [romanF]: the female voice's wording when it differs ("बताऊंगी" for
+     * "बताऊंगा"); [deva] / [roman] are then the male wording. Recorded as <id>_m and <id>_f.
+     */
+    data class Line(
+        val deva: String,
+        val roman: String,
+        val en: String = "",
+        val devaF: String? = null,
+        val romanF: String? = null,
+    ) {
+        /** The wording for [voice]: the female wording for the female voice, else [deva] / [roman]. */
+        fun devaFor(voice: VoicePack?): String = if (voice == VoicePack.Female && devaF != null) devaF else deva
+        fun romanFor(voice: VoicePack?): String = if (voice == VoicePack.Female && romanF != null) romanF else roman
+    }
 
     /** Sections of Settings › Voice › Hear samples and of the review file. */
     enum class Group(val title: String) {
@@ -259,6 +273,17 @@ object HaryanviLines {
 
         /** Said right after a recorded distance: "दो किलोमीटर" + "पै चार्जिंग स्टेशन सै।". */
         FuelEvTail(Group.HumanVoice, "Charger after a distance (human voice)"),
+
+        // Round 2 (lines-v2).
+
+        /** After a toll, once a day, when the FASTag balance is under the driver's alert level: %1$s rupees left. */
+        FastagLowBalance(Group.Papers, "FASTag balance low (after a toll)"),
+
+        /** Instead of FastagLowBalance (the balance shows on the toll card). */
+        FastagLowBalancePlain(Group.HumanVoice, "FASTag balance low (human voice)"),
+
+        /** Once a night: after 11 pm, more than 30 minutes into the drive. */
+        NightDrive(Group.Road, "Night drive reminder"),
 
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
@@ -882,11 +907,27 @@ object HaryanviLines {
         ),
     )
 
+    /** First-round lines, then round 2 ([LINES_V2]) appended so first-round clip ids keep their numbers. */
+    private val ALL: Map<Event, List<Line>> by lazy {
+        val out = LinkedHashMap<Event, List<Line>>()
+        for (event in Event.entries) {
+            val lines = LINES[event].orEmpty() + LINES_V2[event].orEmpty()
+            if (lines.isNotEmpty()) out[event] = lines
+        }
+        out
+    }
+
     /** The lines for [event], or null for safety events and events with no desi lines. */
-    fun forEvent(event: Event): List<Line>? = if (event.safety) null else LINES[event]
+    fun forEvent(event: Event): List<Line>? = if (event.safety) null else ALL[event]
 
     /** Every playful line, for tests, the samples list and the review file. */
-    internal val allLines: Map<Event, List<Line>> get() = LINES
+    internal val allLines: Map<Event, List<Line>> get() = ALL
+
+    /**
+     * How many of [event]'s lines are first-round. Lines from this index on are round 2: a
+     * recorded voice only picks them once their clip is bundled ([VoiceGate]).
+     */
+    fun firstRoundCount(event: Event): Int = LINES[event]?.size ?: 0
 
     /** The time-of-day line for [hour] (0..23): morning 4–11, afternoon 12–16, evening 17–20, night. */
     fun timeOfDay(hour: Int): Event = when (hour) {
@@ -911,6 +952,7 @@ object HaryanviLines {
         Event.MusicPlayNamed -> arrayOf("52 गज का दामण")
         Event.PaperDue, Event.PaperExpired -> arrayOf("बीमा", "insurance")
         Event.PassTripsLow -> arrayOf(5)
+        Event.FastagLowBalance -> arrayOf("90")
         else -> emptyArray()
     }
 }
@@ -919,7 +961,11 @@ object HaryanviLines {
  * Picks a random variant per event, never the same one twice in a row. Keeps one memory per
  * event, so a camera alert doesn't reset the greeting's history.
  */
-class LinePicker(private val random: Random = Random.Default) {
+class LinePicker(
+    private val random: Random = Random.Default,
+    /** The clip check for round-2 lines; by default whatever [VoiceGate.hasClip] says now. */
+    private val hasClip: () -> ((String) -> Boolean)? = { VoiceGate.hasClip },
+) {
     private val last = HashMap<HaryanviLines.Event, Int>()
 
     fun pick(event: HaryanviLines.Event): HaryanviLines.Line? = pickIndexed(event)?.line
@@ -928,17 +974,41 @@ class LinePicker(private val random: Random = Random.Default) {
     fun pickIndexed(event: HaryanviLines.Event): Picked? {
         val lines = HaryanviLines.forEvent(event) ?: return null
         if (lines.isEmpty()) return null
+        val usable = VoiceGate.usable(event, hasClip())
+        if (usable.isEmpty()) return null
         val prev = last[event]
-        val index = if (lines.size == 1) {
-            0
-        } else if (prev == null) {
-            random.nextInt(lines.size)
-        } else {
-            var i = random.nextInt(lines.size - 1)
-            if (i >= prev) i++
-            i
-        }
+        val choices = if (usable.size > 1 && prev != null) usable - prev else usable
+        val index = choices[random.nextInt(choices.size)]
         last[event] = index
         return Picked(event, index, lines[index])
+    }
+}
+
+/**
+ * Round-2 lines and the recorded voice. A first-round line is always usable. A round-2 line that
+ * can be recorded is only usable with a recorded voice once its clip is bundled and its hash
+ * matches the current text, so the human voice never drops to the phone voice mid-drive for a new
+ * line; until the next recording run the phone voice may still say it. Lines with a name or number
+ * play their stand-in clip, so they are always usable.
+ */
+object VoiceGate {
+    /**
+     * True when the recorded voice in use has the clip; null when the phone voice speaks (every
+     * line usable). Set once by DriveApp, reading Settings › Voice each time.
+     */
+    @Volatile
+    var hasClip: ((String) -> Boolean)? = null
+
+    /** The same check for the recorded voice whatever Settings › Voice says (the car-start welcome). */
+    @Volatile
+    var recordedHasClip: ((String) -> Boolean)? = null
+
+    /** Indices of [event]'s lines that may be picked under [check]. */
+    fun usable(event: HaryanviLines.Event, check: ((String) -> Boolean)?): List<Int> {
+        val lines = HaryanviLines.forEvent(event) ?: return emptyList()
+        val first = HaryanviLines.firstRoundCount(event)
+        return lines.indices.filter { i ->
+            i < first || check == null || !VoiceClips.recordable(lines[i]) || check(VoiceClips.id(event, i))
+        }
     }
 }

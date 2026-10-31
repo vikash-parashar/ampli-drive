@@ -836,7 +836,7 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
                 DockKey(stringResource(R.string.voice_button), Icons.Filled.Mic, ui.onMic, Modifier.fillMaxSize(), keyShape, theme.accent, theme.onAccent, stacked = false, textSize = 3.6f)
                 MicRing(ui.listening, theme.accent, Modifier.matchParentSize())
             }
-            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), keyShape, theme.surface, theme.text, stacked = false, textSize = 3.4f)
+            DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), keyShape, theme.surface, theme.text, stacked = false, textSize = 3.4f)
             SosKey(ui, Modifier.weight(1.1f).fillMaxHeight(), keyShape)
         }
     }
@@ -1021,7 +1021,7 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, map: @Composable () -> 
             horizontalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
         ) {
             val keyShape = theme.cardShape(dims, 0.7f)
-            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.size(dims.d(14f)), keyShape, card, theme.text, textSize = 2.4f)
+            DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.size(dims.d(14f)), keyShape, card, theme.text, textSize = 2.4f)
             Box(contentAlignment = Alignment.Center) {
                 val size = dims.d(19f)
                 MicRing(ui.listening, theme.accent, Modifier.size(size))
@@ -1150,7 +1150,7 @@ private fun BentoHome(ui: HomeUi, pullDown: Modifier) {
                 Text(a?.alert?.title ?: stringResource(R.string.nav_search_title), color = fg, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(2.8f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 a?.let { Text(it.alert.text, color = fg.copy(alpha = 0.8f), fontSize = dims.t(2.4f, min = 16f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
             }
-            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(0.9f).fillMaxHeight(), shape, theme.ink, theme.onInk, textSize = 3f)
+            DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(0.9f).fillMaxHeight(), shape, theme.ink, theme.onInk, textSize = 3f)
             SosKey(ui, Modifier.weight(0.9f).fillMaxHeight(), shape, hint = true)
         }
     }
@@ -1263,7 +1263,7 @@ private fun RoadSignHome(ui: HomeUi, pullDown: Modifier) {
                 DockKey(stringResource(R.string.voice_button), Icons.Filled.Mic, ui.onMic, Modifier.fillMaxSize(), RectangleShape, theme.accent, Color.White, theme.border, stacked = false, shadow = true, textSize = 3.6f)
                 MicRing(ui.listening, theme.accent, Modifier.matchParentSize())
             }
-            DockKey(stringResource(R.string.more_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), RectangleShape, theme.surface, theme.text, theme.border, stacked = false, shadow = true)
+            DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.weight(1f).fillMaxHeight(), RectangleShape, theme.surface, theme.text, theme.border, stacked = false, shadow = true)
             SosKey(ui, Modifier.weight(1f).fillMaxHeight(), RectangleShape, border = theme.border, shadow = true)
         }
         Spacer(Modifier.height(dims.d(2.4f)))

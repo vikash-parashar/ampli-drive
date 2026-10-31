@@ -92,7 +92,7 @@ fun MoreSheet(app: DriveApp, onDismiss: () -> Unit, onTile: (MoreTile) -> Unit, 
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(3f))) {
                 Text(
-                    stringResource(R.string.more_title),
+                    stringResource(R.string.more_sheet_title),
                     color = theme.text,
                     fontFamily = theme.numberFont.family,
                     fontWeight = FontWeight.ExtraBold,

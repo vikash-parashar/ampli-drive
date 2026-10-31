@@ -107,6 +107,23 @@ class VoicePlayer(private val app: DriveApp) {
         return ok
     }
 
+    /**
+     * [VoiceGate.hasClip]: may a round-2 line with clip [id] be picked now? Always with the phone
+     * voice; with a recorded voice (picked, or standing in on a unit without TTS) only when the
+     * clip is bundled and up to date.
+     */
+    fun allowsLine(id: String): Boolean {
+        val v = voice
+        return when {
+            v.human -> library.has(v, id)
+            _ttsMissing.value -> library.has(fallbackVoice(), id)
+            else -> true
+        }
+    }
+
+    /** [VoiceGate.recordedHasClip]: the recorded voice the car-start welcome uses has clip [id]. */
+    fun recordedHas(id: String): Boolean = library.has(voice.takeIf { it.human } ?: fallbackVoice(), id)
+
     /** The driver's recorded voice if they picked one, else Male. */
     private fun fallbackVoice(): VoicePack = app.prefs.voicePack.value?.takeIf { it.human } ?: VoicePack.Male
 

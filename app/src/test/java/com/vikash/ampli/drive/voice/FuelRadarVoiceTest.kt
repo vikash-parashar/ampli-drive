@@ -128,7 +128,8 @@ class FuelRadarVoiceTest {
         assertEquals(15, radar.size)
         for (e in radar) {
             val lines = HaryanviLines.forEvent(e)!!
-            assertEquals(4, lines.size)
+            // Four first-round lines each; round 2 (lines-v2) adds more to some radar events.
+            assertEquals(4, HaryanviLines.firstRoundCount(e))
             for (l in lines) assertFalse(l.deva, l.deva.contains('%'))
         }
     }

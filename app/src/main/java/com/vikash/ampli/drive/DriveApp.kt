@@ -116,6 +116,9 @@ class DriveApp : Application() {
         super.onCreate()
         // Server endpoints: cached remote config over BuildConfig (one small GET at most every 12 h).
         com.vikash.ampli.drive.config.RemoteConfig.init(this)
+        // Round-2 Haryanvi lines wait for their recorded clips (checked lazily, nothing loads now).
+        com.vikash.ampli.drive.voice.VoiceGate.hasClip = { id -> voicePlayer.allowsLine(id) }
+        com.vikash.ampli.drive.voice.VoiceGate.recordedHasClip = { id -> voicePlayer.recordedHas(id) }
         // A fresh install starts in Hindi (FirstRunDefaults). Runs before the first activity, so
         // MainActivity already opens in it. A per-app language set in system Settings wins.
         prefs.takeFirstRunLanguage()?.let { tag ->
