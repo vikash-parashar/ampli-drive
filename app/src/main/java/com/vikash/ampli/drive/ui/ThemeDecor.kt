@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vikash.ampli.drive.ui.theme.CardStyle
+import com.vikash.ampli.drive.ui.theme.CrimsonPalette
 import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
 import com.vikash.ampli.drive.ui.theme.GlassPalette
@@ -295,9 +296,26 @@ fun Modifier.themeBackground(theme: DriveTheme): Modifier {
                 }
             }
             Decoration.Glass -> theme.glass?.let { drawGlassBackdrop(it) }
+            Decoration.Forest -> drawForest()
             Decoration.Scanlines, Decoration.None -> Unit
         }
     }
+}
+
+/**
+ * Crimson Drive backdrop: CSS `radial-gradient(70% 90% at 15% 30%, #0b1d14, #06110c 55%, #030806)`.
+ * One gradient rect per frame, no bitmap.
+ */
+internal fun DrawScope.drawForest() {
+    drawRect(
+        Brush.radialGradient(
+            0f to Color(CrimsonPalette.FOREST_GLOW),
+            0.55f to Color(CrimsonPalette.FOREST),
+            1f to Color(CrimsonPalette.FOREST_EDGE),
+            center = Offset(size.width * 0.15f, size.height * 0.3f),
+            radius = max(size.width, size.height) * 0.9f,
+        ),
+    )
 }
 
 /** Glass family backdrop: a vertical gradient and soft colour blobs for the panels to blur. */

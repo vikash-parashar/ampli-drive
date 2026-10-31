@@ -145,6 +145,11 @@ fun HomeScreen(
         Unit
     }
     val gap = dims.d(2f)
+    // Crimson Drive: the car fills the map pane while there is no route. A tap on it (or "Show
+    // map") brings the live map; it comes back when a route ends.
+    var heroHidden by remember { mutableStateOf(false) }
+    LaunchedEffect(nav.visible) { if (!nav.visible) heroHidden = false }
+    val showHero = theme.keys?.heroCar == true && !nav.visible && !heroHidden
     var phoneCard by remember { mutableStateOf(false) }
     if (phoneCard) PhoneCardSheet(app = app, onDismiss = { phoneCard = false })
     // Phone Link: Car Hub's own sheet (connected phone, phone music, devices), not the unit's
@@ -266,7 +271,18 @@ fun HomeScreen(
                 }
             }
             val map = @Composable { m: Modifier, showTurn: Boolean ->
-                if (heavyReady) liveMap(m, showTurn) else Pane(m) {}
+                when {
+                    // Crimson Drive, parked: the car picture until a route starts or the map is asked for.
+                    showHero -> CarHeroPane(
+                        app = app,
+                        onGoHome = { goToSavedPlace(app, context, it) },
+                        onWhereTo = openNav,
+                        onShowMap = { heroHidden = true },
+                        modifier = m,
+                    )
+                    heavyReady -> liveMap(m, showTurn)
+                    else -> Pane(m) {}
+                }
             }
             val obd by app.obd.state.collectAsStateWithLifecycle()
             val speed = @Composable { m: Modifier ->
@@ -522,7 +538,7 @@ private fun Dock(
         val item = Modifier.weight(1f).fillMaxHeight()
         DockButton(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, onNavigate, item, highlight = true)
         // Same flow as the wake word; works without "Always listen" and without the model.
-        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item)
+        DockButton(stringResource(R.string.voice_button), Icons.Filled.Mic, onVoice, item, voice = true)
         DockButton(stringResource(R.string.dock_music), Icons.Filled.MusicNote, onMusic, item, onLongClick = onMusicLong)
         DockButton(stringResource(R.string.dock_phone), Icons.Filled.Phone, onPhone, item, onLongClick = onPhoneLong)
         DockButton(stringResource(R.string.dock_phone_link), Icons.Filled.PhonelinkRing, onAuto, item)
@@ -546,25 +562,35 @@ private fun DockButton(
     highlight: Boolean = false,
     badge: Boolean = false,
     onLongClick: (() -> Unit)? = null,
+    /** Hey Ampli: the green key on Crimson Drive. */
+    voice: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.cardStyle == CardStyle.Skewed) skewShape(0.22f) else theme.cardShape(dims, scale = 0.9f)
     val fill = if (highlight) theme.dockActive else theme.surface
+    val voiceKeys = theme.keys?.takeIf { voice && theme.isSoft }
     val iconTint = when {
+        voiceKeys != null -> voiceKeys.onVoice
         highlight -> theme.onDockActive
         theme.cardStyle == CardStyle.NeonGlow -> theme.accent2
         theme.id == "ampli_rose" -> theme.accentSoft
         theme.family == ThemeFamily.Saffron -> theme.accent
         else -> theme.text
     }
-    val labelColor = if (highlight) theme.onDockActive else theme.muted
+    val labelColor = when {
+        voiceKeys != null -> voiceKeys.onVoice
+        highlight -> theme.onDockActive
+        else -> theme.muted
+    }
     // Minimal Mono marks the active item with a bar on top instead of a fill.
     val topBar = highlight && theme.id == "minimal_mono"
     Column(
         modifier = modifier
             .then(
-                if (theme.isSoft) {
+                if (voiceKeys != null) {
+                    Modifier.voiceKey(theme, voiceKeys, shape, onClick, onLongClick)
+                } else if (theme.isSoft) {
                     // Soft key: raised, presses in on touch with a short haptic tick.
                     Modifier.softClickable(theme, shape, onClick, onLongClick = onLongClick)
                 } else {
@@ -612,7 +638,7 @@ private fun DockButton(
             theme.label(label),
             style = theme.labelStyle(labelColor),
             fontSize = dims.t(2.2f, min = 16f),
-            fontWeight = if (highlight) FontWeight.Bold else FontWeight.SemiBold,
+            fontWeight = if (highlight || voiceKeys != null) FontWeight.Bold else FontWeight.SemiBold,
             // 16 sp minimum on the driving screen: a long label ("HEY AMPLI") wraps instead of "…".
             maxLines = 2,
             lineHeight = dims.t(2.4f, min = 18f),

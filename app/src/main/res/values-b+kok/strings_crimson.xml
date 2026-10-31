@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
+<resources>
+    <string name="theme_crimson_hint">फुकट · डिफॉल्ट · Ampli MP3 कार मोडाचे रंग, होमार गाडी</string>
+    <string name="hero_ready">चलोवपाक तयार</string>
+    <string name="hero_go_home">घरा वचूंया</string>
+    <string name="hero_show_map">नकासो दाखय</string>
+</resources>

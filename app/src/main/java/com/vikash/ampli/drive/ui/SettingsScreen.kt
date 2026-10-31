@@ -581,8 +581,22 @@ private fun ThemePicker(
                 Icon(Icons.Filled.Palette, contentDescription = null, tint = active.accentSoft, modifier = Modifier.size(32.dp))
                 Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.theme_title), null) }
             }
+            // Crimson Drive, the default (free): Ampli MP3's Car mode colours and the car on Home.
+            QuickThemeOption(
+                selected = ThemeDefaults.isCrimson(choice),
+                title = stringResource(R.string.theme_crimson_drive),
+                hint = stringResource(R.string.theme_crimson_hint),
+                swatches = DriveThemes.CrimsonDrive.let { t -> listOf(t.surface to (t.keys?.primary ?: t.accent), t.background to (t.keys?.voice ?: t.ok)) },
+                onClick = { onChange(ThemeDefaults.crimson(choice)) },
+            )
             // "Soft: auto Day/Night": Ampli Soft Day by day, Ampli Soft Night after sunset (free).
-            SoftAutoOption(selected = ThemeDefaults.isSoftAuto(choice), onClick = { onChange(ThemeDefaults.softAuto(choice)) })
+            QuickThemeOption(
+                selected = ThemeDefaults.isSoftAuto(choice),
+                title = stringResource(R.string.theme_soft_auto),
+                hint = stringResource(R.string.theme_soft_auto_hint),
+                swatches = listOf(DriveThemes.AmpliSoftDay, DriveThemes.AmpliSoftNight).map { it.surface to it.accent },
+                onClick = { onChange(ThemeDefaults.softAuto(choice)) },
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -671,9 +685,12 @@ private fun ThemePicker(
     }
 }
 
-/** The one-tap "Soft: auto Day/Night" choice at the top of the theme picker. */
+/**
+ * A one-tap choice at the top of the theme picker (Crimson Drive, "Soft: auto Day/Night"), with
+ * small swatches: each a (fill, dot) pair.
+ */
 @Composable
-private fun SoftAutoOption(selected: Boolean, onClick: () -> Unit) {
+private fun QuickThemeOption(selected: Boolean, title: String, hint: String, swatches: List<Pair<Color, Color>>, onClick: () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = RoundedCornerShape(dims.d(1.8f))
@@ -696,21 +713,20 @@ private fun SoftAutoOption(selected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
-        // Day and night swatches of the pair.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for (t in listOf(DriveThemes.AmpliSoftDay, DriveThemes.AmpliSoftNight)) {
+            for ((fill, dot) in swatches) {
                 Box(
                     Modifier
                         .size(width = 44.dp, height = 30.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(t.surface)
+                        .background(fill)
                         .border(1.dp, theme.softEdge ?: theme.border, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center,
-                ) { Box(Modifier.size(10.dp).clip(CircleShape).background(t.accent)) }
+                ) { Box(Modifier.size(10.dp).clip(CircleShape).background(dot)) }
             }
         }
         Box(Modifier.weight(1f)) {
-            CardTitle(stringResource(R.string.theme_soft_auto), stringResource(R.string.theme_soft_auto_hint))
+            CardTitle(title, hint)
         }
         if (selected) {
             Icon(
@@ -857,6 +873,8 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
             drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
         } else if (t.decoration == Decoration.Glass && t.glass != null) {
             drawGlassBackdrop(t.glass)
+        } else if (t.decoration == Decoration.Forest) {
+            drawForest()
         } else {
             drawRect(t.background)
         }
@@ -885,6 +903,13 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
         }
 
         fun mapPane(x: Float, y: Float, pw: Float, ph: Float) {
+            if (t.keys?.heroCar == true) {
+                // The green car on a dark pane, with the crimson "Go" key under it.
+                pane(x, y, pw, ph, Color(0xFF050A07))
+                drawRoundRect(t.keys.voice, Offset(x + pw * 0.14f, y + ph * 0.38f), Size(pw * 0.72f, ph * 0.22f), CornerRadius(ph * 0.1f))
+                drawRoundRect(t.keys.primary, Offset(x + pw * 0.1f, y + ph * 0.76f), Size(pw * 0.42f, ph * 0.12f), CornerRadius(ph * 0.06f))
+                return
+            }
             pane(x, y, pw, ph, mapColor)
             drawLine(t.accent2, Offset(x + pw * 0.2f, y + ph * 0.9f), Offset(x + pw * 0.55f, y + ph * 0.45f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
             drawLine(t.accent2, Offset(x + pw * 0.55f, y + ph * 0.45f), Offset(x + pw * 0.8f, y + ph * 0.2f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)

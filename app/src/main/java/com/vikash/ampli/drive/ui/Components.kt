@@ -209,11 +209,17 @@ fun BigButton(
     val shape = theme.buttonShape(dims)
     if (theme.isSoft) {
         // Raised key that presses in; the primary action is marked by accent text, not a fill.
-        val ink = if (primary) theme.accentSoft else theme.text
+        // Crimson Drive fills it crimson instead, with white text.
+        val keys = theme.keys?.takeIf { primary }
+        val ink = when {
+            keys != null -> keys.onPrimary
+            primary -> theme.accentSoft
+            else -> theme.text
+        }
         Row(
             modifier = modifier
                 .heightIn(min = MinTouch)
-                .softClickable(theme, shape, onClick)
+                .then(if (keys != null) Modifier.primaryKey(theme, keys, shape, onClick) else Modifier.softClickable(theme, shape, onClick))
                 .padding(horizontal = dims.d(3f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f), Alignment.CenterHorizontally),

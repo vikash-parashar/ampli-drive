@@ -41,6 +41,30 @@ object Contrast {
     }
 
     /**
+     * CIE76 colour difference (ΔE*ab, D65) between two opaque colours. About 2.3 is the smallest
+     * difference people notice; 10 or more reads as a different colour at a glance.
+     */
+    fun deltaE(a: Long, b: Long): Double {
+        val la = lab(a)
+        val lb = lab(b)
+        return kotlin.math.sqrt((la[0] - lb[0]).pow(2) + (la[1] - lb[1]).pow(2) + (la[2] - lb[2]).pow(2))
+    }
+
+    private fun lab(argb: Long): DoubleArray {
+        val r = linear(channel(argb, 16))
+        val g = linear(channel(argb, 8))
+        val b = linear(channel(argb, 0))
+        val x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047
+        val y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        val z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883
+        fun f(t: Double) = if (t > 216.0 / 24389.0) Math.cbrt(t) else (24389.0 / 27.0 * t + 16.0) / 116.0
+        val fx = f(x)
+        val fy = f(y)
+        val fz = f(z)
+        return doubleArrayOf(116.0 * fy - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz))
+    }
+
+    /**
      * Lowest contrast of [text] on a translucent [panel] over any of [backdrop]'s colours.
      * A blur only averages backdrop colours, so this is a safe lower bound for frosted glass too.
      */

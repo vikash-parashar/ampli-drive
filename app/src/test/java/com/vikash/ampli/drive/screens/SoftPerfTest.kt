@@ -83,6 +83,7 @@ class SoftPerfTest {
             "Daylight Clean (old day)" to ThemeDefaults.DAYLIGHT,
             "Ampli Soft Day" to ThemeDefaults.SOFT_DAY,
             "Ampli Soft Night" to ThemeDefaults.SOFT_NIGHT,
+            "Crimson Drive (car)" to ThemeDefaults.CRIMSON,
         )
         for ((name, id) in themes) {
             val rendersBefore = SoftShadowCache.renders

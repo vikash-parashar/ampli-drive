@@ -390,6 +390,17 @@ private fun RoundButton(
 ) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
+    val keys = theme.keys
+    if (keys != null && filled && theme.isSoft) {
+        // Crimson Drive: play/pause is the crimson key, white icon.
+        Box(
+            modifier = Modifier.size(size).primaryKey(theme, keys, CircleShape, onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = description, tint = keys.onPrimary, modifier = Modifier.size(size * 0.5f))
+        }
+        return
+    }
     if (theme.isSoft) {
         // Soft key; the play/pause key stays pressed in (cyan) while music plays.
         Box(
