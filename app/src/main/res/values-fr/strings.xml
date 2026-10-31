@@ -709,7 +709,7 @@
     <string name="nav_go">Partir</string>
     <string name="nav_routing_attribution">Itinéraires : OSRM, © contributeurs OpenStreetMap</string>
     <string name="name_title">Comment vous appelez-vous ?</string>
-    <string name="name_hint">Votre nom s\'affiche sur la carte de bienvenue à chaque démarrage : « Ram Ram {name} Ji 🙏 ».</string>
+    <string name="name_hint">Votre nom s\'affiche sur la carte de bienvenue à chaque démarrage : « Jai Baba Ki {name} Ji 🙏 ».</string>
     <string name="name_field">Votre nom</string>
     <string name="name_skip">Passer</string>
     <string name="name_mic">Dites votre nom</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">Pas compris. Tapez plutôt votre nom.</string>
     <string name="name_mic_denied">Micro non autorisé. Tapez plutôt votre nom.</string>
     <string name="name_settings_title">Votre nom</string>
-    <string name="name_settings_empty">Non défini : la carte de bienvenue dit « Ram Ram »</string>
+    <string name="name_settings_empty">Non défini : la carte de bienvenue dit « Jai Baba Ki »</string>
     <string name="welcome_title">Message de bienvenue</string>
     <string name="welcome_hint">Joué une fois à chaque démarrage de la voiture (démarrage ou contact)</string>
     <string name="welcome_play">Jouer la bienvenue</string>

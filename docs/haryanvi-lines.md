@@ -4,7 +4,7 @@ Every line the car speaks in the **Haryanvi desi** voice style (Settings › Voi
 The source of truth is `app/src/main/java/com/vikash/ampli/drive/voice/HaryanviLines.kt`;
 change a line there and here together (a unit test checks that every line in the app is listed here).
 
-- 94 events, 570 lines. The car never says the same line twice in a row.
+- 107 events, 594 lines. The car never says the same line twice in a row (except the round-3 navigation moments that have a single line, which come at most once per trip or per turn).
 - Left is **उल्टे हाथ** (ulte haath), right is **सुल्टे हाथ** (sulte haath).
 - Family-safe only: no abuse, no crude words, no caste or community jokes (a banned-word test runs over every line).
 - SOS, crash countdown and emergency prompts are never in this list: they always stay in plain, clear Hindi.
@@ -23,16 +23,16 @@ change a line there and here together (a unit test checks that every line in the
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Welcome on car start | राम राम जी, आज कित जाणा सै? | Ram Ram ji, aaj kit jaana sai? | Ram Ram! Where are we going today? |
-| Welcome on car start | राम राम भाई, आज कित का प्लान सै? | Ram Ram bhai, aaj kit ka plan sai? | Ram Ram brother, what's the plan today? |
+| Welcome on car start | जय बाबा की, आज कित जाणा सै? | Jai Baba Ki, aaj kit jaana sai? | Jai Baba Ki! Where are we going today? |
+| Welcome on car start | जय माता दी भाई, आज कित का प्लान सै? | Jai Mata Di bhai, aaj kit ka plan sai? | Jai Mata Di brother, what's the plan today? |
 | Welcome on car start | और तैयारे? सुणा दे, के हाल सै? | Aur taiyaare? Suna de, ke haal sai? | So, all set? Tell me, how are things? |
 | Welcome on car start | राम राम ताई आले, आज कित की तैयारी सै? | Ram Ram Tai Aale, aaj kit ki taiyaari hai? | Ram Ram, dear friend! What are we ready for today? |
-| Welcome on car start | राम राम भाई! गाड्डी त्यार सै, बोल कित चालां? | Ram Ram bhai! Gaadi tyaar sai, bol kit chaalaan? | Ram Ram! The car is ready, say where we go. |
+| Welcome on car start | जय बाबा की भाई! गाड्डी त्यार सै, बोल कित चालां? | Jai Baba Ki bhai! Gaadi tyaar sai, bol kit chaalaan? | Jai Baba Ki! The car is ready, say where we go. |
 | Welcome on car start | भाई कित जाणा सै आज? | Bhai kit jaana sai aaj? | Brother, where are we going today? |
 | Welcome on car start | आज कित की तैयारी सै? | Aaj kit ki taiyaari sai? | What are we ready for today? |
 | Welcome on car start | आज कित का प्लान बणैगा? | Aaj kit ka plan banega? | What's the plan going to be today? |
 | Morning (4 to 11) | सवेरे सवेरे कित चाल पड़े ताऊ? | Savere savere kit chaal pade tau? | Off somewhere so early in the morning, Tau? |
-| Morning (4 to 11) | सवेरे की राम राम! चाय पी ली के? | Savere ki Ram Ram! Chai pi li ke? | Morning Ram Ram! Had your tea? |
+| Morning (4 to 11) | सवेरे सवेरे जय माता दी! चाय पी ली के? | Savere savere Jai Mata Di! Chai pi li ke? | Morning Jai Mata Di! Had your tea? |
 | Morning (4 to 11) | सवेरे सवेरे सड़क खाली सै, फेर भी धीरे चलाइए। | Savere savere sadak khaali sai, pher bhi dheere chalaiye. | The road is empty this early, still drive slowly. |
 | Morning (4 to 11) | दिन की शुरुआत बढ़िया हो, चाल पड़ां। | Din ki shuruaat badhiya ho, chaal padaan. | May the day start well, let's go. |
 | Afternoon (12 to 4 pm) | दोपहर हो री सै, धूप तै बच कै चलाइए। | Dopahar ho ri sai, dhoop te bach ke chalaiye. | It's afternoon, mind the sun. |
@@ -51,7 +51,7 @@ change a line there and here together (a unit test checks that every line in the
 | Goodbye (ACC off / parked) | गाड्डी ढंग तै लॉक कर दिए। | Gaadi dhang te lock kar diye. | Lock the car properly. |
 | Goodbye (ACC off / parked) | राम राम भाई, आराम कर ले, फेर मिलांगे। | Ram Ram bhai, aaram kar le, pher milaange. | Ram Ram brother, get some rest, see you again. |
 | Goodbye (ACC off / parked) | पहुँच गे, शीशे चढ़ा ले अर गाड्डी लॉक कर दिए। | Pahunch ge, sheeshe chadha le ar gaadi lock kar diye. | We're here: roll up the windows and lock the car. |
-| Goodbye (ACC off / parked) | आज का सफर बढ़िया रया, राम राम! | Aaj ka safar badhiya raya, Ram Ram! | Today's trip went well, Ram Ram! |
+| Goodbye (ACC off / parked) | आज का सफर बढ़िया रया, जय माता दी! | Aaj ka safar badhiya raya, Jai Mata Di! | Today's trip went well, Jai Mata Di! |
 
 ## Hey Ampli
 
@@ -63,9 +63,9 @@ change a line there and here together (a unit test checks that every line in the
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Hey Ampli greeting | राम राम भाई! कित चालणा सै आज? | Ram Ram bhai! Kit chalna sai aaj? | Ram Ram brother! Where are we going today? |
+| Hey Ampli greeting | जय बाबा की भाई! कित चालणा सै आज? | Jai Baba Ki bhai! Kit chalna sai aaj? | Jai Baba Ki brother! Where are we going today? |
 | Hey Ampli greeting | सुणा ताई आळे, गाड्डी त्यार सै! | Suna tai aale, gaadi tyar sai! | Tell me, friend, the car is ready! |
-| Hey Ampli greeting | राम राम! बेल्ट ला ले, फेर चालांगे। | Ram Ram! Belt laga le, phir chalange. | Ram Ram! Put on your belt, then we go. |
+| Hey Ampli greeting | जय माता दी! बेल्ट ला ले, फेर चालांगे। | Jai Mata Di! Belt laga le, phir chalange. | Jai Mata Di! Put on your belt, then we go. |
 | Hey Ampli greeting | आ ग्या भाई? चाल, आज कित की सैर करणी सै? | Aa gaya bhai? Chal, aaj kit ki sair karni sai? | You're here? Come on, where shall we ride today? |
 | Hey Ampli greeting | राम राम जी! गाड्डी भी रेडी, मैं भी रेडी। | Ram Ram ji! Gaadi bhi ready, main bhi ready. | Ram Ram! The car is ready, and so am I. |
 | Hey Ampli greeting | भाई कैसा सै, सब राजी खुशी? परिवार में सब ठीक? | Bhai kaisa sai, sab raazi khushi? Parivaar mein sab theek? | How are you, brother, all well? Everyone fine at home? |
@@ -566,17 +566,16 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Welcome on car start | राम राम जी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै? | Ram Ram ji! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai? | Ram Ram! The car's awake and so am I. Where's today's round? |
-| Welcome on car start | इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले। | Engine garjya, janu akhaade main pahalwaan utarya ho! Chaal, belt la le. | The engine roared like a wrestler stepping into the akhada! Come on, belt up. |
+| Welcome on car start | जय माता दी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै? | Jai Mata Di! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai? | Jai Mata Di! The car's awake and so am I. Where's today's round? |
 | Welcome on car start | ल्यो जी, आपणी सवारी त्यार सै! चूरमा खा कै आए हो के? | Lyo ji, aapni sawaari tyaar sai! Choorma kha ke aaye ho ke? | Here we go, our ride is ready! Had your choorma before coming? |
 | Welcome on car start | गाड्डी त्यार, गाणे त्यार, मैं भी त्यार, बस बेल्ट की कसर सै! | Gaadi tyaar, gaane tyaar, main bhi tyaar, bas belt ki kasar sai! | Car ready, songs ready, me ready. Only the seat belt is missing! |
 | Welcome on car start | के बात! आज तो गाड्डी भी नहा-धो कै त्यार लाग री सै। | Ke baat! Aaj to gaadi bhi naha-dho ke tyaar laag ri sai. | Wow! Even the car looks freshly bathed and dressed up today. |
 | Welcome on car start | सीट सेट, शीशे सेट, बेल्ट ला ले, फेर बता कित चालां। | Seat set, sheeshe set, belt la le, pher bata kit chaalaan. | Seat set, mirrors set, belt on, then tell me where we go. |
-| Welcome on car start | राम राम! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां? | Ram Ram! Tractor jisa dam, ar mere jisi boli, chaal padaan? | Ram Ram! Power like a tractor and a tongue like mine. Shall we go? |
-| Welcome on car start | राम राम! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला। | Ram Ram! Aaj raasta main bataaunga, tu bas mauj te chala. | Ram Ram! I'll show the way today, you just drive and enjoy. *(male)* |
-| Welcome on car start | राम राम! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला। | Ram Ram! Aaj raasta main bataaungi, tu bas mauj te chala. | Ram Ram! I'll show the way today, you just drive and enjoy. *(female)* |
+| Welcome on car start | राम राम जी! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां? | Ram Ram ji! Tractor jisa dam, ar mere jisi boli, chaal padaan? | Ram Ram! Power like a tractor and a tongue like mine. Shall we go? |
+| Welcome on car start | जय बाबा की! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला। | Jai Baba Ki! Aaj raasta main bataaunga, tu bas mauj te chala. | Jai Baba Ki! I'll show the way today, you just drive and enjoy. *(male)* |
+| Welcome on car start | जय बाबा की! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला। | Jai Baba Ki! Aaj raasta main bataaungi, tu bas mauj te chala. | Jai Baba Ki! I'll show the way today, you just drive and enjoy. *(female)* |
 | Goodbye (ACC off / parked) | पहुँच गे! गाड्डी लॉक कर दिए, अर मेरी याद आवै तो फेर स्टार्ट कर लिए। | Pahunch ge! Gaadi lock kar diye, ar meri yaad aave to pher start kar liye. | We're here! Lock the car, and if you miss me, just start it again. |
-| Goodbye (ACC off / parked) | राम राम जी! आज का गेड़ा कसूत रया, फेर मिलांगे। | Ram Ram ji! Aaj ka geda kasoot raya, pher milaange. | Ram Ram! Today's round was awesome. See you again. |
+| Goodbye (ACC off / parked) | जय बाबा की! आज का गेड़ा कसूत रया, फेर मिलांगे। | Jai Baba Ki! Aaj ka geda kasoot raya, pher milaange. | Jai Baba Ki! Today's round was awesome. See you again. |
 | Goodbye (ACC off / parked) | चाल, इब तू आराम कर, मैं भी थोड़ी झपकी ले ल्यूं। | Chaal, ib tu aaraam kar, main bhi thodi jhapki le lyun. | OK, you rest now, I'll grab a little nap too. |
 | Goodbye (ACC off / parked) | चाबी, फोन, बटुआ, तीनूं ले लिए? फेर ना कहिए बताया कोनी! | Chaabi, phone, batua, teenun le liye? Pher na kahiye bataaya koni! | Keys, phone, wallet: got all three? Don't say I didn't tell you! |
 | Goodbye (ACC off / parked) | गाड्डी नै भी सांस लेण दे, अर तू भी लस्सी पी कै आराम कर। | Gaadi nai bhi saans len de, ar tu bhi lassi pi ke aaraam kar. | Let the car breathe, and you have a lassi and rest. |
@@ -732,7 +731,7 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Mobile camera ahead | आग्गै मोबाइल कैमरा सै, मंदी कर ले, छुप कै खड़्या सै, पर मन्नै बेरा सै! | Aaggai mobile camera sai, mandi kar le, chhup ke khadya sai, par mannai bera sai! | Mobile camera ahead, slow down. It's hiding, but I know! |
 | Mobile camera ahead | आग्गै इंटरसेप्टर सै, लिमिट मैं, आज शरीफ ड्राइवर बण कै दिखा। | Aaggai interceptor sai, limit main, aaj shareef driver ban ke dikha. | Interceptor ahead, stay in the limit. Show them a model driver today. |
 | Mobile camera ahead | आग्गै स्पीड नापण आळे सैं, धीरे कर, म्हारी तो रोज की आराम आळी चाल सै। | Aaggai speed naapan aale sain, dheere kar, mhaari to roj ki aaraam aali chaal sai. | Speed checkers ahead, slow down. Easy pace is our daily style anyway. |
-| Mobile camera ahead | मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवांगे। | Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaange. | Mobile camera reported, slow down. We'll pose for photos at a wedding. |
+| Mobile camera ahead | मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवावांगे। | Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaawange. | Mobile camera reported, slow down. We'll pose for photos at a wedding. |
 | Mobile camera ahead | आग्गै स्पीड गन सै, लिमिट मैं राख, बढ़िया, तू तो पहलां ए आराम तै सै। | Aaggai speed gun sai, limit main raakh, badhiya, tu to pahlaan e aaraam te sai. | Speed gun ahead, keep in the limit. Good, you're already easy on it. |
 | FASTag balance low (after a toll) | %1$s रुपये ए बचे सैं फास्टैग मैं, रुक कै रिचार्ज कर लिए। | %1$s rupaye e bache sain FASTag main, ruk ke recharge kar liye. | Only ₹{balance} left on FASTag; recharge once you've stopped. |
 | FASTag balance low (after a toll) | %1$s रुपये मैं अगला टोल भी मुश्किल, घरां पहुँच कै रिचार्ज कर दिए। | %1$s rupaye main agla toll bhi mushkil, gharaan pahunch ke recharge kar diye. | ₹{balance} may not cover the next toll; recharge when you get home. |
@@ -750,9 +749,52 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Night drive reminder | रात शांत सै, गाणे हळवे कर द्यूं सूं, तू बस सड़क देख। | Raat shaant sai, gaane halve kar dyun sun, tu bas sadak dekh. | The night is quiet; I'll turn the music down, you just watch the road. |
 | Night drive reminder | घणी रात हो गी जी, घरां आळे जाग रे होंगे, आराम तै पहुँचांगे। | Ghani raat ho gi ji, gharaan aale jaag re honge, aaraam te pahunchaange. | It's late; the family must be up waiting. We'll get there safely. |
 
+## Round 3 lines (navigation)
+
+The owner's approved navigation list, word for word (`%d` is written `%1$d`). Car Hub's own navigation only, *(Haryanvi only)*: the Standard style and Google Maps prompts stay as they are. Like round 2, a recorded voice (Ampli Bhai / Ampli Behen) only says a line once the voice-pack workflow has recorded it; lines with a number are never recorded, so the recorded voice skips them (keep straight and arriving fall back to the usual line). Every line comes at most once per trip (between-turns lines) or once per turn, never over another prompt.
+
+- **Kilometres left**: when the distance left drops past 20, 10, 5 and 2 km (only milestones the trip actually crosses), not within 800 m of a turn, at least 90 s after the previous between-turns line. `%1$d` is the kilometres left.
+- **Halfway**: half of a trip of 10 km or more is done.
+- **Ten minutes left**: the routing server's time left drops to 10 minutes on a trip of 20 minutes or more.
+- **Keep straight (no turn for a while)**: instead of *Continue straight* when the next turn is more than 2 km away. `%1$d` is the kilometres to it.
+- **Left at a petrol pump**: the prompt ahead of a left turn with a petrol pump within 60 m of the corner (offline fuel data, OpenStreetMap). Said after the distance ("400 मीटर आगे, …").
+- **Right after a CNG pump**: the prompt ahead of a right turn with a CNG pump within 60 m, on the road before the corner. Said after the distance.
+- **Roundabout ahead, second exit** / **Roundabout ahead, third exit**: the prompt ahead of a roundabout whose exit is 2 or 3; the "now" prompt keeps the exit-number lines. Said after the distance.
+- **Getting on the highway**: the prompt ahead of an on-ramp. Said after the distance.
+- **Highway exit on the right**: the prompt ahead of an off-ramp to the right, as a sentence of its own.
+- **Left lane for a turn**: the prompt ahead of a left turn where the route's lane data says only the left lane(s) turn.
+- **Middle lane at a split**: 400 m before a fork where the lane data says only the middle lane(s) go on.
+- **Destination on the right**: the arriving prompt (150 m out) when the destination is on the right. `%1$d` is the metres. The *Arrived* line follows on arrival.
+- **Arrived**: two more variants.
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Kilometres left | बस %1$d किलोमीटर बचे, घणा ना सै इब। | Bas %1$d kilometre bache, ghana na sai ib. | Just {km} km left, not much now. |
+| Kilometres left | %1$d किलोमीटर और, फेर पहुँच गे समझ। | %1$d kilometre aur, pher pahunch ge samajh. | {km} km more and we're there. |
+| Halfway | आधा रास्ता हो ग्या भाई, बाकी आधा मौज मैं। | Aadha rasta ho gya bhai, baaki aadha mauj main. | Half way done, the rest is a breeze. |
+| Ten minutes left | बस दस मिनट का खेल सै, पहुँचण आळे सां। | Bas das minat ka khel sai, pahunchan aale saan. | Ten more minutes, almost there. |
+| Keep straight (no turn for a while) | सीधा चालता रह, आगले %1$d किलोमीटर कोए मोड़ कोनी। | Seedha chaalta reh, aagle %1$d kilometre koi mod koni. | Keep straight, no turn for {km} km. |
+| Keep straight (no turn for a while) | नाक की सीध मैं चाल, मैं बता द्यूंगा कद मुड़णा सै। | Naak ki seedh main chaal, main bata dyunga kad mudna sai. | Straight ahead, I'll tell you when to turn. |
+| Left at a petrol pump | पेट्रोल पंप तै उल्टे हाथ ले लिए। | Petrol pump te ulte haath le liye. | Take the left at the petrol pump. |
+| Right after a CNG pump | सीएनजी पंप कै बाद सुल्टे हाथ मुड़ ले। | CNG pump ke baad sulte haath mud le. | Turn right after the CNG pump. |
+| Roundabout ahead, second exit | गोल चक्कर आ रया सै, दूसरा रास्ता पकड़ लिए। | Gol chakkar aa raya sai, doosra rasta pakad liye. | Roundabout ahead, take the second exit. |
+| Roundabout ahead, third exit | चक्कर पै तीसरा निकास, घूम कै सीधा। | Chakkar pai teesra nikaas, ghoom ke seedha. | Third exit at the roundabout. |
+| Getting on the highway | हाईवे पै चढ़ ले भाई, इब खुली सड़क सै। | Highway pai chadh le bhai, ib khuli sadak sai. | Get on the highway, open road now. |
+| Highway exit on the right | आग्गै हाईवे तै उतरणा सै, सुल्टे हाथ आळी लेन मैं आ ज्या। | Aaggai highway te utarna sai, sulte haath aali lane main aa jya. | Exit the highway ahead, move to the right lane. |
+| Left lane for a turn | उल्टे हाथ आळी लेन पकड़ ले, आग्गै मुड़णा सै। | Ulte haath aali lane pakad le, aaggai mudna sai. | Get in the left lane, turn coming. |
+| Middle lane at a split | बीच आळी लेन मैं रह, दोनूं कान्ही रास्ता बंटैगा। | Beech aali lane main reh, donun kaanhi rasta bantaiga. | Stay in the middle lane, the road splits. |
+| Destination on the right | बस आ गे, %1$d मीटर पै सुल्टे हाथ थारी मंजिल सै। | Bas aa ge, %1$d meetar pai sulte haath thaari manzil sai. | Almost there, destination on the right in {m} m. |
+| Arrived | पहुँच गे भाई! गाड्डी ढंग तै लगा दिए। | Pahunch ge bhai! Gaaddi dhang te laga diye. | We're here! Park properly. |
+| Arrived | मंजिल आ गी, जय बाबा की! आज का गेड़ा बढ़िया रया। | Manzil aa gi, Jai Baba Ki! Aaj ka geda badhiya raya. | Arrived, Jai Baba Ki! Good trip today. |
+
 ## Not in this list
 
 - **SOS, crash countdown, emergency**: always plain Hindi / the app language, on purpose. On units without a text-to-speech engine, four fixed plain-Hindi safety clips are recorded in the same two voices (`safety_*` in voice/lines.json: the crash warning, "सेकंड बाकी" after a recorded number for the last ten seconds, "SOS message ready" and "Help panel opening").
 - **Incoming call announcement**: skipped, the app does not read call notifications.
-- **Traffic / slow ETA**: skipped, the routing server (OSRM) has no live traffic.
+- **Traffic / slow ETA**: skipped, the routing server (OSRM) has no live traffic. The approved round-3 lines "आग्गै जाम सै, %d मिनट फालतू लागैंगे, धीरज राख।" and "जाम खुल ग्या, इब रफ्तार पकड़ ले, पर लिमिट मैं।" wait for a traffic source (delay in minutes, jam start and end).
+- **Round-3 lines with nothing to trigger them** (approved, kept for later):
+  - "फ्लाईओवर पै ना चढ़िए, नीचे तै सुल्टे हाथ।" and "फ्लाईओवर पै चढ़ ले, नीचे जाम सै।": the route doesn't say a flyover runs beside a turn, and there is no traffic data.
+  - "आग्गै ब्रेकर सै, हळवे कर ले, गाड्डी उछलैगी।" and "ब्रेकर ब्रेकर! कमर बचा ले भाई।": needs speed-breaker locations (OpenStreetMap traffic_calming points, not in the app yet).
+  - "ढाबे तै आग्गै उल्टे हाथ आळी गली सै।": the offline place data has fuel pumps and chargers only, no dhabas.
+  - "आग्गै टोल सै, फास्टैग आळी लेन मैं आ ज्या।": needs toll plaza locations (OpenStreetMap barrier=toll_booth); the app only knows a toll from the FASTag SMS afterwards.
 - **Engine fault codes and overcharging (OBD)**: the plain description is clearer, so these stay as they are.

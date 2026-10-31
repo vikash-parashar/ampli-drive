@@ -77,6 +77,16 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        // Play upload key (repo secrets UPLOAD_KEYSTORE_BASE64 / _PASSWORD / UPLOAD_KEY_ALIAS /
+        // UPLOAD_KEY_PASSWORD; the workflow writes the file). Absent: the release bundle is unsigned.
+        if (env("UPLOAD_KEYSTORE_FILE").isNotEmpty()) {
+            create("upload") {
+                storeFile = file(env("UPLOAD_KEYSTORE_FILE"))
+                storePassword = env("UPLOAD_KEYSTORE_PASSWORD")
+                keyAlias = env("UPLOAD_KEY_ALIAS")
+                keyPassword = env("UPLOAD_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -98,6 +108,7 @@ android {
             buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL")}\"")
             // The Play bundle never downloads or installs other APKs (and never declares the permission).
             buildConfigField("boolean", "SIDELOAD_INSTALL", "false")
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

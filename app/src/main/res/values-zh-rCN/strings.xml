@@ -709,7 +709,7 @@
     <string name="nav_go">出发</string>
     <string name="nav_routing_attribution">路线：OSRM，© OpenStreetMap 贡献者</string>
     <string name="name_title">你叫什么名字？</string>
-    <string name="name_hint">每次汽车启动时，欢迎卡片上会显示你的名字：“Ram Ram {name} Ji 🙏”。</string>
+    <string name="name_hint">每次汽车启动时，欢迎卡片上会显示你的名字：“Jai Baba Ki {name} Ji 🙏”。</string>
     <string name="name_field">你的名字</string>
     <string name="name_skip">跳过</string>
     <string name="name_mic">说出你的名字</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">没听清。请改为输入你的名字。</string>
     <string name="name_mic_denied">未允许使用麦克风。请改为输入你的名字。</string>
     <string name="name_settings_title">你的名字</string>
-    <string name="name_settings_empty">未设置：欢迎卡片显示“Ram Ram”</string>
+    <string name="name_settings_empty">未设置：欢迎卡片显示“Jai Baba Ki”</string>
     <string name="welcome_title">欢迎语</string>
     <string name="welcome_hint">每次汽车启动时播放一次（开机或点火）</string>
     <string name="welcome_play">立即播放欢迎语</string>

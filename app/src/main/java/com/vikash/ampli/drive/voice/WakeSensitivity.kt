@@ -30,13 +30,15 @@ object WakeSensitivity {
     private val CORE = listOf("hey ampli", "ok ampli", "okay ampli", "hello ampli")
     private val SOUND_ALIKE = listOf("hey amply", "ok amply", "okay amply", "hello amply")
     private val LOOSE = listOf("hey ample", "ok ample", "hello ample", "hi ampli", "hi amply")
+    /** Just the name ("Ampli, gaana chala"), from level 3 (the default) up: owner's ask 2026-10-31. */
+    private val SOLO = listOf("ampli", "amply")
 
     fun tuning(level: Int): Tuning = when (level.coerceIn(1, 5)) {
         1 -> Tuning(CORE, minConfidence = 0.85, acceptPartial = false)
         2 -> Tuning(CORE + SOUND_ALIKE, minConfidence = 0.75, acceptPartial = false)
-        3 -> Tuning(CORE + SOUND_ALIKE + LOOSE, minConfidence = 0.6, acceptPartial = true)
-        4 -> Tuning(CORE + SOUND_ALIKE + LOOSE, minConfidence = 0.45, acceptPartial = true)
-        else -> Tuning(CORE + SOUND_ALIKE + LOOSE, minConfidence = 0.0, acceptPartial = true)
+        3 -> Tuning(CORE + SOUND_ALIKE + LOOSE + SOLO, minConfidence = 0.6, acceptPartial = true)
+        4 -> Tuning(CORE + SOUND_ALIKE + LOOSE + SOLO, minConfidence = 0.45, acceptPartial = true)
+        else -> Tuning(CORE + SOUND_ALIKE + LOOSE + SOLO, minConfidence = 0.0, acceptPartial = true)
     }
 
     /** A partial result ("partial" text, no confidences). */
@@ -52,11 +54,18 @@ object WakeSensitivity {
             return findPhrase(text.lowercase().split(' ').filter { it.isNotBlank() && it != "[unk]" }, tuning) >= 0
         }
         val clean = words.filter { it.first != "[unk]" }.map { it.first.lowercase() to it.second }
-        val i = findPhrase(clean.map { it.first }, tuning)
+        val words2 = clean.map { it.first }
+        val i = findPhrase(words2, tuning)
         if (i < 0) return false
-        return (clean[i].second + clean[i + 1].second) / 2.0 >= tuning.minConfidence
+        val two = i + 1 < clean.size && "${words2[i]} ${words2[i + 1]}" in tuning.phrases
+        val conf = if (two) (clean[i].second + clean[i + 1].second) / 2.0 else clean[i].second
+        return conf >= tuning.minConfidence
     }
 
-    private fun findPhrase(words: List<String>, tuning: Tuning): Int =
-        words.zipWithNext().indexOfFirst { (a, b) -> "$a $b" in tuning.phrases }
+    /** Index of the first two-word phrase, else of a one-word phrase ("ampli"), else -1. */
+    private fun findPhrase(words: List<String>, tuning: Tuning): Int {
+        val pair = words.zipWithNext().indexOfFirst { (a, b) -> "$a $b" in tuning.phrases }
+        if (pair >= 0) return pair
+        return words.indexOfFirst { it in tuning.phrases }
+    }
 }

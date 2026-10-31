@@ -523,7 +523,7 @@ internal fun PinDialog(title: String, error: Boolean, onPin: (String) -> Unit, o
 
 /**
  * After boot / ignition: the Car Hub knob turns, a cyan glow sweeps its ticks, then "Ampli" and
- * the CAR HUB tag fade in ([Shell.SPLASH_MS]). It fades into Home, where the "Ram Ram" welcome
+ * the CAR HUB tag fade in ([Shell.SPLASH_MS]). It fades into Home, where the "Jai Baba Ki" welcome
  * card and voice follow (CarStart waits for it). Normal returns to Home never show it.
  */
 @Composable

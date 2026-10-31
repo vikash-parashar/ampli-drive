@@ -710,7 +710,7 @@
     <string name="nav_go">ଚାଲନ୍ତୁ</string>
     <string name="nav_routing_attribution">ବାଟ: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">ଆପଣଙ୍କ ନାମ କ\'ଣ?</string>
-    <string name="name_hint">ଗାଡ଼ି ଷ୍ଟାର୍ଟ ହେଲେ ପ୍ରତିଥର ସ୍ୱାଗତ କାର୍ଡରେ ଆପଣଙ୍କ ନାମ ଦେଖାଯିବ: “Ram Ram {name} Ji 🙏”।</string>
+    <string name="name_hint">ଗାଡ଼ି ଷ୍ଟାର୍ଟ ହେଲେ ପ୍ରତିଥର ସ୍ୱାଗତ କାର୍ଡରେ ଆପଣଙ୍କ ନାମ ଦେଖାଯିବ: “Jai Baba Ki {name} Ji 🙏”।</string>
     <string name="name_field">ଆପଣଙ୍କ ନାମ</string>
     <string name="name_skip">ଛାଡ଼ନ୍ତୁ</string>
     <string name="name_mic">ଆପଣଙ୍କ ନାମ କୁହନ୍ତୁ</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">ଶୁଣାଗଲା ନାହିଁ। ନାମ ଲେଖିଦିଅନ୍ତୁ।</string>
     <string name="name_mic_denied">ମାଇକ୍ ଅନୁମତି ନାହିଁ। ନାମ ଲେଖିଦିଅନ୍ତୁ।</string>
     <string name="name_settings_title">ଆପଣଙ୍କ ନାମ</string>
-    <string name="name_settings_empty">ନାମ ନାହିଁ: ସ୍ୱାଗତ କାର୍ଡରେ “Ram Ram” ଦେଖାଯିବ</string>
+    <string name="name_settings_empty">ନାମ ନାହିଁ: ସ୍ୱାଗତ କାର୍ଡରେ “Jai Baba Ki” ଦେଖାଯିବ</string>
     <string name="welcome_title">ସ୍ୱାଗତ ବାର୍ତ୍ତା</string>
     <string name="welcome_hint">ପ୍ରତିଥର ଗାଡ଼ି ଷ୍ଟାର୍ଟ ହେଲେ ଥରେ ବାଜେ (ବୁଟ୍ କିମ୍ବା ଇଗ୍ନିସନ୍ ଚାଲୁ)</string>
     <string name="welcome_play">ଏବେ ସ୍ୱାଗତ ଶୁଣନ୍ତୁ</string>

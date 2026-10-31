@@ -710,7 +710,7 @@
     <string name="nav_go">செல்</string>
     <string name="nav_routing_attribution">வழிகள்: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">உங்கள் பெயர் என்ன?</string>
-    <string name="name_hint">கார் ஸ்டார்ட் ஆகும் ஒவ்வொரு முறையும் வரவேற்பு அட்டையில் உங்கள் பெயர் தெரியும்: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">கார் ஸ்டார்ட் ஆகும் ஒவ்வொரு முறையும் வரவேற்பு அட்டையில் உங்கள் பெயர் தெரியும்: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">உங்கள் பெயர்</string>
     <string name="name_skip">தவிர்</string>
     <string name="name_mic">உங்கள் பெயரைச் சொல்லுங்கள்</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">கேட்கவில்லை. பதிலாகப் பெயரைத் தட்டச்சு செய்யுங்கள்.</string>
     <string name="name_mic_denied">மைக்ரோஃபோன் அனுமதிக்கப்படவில்லை. பதிலாகப் பெயரைத் தட்டச்சு செய்யுங்கள்.</string>
     <string name="name_settings_title">உங்கள் பெயர்</string>
-    <string name="name_settings_empty">அமைக்கப்படவில்லை: வரவேற்பு அட்டையில் “Ram Ram” என்று வரும்</string>
+    <string name="name_settings_empty">அமைக்கப்படவில்லை: வரவேற்பு அட்டையில் “Jai Baba Ki” என்று வரும்</string>
     <string name="welcome_title">வரவேற்புச் செய்தி</string>
     <string name="welcome_hint">கார் ஸ்டார்ட் ஆகும் ஒவ்வொரு முறையும் ஒருமுறை ஒலிக்கும் (பூட் அல்லது இக்னிஷன் ஆன்)</string>
     <string name="welcome_play">இப்போது வரவேற்பை ஒலிக்கவும்</string>

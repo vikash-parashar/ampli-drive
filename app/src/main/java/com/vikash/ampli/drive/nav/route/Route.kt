@@ -27,6 +27,11 @@ data class RouteStep(
     /** OSRM's own words, for Diagnostics: "turn/left", "roundabout/right". */
     val osrmType: String,
     val osrmModifier: String?,
+    /**
+     * OSRM lane guidance at the manoeuvre, left to right: true for a lane that can be used for
+     * it. Null when OpenStreetMap has no turn lanes there (most Indian roads).
+     */
+    val lanes: List<Boolean>? = null,
 ) {
     /** Street label for the banner: name, else ref ("NH 48"). */
     val label: String? get() = name ?: ref
@@ -47,6 +52,11 @@ class Route(
     val distanceM: Double,
     val durationS: Double,
     val maxspeedKmh: List<Int?>?,
+    /**
+     * Where on the route (metres from the start) the road splits both ways and only the middle
+     * lane(s) go on: OSRM forks straight ahead with lane data. Not manoeuvres, so not in [steps].
+     */
+    val laneSplitsM: List<Double> = emptyList(),
 ) {
     val cumM: DoubleArray = DoubleArray(points.size).also { c ->
         for (i in 1 until points.size) c[i] = c[i - 1] + Geo.distanceM(points[i - 1], points[i])
@@ -98,4 +108,18 @@ object Geo {
     }
 
     fun lerp(a: LatLon, b: LatLon, t: Double) = LatLon(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t)
+}
+
+/** OSRM lane guidance ([RouteStep.lanes]): which lanes the manoeuvre needs. Plain Kotlin, unit-tested. */
+object Lanes {
+    /** Only the leftmost lane(s) can be used, and at least one lane cannot. */
+    fun leftOnly(valid: List<Boolean>?): Boolean {
+        if (valid == null || valid.size < 2) return false
+        val firstInvalid = valid.indexOfFirst { !it }
+        return firstInvalid > 0 && valid.drop(firstInvalid).none { it }
+    }
+
+    /** Three lanes or more, and only middle ones can be used (the road splits both ways). */
+    fun middleOnly(valid: List<Boolean>?): Boolean =
+        valid != null && valid.size >= 3 && !valid.first() && !valid.last() && valid.any { it }
 }
