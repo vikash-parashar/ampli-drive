@@ -4,7 +4,7 @@ Every line the car speaks in the **Haryanvi desi** voice style (Settings › Voi
 The source of truth is `app/src/main/java/com/vikash/ampli/drive/voice/HaryanviLines.kt`;
 change a line there and here together (a unit test checks that every line in the app is listed here).
 
-- 94 events, 570 lines. The car never says the same line twice in a row.
+- 107 events, 594 lines. The car never says the same line twice in a row (except the round-3 navigation moments that have a single line, which come at most once per trip or per turn).
 - Left is **उल्टे हाथ** (ulte haath), right is **सुल्टे हाथ** (sulte haath).
 - Family-safe only: no abuse, no crude words, no caste or community jokes (a banned-word test runs over every line).
 - SOS, crash countdown and emergency prompts are never in this list: they always stay in plain, clear Hindi.
@@ -749,9 +749,52 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Night drive reminder | रात शांत सै, गाणे हळवे कर द्यूं सूं, तू बस सड़क देख। | Raat shaant sai, gaane halve kar dyun sun, tu bas sadak dekh. | The night is quiet; I'll turn the music down, you just watch the road. |
 | Night drive reminder | घणी रात हो गी जी, घरां आळे जाग रे होंगे, आराम तै पहुँचांगे। | Ghani raat ho gi ji, gharaan aale jaag re honge, aaraam te pahunchaange. | It's late; the family must be up waiting. We'll get there safely. |
 
+## Round 3 lines (navigation)
+
+The owner's approved navigation list, word for word (`%d` is written `%1$d`). Car Hub's own navigation only, *(Haryanvi only)*: the Standard style and Google Maps prompts stay as they are. Like round 2, a recorded voice (Ampli Bhai / Ampli Behen) only says a line once the voice-pack workflow has recorded it; lines with a number are never recorded, so the recorded voice skips them (keep straight and arriving fall back to the usual line). Every line comes at most once per trip (between-turns lines) or once per turn, never over another prompt.
+
+- **Kilometres left**: when the distance left drops past 20, 10, 5 and 2 km (only milestones the trip actually crosses), not within 800 m of a turn, at least 90 s after the previous between-turns line. `%1$d` is the kilometres left.
+- **Halfway**: half of a trip of 10 km or more is done.
+- **Ten minutes left**: the routing server's time left drops to 10 minutes on a trip of 20 minutes or more.
+- **Keep straight (no turn for a while)**: instead of *Continue straight* when the next turn is more than 2 km away. `%1$d` is the kilometres to it.
+- **Left at a petrol pump**: the prompt ahead of a left turn with a petrol pump within 60 m of the corner (offline fuel data, OpenStreetMap). Said after the distance ("400 मीटर आगे, …").
+- **Right after a CNG pump**: the prompt ahead of a right turn with a CNG pump within 60 m, on the road before the corner. Said after the distance.
+- **Roundabout ahead, second exit** / **Roundabout ahead, third exit**: the prompt ahead of a roundabout whose exit is 2 or 3; the "now" prompt keeps the exit-number lines. Said after the distance.
+- **Getting on the highway**: the prompt ahead of an on-ramp. Said after the distance.
+- **Highway exit on the right**: the prompt ahead of an off-ramp to the right, as a sentence of its own.
+- **Left lane for a turn**: the prompt ahead of a left turn where the route's lane data says only the left lane(s) turn.
+- **Middle lane at a split**: 400 m before a fork where the lane data says only the middle lane(s) go on.
+- **Destination on the right**: the arriving prompt (150 m out) when the destination is on the right. `%1$d` is the metres. The *Arrived* line follows on arrival.
+- **Arrived**: two more variants.
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Kilometres left | बस %1$d किलोमीटर बचे, घणा ना सै इब। | Bas %1$d kilometre bache, ghana na sai ib. | Just {km} km left, not much now. |
+| Kilometres left | %1$d किलोमीटर और, फेर पहुँच गे समझ। | %1$d kilometre aur, pher pahunch ge samajh. | {km} km more and we're there. |
+| Halfway | आधा रास्ता हो ग्या भाई, बाकी आधा मौज मैं। | Aadha rasta ho gya bhai, baaki aadha mauj main. | Half way done, the rest is a breeze. |
+| Ten minutes left | बस दस मिनट का खेल सै, पहुँचण आळे सां। | Bas das minat ka khel sai, pahunchan aale saan. | Ten more minutes, almost there. |
+| Keep straight (no turn for a while) | सीधा चालता रह, आगले %1$d किलोमीटर कोए मोड़ कोनी। | Seedha chaalta reh, aagle %1$d kilometre koi mod koni. | Keep straight, no turn for {km} km. |
+| Keep straight (no turn for a while) | नाक की सीध मैं चाल, मैं बता द्यूंगा कद मुड़णा सै। | Naak ki seedh main chaal, main bata dyunga kad mudna sai. | Straight ahead, I'll tell you when to turn. |
+| Left at a petrol pump | पेट्रोल पंप तै उल्टे हाथ ले लिए। | Petrol pump te ulte haath le liye. | Take the left at the petrol pump. |
+| Right after a CNG pump | सीएनजी पंप कै बाद सुल्टे हाथ मुड़ ले। | CNG pump ke baad sulte haath mud le. | Turn right after the CNG pump. |
+| Roundabout ahead, second exit | गोल चक्कर आ रया सै, दूसरा रास्ता पकड़ लिए। | Gol chakkar aa raya sai, doosra rasta pakad liye. | Roundabout ahead, take the second exit. |
+| Roundabout ahead, third exit | चक्कर पै तीसरा निकास, घूम कै सीधा। | Chakkar pai teesra nikaas, ghoom ke seedha. | Third exit at the roundabout. |
+| Getting on the highway | हाईवे पै चढ़ ले भाई, इब खुली सड़क सै। | Highway pai chadh le bhai, ib khuli sadak sai. | Get on the highway, open road now. |
+| Highway exit on the right | आग्गै हाईवे तै उतरणा सै, सुल्टे हाथ आळी लेन मैं आ ज्या। | Aaggai highway te utarna sai, sulte haath aali lane main aa jya. | Exit the highway ahead, move to the right lane. |
+| Left lane for a turn | उल्टे हाथ आळी लेन पकड़ ले, आग्गै मुड़णा सै। | Ulte haath aali lane pakad le, aaggai mudna sai. | Get in the left lane, turn coming. |
+| Middle lane at a split | बीच आळी लेन मैं रह, दोनूं कान्ही रास्ता बंटैगा। | Beech aali lane main reh, donun kaanhi rasta bantaiga. | Stay in the middle lane, the road splits. |
+| Destination on the right | बस आ गे, %1$d मीटर पै सुल्टे हाथ थारी मंजिल सै। | Bas aa ge, %1$d meetar pai sulte haath thaari manzil sai. | Almost there, destination on the right in {m} m. |
+| Arrived | पहुँच गे भाई! गाड्डी ढंग तै लगा दिए। | Pahunch ge bhai! Gaaddi dhang te laga diye. | We're here! Park properly. |
+| Arrived | मंजिल आ गी, जय बाबा की! आज का गेड़ा बढ़िया रया। | Manzil aa gi, Jai Baba Ki! Aaj ka geda badhiya raya. | Arrived, Jai Baba Ki! Good trip today. |
+
 ## Not in this list
 
 - **SOS, crash countdown, emergency**: always plain Hindi / the app language, on purpose. On units without a text-to-speech engine, four fixed plain-Hindi safety clips are recorded in the same two voices (`safety_*` in voice/lines.json: the crash warning, "सेकंड बाकी" after a recorded number for the last ten seconds, "SOS message ready" and "Help panel opening").
 - **Incoming call announcement**: skipped, the app does not read call notifications.
-- **Traffic / slow ETA**: skipped, the routing server (OSRM) has no live traffic.
+- **Traffic / slow ETA**: skipped, the routing server (OSRM) has no live traffic. The approved round-3 lines "आग्गै जाम सै, %d मिनट फालतू लागैंगे, धीरज राख।" and "जाम खुल ग्या, इब रफ्तार पकड़ ले, पर लिमिट मैं।" wait for a traffic source (delay in minutes, jam start and end).
+- **Round-3 lines with nothing to trigger them** (approved, kept for later):
+  - "फ्लाईओवर पै ना चढ़िए, नीचे तै सुल्टे हाथ।" and "फ्लाईओवर पै चढ़ ले, नीचे जाम सै।": the route doesn't say a flyover runs beside a turn, and there is no traffic data.
+  - "आग्गै ब्रेकर सै, हळवे कर ले, गाड्डी उछलैगी।" and "ब्रेकर ब्रेकर! कमर बचा ले भाई।": needs speed-breaker locations (OpenStreetMap traffic_calming points, not in the app yet).
+  - "ढाबे तै आग्गै उल्टे हाथ आळी गली सै।": the offline place data has fuel pumps and chargers only, no dhabas.
+  - "आग्गै टोल सै, फास्टैग आळी लेन मैं आ ज्या।": needs toll plaza locations (OpenStreetMap barrier=toll_booth); the app only knows a toll from the FASTag SMS afterwards.
 - **Engine fault codes and overcharging (OBD)**: the plain description is clearer, so these stay as they are.

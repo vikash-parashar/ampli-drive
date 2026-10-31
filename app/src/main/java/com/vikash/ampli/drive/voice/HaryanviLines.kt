@@ -18,7 +18,8 @@ import kotlin.random.Random
  *   community jokes, nothing that mocks anyone: the app is rated for everyone and Play's content
  *   policy applies to speech too. HaryanviLinesTest checks a banned-word list over the whole bank.
  * - 4 to 8 variants per event so it doesn't get repetitive ([LinePicker] never says the same
- *   line twice in a row).
+ *   line twice in a row). Round-3 navigation events ([roundThreeOnly]) keep the owner's exact
+ *   lines, sometimes just one; they are rare (once per trip or per turn).
  * - Left is "उल्टे हाथ" (ulte haath), right is "सुल्टे हाथ" (sulte haath).
  * - Safety prompts (SOS, crash countdown, emergency) are NOT in this file on purpose: they always
  *   use the clear standard Hindi / app-language strings. [forEvent] returns null for them.
@@ -284,6 +285,48 @@ object HaryanviLines {
 
         /** Once a night: after 11 pm, more than 30 minutes into the drive. */
         NightDrive(Group.Road, "Night drive reminder"),
+
+        // Round 3 (the owner's navigation list, HaryanviLinesV3.kt): Car Hub's own navigation
+        // only, Haryanvi style only. Some have a single line on purpose: the owner's exact words.
+
+        /** Remaining distance crossed 20, 10, 5 or 2 km: %1$d is the kilometres left. */
+        NavDistanceLeft(Group.Navigation, "Kilometres left"),
+
+        /** Half of a trip of 10 km or more done. */
+        NavHalfway(Group.Navigation, "Halfway"),
+
+        /** About ten minutes left on a trip of 20 minutes or more. */
+        NavTenMinutesLeft(Group.Navigation, "Ten minutes left"),
+
+        /** Instead of "Continue straight" when the next turn is more than 2 km away: %1$d km. */
+        NavKeepStraight(Group.Navigation, "Keep straight (no turn for a while)"),
+
+        /** Turn ahead: a left turn with a petrol pump within 60 m of the corner. */
+        NavPumpLeft(Group.Navigation, "Left at a petrol pump"),
+
+        /** Turn ahead: a right turn just past a CNG pump (within 60 m of the corner). */
+        NavCngPumpRight(Group.Navigation, "Right after a CNG pump"),
+
+        /** Turn ahead: roundabout, second exit. */
+        NavRoundaboutSecondExit(Group.Navigation, "Roundabout ahead, second exit"),
+
+        /** Turn ahead: roundabout, third exit. */
+        NavRoundaboutThirdExit(Group.Navigation, "Roundabout ahead, third exit"),
+
+        /** Turn ahead: an on-ramp. */
+        NavHighwayEnter(Group.Navigation, "Getting on the highway"),
+
+        /** Turn ahead: an off-ramp on the right. */
+        NavHighwayExitRight(Group.Navigation, "Highway exit on the right"),
+
+        /** Turn ahead: a left turn where only the left lane(s) go left. */
+        NavLaneLeft(Group.Navigation, "Left lane for a turn"),
+
+        /** A fork where only the middle lane(s) go on. */
+        NavLaneMiddle(Group.Navigation, "Middle lane at a split"),
+
+        /** Arriving, the destination on the right: %1$d is the metres. */
+        NavArrivingRight(Group.Navigation, "Destination on the right"),
 
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
@@ -907,11 +950,14 @@ object HaryanviLines {
         ),
     )
 
-    /** First-round lines, then round 2 ([LINES_V2]) appended so first-round clip ids keep their numbers. */
+    /**
+     * First-round lines, then round 2 ([LINES_V2]) and round 3 ([LINES_V3]) appended so earlier
+     * clip ids keep their numbers.
+     */
     private val ALL: Map<Event, List<Line>> by lazy {
         val out = LinkedHashMap<Event, List<Line>>()
         for (event in Event.entries) {
-            val lines = LINES[event].orEmpty() + LINES_V2[event].orEmpty()
+            val lines = LINES[event].orEmpty() + LINES_V2[event].orEmpty() + LINES_V3[event].orEmpty()
             if (lines.isNotEmpty()) out[event] = lines
         }
         out
@@ -928,6 +974,14 @@ object HaryanviLines {
      * recorded voice only picks them once their clip is bundled ([VoiceGate]).
      */
     fun firstRoundCount(event: Event): Int = LINES[event]?.size ?: 0
+
+    /**
+     * Events that only have round-3 lines (the owner's navigation list, word for word): they may
+     * have a single line, which then repeats. Each fires at most once per trip or per turn.
+     */
+    internal val roundThreeOnly: Set<Event> by lazy {
+        LINES_V3.keys.filter { LINES[it] == null && LINES_V2[it] == null }.toSet()
+    }
 
     /** The time-of-day line for [hour] (0..23): morning 4–11, afternoon 12–16, evening 17–20, night. */
     fun timeOfDay(hour: Int): Event = when (hour) {
@@ -953,6 +1007,9 @@ object HaryanviLines {
         Event.PaperDue, Event.PaperExpired -> arrayOf("बीमा", "insurance")
         Event.PassTripsLow -> arrayOf(5)
         Event.FastagLowBalance -> arrayOf("90")
+        Event.NavDistanceLeft -> arrayOf(5)
+        Event.NavKeepStraight -> arrayOf(8)
+        Event.NavArrivingRight -> arrayOf(100)
         else -> emptyArray()
     }
 }
