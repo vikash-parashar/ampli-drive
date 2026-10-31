@@ -751,6 +751,9 @@
     <string name="restricted_play_note">从 Play 安装应用后，此限制就会消失。</string>
     <string name="restricted_open_app_info">打开应用信息</string>
     <string name="restricted_open_access">打开通知使用权</string>
+    <string name="restricted_before_title">此手机还需多一步</string>
+    <string name="restricted_before_hint">在 Android 13 及更高版本上，手机会对不是从 Play 安装的应用阻止此项。如果 Android 提示\"应用被拒绝访问\"，请这样做：</string>
+    <string name="restricted_step_try">点按\"打开通知使用权\"并开启 Ampli Car Hub。第一次 Android 会拒绝（\"应用被拒绝访问\"）：这是正常的。</string>
     <string name="more_title">更多 Ampli 应用</string>
     <string name="more_hint">Car Hub 开发者的其他应用</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

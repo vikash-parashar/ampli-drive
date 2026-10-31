@@ -751,6 +751,9 @@
     <string name="restricted_play_note">ॲप Play वयल्यान घातल्या उपरांत ही आडखळ आपसूक वता.</string>
     <string name="restricted_open_app_info">App info उगडात</string>
     <string name="restricted_open_access">नोटिफिकेशन ॲक्सेस उगडात</string>
+    <string name="restricted_before_title">ह्या फोनाचेर आनीक एक पावल</string>
+    <string name="restricted_before_hint">Android 13 आनी नव्या फोनांचेर, Play वयल्यान घालूंक नाशिल्ल्या ॲपां खातीर हें आडायतात. Android \"App was denied access\" म्हणटा जाल्यार, अशें करात:</string>
+    <string name="restricted_step_try">\"नोटिफिकेशन ॲक्सेस उगडात\" दाबात आनी Ampli Car Hub सुरू करात. पयले फावट Android नाका म्हणटलें (\"App was denied access\"): तें बरोबर.</string>
     <string name="more_title">Ampli चीं आनीक ॲपां</string>
     <string name="more_hint">Car Hub तयार करपी लोकांचीं हेर ॲपां</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

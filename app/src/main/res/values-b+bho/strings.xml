@@ -751,6 +751,9 @@
     <string name="restricted_play_note">ऐप Play से लगवला पर ई रोक अपने आप हट जाला।</string>
     <string name="restricted_open_app_info">App info खोलीं</string>
     <string name="restricted_open_access">नोटिफिकेशन एक्सेस खोलीं</string>
+    <string name="restricted_before_title">एह फोन पर एगो अउरी कदम</string>
+    <string name="restricted_before_hint">Android 13 आ नया फोन ओह ऐप खातिर एकरा के रोक देला जवन Play से ना लागल। अगर Android कहे \"App was denied access\", त अइसे करीं:</string>
+    <string name="restricted_step_try">\"नोटिफिकेशन एक्सेस खोलीं\" दबाईं आ Ampli Car Hub चालू करीं। पहिला बेर Android मना करी (\"App was denied access\"): ई ठीक बा।</string>
     <string name="more_title">Ampli के आउर ऐप</string>
     <string name="more_hint">Car Hub बनावे वाला लोग के दोसर ऐप</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

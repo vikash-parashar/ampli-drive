@@ -751,6 +751,9 @@
     <string name="restricted_play_note">Ce blocage disparaît une fois l\'appli installée depuis Play.</string>
     <string name="restricted_open_app_info">Ouvrir les infos de l\'appli</string>
     <string name="restricted_open_access">Ouvrir l\'accès aux notifications</string>
+    <string name="restricted_before_title">Une étape de plus sur ce téléphone</string>
+    <string name="restricted_before_hint">Depuis Android 13, le téléphone le bloque pour les applis non installées depuis Play. Si Android indique \"Accès refusé\", faites ceci :</string>
+    <string name="restricted_step_try">Appuyez sur \"Ouvrir l\'accès aux notifications\" et activez Ampli Car Hub. La première fois, Android refuse (\"Accès refusé\") : c\'est normal.</string>
     <string name="more_title">Plus d\'Ampli</string>
     <string name="more_hint">D\'autres applis des créateurs de Car Hub</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

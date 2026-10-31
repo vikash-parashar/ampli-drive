@@ -752,6 +752,9 @@
     <string name="restricted_play_note">ایپ Play سے انسٹال کرنے پر یہ رکاوٹ خود ہٹ جاتی ہے۔</string>
     <string name="restricted_open_app_info">App info کھولیں</string>
     <string name="restricted_open_access">نوٹیفکیشن رسائی کھولیں</string>
+    <string name="restricted_before_title">اس فون پر ایک قدم اور</string>
+    <string name="restricted_before_hint">Android 13 اور نئے فون اُن ایپس کے لیے اسے روک دیتے ہیں جو Play سے انسٹال نہیں ہوئیں۔ اگر Android کہے \"App was denied access\"، تو یوں کریں:</string>
+    <string name="restricted_step_try">\"نوٹیفکیشن رسائی کھولیں\" دبائیں اور Ampli Car Hub آن کریں۔ پہلی بار Android منع کرے گا (\"App was denied access\"): یہ معمول کی بات ہے۔</string>
     <string name="more_title">Ampli کی مزید ایپس</string>
     <string name="more_hint">Car Hub بنانے والوں کی دوسری ایپس</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

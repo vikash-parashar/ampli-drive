@@ -751,6 +751,9 @@
     <string name="restricted_play_note">Diese Sperre entfällt, sobald die App aus Play installiert ist.</string>
     <string name="restricted_open_app_info">App-Info öffnen</string>
     <string name="restricted_open_access">Benachrichtigungszugriff öffnen</string>
+    <string name="restricted_before_title">Ein Schritt mehr auf diesem Telefon</string>
+    <string name="restricted_before_hint">Ab Android 13 blockiert das Telefon dies für Apps, die nicht aus Play installiert wurden. Wenn Android \"Zugriff verweigert\" meldet, geht es so:</string>
+    <string name="restricted_step_try">Tippe auf \"Benachrichtigungszugriff öffnen\" und schalte Ampli Car Hub ein. Beim ersten Mal lehnt Android ab (\"Zugriff verweigert\"): Das ist normal.</string>
     <string name="more_title">Mehr von Ampli</string>
     <string name="more_hint">Weitere Apps von den Machern von Car Hub</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

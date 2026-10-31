@@ -265,6 +265,35 @@ class ScreenshotTest {
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide.png")
     }
 
+    /** The same guide before the switch (Allow access tapped): try once, App info › ⋮, come back. */
+    @Test
+    fun restrictedSettingsGuideBefore() {
+        app.prefs.setNameAsked()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Frame {
+                RestrictedSettingsGuide(visible = true, before = true, onOpenAppInfo = {}, onOpenAccess = {}, onClose = {})
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide-before.png")
+    }
+
+    /** On a phone (Android 13+, sideloaded), in English: where the owner hit "App was denied access". */
+    @Test
+    @Config(sdk = [33], qualifiers = "en-w411dp-h891dp-port-xxhdpi")
+    fun restrictedSettingsGuidePhone() {
+        app.prefs.setNameAsked()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Frame {
+                RestrictedSettingsGuide(visible = true, before = true, onOpenAppInfo = {}, onOpenAccess = {}, onClose = {})
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide-phone.png")
+    }
+
     @Test
     fun homeScreen() {
         app.prefs.setNameAsked()
