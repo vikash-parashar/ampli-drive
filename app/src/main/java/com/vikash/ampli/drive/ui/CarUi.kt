@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Snooze
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.TireRepair
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -331,7 +332,7 @@ fun ParkedPill(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
 
 // ------------------------------------------------------------------------------ Car hub
 
-enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings, Fuel, Radar }
+enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings, Fuel, Radar, Dashcam }
 
 @Composable
 fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
@@ -428,6 +429,20 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
                 )
             },
             { m ->
+                val cam by app.dashcam.state.collectAsStateWithLifecycle()
+                CarTile(
+                    stringResource(R.string.dashcam_title), Icons.Filled.Videocam,
+                    when {
+                        !pro.isPro -> stringResource(R.string.car_pro_feature)
+                        !app.dashcam.hasCamera -> stringResource(R.string.dashcam_no_camera_short)
+                        cam.recording -> stringResource(R.string.dashcam_recording)
+                        else -> stringResource(R.string.car_off)
+                    },
+                    alert = cam.recording, locked = !pro.isPro,
+                    onClick = { onOpen(CarDest.Dashcam) }, modifier = m,
+                )
+            },
+            { m ->
                 CarTile(
                     stringResource(R.string.fuel_title), Icons.Filled.LocalGasStation,
                     stringResource(R.string.fuel_tile_hint),
@@ -483,7 +498,7 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
         )
         Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-            // Two rows (6 + 5 tiles); the shorter row keeps the same tile width.
+            // Two rows (6 + 6 tiles); the shorter row keeps the same tile width.
             val perRow = (tiles.size + 1) / 2
             for (row in tiles.chunked(perRow)) {
                 Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {

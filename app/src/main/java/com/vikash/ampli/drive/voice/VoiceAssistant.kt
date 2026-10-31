@@ -123,6 +123,34 @@ class VoiceAssistant(private val app: DriveApp) {
         }
     }
 
+    /**
+     * One short spoken answer outside a Hey Ampli session (the call and message cards: "हाँ / ना",
+     * or a dictated reply). The wake word lets go of the mic meanwhile, a beep
+     * says "speak now", and the recogniser listens once. Null when nothing was heard, a session
+     * is running, the microphone isn't allowed or there is no recogniser.
+     */
+    suspend fun listenOnce(): String? {
+        if (job?.isActive == true) return null
+        if (app.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return null
+        if (!listener.isAvailable()) return null
+        return withMic {
+            speaker.earcon()
+            when (val r = listener.listen(language(), onPartial = {}, commandsOnly = false)) {
+                is Listener.Result.Heard -> r.text
+                else -> null
+            }
+        }
+    }
+
+    /** True when [listenOnce] can work: a recogniser (or the offline model) and the mic. */
+    fun canListen(): Boolean =
+        app.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED && listener.isAvailable()
+
+    /** Stops a [listenOnce] (the card was tapped or the call ended). */
+    fun cancelListen() {
+        if (job?.isActive != true) listener.cancel()
+    }
+
     /** The overlay's Cancel button. */
     fun cancel() {
         job?.cancel()
@@ -357,6 +385,16 @@ class VoiceAssistant(private val app: DriveApp) {
                 return Expect.Destination
             }
             is VoiceIntent.SmallTalk -> return smallTalk(intent.kind, res, lang)
+            VoiceIntent.DashcamSave -> {
+                // Pro dashcam: lock the last clip. Says why when it isn't recording.
+                val saved = app.dashcam.saveNow(byVoice = true)
+                if (saved) {
+                    styled(res, lang, HaryanviLines.Event.DashcamSaved, res.getString(R.string.dashcam_voice_saved))
+                } else {
+                    say(res, lang, R.string.dashcam_voice_not_recording)
+                }
+                return null
+            }
             VoiceIntent.ServiceDue -> {
                 say(res, lang, CarAnswers.service(app, res))
                 return null

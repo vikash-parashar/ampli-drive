@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp सन्देश सुन्न नोटिफिकेसन पहुँच चाहिन्छ।</string>
     <string name="wa_tts_missing">यो युनिटमा बोली इन्जिन छैन, त्यसैले सन्देश बोलेर सुनाउन सकिँदैन। आवाज जाँच्नुहोस् मा गएर एउटा इन्जिन हाल्नुहोस्।</string>
     <string name="wa_park_to_turn_on">खोल्न गाडी रोक्नुहोस्।</string>
+    <string name="disclosure_chat2_title">Telegram र बोलेर जवाफ</string>
+    <string name="disclosure_chat2_body">Telegram सन्देश बोलेर सुनाउन र तपाईंले बोलेको जवाफ पठाउन Car Hub ले WhatsApp र Telegram सूचनाबाट पठाउनेको नाम र सन्देशको पाठ पढ्छ र सूचनाकै जवाफ बटन प्रयोग गर्छ। यसका लागि सूचना पहुँच र माइक्रोफोन प्रयोग हुन्छ।</string>
+    <string name="disclosure_chat2_uses">तपाईंले जवाफ बोलेर, फेरि सुनेर “हो, पठाइदेऊ” भनेपछि मात्र जवाफ पठाइन्छ। तपाईंले बोलेको जवाफ तपाईंको यन्त्रको बोली पहिचान सेवाले (जस्तै Google को) पाठमा बदल्छ, त्यसपछि त्यो WhatsApp वा Telegram लाई दिइन्छ, जसले त्यसलाई पठाउँछ। सन्देशहरू ड्राइभिङ स्क्रिनमा कहिल्यै देखाइँदैनन् र सेभ गरिँदैनन्।</string>
+    <string name="disclosure_chat2_stays">Car Hub ले केही पनि सेभ वा अपलोड गर्दैन, र Ampli Studio वा अरू कसैसँग केही पनि सेयर गर्दैन।</string>
 </resources>

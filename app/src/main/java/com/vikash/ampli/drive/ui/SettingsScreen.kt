@@ -274,8 +274,10 @@ fun SettingsScreen(
             WelcomeSettingsCard(app = app)
             NavigateWithCard(app = app)
             NavPromptsCard(app = app)
+            CallSettingsCard(app = app, resumeTick = resumeTick)
             WhatsAppReadCard(app = app, isPro = pro.isPro, resumeTick = resumeTick, onLocked = { showProSheet = true })
             CarStartCard(app = app)
+            BhajanSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             CameraSettingsCard(app = app, isPro = pro.isPro, onLocked = { showProSheet = true })
             // Settings › Display: Ampli as the whole screen.
             ToggleRow(

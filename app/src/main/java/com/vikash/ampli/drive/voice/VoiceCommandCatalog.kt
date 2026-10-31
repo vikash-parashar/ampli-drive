@@ -83,6 +83,7 @@ object VoiceCommandCatalog {
                 item("Connect my phone", "Phone jodo", "Android Auto"),
                 item("Bluetooth settings", "Bluetooth kholo", "ब्लूटूथ खोलो"),
                 item("Brightness up", "Brightness kam karo", "ब्राइटनेस बढ़ाओ"),
+                item("Save the video", "Save kar", "क्लिप सेव कर दे"),
             ),
         ),
         Group(

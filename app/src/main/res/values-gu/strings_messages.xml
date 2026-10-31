@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp મેસેજ સાંભળવા નોટિફિકેશન ઍક્સેસ જોઈએ.</string>
     <string name="wa_tts_missing">આ યુનિટમાં સ્પીચ એન્જિન નથી, તેથી મેસેજ વાંચી સંભળાવી શકાતા નથી. અવાજ તપાસો માં જઈ એક એન્જિન ઇન્સ્ટૉલ કરો.</string>
     <string name="wa_park_to_turn_on">ચાલુ કરવા ગાડી રોકો.</string>
+    <string name="disclosure_chat2_title">Telegram અને બોલીને જવાબ</string>
+    <string name="disclosure_chat2_body">Telegram મેસેજ મોટેથી વાંચી સંભળાવવા અને તમે બોલેલો જવાબ મોકલવા માટે Car Hub WhatsApp અને Telegram નોટિફિકેશનમાંથી મોકલનારનું નામ અને મેસેજનો ટેક્સ્ટ વાંચે છે અને નોટિફિકેશનનું પોતાનું જવાબ બટન વાપરે છે. આ માટે નોટિફિકેશન ઍક્સેસ અને માઇક્રોફોન વપરાય છે.</string>
+    <string name="disclosure_chat2_uses">તમે જવાબ બોલો, ફરી સાંભળો અને “હા, મોકલી દે” કહો પછી જ જવાબ મોકલાય છે. તમારો બોલેલો જવાબ તમારા ડિવાઇસની વાણી ઓળખ સેવા (જેમ કે Google ની) ટેક્સ્ટમાં ફેરવે છે, પછી તે WhatsApp કે Telegram ને અપાય છે, જે તેને મોકલે છે. મેસેજ ક્યારેય ડ્રાઇવિંગ સ્ક્રીન પર દેખાતા નથી અને સેવ થતા નથી.</string>
+    <string name="disclosure_chat2_stays">Car Hub કંઈ સેવ કે અપલોડ કરતું નથી, અને Ampli Studio કે બીજા કોઈ સાથે કંઈ શેર કરતું નથી.</string>
 </resources>

@@ -251,6 +251,8 @@ class CarMonitor(private val app: DriveApp) {
     /** Screen off / shutdown (ignition off on most head units). */
     fun onIgnitionOff() {
         store.flushOdometer()
+        // Close the dashcam clip so it plays back after the power cut.
+        app.dashcam.onIgnitionOff()
         val loc = lastLocation
         endTrip(loc?.latitude, loc?.longitude)
         if (loc == null) return
@@ -352,6 +354,8 @@ class CarMonitor(private val app: DriveApp) {
         SosNotifier.cancel(app)
         // No WhatsApp message may talk over the countdown or the SOS screen.
         app.messages.cancelAll()
+        // Keep the dashcam clip of the impact (no-op when the dashcam is off).
+        app.dashcam.onJolt()
         // A fresh fix for the SOS message, whether or not the countdown screen is showing.
         crashFix = null
         crashFixSignal?.cancel()

@@ -57,6 +57,8 @@ object HaryanviLines {
         Talk("Small talk"),
         Papers("Papers and FASTag pass"),
         Radar("Fuel finder and radar"),
+        Calls("Calls and messages"),
+        Upkeep("Service and dashcam"),
 
         /** Recorded human voice only: stand-ins for lines with a name or number in them. */
         HumanVoice("Human voice only (no names or numbers)"),
@@ -327,6 +329,50 @@ object HaryanviLines {
 
         /** Arriving, the destination on the right: %1$d is the metres. */
         NavArrivingRight(Group.Navigation, "Destination on the right"),
+
+        // Round 4 (HaryanviLinesV4.kt): calls and chat messages answered by voice, service
+        // reminders at car start and the dashcam.
+
+        /** A phone call ringing (Settings › Announce calls): %1$s is the contact name or number. */
+        CallAnnounce(Group.Calls, "Incoming call (name)"),
+
+        /** A call from a private or unknown number. */
+        CallUnknown(Group.Calls, "Incoming call (no name)"),
+
+        /** "हाँ" to a call: it was picked up. */
+        CallAnswered(Group.Calls, "Call picked up"),
+
+        /** "ना" to a call: it was declined (or left to ring, when the unit can't decline). */
+        CallRejected(Group.Calls, "Call declined"),
+
+        /** "हाँ", but this phone or unit doesn't let an app pick up: tap the card's button. */
+        CallManual(Group.Calls, "Can't pick up by voice"),
+
+        /** Pro: a WhatsApp / Telegram message: %1$s is the sender, %2$s the app. */
+        MessageAnnounce(Group.Calls, "Chat message arrived"),
+
+        /** After reading a message that can be answered. */
+        MessageAskReply(Group.Calls, "Reply?"),
+
+        /** Before taking down a reply. */
+        MessageDictate(Group.Calls, "Say the reply"),
+
+        /** Reading the reply back before it goes: %1$s is the reply. */
+        MessageConfirm(Group.Calls, "Confirm the reply"),
+        MessageSent(Group.Calls, "Reply sent"),
+        MessageNotSent(Group.Calls, "Reply not sent"),
+
+        /** Car start, a service job due soon by distance: %1$s is the job, %2$d km left. */
+        ServiceDueKm(Group.Upkeep, "Service due (km)"),
+
+        /** Car start, a service job due soon by date: %1$s is the job, %2$d days left. */
+        ServiceDueDays(Group.Upkeep, "Service due (days)"),
+
+        /** Car start, a service job overdue: %1$s is the job. */
+        ServiceOverdue(Group.Upkeep, "Service overdue"),
+
+        /** Dashcam (Pro): a jolt or "save kar" locked the last clip. */
+        DashcamSaved(Group.Upkeep, "Dashcam clip saved"),
 
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
@@ -951,13 +997,13 @@ object HaryanviLines {
     )
 
     /**
-     * First-round lines, then round 2 ([LINES_V2]) and round 3 ([LINES_V3]) appended so earlier
+     * First-round lines, then rounds 2, 3 and 4 ([LINES_V2], [LINES_V3], [LINES_V4]) appended so earlier
      * clip ids keep their numbers.
      */
     private val ALL: Map<Event, List<Line>> by lazy {
         val out = LinkedHashMap<Event, List<Line>>()
         for (event in Event.entries) {
-            val lines = LINES[event].orEmpty() + LINES_V2[event].orEmpty() + LINES_V3[event].orEmpty()
+            val lines = LINES[event].orEmpty() + LINES_V2[event].orEmpty() + LINES_V3[event].orEmpty() + LINES_V4[event].orEmpty()
             if (lines.isNotEmpty()) out[event] = lines
         }
         out
@@ -1010,6 +1056,12 @@ object HaryanviLines {
         Event.NavDistanceLeft -> arrayOf(5)
         Event.NavKeepStraight -> arrayOf(8)
         Event.NavArrivingRight -> arrayOf(100)
+        Event.CallAnnounce -> arrayOf("मम्मी")
+        Event.MessageAnnounce -> arrayOf("रमेश", "WhatsApp")
+        Event.MessageConfirm -> arrayOf("दस मिनट मैं पहुँच रया सूं")
+        Event.ServiceDueKm -> arrayOf("इंजन ऑयल", 420)
+        Event.ServiceDueDays -> arrayOf("इंजन ऑयल", 9)
+        Event.ServiceOverdue -> arrayOf("इंजन ऑयल")
         else -> emptyArray()
     }
 }

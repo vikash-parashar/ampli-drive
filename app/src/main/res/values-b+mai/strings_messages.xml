@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp मैसेज सुनबाक लेल नोटिफिकेशन एक्सेस चाही।</string>
     <string name="wa_tts_missing">एहि यूनिट मे बाजय बला इंजन (TTS) नहि अछि, तेँ मैसेज बाजि कऽ नहि सुनाओल जा सकैत अछि। आवाज जाँचू मे जा कऽ एकटा इंजन लगाउ।</string>
     <string name="wa_park_to_turn_on">चालू करबाक लेल गाड़ी रोकू।</string>
+    <string name="disclosure_chat2_title">Telegram आ बाजि क\' जवाब</string>
+    <string name="disclosure_chat2_body">Telegram मैसेज बाजि क\' सुनाबए लेल आ अहाँक बाजल जवाब पठाबए लेल Car Hub WhatsApp आ Telegram नोटिफ़िकेशन सँ पठाबए बलाक नाम आ मैसेजक टेक्स्ट पढ़ैत अछि आ नोटिफ़िकेशनक अपन जवाब बला बटन प्रयोग करैत अछि। एहि लेल नोटिफ़िकेशन एक्सेस आ माइक्रोफ़ोनक प्रयोग होइत अछि।</string>
+    <string name="disclosure_chat2_uses">जवाब तखने पठाओल जाइत अछि जखन अहाँ ओकरा बाजी, फेर सँ सुनी आ “हँ, पठा दिअ” कही। अहाँक बाजल जवाब अहाँक डिवाइसक बोली चिन्हए बला सेवा (जेना Google क) टेक्स्ट मे बदलैत अछि, फेर ओ WhatsApp वा Telegram केँ देल जाइत अछि, जे ओकरा पठबैत अछि। मैसेज ड्राइविंग स्क्रीन पर कहियो नहि देखाइत अछि आ कतहु सेव नहि होइत अछि।</string>
+    <string name="disclosure_chat2_stays">Car Hub किछुओ सेव वा अपलोड नहि करैत अछि, आ Ampli Studio वा आन ककरो संग किछुओ शेयर नहि करैत अछि।</string>
 </resources>

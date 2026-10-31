@@ -17,4 +17,8 @@
     <string name="wa_needs_access">Nécessite l\'accès aux notifications pour entendre les messages WhatsApp.</string>
     <string name="wa_tts_missing">Cet appareil n\'a pas de moteur vocal, les messages ne peuvent donc pas être lus. Installez-en un dans Vérifier la voix.</string>
     <string name="wa_park_to_turn_on">Garez-vous pour activer.</string>
+    <string name="disclosure_chat2_title">Telegram et réponses vocales</string>
+    <string name="disclosure_chat2_body">Pour lire les messages Telegram à voix haute et envoyer les réponses que vous dictez, Car Hub lit le nom de l\'expéditeur et le texte du message dans les notifications WhatsApp et Telegram et utilise le bouton de réponse de la notification. Il utilise pour cela l\'accès aux notifications et le micro.</string>
+    <string name="disclosure_chat2_uses">Une réponse n\'est envoyée qu\'après que vous l\'avez dite, entendue relue et confirmée par « haan, bhej de ». Votre réponse dictée est transformée en texte par le service de reconnaissance vocale de votre appareil (par exemple celui de Google), puis transmise à WhatsApp ou Telegram, qui l\'envoient. Les messages ne sont jamais affichés sur l\'écran de conduite ni enregistrés.</string>
+    <string name="disclosure_chat2_stays">Car Hub n\'enregistre et n\'envoie rien, et ne partage rien avec Ampli Studio ni avec personne.</string>
 </resources>

@@ -17,4 +17,8 @@
     <string name="wa_needs_access">Braucht Zugriff auf Benachrichtigungen, um WhatsApp-Nachrichten zu hören.</string>
     <string name="wa_tts_missing">Dieses Gerät hat keine Sprachausgabe, daher können Nachrichten nicht vorgelesen werden. Installiere eine unter Sprache prüfen.</string>
     <string name="wa_park_to_turn_on">Zum Einschalten anhalten.</string>
+    <string name="disclosure_chat2_title">Telegram und Antworten per Sprache</string>
+    <string name="disclosure_chat2_body">Um Telegram-Nachrichten vorzulesen und gesprochene Antworten zu senden, liest Car Hub den Namen des Absenders und den Nachrichtentext aus WhatsApp- und Telegram-Benachrichtigungen und nutzt die Antworttaste der Benachrichtigung. Dafür werden der Benachrichtigungszugriff und das Mikrofon verwendet.</string>
+    <string name="disclosure_chat2_uses">Eine Antwort wird erst gesendet, wenn du sie gesprochen, vorgelesen bekommen und mit „haan, bhej de“ bestätigt hast. Deine gesprochene Antwort wird vom Spracherkennungsdienst deines Geräts (zum Beispiel von Google) in Text umgewandelt und dann an WhatsApp oder Telegram übergeben, die sie senden. Nachrichten werden nie auf dem Fahrbildschirm angezeigt und nie gespeichert.</string>
+    <string name="disclosure_chat2_stays">Car Hub speichert und lädt nichts hoch und teilt nichts mit Ampli Studio oder anderen.</string>
 </resources>

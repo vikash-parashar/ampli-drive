@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp বাৰ্তা শুনিবলৈ জাননী এক্সেছ লাগে।</string>
     <string name="wa_tts_missing">এই ইউনিটত কথন ইঞ্জিন নাই, সেয়ে বাৰ্তা মাতি শুনাব নোৱাৰি। মাত পৰীক্ষা কৰক-ত গৈ এটা ইঞ্জিন ইনষ্টল কৰক।</string>
     <string name="wa_park_to_turn_on">অন কৰিবলৈ গাড়ী ৰখাওক।</string>
+    <string name="disclosure_chat2_title">Telegram আৰু মাতি উত্তৰ</string>
+    <string name="disclosure_chat2_body">Telegram বাৰ্তা মাতি শুনাবলৈ আৰু আপুনি কোৱা উত্তৰ পঠাবলৈ Car Hub-এ WhatsApp আৰু Telegram জাননীৰ পৰা প্ৰেৰকৰ নাম আৰু বাৰ্তাৰ লিখনি পঢ়ে আৰু জাননীৰ নিজৰ উত্তৰ বুটাম ব্যৱহাৰ কৰে। ইয়াৰ বাবে জাননী এক্সেছ আৰু মাইক্ৰ\'ফোন ব্যৱহাৰ হয়।</string>
+    <string name="disclosure_chat2_uses">আপুনি উত্তৰটো কৈ, পুনৰ শুনি “হয়, পঠিয়াই দিয়া” কোৱাৰ পিছতহে উত্তৰ পঠোৱা হয়। আপোনাৰ কোৱা উত্তৰ আপোনাৰ ডিভাইচৰ কথা চিনাক্তকৰণ সেৱাই (যেনে Google-ৰ) লিখনিলৈ সলনি কৰে, তাৰ পিছত সেয়া WhatsApp বা Telegram-লৈ দিয়া হয়, যিয়ে পঠিয়ায়। বাৰ্তা ড্ৰাইভিং স্ক্ৰীণত কেতিয়াও দেখুওৱা নহয় আৰু সংৰক্ষণ কৰা নহয়।</string>
+    <string name="disclosure_chat2_stays">Car Hub-এ একো সংৰক্ষণ বা আপল\'ড নকৰে, আৰু Ampli Studio বা আন কাৰো লগত একো শ্বেয়াৰ নকৰে।</string>
 </resources>

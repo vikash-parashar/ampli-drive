@@ -17,4 +17,8 @@
     <string name="wa_needs_access">需要通知使用权才能听到 WhatsApp 消息。</string>
     <string name="wa_tts_missing">此设备没有语音引擎，无法朗读消息。请在\"检查语音\"中安装一个。</string>
     <string name="wa_park_to_turn_on">停车后才能开启。</string>
+    <string name="disclosure_chat2_title">Telegram 与语音回复</string>
+    <string name="disclosure_chat2_body">为了朗读 Telegram 消息并发送您说出的回复，Car Hub 会从 WhatsApp 和 Telegram 通知中读取发送者姓名和消息文字，并使用通知自带的回复按钮。为此会使用通知访问权限和麦克风。</string>
+    <string name="disclosure_chat2_uses">只有在您说出回复、听到复述并说出“haan, bhej de”之后，回复才会发送。您说出的回复由设备的语音识别服务（例如 Google 的）转换为文字，然后交给 WhatsApp 或 Telegram 发送。消息绝不会显示在驾驶屏幕上，也不会被保存。</string>
+    <string name="disclosure_chat2_stays">Car Hub 不存储、不上传任何内容，也不与 Ampli Studio 或其他任何人分享任何内容。</string>
 </resources>

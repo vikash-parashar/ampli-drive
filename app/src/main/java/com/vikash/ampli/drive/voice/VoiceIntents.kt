@@ -39,6 +39,9 @@ sealed interface VoiceIntent {
 
     /** "SOS", "help me", "emergency": opens the Help panel. Never sends anything by itself. */
     data object Sos : VoiceIntent
+
+    /** Dashcam (Pro): "save kar" / "video save karo" locks the last clip. */
+    data object DashcamSave : VoiceIntent
     data object Greeting : VoiceIntent
 
     /** Small talk: "के हाल सै?", "कौन सै तू?", "चुटकला सुणा". */
@@ -126,6 +129,7 @@ object VoiceIntents {
             roadReport(t, kw)?.let { return it }
         }
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
+        if (!playWord && DASHCAM_SAVE.any { has(t, it) }) return VoiceIntent.DashcamSave
         if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
         if (!playWord) {
             roadReport(t, kw)?.let { return it }
@@ -495,6 +499,13 @@ object VoiceIntents {
     /** The accident is ahead of the car, not the car's own. */
     private val AHEAD = listOf("aage", "aagey", "आगे", "ahead", "up ahead", "further on")
         .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** "save kar", "video save karo", "क्लिप सेव कर दे": the dashcam keeps the last clip. */
+    private val DASHCAM_SAVE = listOf(
+        "save kar", "save karo", "save kar de", "save kar do", "video save", "clip save", "recording save",
+        "save the video", "save video", "save clip", "save the clip", "save recording",
+        "सेव कर", "सेव करो", "सेव कर दे", "वीडियो सेव", "क्लिप सेव", "रिकॉर्डिंग सेव", "वीडियो बचा", "रिकॉर्डिंग बचा",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     /** Words that keep "accident" an SOS even with "ahead" in it. */
     private val SOS_STRONG = listOf("help", "ambulance", "sos", "emergency", "madad", "bachao", "मदद", "बचाओ", "एम्बुलेंस", "इमरजेंसी", "hurt", "injured", "चोट")

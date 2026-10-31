@@ -83,6 +83,18 @@ class DriveApp : Application() {
     val messages: com.vikash.ampli.drive.messages.WhatsAppReader by lazy { com.vikash.ampli.drive.messages.WhatsAppReader(this) }
     val emergency: EmergencyStore by lazy { EmergencyStore(this) }
 
+    /** Free: incoming calls announced in Haryanvi and answered by voice (Settings, off by default). */
+    val calls: com.vikash.ampli.drive.calls.CallAnnouncer by lazy { com.vikash.ampli.drive.calls.CallAnnouncer(this) }
+
+    /** Service jobs (oil, tyres…) due soon, spoken at car start after the papers. */
+    val serviceVoice: com.vikash.ampli.drive.car.ServiceVoice by lazy { com.vikash.ampli.drive.car.ServiceVoice(this) }
+
+    /** Pro: loop-recording dashcam (only on units with a camera; off until switched on). */
+    val dashcam: com.vikash.ampli.drive.dashcam.Dashcam by lazy { com.vikash.ampli.drive.dashcam.Dashcam(this) }
+
+    /** Optional short bhajan after the car-start welcome (off by default). */
+    val bhajan: com.vikash.ampli.drive.bhajan.BhajanPlayer by lazy { com.vikash.ampli.drive.bhajan.BhajanPlayer(this) }
+
     /** Car owner features: break reminder, papers, parking, crash detection, weather, expenses. */
     val car: CarMonitor by lazy { CarMonitor(this) }
 

@@ -8,6 +8,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.graphics.drawable.toBitmap
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.calls.CallAnnouncer
 import com.vikash.ampli.drive.fastag.FastagParser
 import com.vikash.ampli.drive.messages.WhatsAppReader
 import com.vikash.ampli.drive.nav.NavTurnRepository
@@ -20,8 +21,12 @@ import com.vikash.ampli.drive.nav.NextTurn
  * 2. It reads Google Maps' ongoing navigation notification to fill the next-turn card.
  * 3. It reads SMS notifications (Google Messages, Samsung, AOSP, the default SMS app, phone-link
  *    apps) for FASTag toll debits. No READ_SMS permission: only what the notification shows.
- * 4. Pro, off by default, after its own disclosure: WhatsApp / WhatsApp Business message
- *    notifications, read aloud and never shown or stored ([WhatsAppReader]).
+ * 4. Pro, off by default, after its own disclosure: WhatsApp / WhatsApp Business (and, after a
+ *    second disclosure, Telegram) message notifications, read aloud and never shown or stored;
+ *    a reply goes only through the notification's own reply button after a spoken "yes"
+ *    ([WhatsAppReader]).
+ * 5. Free, off by default: a ringing call's notification (the dialer, a head unit's Bluetooth
+ *    phone app) for the caller's name and its Answer / Decline buttons ([CallAnnouncer]).
  */
 class DriveNotificationListener : NotificationListenerService() {
 
@@ -46,6 +51,8 @@ class DriveNotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        // Settings › Announce calls: a ringing call's notification (cheap exit when off or not a call).
+        (application as? DriveApp)?.calls?.onNotification(sbn)
         if (isNavNotification(sbn)) {
             handle(sbn)
         } else if (isSmsNotification(sbn)) {
@@ -57,6 +64,7 @@ class DriveNotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        (application as? DriveApp)?.calls?.onNotificationRemoved(sbn)
         if (sbn.packageName in NAV_PACKAGES && sbn.isOngoing) {
             NavTurnRepository.clear(sbn.packageName)
         }

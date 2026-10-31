@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp संदेश आयकुपाक नोटिफिकेशन ॲक्सेस जाय.</string>
     <string name="wa_tts_missing">ह्या युनिटांत उलोवपाचें इंजिन ना, देखून संदेश वाचून दाखोवंक जायना. आवाज तपासात हांगा एक इंजिन घालात.</string>
     <string name="wa_park_to_turn_on">सुरू करपाक गाडी राबयात.</string>
+    <string name="disclosure_chat2_title">Telegram आनी उलोवन जाप</string>
+    <string name="disclosure_chat2_body">Telegram संदेश वाचून दाखोवपाक आनी तुमी उलयल्लें जाप धाडपाक Car Hub WhatsApp आनी Telegram नोटिफिकेशनांतल्यान धाडपी मनशाचें नांव आनी संदेशाचो मजकूर वाचता आनी नोटिफिकेशनाचें स्वताचें जाप बटण वापरता. हाका लागून नोटिफिकेशन एक्सेस आनी मायक्रोफोन वापरतात.</string>
+    <string name="disclosure_chat2_uses">तुमी जाप उलोवन, परत आयकून “हय, धाड” म्हणटा तेन्नाच जाप धाडटात. तुमचो उलयल्लो जाप तुमच्या डिव्हायसाची उलोवप वळखुपी सेवा (देखीक Google ची) मजकुरांत बदलता, मागीर तो WhatsApp वा Telegram क दितात, जे तो धाडटात. संदेश ड्रायव्हिंग स्क्रीनार केन्नाच दाखयनात आनी सेव करिनात.</string>
+    <string name="disclosure_chat2_stays">Car Hub कांयच सेव वा अपलोड करिना, आनी Ampli Studio वा हेर कोणाकूय कांयच शेयर करिना.</string>
 </resources>

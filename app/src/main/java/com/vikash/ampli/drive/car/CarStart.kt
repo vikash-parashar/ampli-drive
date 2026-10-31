@@ -105,7 +105,8 @@ object StartPolicy {
  * start other apps. A signal that arrives while Car Hub is hidden is kept as pending and runs the
  * next time the launcher shows.
  *
- * Actions: the welcome message (WelcomeGreeter), spoken paper reminders (PaperVoice) and Settings › When the car
+ * Actions: the welcome message (WelcomeGreeter), spoken paper and service reminders (PaperVoice,
+ * ServiceVoice), the optional bhajan (BhajanPlayer) and Settings › When the car
  * starts (open the phone-mirroring app, or start music and open the map).
  */
 object CarStart {
@@ -244,6 +245,16 @@ object CarStart {
                 // Papers about to expire / FASTag pass running low, in the same voice (at most two).
                 try {
                     app.paperVoice.speakAtStart()
+                    // Then the service job due soonest (oil, tyres…), at most one.
+                    app.serviceVoice.speakAtStart()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                }
+                // Optional short bhajan (off by default), low, after the spoken lines. It stops
+                // for music, Hey Ampli or a tap, and the auto start below waits for it.
+                try {
+                    app.bhajan.playAtStart(showCard = !moving)
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (_: Exception) {
