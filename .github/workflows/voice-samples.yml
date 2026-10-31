@@ -1,0 +1,36 @@
+name: Voice samples
+
+# Records three Haryanvi lines in several Indian male and female voices for comparison.
+# Runs on a push to voice-samples-run and pushes the clips to voice-samples/<run>.
+on:
+  push:
+    branches: [voice-samples-run]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: voice-samples
+  cancel-in-progress: false
+
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: command -v ffmpeg >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q ffmpeg; }
+      - name: Record samples
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 scripts/voice_samples.py
+      - name: Push the clips
+        run: |
+          branch="voice-samples/${{ github.run_number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add voice-samples
+          git commit -q -m "Voice samples (run ${{ github.run_number }})"
+          git push -q origin "$branch"
