@@ -124,6 +124,8 @@ internal class FourThemeShots(private val compose: ComposeContentTestRule, priva
     fun driving(themeId: String) {
         setUp(themeId)
         shadowOf(app).grantPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        // Already agreed, as on a unit in use: no background-location explainer over Home.
+        app.prefs.setBgDisclosureAccepted(true)
         app.navigator.showPreview(previewTrip())
         val fake = {
             val here = Location(LocationManager.GPS_PROVIDER).apply {
