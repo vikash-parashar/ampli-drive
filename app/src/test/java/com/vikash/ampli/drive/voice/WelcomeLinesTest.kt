@@ -28,10 +28,20 @@ class WelcomeLinesTest {
             val texts = (0..9).map { haryanvi(name, it).text }
             for (t in texts) assertFalse(t, t.contains("%"))
             for (i in 1 until texts.size) assertTrue("repeat at $i", texts[i] != texts[i - 1])
-            // Every opener gets its turn, the owner's new lines included.
-            for (opener in lines(HaryanviLines.Event.Welcome)) {
+            // Every first-round opener gets its turn, the owner's new lines included. Round-2
+            // openers wait for their recorded clips (checked below).
+            for (opener in lines(HaryanviLines.Event.Welcome).take(HaryanviLines.firstRoundCount(HaryanviLines.Event.Welcome))) {
                 assertTrue("never said: ${opener.deva}", texts.any { it.startsWith(opener.deva) })
             }
+        }
+        // Once the recorded voice has every clip, the round-2 openers join the rotation.
+        val all = lines(HaryanviLines.Event.Welcome)
+        VoiceGate.recordedHasClip = { true }
+        try {
+            val texts = (0 until all.size * 2).map { haryanvi(null, it).text }
+            for (opener in all) assertTrue("never said: ${opener.deva}", texts.any { it.startsWith(opener.deva) })
+        } finally {
+            VoiceGate.recordedHasClip = null
         }
         for (count in 0..5) assertEquals("Ram Ram 🙏", haryanvi("", count).card)
     }
