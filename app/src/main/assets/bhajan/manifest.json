@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "note": "Short bhajans played after the car-start welcome (Settings > When the car starts > Bhajan). Only Ampli's own original recordings go here: no third-party audio or lyrics. Each entry needs bhajan/<id>.mp3 next to this file; until it is added, the app skips that bhajan quietly. 'original' must be true or the entry is ignored. 'free': the one bhajan free users get. 'days': the days it plays by default (MON..SUN).",
+  "bhajans": [
+    {
+      "id": "hanuman_short",
+      "title": "Hanuman Chalisa (short)",
+      "titleHi": "हनुमान चालीसा (छोटा)",
+      "greeting": "जय बजरंगबली!",
+      "file": "bhajan/hanuman_short.mp3",
+      "seconds": 45,
+      "free": true,
+      "days": ["TUE"],
+      "original": true
+    },
+    {
+      "id": "ram_naam_dhun",
+      "title": "Ram naam dhun",
+      "titleHi": "राम नाम धुन",
+      "greeting": "जय श्री राम!",
+      "file": "bhajan/ram_naam_dhun.mp3",
+      "seconds": 45,
+      "free": false,
+      "days": ["MON", "WED", "THU", "FRI", "SUN"],
+      "original": true
+    },
+    {
+      "id": "shanidev_aarti",
+      "title": "Shani Dev aarti",
+      "titleHi": "शनिदेव आरती",
+      "greeting": "जय शनिदेव!",
+      "file": "bhajan/shanidev_aarti.mp3",
+      "seconds": 45,
+      "free": false,
+      "days": ["SAT"],
+      "original": true
+    }
+  ]
+}

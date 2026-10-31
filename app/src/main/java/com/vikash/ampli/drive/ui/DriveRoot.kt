@@ -59,6 +59,9 @@ enum class Screen {
 
     /** Fuel / CNG / EV finder and the speed-camera radar (from the Car hub, or by voice). */
     Fuel, Radar,
+
+    /** Car hub › Dashcam (Pro; "No camera found" on units without one). */
+    Dashcam,
 }
 
 @Composable
@@ -228,6 +231,7 @@ fun DriveRoot(
                                         onNavigate(Screen.Fuel)
                                     }
                                     CarDest.Radar -> onNavigate(Screen.Radar)
+                                    CarDest.Dashcam -> onNavigate(Screen.Dashcam)
                                     CarDest.Settings -> {
                                         settingsReturn = Screen.Car
                                         onNavigate(Screen.Settings)
@@ -301,6 +305,10 @@ fun DriveRoot(
                             BackHandler(enabled = true) { onNavigate(subReturn) }
                             RadarScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
                         }
+                        Screen.Dashcam -> {
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            DashcamScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
+                        }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
@@ -352,6 +360,13 @@ fun DriveRoot(
                     RestrictedSettingsGuideHost(resumeTick = resumeTick)
                     // "Jai Baba Ki {name} Ji 🙏" while the car-start welcome plays.
                     WelcomeCardHost(app = app)
+                    // "जय बजरंगबली!" while the car-start bhajan plays ("छोड़ दे" stops it).
+                    BhajanCardHost(app = app)
+                    // Incoming call and WhatsApp / Telegram cards over the map; never over the SOS screens.
+                    if (screen != Screen.Crash && screen != Screen.Sos) {
+                        CallCardHost(app = app)
+                        MessageCardHost(app = app)
+                    }
                     // A trip started (voice, search, retry): show the navigation screen, unless the
                     // SOS countdown is up.
                     val navOpen by app.navigator.openRequest.collectAsStateWithLifecycle()

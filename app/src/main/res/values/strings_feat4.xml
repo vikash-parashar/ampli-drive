@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calls and WhatsApp / Telegram voice answers, service reminders, dashcam, bhajan on ignition. -->
+<resources>
+    <!-- Calls: spoken (Standard style, and recorded voices without the clip). -->
+    <string name="call_voice_ask">%1$s is calling. Answer?</string>
+    <string name="call_voice_ask_unknown">A call is coming in. Answer?</string>
+    <string name="call_voice_answered">Call answered.</string>
+    <string name="call_voice_declined">Call declined.</string>
+    <string name="call_voice_manual">Please answer on the phone screen.</string>
+    <string name="call_unknown_caller">Unknown caller</string>
+    <!-- Calls: the card over the map. -->
+    <string name="call_card_label">Incoming call</string>
+    <string name="call_card_answer">Yes, answer</string>
+    <string name="call_card_later">Later</string>
+    <string name="call_card_say">Say: yes / no</string>
+    <string name="call_card_answered">Answered</string>
+    <string name="call_card_tap">Tap the green button on the phone screen.</string>
+    <!-- Calls: Settings. -->
+    <string name="calls_title">Announce incoming calls</string>
+    <string name="calls_hint_off">The car says who is calling and you answer by voice.</string>
+    <string name="calls_hint_on">On. The caller\'s name is read out when a call rings.</string>
+    <string name="calls_listen_title">Answer by voice</string>
+    <string name="calls_listen_hint">After the name, say “haan” or “utha le” to answer, “naa” or “baad mein” to decline.</string>
+    <string name="calls_needs_permission">Allow phone and contacts so the caller\'s name can be read and the call answered.</string>
+    <string name="calls_allow">Allow</string>
+    <string name="calls_needs_access">Head unit Bluetooth calls need notification access.</string>
+    <string name="calls_rules">Free. Nothing about your calls is saved or sent anywhere. Some head unit phone apps can\'t be answered by voice; the card then asks you to tap.</string>
+
+    <!-- WhatsApp / Telegram: spoken. -->
+    <string name="chat_voice_ask">Message from %1$s on %2$s. Shall I read it?</string>
+    <string name="chat_voice_ask_reply">Do you want to reply?</string>
+    <string name="chat_voice_dictate">Say your reply.</string>
+    <string name="chat_voice_confirm">Your reply: %1$s. Send it?</string>
+    <string name="chat_voice_sent">Reply sent.</string>
+    <string name="chat_voice_not_sent">Not sent.</string>
+    <!-- WhatsApp / Telegram: the card (the message text is never shown). -->
+    <string name="chat_card_offer">Message from %1$s. Read it?</string>
+    <string name="chat_card_offer_reply">Send a reply?</string>
+    <string name="chat_card_dictate">Say your reply…</string>
+    <string name="chat_card_confirm">Send this reply?</string>
+    <string name="chat_card_sent">Sent</string>
+    <string name="chat_card_read">Read it</string>
+    <string name="chat_card_skip">Skip</string>
+    <string name="chat_card_reply">Reply by voice</string>
+    <string name="chat_card_send">Yes, send</string>
+    <string name="chat_card_dont_send">Don\'t send</string>
+    <string name="chat_card_listening">Listening…</string>
+    <string name="chat_card_reading">Reading aloud…</string>
+    <!-- WhatsApp card: Telegram and voice replies. -->
+    <string name="chat_telegram_title">Telegram messages too</string>
+    <string name="chat_telegram_hint">Read Telegram messages the same way.</string>
+    <string name="chat_reply_title">Reply by voice</string>
+    <string name="chat_reply_hint">After a message, say your reply. It is read back before it is sent.</string>
+    <string name="chat_reply_rules">A reply goes only after you hear it read back and say “haan, bhej de”. It is sent by WhatsApp or Telegram through their own reply button; Car Hub uploads nothing.</string>
+    <string name="disclosure_chat2_title">Telegram and voice replies</string>
+    <string name="disclosure_chat2_body">To read Telegram messages aloud and to send replies you speak, Car Hub reads the sender\'s name and the message text from WhatsApp and Telegram notifications and uses the notification\'s own reply button. It uses notification access and the microphone to do this.</string>
+    <string name="disclosure_chat2_uses">A reply is sent only after you say it, hear it read back and say “haan, bhej de”. Your spoken reply is turned into text by your device\'s speech recognition service (for example Google\'s), then handed to WhatsApp or Telegram, which send it. Messages are never shown on the driving screen and never saved.</string>
+    <string name="disclosure_chat2_stays">Car Hub stores and uploads nothing, and shares nothing with Ampli Studio or anyone else.</string>
+
+    <!-- Service reminders at car start. -->
+    <string name="service_voice_due_km">%1$s is due in %2$d kilometres.</string>
+    <string name="service_voice_due_days">%1$s is due in %2$d days.</string>
+    <string name="service_voice_overdue">%1$s is overdue. Please get it done soon.</string>
+    <string name="service_voice_overdue_km">%1$s is overdue by %2$d kilometres. Please get it done soon.</string>
+    <!-- Expenses: mileage by fuel and reminders. -->
+    <string name="fuel_kg">Kilograms</string>
+    <string name="unit_kmkg">km/kg</string>
+    <string name="expenses_trend">Real mileage · last %1$d fills</string>
+    <string name="expenses_reminders">Service and papers</string>
+
+    <!-- Dashcam. -->
+    <string name="dashcam_title">Dashcam</string>
+    <string name="dashcam_hint">Loop recording on this unit\'s camera</string>
+    <string name="dashcam_point_loop">Records in a loop while you drive; the oldest clips are replaced.</string>
+    <string name="dashcam_point_jolt">A hard jolt, a crash or “save kar” keeps the last 30 seconds.</string>
+    <string name="dashcam_point_local">Clips stay on the unit. Nothing is uploaded.</string>
+    <string name="dashcam_no_camera">No camera found</string>
+    <string name="dashcam_no_camera_short">No camera found</string>
+    <string name="dashcam_no_camera_hint">This unit has no camera that apps can use, so the dashcam stays off.</string>
+    <string name="dashcam_switch">Record while driving</string>
+    <string name="dashcam_switch_hint">Video only, no sound. Starts when Car Hub opens.</string>
+    <string name="dashcam_recording">Recording</string>
+    <string name="dashcam_stopped">Not recording</string>
+    <string name="dashcam_loop_line">Loop recording · about %2$s hours in %1$s</string>
+    <string name="dashcam_saved_banner">Clip saved: the last 30 seconds are kept.</string>
+    <string name="dashcam_saved_tag">Saved</string>
+    <string name="dashcam_save_now">Save this clip</string>
+    <string name="dashcam_cap">Storage for clips</string>
+    <string name="dashcam_rules">Clips are saved in this app\'s own folder and deleted with the app. Saved clips use up to a quarter of the space.</string>
+    <string name="dashcam_no_clips">No clips yet</string>
+    <string name="dashcam_error_busy">The camera is busy or stopped. Close other camera apps and switch it on again.</string>
+    <string name="dashcam_error_permission">Allow the camera to record.</string>
+    <string name="dashcam_error_storage">Storage is almost full. Free some space or choose a smaller limit.</string>
+    <string name="dashcam_channel">Dashcam</string>
+    <string name="dashcam_notification">Dashcam recording</string>
+    <string name="dashcam_voice_saved">Clip saved.</string>
+    <string name="dashcam_voice_not_recording">The dashcam is not recording.</string>
+
+    <!-- Bhajan on ignition. -->
+    <string name="bhajan_title">Bhajan when the car starts</string>
+    <string name="bhajan_hint_off">Off. A short bhajan after the welcome, on the days you choose.</string>
+    <string name="bhajan_hint_days">On: %1$s, first start of the day</string>
+    <string name="bhajan_hint_every_morning">On: every morning, first start</string>
+    <string name="bhajan_choose">Days, bhajan and volume</string>
+    <string name="bhajan_rules">Plays low and stops when music starts, a call rings or you say “Hey Ampli”. One bhajan is free; the rest need Pro. Only Ampli\'s own recordings.</string>
+    <string name="bhajan_sheet_title">Bhajan settings</string>
+    <string name="bhajan_when">When to play</string>
+    <string name="bhajan_every_morning">Every morning, first start</string>
+    <string name="bhajan_for_day">Bhajan for %1$s</string>
+    <string name="bhajan_original">Ampli original</string>
+    <string name="bhajan_not_in_build">Ampli original · not in this version yet</string>
+    <string name="bhajan_none_bundled">No bhajans in this version.</string>
+    <string name="bhajan_preview">Play</string>
+    <string name="bhajan_volume">Volume: %1$d%%</string>
+    <string name="bhajan_card_day">Ram Ram this %1$s</string>
+    <string name="bhajan_card_playing">A short bhajan is playing (%1$d seconds)</string>
+    <string name="bhajan_card_stop">Stop</string>
+</resources>

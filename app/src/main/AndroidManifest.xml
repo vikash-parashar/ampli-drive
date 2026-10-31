@@ -52,6 +52,14 @@
     <uses-permission
         android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
+    <!-- Incoming call read-out (Settings › Calls, off by default): who is ringing, the caller's
+         name from the contacts, and "haan / naa" by voice. Asked for only from that switch. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+    <!-- Dashcam (Pro, off by default): video only, saved on the unit. Asked for from its switch. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
 
     <!-- The head unit has GPS but may lack some of these; none are required to install. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -61,6 +69,8 @@
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <!-- Package visibility (Android 11+): apps the launcher lists or opens. -->
     <queries>
@@ -281,6 +291,13 @@
             android:name=".car.CarMonitorService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <!-- Dashcam (Pro, off by default): loop recording while Maps is in front. Started only from
+             the visible launcher or the dashcam switch. -->
+        <service
+            android:name=".dashcam.DashcamService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
 
         <!-- Expenses › Export CSV: shares a file from the cache folder. -->
         <provider

@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp মেসেজ শুনতে নোটিফিকেশন অ্যাক্সেস দরকার।</string>
     <string name="wa_tts_missing">এই ইউনিটে স্পিচ ইঞ্জিন নেই, তাই মেসেজ পড়ে শোনানো যাবে না। ভয়েস দেখুন-এ গিয়ে একটি ইঞ্জিন ইনস্টল করুন।</string>
     <string name="wa_park_to_turn_on">চালু করতে গাড়ি থামান।</string>
+    <string name="disclosure_chat2_title">Telegram আর মুখে বলে উত্তর</string>
+    <string name="disclosure_chat2_body">Telegram মেসেজ জোরে পড়ে শোনাতে এবং আপনার বলা উত্তর পাঠাতে Car Hub WhatsApp ও Telegram নোটিফিকেশন থেকে প্রেরকের নাম ও মেসেজের লেখা পড়ে এবং নোটিফিকেশনের নিজস্ব উত্তর বোতাম ব্যবহার করে। এর জন্য নোটিফিকেশন অ্যাক্সেস ও মাইক্রোফোন ব্যবহার হয়।</string>
+    <string name="disclosure_chat2_uses">আপনি উত্তরটি বলে, আবার শুনে “হ্যাঁ, পাঠিয়ে দাও” বললে তবেই উত্তর পাঠানো হয়। আপনার বলা উত্তর আপনার ডিভাইসের কথা চেনার পরিষেবা (যেমন Google-এর) লেখায় বদলায়, তারপর তা WhatsApp বা Telegram-কে দেওয়া হয়, যারা সেটি পাঠায়। মেসেজ কখনও ড্রাইভিং স্ক্রিনে দেখানো হয় না এবং সেভ করা হয় না।</string>
+    <string name="disclosure_chat2_stays">Car Hub কিছুই সেভ বা আপলোড করে না, এবং Ampli Studio বা অন্য কারও সঙ্গে কিছুই শেয়ার করে না।</string>
 </resources>

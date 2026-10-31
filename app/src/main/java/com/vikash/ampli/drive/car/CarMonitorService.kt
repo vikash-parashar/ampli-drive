@@ -120,6 +120,7 @@ class CarMonitorService : Service() {
         app.car.startSensors()
         app.navPrompter.start()
         app.desi.start()
+        app.calls.start()
 
         bubble = SpeedBubble(app)
         // The bubble shows only while another app is in front.

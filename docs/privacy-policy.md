@@ -1,6 +1,6 @@
 # Ampli Car Hub privacy policy
 
-_Last updated: 17 October 2026_
+_Last updated: 31 October 2026_
 
 Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by **Ampli Studio** ("we"). This policy explains what the app does with your data.
 
@@ -28,6 +28,8 @@ The app stores these in its private storage on the head unit. Uninstalling the a
 | Paired tyre-sensor ids, OBD-II dongle address | Tyre pressure and engine readings (Pro) |
 | Settings, theme, language, wake-word model | Your preferences; the 36 MB offline speech model for "Hey Ampli" |
 | Your name, if you enter it | The spoken welcome when the car starts ("Ram Ram {name} Ji"). Optional; if you say it with the mic, the audio goes to your device's own speech recognition service like a "Hey Ampli" command |
+| Dashcam clips (Pro, off by default) | Loop recording from the unit's camera, video only (no sound), in the app's own folder; the oldest clips are deleted when the storage limit you set is reached. Never uploaded |
+| Bhajan settings (off by default) | Which days a short bhajan plays when the car starts, and its volume |
 | A random install id | Only used to link your Help & feedback reports (see below) |
 
 ## Location, including while the app is closed
@@ -46,14 +48,31 @@ Location is used on the unit. It is sent off the unit only in these cases:
 
 If you switch on **Always listen for "Hey Ampli"**, the app uses the microphone to listen for the wake word, **including when the app is closed or not in use**. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.
 
-## Notification access (FASTag SMS, music, navigation and WhatsApp read-aloud)
+## Phone calls and contacts (announce incoming calls)
+
+Only if you switch on **Announce incoming calls** (free, off by default), the app asks for these permissions from that switch, and each one is optional:
+
+- **Phone state** (READ_PHONE_STATE): to know when a call rings on the device running the app, and on older Android versions the caller's number;
+- **Contacts** (READ_CONTACTS): to look up the caller's name on the unit, so it can be spoken;
+- **Answer calls** (ANSWER_PHONE_CALLS): to answer or decline when you say "haan" or "naa" (or tap the card).
+
+A head unit's Bluetooth call is detected from its ringing notification (see Notification access), and its own Answer / Decline buttons are pressed. The caller's name or number is spoken and shown on the call card only while it rings. Nothing about your calls or contacts is stored, and nothing is sent to us or anyone else. After the name, the app listens once for "haan / naa"; that short answer is handled by your device's speech recognition service like a "Hey Ampli" command.
+
+## Camera (dashcam)
+
+Only if you have Pro and switch on **Dashcam** (off by default), the app asks for the camera permission and records video (no sound) from a camera on the unit while Car Hub is running, with a notification showing whenever it records. Clips stay in the app's own folder on the unit and are deleted with the app. A hard jolt, a crash or saying "save kar" keeps the current clip from being overwritten. Clips are never uploaded or sent anywhere; you can open one in your video player.
+
+## Notification access (FASTag SMS, music, navigation, calls and WhatsApp / Telegram read-aloud)
 
 With your permission (Android's notification access), the app reads:
 
 - notifications from your SMS app that mention FASTag, to pick out toll debits, recharges and the balance. Other SMS are ignored and not stored. The app has no SMS permission and cannot read your inbox;
 - the media player's now-playing information, to show and control music;
 - Google Maps' navigation notification, to show the next turn;
-- only if you switch on **Read WhatsApp messages aloud** (Pro, off by default, after its own explanation screen): WhatsApp and WhatsApp Business message notifications, to say the sender's name and the message out loud while you drive. The message is spoken only: it is never shown on screen and never stored, Ampli Car Hub never sends it to us or anyone else, and the app never replies or acts on the notification. It is spoken by your unit's text-to-speech engine. Most engines work on the unit; if yours is an online engine, the text is sent to that engine's provider to be turned into speech, under that provider's own privacy policy. Group messages are skipped unless you also switch on group messages. You can switch it off in Settings at any time.
+- only if you switch on **Read WhatsApp messages aloud** (Pro, off by default, after its own explanation screen): WhatsApp and WhatsApp Business message notifications, to say the sender's name and the message out loud while you drive. The message is spoken only: it is never shown on screen and never stored, Ampli Car Hub never sends it to us or anyone else, and the app never replies or acts on the notification unless you also switch on Reply by voice (below). It is spoken by your unit's text-to-speech engine. Most engines work on the unit; if yours is an online engine, the text is sent to that engine's provider to be turned into speech, under that provider's own privacy policy. Group messages are skipped unless you also switch on group messages. You can switch it off in Settings at any time.
+- only if you also switch on **Telegram messages too** (after its own explanation screen): Telegram message notifications, read in the same way;
+- only if you also switch on **Reply by voice** (after the same explanation screen): when a message has a reply button, the app asks whether you want to reply, listens for your reply, reads it back and sends it only after you say "haan, bhej de". Your spoken reply is turned into text by your device's speech recognition service (for example Google's), under that provider's own privacy policy, and is then handed to WhatsApp or Telegram through the notification's own reply button; WhatsApp or Telegram send it. Ampli Car Hub does not store the reply and never sends it to us or anyone else;
+- ringing call notifications, only if you switch on **Announce incoming calls**, to read the caller's name and press the notification's own Answer / Decline button when you ask.
 
 Ampli Car Hub keeps all of this on the unit (apart from what an online speech engine you chose may process, as above).
 
@@ -87,7 +106,7 @@ The app is meant for drivers and is not directed at children.
 
 ## Your choices
 
-Every feature that uses location in the background, the microphone or notification access can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help & feedback reports, write to the contact address above with your install id (shown in the report email or available on request).
+Every feature that uses location in the background, the microphone, the camera, phone and contacts permissions or notification access can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help & feedback reports, write to the contact address above with your install id (shown in the report email or available on request).
 
 ## Changes
 

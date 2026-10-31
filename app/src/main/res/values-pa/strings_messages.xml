@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp ਸੁਨੇਹੇ ਸੁਣਨ ਲਈ ਨੋਟੀਫ਼ਿਕੇਸ਼ਨ ਪਹੁੰਚ ਚਾਹੀਦੀ ਹੈ।</string>
     <string name="wa_tts_missing">ਇਸ ਯੂਨਿਟ ਵਿੱਚ ਸਪੀਚ ਇੰਜਣ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਸੁਨੇਹੇ ਬੋਲ ਕੇ ਨਹੀਂ ਸੁਣਾਏ ਜਾ ਸਕਦੇ। ਆਵਾਜ਼ ਜਾਂਚੋ ਵਿੱਚ ਜਾ ਕੇ ਇੱਕ ਇੰਜਣ ਇੰਸਟਾਲ ਕਰੋ।</string>
     <string name="wa_park_to_turn_on">ਚਾਲੂ ਕਰਨ ਲਈ ਗੱਡੀ ਰੋਕੋ।</string>
+    <string name="disclosure_chat2_title">Telegram ਅਤੇ ਬੋਲ ਕੇ ਜਵਾਬ</string>
+    <string name="disclosure_chat2_body">Telegram ਸੁਨੇਹੇ ਬੋਲ ਕੇ ਸੁਣਾਉਣ ਅਤੇ ਤੁਹਾਡਾ ਬੋਲਿਆ ਜਵਾਬ ਭੇਜਣ ਲਈ Car Hub WhatsApp ਅਤੇ Telegram ਸੂਚਨਾਵਾਂ ਤੋਂ ਭੇਜਣ ਵਾਲੇ ਦਾ ਨਾਮ ਅਤੇ ਸੁਨੇਹੇ ਦਾ ਟੈਕਸਟ ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ ਸੂਚਨਾ ਦਾ ਆਪਣਾ ਜਵਾਬ ਬਟਨ ਵਰਤਦਾ ਹੈ। ਇਸ ਲਈ ਸੂਚਨਾ ਐਕਸੈਸ ਅਤੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਵਰਤੇ ਜਾਂਦੇ ਹਨ।</string>
+    <string name="disclosure_chat2_uses">ਜਵਾਬ ਤਾਂ ਹੀ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਤੁਸੀਂ ਉਸਨੂੰ ਬੋਲੋ, ਦੁਬਾਰਾ ਸੁਣੋ ਅਤੇ “ਹਾਂ, ਭੇਜ ਦੇ” ਕਹੋ। ਤੁਹਾਡਾ ਬੋਲਿਆ ਜਵਾਬ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਦੀ ਬੋਲੀ ਪਛਾਣ ਸੇਵਾ (ਜਿਵੇਂ Google ਦੀ) ਟੈਕਸਟ ਵਿੱਚ ਬਦਲਦੀ ਹੈ, ਫਿਰ ਉਹ WhatsApp ਜਾਂ Telegram ਨੂੰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਜੋ ਉਸਨੂੰ ਭੇਜਦੇ ਹਨ। ਸੁਨੇਹੇ ਡਰਾਈਵਿੰਗ ਸਕ੍ਰੀਨ ਉੱਤੇ ਕਦੇ ਨਹੀਂ ਦਿਖਾਏ ਜਾਂਦੇ ਅਤੇ ਸੇਵ ਨਹੀਂ ਹੁੰਦੇ।</string>
+    <string name="disclosure_chat2_stays">Car Hub ਕੁਝ ਵੀ ਸੇਵ ਜਾਂ ਅੱਪਲੋਡ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ Ampli Studio ਜਾਂ ਕਿਸੇ ਹੋਰ ਨਾਲ ਕੁਝ ਵੀ ਸਾਂਝਾ ਨਹੀਂ ਕਰਦਾ।</string>
 </resources>

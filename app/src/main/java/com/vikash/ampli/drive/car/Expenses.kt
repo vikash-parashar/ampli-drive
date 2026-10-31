@@ -6,13 +6,29 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** One fuel fill-up. [time] is epoch ms and also the id. */
+/** What went into the tank. CNG is bought by the kilogram, so its mileage is km per kg. */
+enum class FuelType(val key: String) {
+    Petrol("petrol"), Diesel("diesel"), Cng("cng");
+
+    /** True for CNG: amounts in kg, mileage in km/kg. */
+    val byWeight: Boolean get() = this == Cng
+
+    companion object {
+        fun fromKey(key: String?): FuelType = entries.firstOrNull { it.key == key } ?: Petrol
+    }
+}
+
+/**
+ * One fuel fill-up. [time] is epoch ms and also the id. [litres] holds kilograms for CNG
+ * ([FuelType.byWeight]).
+ */
 data class FuelFill(
     val time: Long,
     val litres: Double,
     val rupees: Double,
     val odometerKm: Double,
     val fullTank: Boolean,
+    val fuel: FuelType = FuelType.Petrol,
 )
 
 enum class ExpenseKind { Service, Repair, Toll, Parking, Other }
@@ -70,6 +86,27 @@ object Mileage {
         return out
     }
 
+    /**
+     * The fuel the mileage is shown for: the one filled most often in the last ten fills (a
+     * CNG car with a little petrol shows km/kg). Null without fills.
+     */
+    fun mainFuel(fills: List<FuelFill>): FuelType? =
+        fills.sortedByDescending { it.time }.take(10).groupingBy { it.fuel }.eachCount()
+            .maxWithOrNull(compareBy<Map.Entry<FuelType, Int>> { it.value }.thenBy { -it.key.ordinal })?.key
+
+    /**
+     * Full-to-full segments of one fuel only: a bi-fuel car's petrol and CNG tanks are separate,
+     * so each is measured between its own full fills.
+     */
+    fun segments(fills: List<FuelFill>, fuel: FuelType): List<MileageSegment> = segments(fills.filter { it.fuel == fuel })
+
+    /** km/l (km/kg for CNG) of one fuel, or null with fewer than two of its full tanks. */
+    fun average(fills: List<FuelFill>, fuel: FuelType): Double? = average(fills.filter { it.fuel == fuel })
+
+    /** The last [count] segments' mileage of [fuel], oldest first, for the trend line. */
+    fun trend(fills: List<FuelFill>, fuel: FuelType, count: Int = 6): List<Double> =
+        segments(fills, fuel).sortedBy { it.endTime }.takeLast(count).map { it.kmPerLitre }
+
     /** Overall km/l across all full-to-full segments, or null with fewer than two full tanks. */
     fun average(fills: List<FuelFill>): Double? {
         val segs = segments(fills)
@@ -124,7 +161,8 @@ object Mileage {
         fun q(s: String) = if (s.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + s.replace("\"", "\"\"") + "\"" else s
         data class Row(val time: Long, val cells: List<String>)
         val rows = fills.map {
-            Row(it.time, listOf(date(it.time), "Fuel", num(it.rupees), num(it.litres), num(it.odometerKm), if (it.fullTank) "yes" else "no", ""))
+            // A CNG fill says so in the note column (its amount is kilograms, not litres).
+            Row(it.time, listOf(date(it.time), "Fuel", num(it.rupees), num(it.litres), num(it.odometerKm), if (it.fullTank) "yes" else "no", if (it.fuel == FuelType.Petrol) "" else it.fuel.name))
         } + expenses.map {
             Row(it.time, listOf(date(it.time), it.kind.name, num(it.rupees), "", "", "", q(it.note)))
         }

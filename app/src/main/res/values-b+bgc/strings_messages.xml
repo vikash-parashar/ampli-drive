@@ -16,4 +16,8 @@
     <string name="disclosure_park_hint">न्यूं पढ़ण अर चालू करण खातर गाड्डी रोक ले।</string>
     <string name="wa_tts_missing">इस यूनिट मैं बोलण आळा इंजन (TTS) कोनी, इस खातर मैसेज बोल कै कोनी सुणाए जा सकदे। आवाज जांचो मैं जा कै एक इंजन लगाओ।</string>
     <string name="wa_park_to_turn_on">चालू करण खातर गाड्डी रोको।</string>
+    <string name="disclosure_chat2_title">Telegram अर बोल कै जवाब</string>
+    <string name="disclosure_chat2_body">Telegram के मैसेज बोल कै सुणाण खातर अर थारा बोल्या होया जवाब भेजण खातर Car Hub WhatsApp अर Telegram की नोटिफ़िकेशन तै भेजण आळे का नाम अर मैसेज का टेक्स्ट पढ़ै सै अर नोटिफ़िकेशन का अपणा जवाब आळा बटन बरतै सै। इसकै खातर नोटिफ़िकेशन एक्सेस अर माइक बरते जावैं सैं।</string>
+    <string name="disclosure_chat2_uses">जवाब तभी जावै सै जद थम उसनै बोलो, दोबारा सुणो अर “हाँ, भेज दे” कहो। थारा बोल्या होया जवाब थारे डिवाइस की बोली पिछाणण आळी सेवा (जिसी Google की) टेक्स्ट मैं बदलै सै, फेर वो WhatsApp या Telegram नै दिया जावै सै, जो उसनै भेजैं सैं। मैसेज ड्राइविंग स्क्रीन पै कदे ना दिखते अर कितै सेव ना होंदे।</string>
+    <string name="disclosure_chat2_stays">Car Hub ना किमे सेव करै, ना अपलोड करै, अर Ampli Studio या किसे और गेल्याँ किमे शेयर ना करै।</string>
 </resources>

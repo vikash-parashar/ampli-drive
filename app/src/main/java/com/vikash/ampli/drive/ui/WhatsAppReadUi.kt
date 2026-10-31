@@ -123,6 +123,8 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
         onGroups = prefs::setAllowGroups,
         // Android's notification-access page is a settings form: not while moving.
         onAllowAccess = { if (!moving) Launchers.allowNotificationAccess(context) },
+        // Telegram too, and reply by voice (their own disclosure first).
+        extras = { ChatExtrasSection(app) },
     )
 
     if (askDisclosure) {
@@ -152,6 +154,7 @@ fun WhatsAppReadCardContent(
     onAllowAccess: () -> Unit,
     ttsMissing: Boolean = false,
     moving: Boolean = false,
+    extras: @Composable () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -194,6 +197,7 @@ fun WhatsAppReadCardContent(
                     Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.wa_groups_title), stringResource(R.string.wa_groups_hint)) }
                     ThemedSwitch(allowGroups, onGroups)
                 }
+                extras()
                 if (!hasAccess) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

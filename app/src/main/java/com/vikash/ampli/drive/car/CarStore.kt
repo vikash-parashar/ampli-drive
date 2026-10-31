@@ -198,7 +198,7 @@ class CarStore(private val context: Context) {
     private fun writeFills(list: List<FuelFill>) {
         val arr = JSONArray()
         list.take(MAX_ROWS).forEach {
-            arr.put(JSONObject().put("t", it.time).put("l", it.litres).put("r", it.rupees).put("km", it.odometerKm).put("full", it.fullTank))
+            arr.put(JSONObject().put("t", it.time).put("l", it.litres).put("r", it.rupees).put("km", it.odometerKm).put("full", it.fullTank).put("fuel", it.fuel.key))
         }
         sp.edit().putString(KEY_FILLS, arr.toString()).apply()
         _fills.value = list.take(MAX_ROWS)
@@ -207,7 +207,7 @@ class CarStore(private val context: Context) {
     private fun loadFills(): List<FuelFill> = try {
         val arr = JSONArray(sp.getString(KEY_FILLS, "[]"))
         (0 until arr.length()).mapNotNull { i ->
-            arr.optJSONObject(i)?.let { FuelFill(it.optLong("t"), it.optDouble("l"), it.optDouble("r"), it.optDouble("km"), it.optBoolean("full")) }
+            arr.optJSONObject(i)?.let { FuelFill(it.optLong("t"), it.optDouble("l"), it.optDouble("r"), it.optDouble("km"), it.optBoolean("full"), FuelType.fromKey(it.optString("fuel"))) }
         }
     } catch (_: Exception) {
         emptyList()

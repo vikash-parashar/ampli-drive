@@ -86,6 +86,10 @@ class SpeedTracker(
         fixListeners.addIfAbsent(listener)
     }
 
+    fun removeFixListener(listener: FixListener) {
+        fixListeners.remove(listener)
+    }
+
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location) = handleFix(location)
 

@@ -163,7 +163,8 @@ class VoiceRoundTwoTest {
         val night = HaryanviLines.forEvent(E.NightDrive)!!
         assertTrue(night.size >= 4)
         for (i in night.indices) assertTrue(VoiceClips.id(E.NightDrive, i) in VoiceClips.expectedHashes)
-        // Incoming calls and SMS are never read out: no such events.
+        // SMS are never read out. Calls are announced only by the opt-in round-4 CallAnnounce /
+        // CallUnknown events (Settings › Announce calls), never by a generic "incoming" event.
         val names = HaryanviLines.Event.entries.map { it.name }
         for (bad in listOf("CallIncoming", "SmsIncoming")) assertFalse(bad, bad in names)
     }

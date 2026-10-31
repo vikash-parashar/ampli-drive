@@ -5,4 +5,6 @@
     <cache-path name="feedback" path="feedback/" />
     <!-- Test builds: the downloaded Ampli MP3 Player APK, handed to the system installer. -->
     <cache-path name="apk" path="apk/" />
+    <!-- Dashcam: a clip opened in the unit's video player or shared. -->
+    <external-files-path name="dashcam" path="dashcam/" />
 </paths>

@@ -69,6 +69,8 @@ class MainActivity : ComponentActivity() {
             // Speaks in-app navigation turns, and Google Maps' when Settings › Haryanvi navigation prompts is on.
             app.navPrompter.start()
             app.desi.start()
+            // Settings › Announce calls (off until switched on): listens for the phone ringing.
+            app.calls.start()
         }
         // 1-2 GB units: Home draws first; Play Billing and the voice helpers start just after.
         if (app.lowEnd) window.decorView.post { background() } else background()
@@ -140,6 +142,8 @@ class MainActivity : ComponentActivity() {
         app.car.onForeground()
         // Keeps the drive monitored while Google Maps or another app is in front.
         if (app.car.store.settings.value.backgroundMonitor) CarMonitorService.start(this)
+        // Dashcam (Pro, off by default): a camera service may only start from the foreground.
+        app.dashcam.startIfEnabled()
         // Help & feedback reports waiting from an offline moment go out once online.
         app.feedback.watchNetwork()
     }

@@ -17,4 +17,8 @@
     <string name="wa_needs_access">WhatsApp پیغامات سننے کے لیے نوٹیفکیشن رسائی چاہیے۔</string>
     <string name="wa_tts_missing">اس یونٹ میں بولنے والا انجن نہیں، اس لیے پیغامات بول کر نہیں سنائے جا سکتے۔ آواز جانچیں میں جا کر ایک انجن انسٹال کریں۔</string>
     <string name="wa_park_to_turn_on">آن کرنے کے لیے گاڑی روکیں۔</string>
+    <string name="disclosure_chat2_title">Telegram اور بول کر جواب</string>
+    <string name="disclosure_chat2_body">Telegram پیغامات بول کر سنانے اور آپ کا بولا ہوا جواب بھیجنے کے لیے Car Hub WhatsApp اور Telegram کی نوٹیفکیشن سے بھیجنے والے کا نام اور پیغام کا متن پڑھتا ہے اور نوٹیفکیشن کا اپنا جواب والا بٹن استعمال کرتا ہے۔ اس کے لیے نوٹیفکیشن رسائی اور مائیکروفون استعمال ہوتے ہیں۔</string>
+    <string name="disclosure_chat2_uses">جواب تبھی بھیجا جاتا ہے جب آپ اسے بولیں، دوبارہ سنیں اور “ہاں، بھیج دے” کہیں۔ آپ کا بولا ہوا جواب آپ کے آلے کی بولی پہچاننے والی سروس (جیسے Google کی) متن میں بدلتی ہے، پھر وہ WhatsApp یا Telegram کو دیا جاتا ہے، جو اسے بھیجتے ہیں۔ پیغامات ڈرائیونگ اسکرین پر کبھی نہیں دکھائے جاتے اور محفوظ نہیں ہوتے۔</string>
+    <string name="disclosure_chat2_stays">Car Hub کچھ بھی محفوظ یا اپ لوڈ نہیں کرتا، اور Ampli Studio یا کسی اور کے ساتھ کچھ بھی شیئر نہیں کرتا۔</string>
 </resources>
