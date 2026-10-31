@@ -1,0 +1,70 @@
+{
+ "lines": [
+  {
+   "id": "welcome",
+   "text": "इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।"
+  },
+  {
+   "id": "speed",
+   "text": "धीरे कर, कैमरा आग्गै सै, ना तो चालान का लड्डू घरां पहुँचैगा।"
+  },
+  {
+   "id": "fastag",
+   "text": "फास्टैग भूखा सै, रुक कै रिचार्ज का चूरमा खुवा दिए।"
+  }
+ ],
+ "voices": [
+  {
+   "gender": "male",
+   "voice_id": "4u5cJuSmHP9d6YRolsOu",
+   "name": "Jonathan - Sophisticated, Calm Narrator",
+   "owner": "bb9155af3bec8240b8db699685a81097bc615809ef5b2becc1fa9d4da8bd0a1c",
+   "accent": "british",
+   "age": "young",
+   "style": "Calm AI butler",
+   "description": "A youthful and engaging voice with a UK accent is perfect for professional audiobooks and captivating narrations for stories and fantasy novels, especially with a lighter-hearted tone. It adds charm t",
+   "current": false,
+   "key": "male-00",
+   "clips": {
+    "welcome": "male-00/welcome.ogg",
+    "speed": "male-00/speed.ogg",
+    "fastag": "male-00/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "cc7CUnTLFRNIIkfOaucG",
+   "name": "Kroy - youthful, confident narrator ",
+   "owner": "4b96514c72347f4da6a7b8819e54e5daaa91bdd9f6bb475efae07496097223cb",
+   "accent": "american",
+   "age": "middle_aged",
+   "style": "Cocky hero",
+   "description": " Middle aged American male voice enriched by a charming and witty undertone, this voice captivates and connects. Ideal for telling stories that resonate or sharing insights with depth, it embodies a d",
+   "current": false,
+   "key": "male-01",
+   "clips": {
+    "welcome": "male-01/welcome.ogg",
+    "speed": "male-01/speed.ogg",
+    "fastag": "male-01/fastag.ogg"
+   }
+  },
+  {
+   "gender": "male",
+   "voice_id": "Ho7fjSHAC1BzucANXMRy",
+   "name": "Matthew Schmitz - African Tribal Warrior",
+   "owner": "1bdf478ac5e1a81b0b8423faadde277a29cb25195ed2c86adcb0622464c9b930",
+   "accent": "south african",
+   "age": "middle_aged",
+   "style": "Thunder warrior",
+   "description": "Deep South African, Zulu-influenced accent, commanding male voice, regal, tribal hunter, ceremonial delivery, slow deliberate speech, rich chest resonance, authoritative, dignified voice, stoic delive",
+   "current": false,
+   "key": "male-02",
+   "clips": {
+    "welcome": "male-02/welcome.ogg",
+    "speed": "male-02/speed.ogg",
+    "fastag": "male-02/fastag.ogg"
+   }
+  }
+ ],
+ "characters": 630
+}
