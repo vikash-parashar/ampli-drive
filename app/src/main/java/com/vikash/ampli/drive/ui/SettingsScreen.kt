@@ -80,6 +80,7 @@ import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.prefs.ThemeChoice
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.RestrictedSettings
 import com.vikash.ampli.drive.system.AppChooser
 import com.vikash.ampli.drive.system.AppResolver
 import com.vikash.ampli.drive.system.AppRole
@@ -136,6 +137,7 @@ fun SettingsScreen(
     val hasCoarse = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) }
     val hasBt = remember(resumeTick) { BtPermissions.hasConnect(context) }
     val hasNotif = remember(resumeTick) { app.mediaHub.hasAccess() }
+    val notifMayBlock = remember(resumeTick, hasNotif) { !hasNotif && RestrictedSettings.mayBlock(context) }
     val language = remember(resumeTick, savedLanguage) { AppLanguages.current(context, savedLanguage) }
 
     Column(
@@ -248,7 +250,10 @@ fun SettingsScreen(
                 status = stringResource(if (hasNotif) R.string.notif_ok else R.string.notif_needed),
                 ok = hasNotif,
                 action = stringResource(if (hasNotif) R.string.action_manage else R.string.allow_access),
-                onAction = { Launchers.openNotificationAccess(context) },
+                onAction = { if (hasNotif) Launchers.openNotificationAccess(context) else Launchers.allowNotificationAccess(context) },
+                // Android 13+ sideloaded: the switch is refused once; App info › ⋮ › Allow restricted settings.
+                secondaryAction = if (notifMayBlock) stringResource(R.string.restricted_open_app_info) else null,
+                onSecondary = { Launchers.openAppDetails(context) },
             )
             SettingRow(
                 title = stringResource(R.string.bt_label),

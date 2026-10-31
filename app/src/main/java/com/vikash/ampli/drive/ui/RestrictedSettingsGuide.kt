@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -59,30 +60,38 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
 
 /**
- * Android 13+: the driver went to notification access (from Music, Settings or Maps prompts) and
- * came back with it still off. On a sideloaded APK that is usually "restricted settings", so show
- * how to allow it. Closes by itself once access is on.
+ * Android 13+, sideloaded APK ("restricted settings"):
+ * - before: the driver tapped "Allow access"; the steps show first, since Android refuses the
+ *   switch once and only then offers App info › ⋮ › "Allow restricted settings".
+ * - after: the driver went to notification access (from Music, Settings or Maps prompts) and came
+ *   back with it still off. This also works when the app was restarted meanwhile (the flag is saved).
+ * Closes by itself once access is on.
  */
 @Composable
 fun RestrictedSettingsGuideHost(resumeTick: Int) {
     val context = LocalContext.current
     val armed by RestrictedSettings.armed.collectAsStateWithLifecycle()
+    val before by RestrictedSettings.before.collectAsStateWithLifecycle()
     var show by remember { mutableStateOf(false) }
     LaunchedEffect(resumeTick) {
-        if (!RestrictedSettings.armed.value) return@LaunchedEffect
+        RestrictedSettings.restore(context)
         if (RestrictedSettings.hasNotificationAccess(context)) {
-            RestrictedSettings.disarm()
-        } else {
+            RestrictedSettings.hideBefore()
+            if (RestrictedSettings.armed.value) RestrictedSettings.disarm(context)
+            show = false
+        } else if (RestrictedSettings.armed.value) {
             show = true
         }
     }
+    val after = show && armed
     RestrictedSettingsGuide(
-        visible = show && armed,
+        visible = after || before,
+        before = before && !after,
         onOpenAppInfo = { Launchers.openAppDetails(context) },
         onOpenAccess = { Launchers.openNotificationAccess(context) },
         onClose = {
             show = false
-            RestrictedSettings.disarm()
+            RestrictedSettings.disarm(context)
         },
     )
 }
@@ -91,6 +100,7 @@ fun RestrictedSettingsGuideHost(resumeTick: Int) {
 @Composable
 internal fun RestrictedSettingsGuide(
     visible: Boolean,
+    before: Boolean = false,
     onOpenAppInfo: () -> Unit,
     onOpenAccess: () -> Unit,
     onClose: () -> Unit,
@@ -136,12 +146,16 @@ internal fun RestrictedSettingsGuide(
                     GlowBadge { Icon(Icons.Filled.Shield, contentDescription = null, tint = theme.text, modifier = Modifier.size(26.dp)) }
                     Column(Modifier.weight(1f)) {
                         Text(
-                            stringResource(R.string.restricted_title),
+                            stringResource(if (before) R.string.restricted_before_title else R.string.restricted_title),
                             color = theme.text,
                             fontSize = dims.t(4f, min = 21f),
                             fontWeight = FontWeight.Bold,
                         )
-                        Text(stringResource(R.string.restricted_hint), color = theme.muted, fontSize = dims.t(2.4f, min = 14f))
+                        Text(
+                            stringResource(if (before) R.string.restricted_before_hint else R.string.restricted_hint),
+                            color = theme.muted,
+                            fontSize = dims.t(2.4f, min = 14f),
+                        )
                     }
                     Box(
                         Modifier
@@ -153,42 +167,62 @@ internal fun RestrictedSettingsGuide(
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = theme.muted, modifier = Modifier.size(28.dp))
                     }
                 }
-                val steps = listOf(
-                    stringResource(R.string.restricted_step_1),
-                    stringResource(R.string.restricted_step_2),
-                    stringResource(R.string.restricted_step_3),
-                )
-                steps.forEachIndexed { i, step -> GuideStep(number = i + 1, text = step, index = i) }
-                GuideStep(number = null, text = stringResource(R.string.restricted_menu_missing), index = steps.size)
+                // Android shows ⋮ › "Allow restricted settings" only after one refused try, so the
+                // try comes first. Coming back with access still off, that step is done.
+                val steps = restrictedSteps().map { stringResource(it) }
+                steps.forEachIndexed { i, step ->
+                    GuideStep(number = i + 1, text = step, index = i, done = !before && i == 0)
+                }
+                if (!before) GuideStep(number = null, text = stringResource(R.string.restricted_menu_missing), index = steps.size)
                 Text(
                     stringResource(R.string.restricted_play_note),
                     color = theme.accentSoft,
                     fontSize = dims.t(2.3f, min = 13f),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                    BigButton(
-                        text = stringResource(R.string.restricted_open_app_info),
-                        onClick = onOpenAppInfo,
-                        icon = Icons.Filled.Info,
-                        primary = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                    BigButton(
-                        text = stringResource(R.string.restricted_open_access),
-                        onClick = onOpenAccess,
-                        icon = Icons.Filled.NotificationsActive,
-                        primary = false,
-                        modifier = Modifier.weight(1f),
-                    )
+                    // Before: the first step is the switch. After: App info is next.
+                    val appInfo: @Composable (Modifier) -> Unit = { m ->
+                        BigButton(
+                            text = stringResource(R.string.restricted_open_app_info),
+                            onClick = onOpenAppInfo,
+                            icon = Icons.Filled.Info,
+                            primary = !before,
+                            modifier = m,
+                        )
+                    }
+                    val access: @Composable (Modifier) -> Unit = { m ->
+                        BigButton(
+                            text = stringResource(R.string.restricted_open_access),
+                            onClick = onOpenAccess,
+                            icon = Icons.Filled.NotificationsActive,
+                            primary = before,
+                            modifier = m,
+                        )
+                    }
+                    if (before) {
+                        access(Modifier.weight(1f))
+                        appInfo(Modifier.weight(1f))
+                    } else {
+                        appInfo(Modifier.weight(1f))
+                        access(Modifier.weight(1f))
+                    }
                 }
             }
         }
     }
 }
 
+/** The steps in order: try the switch (refused once), App info, ⋮ › Allow restricted settings, back and on. */
+internal fun restrictedSteps(): List<Int> = listOf(
+    R.string.restricted_step_try,
+    R.string.restricted_step_1,
+    R.string.restricted_step_2,
+    R.string.restricted_step_3,
+)
+
 /** One numbered step (or a tip when [number] is null), fading up a moment after the one before. */
 @Composable
-private fun GuideStep(number: Int?, text: String, index: Int) {
+private fun GuideStep(number: Int?, text: String, index: Int, done: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val enter = remember { Animatable(0f) }
@@ -212,11 +246,15 @@ private fun GuideStep(number: Int?, text: String, index: Int) {
                 .border(1.dp, theme.accent.copy(alpha = if (number != null) 0.6f else 0.3f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Text(number?.toString() ?: "?", color = theme.text, fontSize = dims.t(2.4f, min = 15f), fontWeight = FontWeight.Bold)
+            if (done) {
+                Icon(Icons.Filled.Check, contentDescription = null, tint = theme.text, modifier = Modifier.size(20.dp))
+            } else {
+                Text(number?.toString() ?: "?", color = theme.text, fontSize = dims.t(2.4f, min = 15f), fontWeight = FontWeight.Bold)
+            }
         }
         Text(
             text,
-            color = if (number != null) theme.text else theme.muted,
+            color = if (number != null && !done) theme.text else theme.muted,
             fontSize = dims.t(2.6f, min = 15f),
             modifier = Modifier.weight(1f),
         )

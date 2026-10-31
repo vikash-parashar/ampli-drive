@@ -269,7 +269,7 @@ internal fun FastagSmsRow(app: DriveApp) {
             onAgree = {
                 ask = false
                 app.fastag.setSmsConsent(true)
-                if (!RestrictedSettings.hasNotificationAccess(context)) Launchers.openNotificationAccess(context)
+                if (!RestrictedSettings.hasNotificationAccess(context)) Launchers.allowNotificationAccess(context)
             },
             onDecline = { ask = false },
         )

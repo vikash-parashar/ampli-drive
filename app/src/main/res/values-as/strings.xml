@@ -752,6 +752,9 @@
     <string name="restricted_play_note">এপ Play-ৰ পৰা ল\'লে এই বাধা নিজে নিজে আঁতৰি যায়।</string>
     <string name="restricted_open_app_info">App info খোলক</string>
     <string name="restricted_open_access">জাননী এক্সেছ খোলক</string>
+    <string name="restricted_before_title">এই ফোনত আৰু এটা খোজ</string>
+    <string name="restricted_before_hint">Android 13 আৰু নতুন ফোনত, Play-ৰ পৰা নোলোৱা এপৰ বাবে ইয়াক বাধা দিয়া হয়। Android-এ \"App was denied access\" ক\'লে এনেদৰে কৰক:</string>
+    <string name="restricted_step_try">\"জাননী এক্সেছ খোলক\" টিপক আৰু Ampli Car Hub অন কৰক। প্ৰথমবাৰ Android-এ নাকচ কৰিব (\"App was denied access\"): এয়া স্বাভাৱিক।</string>
     <string name="more_title">Ampli-ৰ আৰু এপ</string>
     <string name="more_hint">Car Hub নিৰ্মাতাসকলৰ আন এপ</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

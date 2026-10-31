@@ -762,6 +762,9 @@
     <string name="restricted_play_note">This block goes away once the app is installed from Play.</string>
     <string name="restricted_open_app_info">Open App info</string>
     <string name="restricted_open_access">Open notification access</string>
+    <string name="restricted_before_title">One extra step on this phone</string>
+    <string name="restricted_before_hint">On Android 13 and newer, the phone blocks this for apps not installed from Play. If Android says \"App was denied access\", do this:</string>
+    <string name="restricted_step_try">Tap \"Open notification access\" and turn on Ampli Car Hub. The first time Android refuses (\"App was denied access\"): that is expected.</string>
 
     <!-- Settings › More from Ampli -->
     <string name="more_title">More from Ampli</string>

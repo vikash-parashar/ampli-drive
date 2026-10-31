@@ -100,6 +100,14 @@ object Launchers {
         null
     }
 
+    /**
+     * "Allow access" buttons: where Android 13+ may refuse the switch (sideloaded APK), show the
+     * in-app steps first; otherwise (Play installs, Android 12 and older) open the switch directly.
+     */
+    fun allowNotificationAccess(context: Context) {
+        if (RestrictedSettings.mayBlock(context)) RestrictedSettings.showBefore() else openNotificationAccess(context)
+    }
+
     fun openNotificationAccess(context: Context) {
         // Android 13+: if access is still off on return, show the "restricted settings" guide.
         RestrictedSettings.arm(context)

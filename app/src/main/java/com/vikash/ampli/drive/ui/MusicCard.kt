@@ -105,7 +105,7 @@ fun MusicCard(
             val np = state.nowPlaying
             when {
                 np == null && phoneName != null -> PhoneMusic(phoneName, onPhoneKey)
-                !state.accessGranted -> AccessNeeded(onAllow = { Launchers.openNotificationAccess(context) })
+                !state.accessGranted -> AccessNeeded(onAllow = { Launchers.allowNotificationAccess(context) })
                 np == null -> NothingPlaying(onOpen = { Launchers.openMusic(context) })
                 else -> {
                     AlbumArt(np, Modifier.fillMaxWidth().weight(1f))

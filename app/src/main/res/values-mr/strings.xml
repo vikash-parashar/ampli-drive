@@ -751,6 +751,9 @@
     <string name="restricted_play_note">ॲप Play वरून घेतल्यावर ही अडचण आपोआप जाते.</string>
     <string name="restricted_open_app_info">App info उघडा</string>
     <string name="restricted_open_access">नोटिफिकेशन ॲक्सेस उघडा</string>
+    <string name="restricted_before_title">या फोनवर आणखी एक पायरी</string>
+    <string name="restricted_before_hint">Android 13 आणि नवीन फोनवर, Play वरून न घेतलेल्या ॲप्ससाठी हे अडवले जाते. Android ने \"App was denied access\" म्हटले, तर असे करा:</string>
+    <string name="restricted_step_try">\"नोटिफिकेशन ॲक्सेस उघडा\" दाबा आणि Ampli Car Hub सुरू करा. पहिल्यांदा Android नकार देईल (\"App was denied access\"): हे अपेक्षित आहे.</string>
     <string name="more_title">Ampli ची आणखी ॲप्स</string>
     <string name="more_hint">Car Hub बनवणाऱ्यांची इतर ॲप्स</string>
     <string name="more_mp3_name">Ampli MP3 Player</string>

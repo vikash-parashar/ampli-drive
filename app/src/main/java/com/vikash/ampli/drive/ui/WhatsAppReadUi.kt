@@ -108,7 +108,7 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
             askDisclosure = true
         } else {
             prefs.setEnabled(true)
-            if (!hasAccess) Launchers.openNotificationAccess(context)
+            if (!hasAccess) Launchers.allowNotificationAccess(context)
         }
     }
 
@@ -122,7 +122,7 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
         onToggle = { on -> if (on) turnOn() else prefs.setEnabled(false) },
         onGroups = prefs::setAllowGroups,
         // Android's notification-access page is a settings form: not while moving.
-        onAllowAccess = { if (!moving) Launchers.openNotificationAccess(context) },
+        onAllowAccess = { if (!moving) Launchers.allowNotificationAccess(context) },
     )
 
     if (askDisclosure) {
@@ -133,7 +133,7 @@ fun WhatsAppReadCard(app: DriveApp, isPro: Boolean, resumeTick: Int, onLocked: (
                 askDisclosure = false
                 prefs.setDisclosureAccepted(true)
                 prefs.setEnabled(true)
-                if (!hasAccess) Launchers.openNotificationAccess(context)
+                if (!hasAccess) Launchers.allowNotificationAccess(context)
             },
             onDecline = { askDisclosure = false },
         )

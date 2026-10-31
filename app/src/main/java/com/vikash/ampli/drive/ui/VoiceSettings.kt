@@ -398,7 +398,7 @@ internal fun NavPromptsCard(app: DriveApp) {
                             fontSize = dims.t(2.4f, min = 13f),
                             modifier = Modifier.weight(1f),
                         )
-                        BigButton(text = stringResource(R.string.action_allow), onClick = { Launchers.openNotificationAccess(context) }, primary = true)
+                        BigButton(text = stringResource(R.string.action_allow), onClick = { Launchers.allowNotificationAccess(context) }, primary = true)
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
