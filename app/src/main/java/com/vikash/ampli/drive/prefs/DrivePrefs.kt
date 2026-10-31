@@ -497,9 +497,12 @@ class DrivePrefs(context: Context) {
     )
 
     companion object {
-        /** Free defaults for day and night (Ampli Soft). The full free set is ThemeAccess.FREE_IDS. */
+        /** Free defaults for day and night with Auto on (Ampli Soft). The full free set is ThemeAccess.FREE_IDS. */
         const val DEFAULT_DAY = ThemeDefaults.SOFT_DAY
         const val DEFAULT_NIGHT = ThemeDefaults.SOFT_NIGHT
+
+        /** Free default with Auto off: Crimson Drive (also the default for new installs). */
+        const val DEFAULT_FIXED = ThemeDefaults.CRIMSON
 
         private const val FILE = "drive_prefs"
         private const val KEY_SCREEN_ON = "keep_screen_on"

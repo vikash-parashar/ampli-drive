@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crimson Drive theme and the car on Home. "Crimson Drive" is a brand name and stays in English. -->
+<resources>
+    <string name="theme_crimson_drive" translatable="false">Crimson Drive</string>
+    <string name="theme_crimson_hint">Free · default · Ampli MP3 Car mode colours, car on Home</string>
+    <string name="hero_ready">Ready to drive</string>
+    <string name="hero_go_home">Go home</string>
+    <string name="hero_show_map">Show map</string>
+</resources>

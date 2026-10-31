@@ -22,6 +22,30 @@ enum class Decoration {
 
     /** Colourful gradient with soft blobs, for glass panels to blur ([DriveTheme.glass]). */
     Glass,
+
+    /** Crimson Drive: a dark forest-green radial glow, brightest top-left. */
+    Forest,
+}
+
+/**
+ * Filled keys of Crimson Drive (Ampli MP3's Car mode): crimson for the primary action (play, "Go",
+ * the main button of a screen), green for Hey Ampli. Each fill has an edge of at least 3:1 against
+ * the charcoal. [heroCar]: Home shows the car picture in the map pane while not navigating.
+ */
+@Immutable
+data class DriveKeys(
+    val primaryTop: Color,
+    val primary: Color,
+    val primaryBottom: Color,
+    val primaryEdge: Color,
+    val onPrimary: Color,
+    val voice: Color,
+    val voiceEdge: Color,
+    val onVoice: Color,
+    val heroCar: Boolean,
+) {
+    /** The crimson fill: highlight at the top, the dark edge at the bottom (CSS radial in the sample). */
+    val primaryBrush: Brush get() = Brush.verticalGradient(0f to primaryTop, 0.55f to primary, 1f to primaryBottom)
 }
 
 /** Order and size of the three home panes. */
@@ -157,6 +181,8 @@ data class DriveTheme(
     val glass: GlassPalette? = null,
     /** Translated name, where there is one; otherwise [name] is shown. */
     @StringRes val nameRes: Int? = null,
+    /** Filled crimson / green keys and the car on Home (Crimson Drive), or null. */
+    val keys: DriveKeys? = null,
 ) {
     /** Pro themes need the one-time purchase. The free set lives in [ThemeAccess.FREE_IDS]. */
     val isPro: Boolean get() = !ThemeAccess.isFree(id)
@@ -378,6 +404,37 @@ object DriveThemes {
         speedFill = 0xFFFFD23F, speedInk = 0xFF1E1030,
     )
 
+    // ------------------------------------------------ Crimson Drive (the default, free)
+
+    /**
+     * Crimson Drive: Ampli MP3's Car mode colours (charcoal soft keys over a forest glow, crimson
+     * primary actions, green Hey Ampli) and the green car on Home. Free, and the default look.
+     */
+    val CrimsonDrive = soft(
+        id = ThemeDefaults.CRIMSON, code = "C1", name = "Crimson Drive", light = false,
+        nb = CrimsonPalette.CHARCOAL, lt = CrimsonPalette.HIGHLIGHT, dk = CrimsonPalette.SHADOW,
+        fg = CrimsonPalette.INK, mut = CrimsonPalette.MUTED, mut2 = CrimsonPalette.PALE,
+        acc = CrimsonPalette.CRIMSON_HI, onacc = CrimsonPalette.ON_FILL, warn = CrimsonPalette.WARNING, trk = CrimsonPalette.TRACK,
+        layout = HomeLayout.MapSpeedMusic, map = MapLook.Dark, mapTint = 0x1406110C,
+    ).copy(
+        background = c(CrimsonPalette.FOREST),
+        accentSoft = c(CrimsonPalette.PALE), ok = c(CrimsonPalette.OK),
+        gauge = listOf(c(CrimsonPalette.CRIMSON_HI), c(CrimsonPalette.CRIMSON_HI)),
+        turnTile = Brush.verticalGradient(listOf(c(CrimsonPalette.CRIMSON_HI), c(CrimsonPalette.CRIMSON))),
+        turnTileText = c(CrimsonPalette.ON_FILL),
+        onDockActive = c(CrimsonPalette.PALE), mapPuck = c(CrimsonPalette.CRIMSON_HI),
+        radius = 2.8f, numberWeight = FontWeight.ExtraBold, labelSpacing = 0.02f,
+        decoration = Decoration.Forest, softEdge = c(CrimsonPalette.EDGE),
+        nameRes = R.string.theme_crimson_drive,
+        keys = DriveKeys(
+            primaryTop = c(CrimsonPalette.CRIMSON_HI), primary = c(CrimsonPalette.CRIMSON),
+            primaryBottom = c(CrimsonPalette.CRIMSON_DEEP), primaryEdge = c(CrimsonPalette.CRIMSON_HI),
+            onPrimary = c(CrimsonPalette.ON_FILL),
+            voice = c(CrimsonPalette.GREEN), voiceEdge = c(CrimsonPalette.GREEN_EDGE), onVoice = c(CrimsonPalette.ON_FILL),
+            heroCar = true,
+        ),
+    )
+
     // ------------------------------------------------ Soft family (.n1–.n6)
 
     /** Ampli Soft Day: the default day theme (approved neumorphic sample). */
@@ -466,10 +523,11 @@ object DriveThemes {
     )
 
     /**
-     * Picker order: Classic (01–06, 09), Glass family, Saffron family, Soft family.
-     * Luxury Gold (design 10) is not shipped.
+     * Picker order: Crimson Drive (the default) first, then Classic (01–06, 09), Glass family,
+     * Saffron family, Soft family. Luxury Gold (design 10) is not shipped.
      */
     val all: List<DriveTheme> = listOf(
+        CrimsonDrive,
         MidnightGlass, AmpliRose, DaylightClean, SportRed, Synthwave, MinimalMono, HudGreen,
         FrostedGlass, MidnightFrost, RoseGlass, CyanGlass, VioletGlass, SunsetGlass,
         DesiSaffron, SaffronDay, RajasthaniPink, KeralaGreen, BanarasiRoyal, HoliPop,
@@ -484,7 +542,7 @@ object DriveThemes {
      * back to the free theme for that time of day.
      */
     fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme =
-        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: if (night) AmpliSoftNight else AmpliSoftDay
+        byId(ThemeAccess.resolveId(choice, night, isPro, ids)) ?: CrimsonDrive
 
     private val ids: Set<String> = all.mapTo(HashSet()) { it.id }
 }
