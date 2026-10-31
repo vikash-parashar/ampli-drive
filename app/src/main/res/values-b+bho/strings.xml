@@ -709,7 +709,7 @@
     <string name="nav_go">चलीं</string>
     <string name="nav_routing_attribution">रास्ता: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">रउआ के नाम का ह?</string>
-    <string name="name_hint">गाड़ी स्टार्ट होते हर बेर स्वागत कार्ड पर रउआ नाम देखाई: “Ram Ram {name} Ji 🙏”।</string>
+    <string name="name_hint">गाड़ी स्टार्ट होते हर बेर स्वागत कार्ड पर रउआ नाम देखाई: “Jai Baba Ki {name} Ji 🙏”।</string>
     <string name="name_field">रउआ नाम</string>
     <string name="name_skip">छोड़ीं</string>
     <string name="name_mic">आपन नाम बोलीं</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">सुनाई ना दिहल। नाम लिख दीं।</string>
     <string name="name_mic_denied">माइक के अनुमति नइखे। नाम लिख दीं।</string>
     <string name="name_settings_title">रउआ नाम</string>
-    <string name="name_settings_empty">नाम नइखे: स्वागत कार्ड पर “Ram Ram” देखाई</string>
+    <string name="name_settings_empty">नाम नइखे: स्वागत कार्ड पर “Jai Baba Ki” देखाई</string>
     <string name="welcome_title">स्वागत संदेश</string>
     <string name="welcome_hint">हर बेर गाड़ी स्टार्ट भइला पर एक बेर बाजेला (बूट भा इग्निशन ऑन)</string>
     <string name="welcome_play">अबहीं स्वागत सुनीं</string>

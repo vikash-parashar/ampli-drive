@@ -709,7 +709,7 @@
     <string name="nav_go">वचूंया</string>
     <string name="nav_routing_attribution">वाटो: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">तुमचें नांव कितें?</string>
-    <string name="name_hint">गाडी सुरू जाता तेन्ना दर खेपे येवकार कार्डार तुमचें नांव दिसतलें: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">गाडी सुरू जाता तेन्ना दर खेपे येवकार कार्डार तुमचें नांव दिसतलें: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">तुमचें नांव</string>
     <string name="name_skip">सोडात</string>
     <string name="name_mic">तुमचें नांव सांगात</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">आयकूंक आयलें ना. नांव टायप करात.</string>
     <string name="name_mic_denied">माइकाक परवानगी ना. नांव टायप करात.</string>
     <string name="name_settings_title">तुमचें नांव</string>
-    <string name="name_settings_empty">नांव ना: येवकार कार्डार “Ram Ram” दिसतलें</string>
+    <string name="name_settings_empty">नांव ना: येवकार कार्डार “Jai Baba Ki” दिसतलें</string>
     <string name="welcome_title">येवकार संदेश</string>
     <string name="welcome_hint">गाडी सुरू जाता तेन्ना दर खेपे एक फावट वाजता (बूट वा इग्निशन सुरू)</string>
     <string name="welcome_play">आतां येवकार आयकात</string>

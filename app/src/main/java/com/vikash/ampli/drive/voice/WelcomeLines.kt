@@ -9,10 +9,10 @@ import java.util.Locale
  * time-of-day events).
  *
  * The car never says the owner's name (the owner's choice): every welcome is a no-name one, and
- * the name, when set, shows only on the welcome card ("Ram Ram Vikash Ji 🙏"). That also lets the
+ * the name, when set, shows only on the welcome card ("Jai Baba Ki Vikash Ji 🙏"). That also lets the
  * recorded voice pack say every welcome.
  *
- * - Haryanvi style: an opener ("राम राम भाई, आज कित का प्लान सै?"), then a time-of-day line
+ * - Haryanvi style: an opener ("जय बाबा की भाई, आज कित का प्लान सै?"), then a time-of-day line
  *   ("सवेरे सवेरे कित चाल पड़े ताऊ?"). Openers and time lines rotate with the stored welcome
  *   count, so the same line never plays on two starts in a row, across reboots too.
  * - Standard style: a plain Hindi (Hindi screen language and a Hindi voice) or English welcome.
@@ -51,7 +51,7 @@ object WelcomeLines {
                 val opener = rotate(HaryanviLines.Event.Welcome, n)
                 val time = rotate(HaryanviLines.timeOfDay(hour), n)
                 fun text(p: Picked) = if (hindiVoice) p.line.deva else p.line.roman
-                val card = if (who.isNotEmpty()) "Ram Ram $who Ji 🙏" else "Ram Ram 🙏"
+                val card = if (who.isNotEmpty()) "Jai Baba Ki $who Ji 🙏" else "Jai Baba Ki 🙏"
                 Welcome("${text(opener)} ${text(time)}", if (hindiVoice) "hi" else "en-IN", card, listOf(opener.id, time.id))
             }
             VoiceStyle.Standard -> {

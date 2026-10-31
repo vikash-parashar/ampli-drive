@@ -149,7 +149,7 @@ class VoiceClipsTest {
             for (hindi in listOf(true, false)) {
                 val w = WelcomeLines.select(VoiceStyle.Haryanvi, "Vikash", count, hindiVoice = hindi, hindiScreen = true)
                 assertFalse(w.text, w.text.contains("Vikash"))
-                assertEquals("Ram Ram Vikash Ji 🙏", w.card)
+                assertEquals("Jai Baba Ki Vikash Ji 🙏", w.card)
                 assertEquals(2, w.clips.size)
                 assertTrue(w.clips[0].startsWith("welcome_0"))
                 for (id in w.clips) assertTrue(id, id in VoiceClips.expectedHashes)

@@ -34,19 +34,50 @@ object NavPhrases {
 
     fun desi(prompt: NavPrompt, picker: LinePicker, roman: Boolean): String? = desiPhrase(prompt, picker, roman)?.text
 
-    /** The sentence and, for the recorded voice, its clips (empty when one part can't be recorded). */
-    data class Phrase(val text: String, val clips: List<String>)
+    /**
+     * The sentence and, for the recorded voice, its clips (empty when one part can't be recorded).
+     * [hint]: the [TurnHint] line used instead of the plain turn line, if any.
+     */
+    data class Phrase(val text: String, val clips: List<String>, val hint: TurnHint? = null)
 
     /**
      * Like [desi], plus the recorded-voice clips: "<distance clip> <tail clip> <turn clip>" for a
      * turn ahead (distance rounded to the nearest recorded one), "<ib clip> <turn clip>" for now.
+     *
+     * A [ParsedTurn.hint] replaces the turn line in the prompt ahead (and in the arriving one).
+     * [recordedOnly]: the recorded voice speaks, so a hint line it has no clip for (a line with a
+     * number) is skipped and the plain turn line is said instead.
      */
-    fun desiPhrase(prompt: NavPrompt, picker: LinePicker, roman: Boolean): Phrase? {
+    fun desiPhrase(prompt: NavPrompt, picker: LinePicker, roman: Boolean, recordedOnly: Boolean = false): Phrase? {
+        hintPhrase(prompt, picker, roman, recordedOnly)?.let { return it }
         val turn = prompt.turn
         val main = picker.pickIndexed(event(turn.maneuver, turn.exitNumber)) ?: return null
         val body = fill(if (roman) main.line.roman else main.line.deva, turn.exitNumber ?: 0)
         val bodyClips = VoiceClips.clipsFor(main, arrayOf(turn.exitNumber ?: 0)) { picker.pickIndexed(it) }
         if (!takesPrefix(turn.maneuver)) return Phrase(body, bodyClips)
+        return withPrefix(prompt, picker, roman, body, bodyClips, null)
+    }
+
+    /** The [TurnHint] version of [prompt], or null when it has none, it doesn't apply or can't be said. */
+    private fun hintPhrase(prompt: NavPrompt, picker: LinePicker, roman: Boolean, recordedOnly: Boolean): Phrase? {
+        val hint = prompt.turn.hint ?: return null
+        val arg: Int
+        if (hint == TurnHint.ArrivingRight) {
+            // "बस आ गे, 100 मीटर पै सुल्टे हाथ…": only with a real distance left.
+            arg = prompt.distanceM?.takeIf { it >= ARRIVING_MIN_M } ?: return null
+        } else {
+            if (prompt.now) return null
+            arg = 0
+        }
+        val main = picker.pickIndexed(hint.event) ?: return null
+        val body = fill(if (roman) main.line.roman else main.line.deva, arg)
+        val bodyClips = VoiceClips.clipsFor(main, arrayOf(arg)) { picker.pickIndexed(it) }
+        if (recordedOnly && bodyClips.isEmpty()) return null
+        if (!hint.prefix) return Phrase(body, bodyClips, hint)
+        return withPrefix(prompt, picker, roman, body, bodyClips, hint)
+    }
+
+    private fun withPrefix(prompt: NavPrompt, picker: LinePicker, roman: Boolean, body: String, bodyClips: List<String>, hint: TurnHint?): Phrase {
         var prefixClips: List<String> = emptyList()
         val prefix = when {
             prompt.now -> picker.pickIndexed(HaryanviLines.Event.NavNow)?.let {
@@ -59,10 +90,13 @@ object NavPhrases {
             }
             else -> null
         }
-        if (prefix == null) return Phrase(body, bodyClips)
+        if (prefix == null) return Phrase(body, bodyClips, hint)
         val clips = if (prefixClips.isNotEmpty() && bodyClips.isNotEmpty()) prefixClips + bodyClips else emptyList()
-        return Phrase("$prefix $body", clips)
+        return Phrase("$prefix $body", clips, hint)
     }
+
+    /** The arriving line with metres is only said this far out or more. */
+    const val ARRIVING_MIN_M = 50
 
     /** "400 मीटर", "1.5 किलोमीटर" (roman: "400 metre", "1.5 kilometre"). */
     fun distance(m: Int, roman: Boolean): String = if (m < 1000) {

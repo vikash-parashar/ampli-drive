@@ -710,7 +710,7 @@
     <string name="nav_go">چلیں</string>
     <string name="nav_routing_attribution">راستے: OSRM، © OpenStreetMap contributors</string>
     <string name="name_title">آپ کا نام کیا ہے؟</string>
-    <string name="name_hint">گاڑی اسٹارٹ ہوتے ہی ہر بار خوش آمدید کارڈ پر آپ کا نام دکھے گا: “Ram Ram {name} Ji 🙏”۔</string>
+    <string name="name_hint">گاڑی اسٹارٹ ہوتے ہی ہر بار خوش آمدید کارڈ پر آپ کا نام دکھے گا: “Jai Baba Ki {name} Ji 🙏”۔</string>
     <string name="name_field">آپ کا نام</string>
     <string name="name_skip">چھوڑیں</string>
     <string name="name_mic">اپنا نام بولیں</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">سنائی نہیں دیا۔ نام لکھ دیں۔</string>
     <string name="name_mic_denied">مائیک کی اجازت نہیں ہے۔ نام لکھ دیں۔</string>
     <string name="name_settings_title">آپ کا نام</string>
-    <string name="name_settings_empty">نام نہیں: خوش آمدید کارڈ پر “Ram Ram” دکھے گا</string>
+    <string name="name_settings_empty">نام نہیں: خوش آمدید کارڈ پر “Jai Baba Ki” دکھے گا</string>
     <string name="welcome_title">خوش آمدید پیغام</string>
     <string name="welcome_hint">ہر بار گاڑی اسٹارٹ ہونے پر ایک بار بجتا ہے (بوٹ یا اگنیشن آن)</string>
     <string name="welcome_play">ابھی خوش آمدید سنیں</string>

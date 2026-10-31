@@ -709,7 +709,7 @@
     <string name="nav_go">ਚੱਲੋ</string>
     <string name="nav_routing_attribution">ਰਸਤੇ: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">ਤੁਹਾਡਾ ਨਾਂ ਕੀ ਹੈ?</string>
-    <string name="name_hint">ਕਾਰ ਸਟਾਰਟ ਹੋਣ \'ਤੇ ਹਰ ਵਾਰ ਸੁਆਗਤ ਕਾਰਡ \'ਤੇ ਤੁਹਾਡਾ ਨਾਂ ਦਿਸੇਗਾ: “Ram Ram {name} Ji 🙏”।</string>
+    <string name="name_hint">ਕਾਰ ਸਟਾਰਟ ਹੋਣ \'ਤੇ ਹਰ ਵਾਰ ਸੁਆਗਤ ਕਾਰਡ \'ਤੇ ਤੁਹਾਡਾ ਨਾਂ ਦਿਸੇਗਾ: “Jai Baba Ki {name} Ji 🙏”।</string>
     <string name="name_field">ਤੁਹਾਡਾ ਨਾਂ</string>
     <string name="name_skip">ਛੱਡੋ</string>
     <string name="name_mic">ਆਪਣਾ ਨਾਂ ਬੋਲੋ</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">ਸੁਣਿਆ ਨਹੀਂ। ਨਾਂ ਲਿਖ ਦਿਓ।</string>
     <string name="name_mic_denied">ਮਾਈਕ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ। ਨਾਂ ਲਿਖ ਦਿਓ।</string>
     <string name="name_settings_title">ਤੁਹਾਡਾ ਨਾਂ</string>
-    <string name="name_settings_empty">ਨਾਂ ਨਹੀਂ: ਸੁਆਗਤ ਕਾਰਡ \'ਤੇ “Ram Ram” ਦਿਸੇਗਾ</string>
+    <string name="name_settings_empty">ਨਾਂ ਨਹੀਂ: ਸੁਆਗਤ ਕਾਰਡ \'ਤੇ “Jai Baba Ki” ਦਿਸੇਗਾ</string>
     <string name="welcome_title">ਸੁਆਗਤ ਸੁਨੇਹਾ</string>
     <string name="welcome_hint">ਹਰ ਵਾਰ ਕਾਰ ਸਟਾਰਟ ਹੋਣ \'ਤੇ ਇੱਕ ਵਾਰ ਵੱਜਦਾ ਹੈ (ਬੂਟ ਜਾਂ ਇਗਨੀਸ਼ਨ ਚਾਲੂ)</string>
     <string name="welcome_play">ਹੁਣੇ ਸੁਆਗਤ ਸੁਣੋ</string>

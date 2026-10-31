@@ -36,7 +36,7 @@ MODEL = "eleven_v3"
 # (distances, turn tails, turn instructions) get none, so the pieces sound alike.
 TAG_BY_EVENT = {
     "TalkJoke": "[playfully]",
-    "Greeting": "[warmly]",
+    "Greeting": "[excited]",
     "WakeReply": "[warmly]",
     "TalkHowAreYou": "[warmly]",
     "TalkWhoAreYou": "[cheerfully]",
@@ -48,7 +48,7 @@ TAG_BY_EVENT = {
     "ParkingSaved": "[cheerfully]",
 }
 TAG_BY_GROUP = {
-    "Welcome": "[warmly]",
+    "Welcome": "[excited]",
     "Car": "[concerned]",
     "Music": "[cheerfully]",
 }

@@ -51,6 +51,15 @@ class FuelRepository(context: Context) {
         return withContext(Dispatchers.Default) { FuelFinder.nearby(s, lat, lon, filter, limit) }
     }
 
+    /**
+     * Runs [block] over the snapshot on a background thread (loading it first if needed): Car Hub's
+     * navigation looks up pumps near each turn of a new route this way.
+     */
+    suspend fun <T> withSnapshot(block: (FuelSnapshot) -> T): T {
+        val s = snapshot().await()
+        return withContext(Dispatchers.Default) { block(s) }
+    }
+
     private fun load(): FuelSnapshot {
         val snap = try {
             appContext.assets.open(ASSET).use { FuelSnapshot.read(it) }

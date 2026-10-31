@@ -13,8 +13,9 @@ enum class Maneuver {
  * @param distanceM metres to the manoeuvre, null when the notification shows none.
  * @param exitNumber the roundabout exit ("take the 2nd exit"), when given.
  * @param key the instruction without its distance: a new key means a new manoeuvre.
+ * @param hint Car Hub's own navigation only: a better Haryanvi line for the prompt ahead.
  */
-data class ParsedTurn(val maneuver: Maneuver, val distanceM: Int?, val exitNumber: Int?, val key: String)
+data class ParsedTurn(val maneuver: Maneuver, val distanceM: Int?, val exitNumber: Int?, val key: String, val hint: TurnHint? = null)
 
 /**
  * Reads Google Maps' navigation notification (title "450 m", text "Turn right onto NH 48", or

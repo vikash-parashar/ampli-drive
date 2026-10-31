@@ -204,9 +204,9 @@
     <string name="voice_cancel">रद्द करो</string>
     <string name="voice_unavailable">इस यूनिट पै बोली पिछाण कोनी।</string>
     <string name="voice_mic_denied">सेटिंग्स म्हं माइक्रोफोन की इजाजत द्यो।</string>
-    <string name="voice_greet_morning">राम राम, सुप्रभात!</string>
-    <string name="voice_greet_afternoon">राम राम!</string>
-    <string name="voice_greet_evening">राम राम, सुभ संध्या!</string>
+    <string name="voice_greet_morning">जय बाबा की, सुप्रभात!</string>
+    <string name="voice_greet_afternoon">जय बाबा की!</string>
+    <string name="voice_greet_evening">जय बाबा की, सुभ संध्या!</string>
     <string name="voice_greet_question">थारा दिन किसा जा रह्या सै? आज कित चालणा सै?</string>
     <string name="voice_didnt_catch">माफ करियो, मैं समझ कोनी पाई।</string>
     <string name="voice_not_understood">माफ करियो, यो मैं इब्बै कोनी कर सकती।</string>
@@ -569,7 +569,7 @@
     <string name="feedback_reply">जवाब: %1$s</string>
     <!-- Welcome message on car start, and the owner's name for it. -->
     <string name="name_title">थारा नाम के सै?</string>
-    <string name="name_hint">गाड्डी स्टार्ट होंदे ए स्वागत कार्ड पै थारा नाम दिखैगा: “राम राम {name} जी 🙏”।</string>
+    <string name="name_hint">गाड्डी स्टार्ट होंदे ए स्वागत कार्ड पै थारा नाम दिखैगा: “जय बाबा की {name} जी 🙏”।</string>
     <string name="name_field">थारा नाम</string>
     <string name="name_skip">रहण दे</string>
     <string name="name_mic">अपणा नाम बोल</string>
@@ -577,7 +577,7 @@
     <string name="name_not_heard">सुण्या कोनी। नाम लिख दे।</string>
     <string name="name_mic_denied">माइक की इजाजत कोनी। नाम लिख दे।</string>
     <string name="name_settings_title">थारा नाम</string>
-    <string name="name_settings_empty">नाम कोनी: स्वागत कार्ड पै “राम राम” दिखैगा</string>
+    <string name="name_settings_empty">नाम कोनी: स्वागत कार्ड पै “जय बाबा की” दिखैगा</string>
     <string name="welcome_title">स्वागत संदेस</string>
     <string name="welcome_hint">हर बार गाड्डी स्टार्ट होण पै एक बार बाजै (बूट या इग्निसन ऑन)</string>
     <string name="welcome_play">इब्बे स्वागत सुण</string>
@@ -761,7 +761,7 @@
     <string name="voice_pack_tts">फोन की आवाज (TTS)</string>
     <string name="voice_pack_status">%2$d मैं तै %1$d लाइन रिकॉर्ड</string>
     <string name="voice_pack_missing">इस बिल्ड मैं इब्बे कोनी: जद ताईं फोन की आवाज बोलैगी</string>
-    <string name="voice_pack_name_note">गाड्डी थारा नाम लिए बिना राम राम करै सै; नाम स्वागत कार्ड पै दीखै सै।</string>
+    <string name="voice_pack_name_note">गाड्डी थारा नाम लिए बिना जय बाबा की करै सै; नाम स्वागत कार्ड पै दीखै सै।</string>
     <string name="autostart_title">जद गाड्डी स्टार्ट हो</string>
     <string name="autostart_hint">बूट या इग्निशन ऑन होए पाच्छै थारे खातर ऐप खोल्लै</string>
     <string name="autostart_off">बंद</string>

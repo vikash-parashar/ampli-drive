@@ -17,7 +17,8 @@ class HaryanviLinesTest {
 
     /**
      * First round: 4 to 8 variants per event. Round 2 (lines-v2) appends up to 8 more; an event
-     * that only exists from round 2 needs at least 3.
+     * that only exists from round 2 needs at least 3. Round-3 navigation events keep the owner's
+     * exact lines, so one is enough there.
      */
     @Test
     fun everyPlayfulEventHasFourToEightVariants() {
@@ -28,18 +29,22 @@ class HaryanviLinesTest {
             if (first > 0) {
                 assertTrue("$event has $first first-round lines", first in 4..8)
             } else {
-                assertTrue("$event has ${lines!!.size}", lines.size >= 3)
+                val min = if (event in HaryanviLines.roundThreeOnly) 1 else 3
+                assertTrue("$event has ${lines!!.size}", lines.size >= min)
             }
             assertTrue("$event has ${lines!!.size}", lines.size - first <= 8)
             assertEquals("$event has duplicate lines", lines.size, lines.map { it.deva }.toSet().size)
         }
     }
 
+    /** Every event with more than one line (a single-line round-3 event can only repeat). */
     @Test
     fun noImmediateRepeats() {
+        val varied = playful.filter { HaryanviLines.forEvent(it)!!.size > 1 }
+        assertTrue(varied.size > 80)
         for (seed in 0..20) {
             val picker = LinePicker(Random(seed))
-            for (event in playful) {
+            for (event in varied) {
                 var prev: HaryanviLines.Line? = null
                 repeat(200) {
                     val line = picker.pick(event)!!
@@ -145,8 +150,8 @@ class HaryanviLinesTest {
     fun ownersWordsAreInTheBank() {
         fun has(e: HaryanviLines.Event, deva: String) =
             assertTrue("$e lacks $deva", HaryanviLines.forEvent(e)!!.any { it.deva == deva })
-        has(HaryanviLines.Event.Welcome, "राम राम जी, आज कित जाणा सै?")
-        has(HaryanviLines.Event.Welcome, "राम राम भाई, आज कित का प्लान सै?")
+        has(HaryanviLines.Event.Welcome, "जय बाबा की, आज कित जाणा सै?")
+        has(HaryanviLines.Event.Welcome, "जय माता दी भाई, आज कित का प्लान सै?")
         has(HaryanviLines.Event.Welcome, "और तैयारे? सुणा दे, के हाल सै?")
         has(HaryanviLines.Event.Welcome, "राम राम ताई आले, आज कित की तैयारी सै?")
         has(HaryanviLines.Event.Welcome, "भाई कित जाणा सै आज?")

@@ -5,6 +5,8 @@ import android.location.Location
 import android.os.SystemClock
 import com.vikash.ampli.drive.BuildConfig
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.fuel.FuelFilter
+import com.vikash.ampli.drive.fuel.FuelFinder
 import com.vikash.ampli.drive.nav.route.LatLon
 import com.vikash.ampli.drive.nav.route.OffRouteDetector
 import com.vikash.ampli.drive.nav.route.OsrmRouteProvider
@@ -106,6 +108,13 @@ class InAppNavigator(private val app: DriveApp) {
     val diagnostics: StateFlow<NavDiagnostics> = _diag.asStateFlow()
 
     private var tracker: RouteTracker? = null
+
+    /** Haryanvi between-turns lines: kilometres left, halfway, ten minutes, lane splits. */
+    private val cues = TripCues()
+
+    /** Pump landmarks of the current route ([PumpLandmarks]): step index → hint. */
+    private var landmarks: Map<Int, TurnHint> = emptyMap()
+    private var landmarkJob: Job? = null
     private val offRoute = OffRouteDetector()
     private val limiter = RerouteLimiter()
     private var routeJob: Job? = null
@@ -201,7 +210,10 @@ class InAppNavigator(private val app: DriveApp) {
     private fun reset() {
         routeJob?.cancel()
         arrivedJob?.cancel()
+        landmarkJob?.cancel()
         tracker = null
+        cues.reset()
+        landmarks = emptyMap()
         offRoute.reset()
         limiter.reset()
         app.navPrompter.onInAppTurn(null)
@@ -260,6 +272,9 @@ class InAppNavigator(private val app: DriveApp) {
                     }
                     // Haryanvi desi: "चाल, रास्ता मिल गया, 42 किलोमीटर सै।" (first route only).
                     if (!reroute) app.navPrompter.onRouteFound(route.distanceM, route.durationS)
+                    if (!reroute) cues.startTrip(route.distanceM, route.durationS)
+                    cues.onRoute(route.laneSplitsM)
+                    findLandmarks(route, version)
                     speak(progress)
                 }
                 is RouteResult.Failed -> {
@@ -304,6 +319,8 @@ class InAppNavigator(private val app: DriveApp) {
         if (p.arrived) {
             _state.value = s.copy(phase = NavSession.Phase.Arrived, progress = p, rerouting = false)
             speak(p)
+            // "बस आ गे, 100 मीटर पै सुल्टे हाथ…" was said: now the "arrived" line.
+            app.navPrompter.onInAppArrived()
             tracker = null
             // The arrival card stays a while, then the map goes back to normal by itself.
             arrivedJob?.cancel()
@@ -344,7 +361,40 @@ class InAppNavigator(private val app: DriveApp) {
             }
         }
         _state.value = s.copy(progress = p)
-        if (p.distanceFromRouteM <= RouteTracker.ON_ROUTE_M) speak(p)
+        if (p.distanceFromRouteM <= RouteTracker.ON_ROUTE_M) {
+            speak(p)
+            cue(p)
+        }
+    }
+
+    /** "Petrol pump te ulte haath…": pumps within 60 m of each turn, looked up off the main thread. */
+    private fun findLandmarks(route: Route, version: Int) {
+        landmarks = emptyMap()
+        landmarkJob?.cancel()
+        landmarkJob = scope.launch {
+            val found = try {
+                app.fuel.withSnapshot { snap ->
+                    PumpLandmarks.find(route) { p ->
+                        FuelFinder.nearby(snap, p.lat, p.lon, FuelFilter.All, limit = 10, maxRadiusM = PumpLandmarks.RADIUS_M).map { it.station }
+                    }
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                emptyMap()
+            }
+            if (_state.value.routeVersion == version) landmarks = found
+        }
+    }
+
+    /** Between turns: kilometres left, halfway, ten minutes left, a lane split ahead. */
+    private fun cue(p: RouteProgress) {
+        val route = _state.value.route ?: return
+        val step = route.steps.getOrNull(p.stepIndex)
+        val toTurn = if (step == null || step.maneuver == Maneuver.Arrive) Double.MAX_VALUE else p.distanceToStepM
+        val now = SystemClock.elapsedRealtime()
+        val c = cues.onProgress(now, p.alongM, p.remainingM, p.remainingS, toTurn, app.navPrompter.canCue(now)) ?: return
+        app.navPrompter.onTripCue(c)
     }
 
     /** The next thing to say, as a [ParsedTurn] for the shared prompt planner. */
@@ -357,7 +407,13 @@ class InAppNavigator(private val app: DriveApp) {
             // A long way to the next turn: "keep going straight" once.
             ParsedTurn(Maneuver.Continue, d, null, "v${s.routeVersion}|c${p.stepIndex}")
         } else {
-            ParsedTurn(step.maneuver, if (s.phase == NavSession.Phase.Arrived) 0 else d, step.exitNumber, "v${s.routeVersion}|s${p.stepIndex}")
+            ParsedTurn(
+                step.maneuver,
+                if (s.phase == NavSession.Phase.Arrived) 0 else d,
+                step.exitNumber,
+                "v${s.routeVersion}|s${p.stepIndex}",
+                hint = NavHints.forStep(step, landmarks[p.stepIndex]),
+            )
         }
         app.navPrompter.onInAppTurn(turn)
     }

@@ -95,4 +95,35 @@ class OsrmParserTest {
         assertEquals(listOf(1.0, -250.0, true, false, null), v["b"])
         assertEquals(emptyMap<String, Any?>(), v["c"])
     }
+
+    /** A small OSRM answer with lane data: a left turn from the left lane, then a three-way split. */
+    private val lanesBody = """
+        {"code": "Ok", "routes": [{"distance": 560.0, "duration": 60.0,
+          "geometry": {"type": "LineString", "coordinates": [[77.0, 28.0], [77.001, 28.0], [77.001, 28.001], [77.001, 28.002], [77.001, 28.003]]},
+          "legs": [{"steps": [
+            {"maneuver": {"type": "depart", "location": [77.0, 28.0]}, "name": "A Road", "distance": 98.0, "duration": 10.0,
+             "intersections": [{"location": [77.0, 28.0]}]},
+            {"maneuver": {"type": "turn", "modifier": "left", "location": [77.001, 28.0]}, "name": "B Road", "distance": 111.0, "duration": 15.0,
+             "intersections": [{"location": [77.001, 28.0], "lanes": [{"indications": ["left"], "valid": true}, {"indications": ["straight"], "valid": false}]}]},
+            {"maneuver": {"type": "fork", "modifier": "straight", "location": [77.001, 28.001]}, "name": "B Road", "distance": 222.0, "duration": 25.0,
+             "intersections": [{"location": [77.001, 28.001], "lanes": [{"indications": ["slight left"], "valid": false}, {"indications": ["straight"], "valid": true}, {"indications": ["slight right"], "valid": false}]}]},
+            {"maneuver": {"type": "arrive", "modifier": "right", "location": [77.001, 28.003]}, "name": "B Road", "distance": 0.0, "duration": 0.0,
+             "intersections": [{"location": [77.001, 28.003]}]}
+          ]}]}]}
+    """.trimIndent()
+
+    @Test
+    fun readsLanesAndLaneSplits() {
+        val r = (OsrmParser.parse(lanesBody) as OsrmParse.Ok).route
+        assertEquals(listOf(Maneuver.Left, Maneuver.Arrive), r.steps.map { it.maneuver })
+        assertEquals(listOf(true, false), r.steps[0].lanes)
+        assertNull(r.steps[1].lanes)
+        assertEquals("right", r.steps[1].osrmModifier)
+        // The fork straight on is no manoeuvre, but its middle-lane split is kept.
+        assertEquals(1, r.laneSplitsM.size)
+        assertEquals(r.cumM[2], r.laneSplitsM[0], 0.01)
+        // The sample answer has no lane data.
+        assertTrue(route().steps.all { it.lanes == null })
+        assertTrue(route().laneSplitsM.isEmpty())
+    }
 }

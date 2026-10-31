@@ -165,7 +165,7 @@ class DrivePrefs(context: Context) {
     private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
     val mapTextureMode: StateFlow<Boolean> = _mapTextureMode.asStateFlow()
 
-    /** The car owner's name for the welcome message ("" = not set: "Ram Ram Tai Aale"). */
+    /** The car owner's name for the welcome message ("" = not set: "Jai Baba Ki Tai Aale"). */
     private val _ownerName = MutableStateFlow(sp.getString(KEY_OWNER_NAME, "") ?: "")
     val ownerName: StateFlow<String> = _ownerName.asStateFlow()
 

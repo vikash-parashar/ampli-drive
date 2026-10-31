@@ -48,6 +48,13 @@ class NavPrompter(private val app: DriveApp) {
     private var speech: Job? = null
     private var captionJob: Job? = null
 
+    /** When the last prompt finished ([SystemClock.elapsedRealtime]), for [canCue]. */
+    @Volatile
+    private var lastDoneMs = Long.MIN_VALUE
+
+    /** The arriving prompt said "destination on the right in 100 m": say "arrived" on arrival. */
+    private var arrivingRightSaid = false
+
     /** For Settings › About › Diagnostics. */
     data class Debug(
         val title: String,
@@ -94,12 +101,61 @@ class NavPrompter(private val app: DriveApp) {
     fun onInAppTurn(turn: ParsedTurn?) {
         if (turn == null) {
             inAppPlanner.reset()
+            arrivingRightSaid = false
             return
         }
         val prompt = inAppPlanner.onTurn(turn) ?: return
         _debug.value = Debug("in-app", turn.key, turn, _debug.value?.lastSpoken, System.currentTimeMillis())
         if (app.navigator.muted.value) return
-        say { haryanvi -> if (haryanvi) desiText(prompt) else standardText(prompt) }
+        say { haryanvi ->
+            when {
+                !haryanvi -> standardText(prompt)
+                // A long road: "सीधा चालता रह, आगले 8 किलोमीटर कोए मोड़ कोनी।" (else the usual line).
+                prompt.turn.maneuver == Maneuver.Continue -> keepStraight(prompt) ?: desiText(prompt, inApp = true)
+                else -> desiText(prompt, inApp = true)
+            }
+        }
+    }
+
+    /**
+     * Car Hub's navigation arrived. When the arriving prompt was "destination on the right in
+     * 100 m", the "arrived" line follows now (Haryanvi style only).
+     */
+    fun onInAppArrived() {
+        if (!arrivingRightSaid) return
+        arrivingRightSaid = false
+        if (app.navigator.muted.value) return
+        say { haryanvi -> if (haryanvi) desiExtra(HaryanviLines.Event.NavArrive) else null }
+    }
+
+    /**
+     * True when a [TripCue] may be said now: nothing being said or queued, the last prompt ended
+     * a few seconds ago, and the Hey Ampli assistant isn't talking.
+     */
+    fun canCue(nowMs: Long): Boolean {
+        if (speech?.isActive == true || _speaking.value || app.voice.busy.value) return false
+        return lastDoneMs == Long.MIN_VALUE || nowMs - lastDoneMs >= CUE_AFTER_PROMPT_MS
+    }
+
+    /** A between-turns line of Car Hub's navigation ([TripCues]): Haryanvi style only. */
+    fun onTripCue(cue: TripCue) {
+        if (app.navigator.muted.value) return
+        say { haryanvi ->
+            if (!haryanvi) return@say null
+            when (cue) {
+                is TripCue.DistanceLeft -> desiExtra(HaryanviLines.Event.NavDistanceLeft, cue.km)
+                TripCue.Halfway -> desiExtra(HaryanviLines.Event.NavHalfway)
+                TripCue.TenMinutesLeft -> desiExtra(HaryanviLines.Event.NavTenMinutesLeft)
+                TripCue.LaneSplit -> desiExtra(HaryanviLines.Event.NavLaneMiddle)
+            }
+        }
+    }
+
+    /** "Keep straight, no turn for N km" for in-app navigation, or null to say the usual line. */
+    private suspend fun keepStraight(prompt: NavPrompt): Spoken? {
+        val m = prompt.distanceM ?: return null
+        if (m < 1000) return null
+        return desiExtra(HaryanviLines.Event.NavKeepStraight, m / 1000)
     }
 
     private fun onTurn(turn: NextTurn?) {
@@ -189,6 +245,7 @@ class NavPrompter(private val app: DriveApp) {
                 app.voicePlayer.say(spoken)
             } finally {
                 _speaking.value = false
+                lastDoneMs = SystemClock.elapsedRealtime()
             }
         }
     }
@@ -204,10 +261,25 @@ class NavPrompter(private val app: DriveApp) {
 
     private suspend fun hindiVoice(): Boolean = app.speaker.hasVoice(HINDI)
 
-    private suspend fun desiText(prompt: NavPrompt): Spoken? {
+    private suspend fun desiText(prompt: NavPrompt, inApp: Boolean = false): Spoken? {
         val hindi = hindiVoice()
-        val phrase = NavPhrases.desiPhrase(prompt, picker, roman = !hindi) ?: return null
+        val phrase = NavPhrases.desiPhrase(prompt, picker, roman = !hindi, recordedOnly = recordedOnly()) ?: return null
+        if (inApp && prompt.turn.maneuver == Maneuver.Arrive) arrivingRightSaid = phrase.hint == TurnHint.ArrivingRight
         return Spoken(phrase.text, if (hindi) "hi" else "en-IN", phrase.clips)
+    }
+
+    /** The recorded voice speaks (picked, or standing in for a missing TTS engine). */
+    private fun recordedOnly(): Boolean = app.voicePlayer.voice.human || app.voicePlayer.ttsMissing.value
+
+    /**
+     * A round-3 line ([HaryanviLines.Event.NavDistanceLeft] and the like). With the recorded voice
+     * only when its clip is there: a line with a number has none, so the recorded voice skips it
+     * rather than switching to the phone voice mid-drive.
+     */
+    private suspend fun desiExtra(event: HaryanviLines.Event, vararg args: Any): Spoken? {
+        val spoken = desiLine(event, *args) ?: return null
+        if (spoken.clips.isEmpty() && recordedOnly()) return null
+        return spoken
     }
 
     private suspend fun desiLine(event: HaryanviLines.Event, vararg args: Any): Spoken? {
@@ -275,6 +347,9 @@ class NavPrompter(private val app: DriveApp) {
         const val TAG = "NavPrompter"
         const val CAPTION_MS = 7_000L
         const val VOICE_WAIT_MS = 10_000L
+
+        /** A between-turns cue waits this long after the last prompt ended. */
+        const val CUE_AFTER_PROMPT_MS = 8_000L
         val HINDI: Locale = Locale.forLanguageTag("hi-IN")
     }
 }

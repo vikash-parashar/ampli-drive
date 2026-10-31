@@ -57,6 +57,7 @@ object OsrmParser {
                     ref = step.str("ref"),
                     distanceM = step.num("distance") ?: 0.0,
                     durationS = step.num("duration") ?: 0.0,
+                    lanes = lanes(step),
                 )
             }
             val maxspeed = l["annotation"].obj()?.get("maxspeed").arr()
@@ -83,9 +84,16 @@ object OsrmParser {
         }
 
         val steps = ArrayList<RouteStep>()
+        val laneSplits = ArrayList<Double>()
         var prevRoad: String? = null
         for ((i, s) in raw.withIndex()) {
             val mapped = OsrmManeuvers.map(s.type, s.modifier, s.exit, s.name ?: s.ref, prevRoad)
+            // A fork straight on that needs no instruction, where only the middle lanes go on.
+            if (mapped == null && s.type.lowercase() == "fork" && (s.modifier == null || s.modifier.lowercase() == "straight") &&
+                Lanes.middleOnly(s.lanes)
+            ) {
+                laneSplits += along[i]
+            }
             if (mapped != null) {
                 steps += RouteStep(
                     maneuver = mapped.first,
@@ -96,6 +104,7 @@ object OsrmParser {
                     alongM = if (mapped.first == Maneuver.Arrive) total else along[i],
                     osrmType = s.type,
                     osrmModifier = s.modifier,
+                    lanes = s.lanes,
                 )
             }
             prevRoad = s.name ?: s.ref
@@ -113,6 +122,7 @@ object OsrmParser {
                 distanceM = r.num("distance") ?: total,
                 durationS = r.num("duration") ?: spans.sumOf { it.durationS },
                 maxspeedKmh = if (hasLimits) limits else null,
+                laneSplitsM = laneSplits,
             ),
         )
     }
@@ -124,6 +134,17 @@ object OsrmParser {
         if (speed <= 0) return null
         val kmh = if (v.str("unit") == "mph") speed * 1.609344 else speed
         return kmh.roundToInt()
+    }
+
+    /**
+     * The lanes at the step's manoeuvre (its first intersection), left to right, true where
+     * OSRM marks the lane valid for this route. Null without lane data.
+     */
+    internal fun lanes(step: Map<String, Any?>): List<Boolean>? {
+        val first = step["intersections"].arr()?.firstOrNull().obj() ?: return null
+        val lanes = first["lanes"].arr() ?: return null
+        if (lanes.isEmpty()) return null
+        return lanes.map { it.obj()?.get("valid") == true }
     }
 
     /** OSRM manoeuvre locations are geometry vertices: the first close match from [from] onwards. */
@@ -150,6 +171,7 @@ object OsrmParser {
         val ref: String?,
         val distanceM: Double,
         val durationS: Double,
+        val lanes: List<Boolean>?,
     )
 }
 
