@@ -4,7 +4,7 @@ Every line the car speaks in the **Haryanvi desi** voice style (Settings › Voi
 The source of truth is `app/src/main/java/com/vikash/ampli/drive/voice/HaryanviLines.kt`;
 change a line there and here together (a unit test checks that every line in the app is listed here).
 
-- 76 events, 331 lines. The car never says the same line twice in a row.
+- 91 events, 391 lines. The car never says the same line twice in a row.
 - Left is **उल्टे हाथ** (ulte haath), right is **सुल्टे हाथ** (sulte haath).
 - Family-safe only: no abuse, no crude words, no caste or community jokes (a banned-word test runs over every line).
 - SOS, crash countdown and emergency prompts are never in this list: they always stay in plain, clear Hindi.
@@ -392,6 +392,93 @@ change a line there and here together (a unit test checks that every line in the
 | Annual Pass trips running out | पास के %1$d ट्रिप रह गे, ध्यान राखिए। | Pass ke %1$d trip reh ge, dhyan raakhiye. | {n} trips left on the pass, keep it in mind. |
 | Annual Pass trips running out | सालाना पास मैं %1$d ट्रिप बाकी सैं। | Saalana pass main %1$d trip baaki sain. | {n} trips remain on the annual pass. |
 | Annual Pass trips running out | %1$d ट्रिप और, फेर पास खतम। | %1$d trip aur, pher pass khatam. | {n} more trips, then the pass is used up. |
+
+## Fuel finder and radar
+
+- **Red-light camera ahead**: Before a red-light camera (OSM enforcement=traffic_signals). Pro.
+- **Average-speed zone starts**: Entering an average-speed section. Pro.
+- **Average-speed zone ends**: Leaving it. Pro.
+- **Police check ahead**: A police check you reported is ahead (reports stay 2 hours, on this unit only). Pro.
+- **Accident ahead**: A reported accident is ahead. Pro.
+- **Traffic jam ahead**: A reported traffic jam is ahead. Pro.
+- **Mobile camera ahead**: A reported mobile camera / speed gun is ahead. Pro.
+- **Report saved**: After "Hey Ampli, police aage hai" or a tap on the report sheet. *(Haryanvi only; the Standard style says it plainly)*
+- **Fuel pumps found**: "Hey Ampli, nearest petrol pump": the list and distances are on screen.
+- **CNG pumps found**: "CNG pump kahan hai": the same for CNG.
+- **EV chargers found**: "Charging station": the same for EV chargers.
+- **No station nearby**: Nothing within 50 km, or no station data in this build.
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Red-light camera ahead | आगे लाल बत्ती का कैमरा सै, बत्ती देख कै चालिए। | Aage laal batti ka camera sai, batti dekh ke chaliye. | Red-light camera ahead, watch the signal. |
+| Red-light camera ahead | भाई, आगे बत्ती पै कैमरा लाग्या सै। | Bhai, aage batti pe camera laagya sai. | Brother, there's a camera at the signal ahead. |
+| Red-light camera ahead | लाल बत्ती आळे चौक पै कैमरा सै, जल्दबाजी ना करिए। | Laal batti aale chauk pe camera sai, jaldbaazi na kariye. | Camera at the red-light crossing ahead, don't rush. |
+| Red-light camera ahead | आगे सिग्नल पै कैमरा सै, लाल हो तो रुक जाइयो। | Aage signal pe camera sai, laal ho to ruk jaiyo. | Camera at the signal ahead; stop if it's red. |
+| Average-speed zone starts | औसत स्पीड आळा इलाका शुरू, पूरे रास्ते लिमिट मैं चालिए। | Ausat speed aala ilaaka shuru, poore raaste limit main chaliye. | Average-speed zone starts; keep to the limit all the way. |
+| Average-speed zone starts | इब तै कैमरे औसत स्पीड नापैंगे, आराम तै चाल। | Ib te camere ausat speed naapenge, aaram te chaal. | From here the cameras measure your average speed; take it easy. |
+| Average-speed zone starts | औसत स्पीड का जोन आ ग्या भाई, लिमिट स्क्रीन पै सै। | Ausat speed ka zone aa gaya bhai, limit screen pe sai. | Average-speed zone, brother; the limit is on the screen. |
+| Average-speed zone starts | ध्यान दे, इड़ै तै औसत स्पीड गिणी जावैगी। | Dhyan de, ide te ausat speed gini jaavegi. | Careful, the average speed is counted from here. |
+| Average-speed zone ends | औसत स्पीड आळा इलाका खतम। | Ausat speed aala ilaaka khatam. | Average-speed zone over. |
+| Average-speed zone ends | जोन पार हो ग्या, बढ़िया चलाई भाई। | Zone paar ho gaya, badhiya chalaai bhai. | Zone done, nicely driven, brother. |
+| Average-speed zone ends | औसत स्पीड का कैमरा पाछै रह ग्या। | Ausat speed ka camera paachhe reh gaya. | The average-speed camera is behind us. |
+| Average-speed zone ends | जोन खतम, फेर भी आराम तै चालियो। | Zone khatam, pher bhi aaram te chaliyo. | Zone over; still drive easy. |
+| Police check ahead | आगे पुलिस का नाका सै, कागज त्यार राखिए। | Aage police ka naka sai, kaagaz tyaar raakhiye. | Police check ahead, keep your papers ready. |
+| Police check ahead | भाई, आगे पुलिस खड़ी सै, बेल्ट ला ले। | Bhai, aage police khadi sai, belt la le. | Brother, police ahead, put your belt on. |
+| Police check ahead | आगे चेकिंग चाल री सै, आराम तै चाल। | Aage checking chaal ri sai, aaram te chaal. | Checking going on ahead, take it easy. |
+| Police check ahead | पुलिस का नाका आण आळा सै, स्पीड कम कर ले। | Police ka naka aan aala sai, speed kam kar le. | A police check is coming up, slow down. |
+| Accident ahead | आगे हादसा होया सै, धीरे चालिए। | Aage haadsa hoya sai, dheere chaliye. | Accident ahead, go slowly. |
+| Accident ahead | भाई, आगे एक्सीडेंट सै, ध्यान तै। | Bhai, aage accident sai, dhyan te. | Brother, accident ahead, careful. |
+| Accident ahead | आगे गाड्डी भिड़ री सैं, संभल कै चाल। | Aage gaadi bhid ri sain, sambhal ke chaal. | Vehicles have collided ahead, drive carefully. |
+| Accident ahead | आगे हादसे की खबर सै, स्पीड घटा ले। | Aage haadse ki khabar sai, speed ghata le. | Accident reported ahead, reduce speed. |
+| Traffic jam ahead | आगे जाम सै भाई, आराम तै। | Aage jaam sai bhai, aaram te. | Jam ahead, brother, take it easy. |
+| Traffic jam ahead | आगे गाड्डी अटकी पड़ी सैं, धीरे हो ले। | Aage gaadi atki padi sain, dheere ho le. | Traffic is stuck ahead, slow down. |
+| Traffic jam ahead | जाम आण आळा सै, टाइम लागैगा, सबर राखिए। | Jaam aan aala sai, time laagega, sabar raakhiye. | A jam is coming; it will take time, be patient. |
+| Traffic jam ahead | आगे ट्रैफिक घणा सै, धीरे चालिए। | Aage traffic ghana sai, dheere chaliye. | Heavy traffic ahead, go slowly. |
+| Mobile camera ahead | आगे मोबाइल कैमरा सै, स्पीड कम कर ले। | Aage mobile camera sai, speed kam kar le. | Mobile camera ahead, slow down. |
+| Mobile camera ahead | भाई, आगे स्पीड गन आळे खड़े सैं। | Bhai, aage speed gun aale khade sain. | Brother, a speed-gun team is standing ahead. |
+| Mobile camera ahead | आगे इंटरसेप्टर गाड्डी सै, लिमिट मैं चाल। | Aage interceptor gaadi sai, limit main chaal. | Interceptor ahead, stay within the limit. |
+| Mobile camera ahead | मोबाइल कैमरा की खबर सै, ध्यान तै चालिए। | Mobile camera ki khabar sai, dhyan te chaliye. | Mobile camera reported, drive carefully. |
+| Report saved | ठीक सै, निशान ला दिया। दो घंटे याद राखूंगा। | Theek sai, nishaan la diya. Do ghante yaad raakhunga. | OK, marked it. I'll remember it for two hours. |
+| Report saved | बढ़िया भाई, इड़ै का निशान ला दिया। | Badhiya bhai, ide ka nishaan la diya. | Nice, brother, marked this spot. |
+| Report saved | लिख लिया, इड़ै तै गुजरैगा तै चेता दूंगा। | Likh liya, ide te gujrega te cheta dunga. | Noted; I'll warn you when you pass here. |
+| Report saved | रिपोर्ट हो गी, शुक्रिया भाई। | Report ho gi, shukriya bhai. | Reported, thanks brother. |
+| Fuel pumps found | लै, नेड़े के पंप स्क्रीन पै सैं। | Lai, nede ke pump screen pe sain. | Here, the nearby pumps are on the screen. |
+| Fuel pumps found | पंप मिल ग्या भाई, दूरी स्क्रीन पै देख ले। | Pump mil gaya bhai, doori screen pe dekh le. | Found a pump, brother; see the distance on screen. |
+| Fuel pumps found | नेड़े का पंप ढूंढ दिया, बोल तै ले चालूं। | Nede ka pump dhoondh diya, bol te le chaalun. | Found the nearest pump; say so and I'll take you. |
+| Fuel pumps found | पंप त्यार सैं, पहला आळा सबतै नेड़े सै। | Pump tyaar sain, pehla aala sabte nede sai. | Pumps ready; the first one is the nearest. |
+| CNG pumps found | सीएनजी पंप मिल ग्या, दूरी स्क्रीन पै सै। | CNG pump mil gaya, doori screen pe sai. | Found a CNG pump; the distance is on screen. |
+| CNG pumps found | लै भाई, नेड़े के सीएनजी पंप स्क्रीन पै सैं। | Lai bhai, nede ke CNG pump screen pe sain. | Here, brother, the nearby CNG pumps are on screen. |
+| CNG pumps found | सीएनजी आळा पंप ढूंढ दिया, बोल तै ले चालूं। | CNG aala pump dhoondh diya, bol te le chaalun. | Found a CNG pump; say so and I'll take you. |
+| CNG pumps found | गैस भरवाणी सै? पहला आळा सबतै नेड़े सै। | Gas bharwaani sai? Pehla aala sabte nede sai. | Need gas? The first one is the nearest. |
+| EV chargers found | चार्जिंग स्टेशन मिल ग्या, स्क्रीन पै देख ले। | Charging station mil gaya, screen pe dekh le. | Found a charging station; see it on screen. |
+| EV chargers found | लै, नेड़े के चार्जर स्क्रीन पै सैं। | Lai, nede ke charger screen pe sain. | Here, the nearby chargers are on screen. |
+| EV chargers found | गाड्डी चार्ज करणी सै? पहला आळा सबतै नेड़े सै। | Gaadi charge karni sai? Pehla aala sabte nede sai. | Need a charge? The first one is the nearest. |
+| EV chargers found | चार्जिंग स्टेशन ढूंढ दिया, बोल तै ले चालूं। | Charging station dhoondh diya, bol te le chaalun. | Found a charging station; say so and I'll take you. |
+| No station nearby | भाई, नेड़े कोए पंप ना मिल्या। | Bhai, nede koye pump na milya. | Brother, no pump found nearby. |
+| No station nearby | पचास किलोमीटर मैं कोए स्टेशन ना दिख्या। | Pachaas kilometre main koye station na dikhya. | No station within fifty kilometres. |
+| No station nearby | माफ करिए, इड़ै आसपास किमे ना मिल्या। | Maaf kariye, ide aaspaas kime na milya. | Sorry, nothing found around here. |
+| No station nearby | इस इलाके का डेटा कोन्या, नक्शे मैं देख ले। | Is ilaake ka data konya, nakshe main dekh le. | No data for this area; check the map. |
+
+Recorded-voice tails for the fuel answer, said right after a recorded distance when it is within 15% of the real one ("दो किलोमीटर" + "पै सीएनजी पंप सै।"); otherwise the *found* line plays and the card shows the distance:
+
+- **Pump after a distance (human voice)**
+- **CNG pump after a distance (human voice)**
+- **Charger after a distance (human voice)**
+
+| Event | Devanagari | Roman | English meaning |
+|---|---|---|---|
+| Pump after a distance (human voice) | पै पंप सै। | pe pump sai. | {distance}: a pump there. |
+| Pump after a distance (human voice) | दूर पेट्रोल पंप सै। | door petrol pump sai. | {distance} away there's a petrol pump. |
+| Pump after a distance (human voice) | पै सबतै नेड़े का पंप सै। | pe sabte nede ka pump sai. | {distance}: the nearest pump. |
+| Pump after a distance (human voice) | आगे पंप मिलैगा। | aage pump milega. | {distance} on you'll find a pump. |
+| CNG pump after a distance (human voice) | पै सीएनजी पंप सै। | pe CNG pump sai. | {distance}: a CNG pump there. |
+| CNG pump after a distance (human voice) | दूर सीएनजी मिलैगी। | door CNG milegi. | {distance} away you'll get CNG. |
+| CNG pump after a distance (human voice) | पै सबतै नेड़े का सीएनजी पंप सै। | pe sabte nede ka CNG pump sai. | {distance}: the nearest CNG pump. |
+| CNG pump after a distance (human voice) | आगे सीएनजी स्टेशन सै। | aage CNG station sai. | {distance} on there's a CNG station. |
+| Charger after a distance (human voice) | पै चार्जिंग स्टेशन सै। | pe charging station sai. | {distance}: a charging station there. |
+| Charger after a distance (human voice) | दूर चार्जर मिलैगा। | door charger milega. | {distance} away you'll find a charger. |
+| Charger after a distance (human voice) | पै सबतै नेड़े का चार्जर सै। | pe sabte nede ka charger sai. | {distance}: the nearest charger. |
+| Charger after a distance (human voice) | आगे चार्जिंग स्टेशन सै। | aage charging station sai. | {distance} on there's a charging station. |
 
 ## Human voice only (no names or numbers)
 

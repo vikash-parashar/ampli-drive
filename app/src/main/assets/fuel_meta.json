@@ -1,0 +1,10 @@
+{
+  "generated": "2026-10-31",
+  "count": 19414,
+  "cng": 390,
+  "ev": 575,
+  "assumed": 16585,
+  "bytes": 281595,
+  "source": "OpenStreetMap (Overpass API): amenity=fuel, amenity=charging_station",
+  "license": "ODbL 1.0. Fuel and charging station data © OpenStreetMap contributors"
+}

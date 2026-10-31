@@ -322,6 +322,7 @@ fun SettingsScreen(
                     if (pro.isPro) stringResource(R.string.pro_active) else null,
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
+                    stringResource(R.string.fuel_attribution),
                     stringResource(R.string.weather_attribution),
                     stringResource(R.string.about_not_affiliated),
                 ),

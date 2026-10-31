@@ -61,6 +61,15 @@ object VoiceCommandCatalog {
             ),
         ),
         Group(
+            R.string.voice_cmds_fuel,
+            listOf(
+                item("Nearest CNG pump", "CNG pump kahan hai", "सीएनजी पंप कहाँ है"),
+                item("Petrol pump", "Diesel pump", "Charging station"),
+                item("Police aage hai", "Accident ahead", "आगे जाम है"),
+                item("Mobile camera ahead", "मोबाइल कैमरा आगे है"),
+            ),
+        ),
+        Group(
             R.string.voice_cmds_car,
             listOf(
                 item("Where is my car?", "Gaadi kahan hai?", "गाड़ी कहाँ खड़ी है?"),

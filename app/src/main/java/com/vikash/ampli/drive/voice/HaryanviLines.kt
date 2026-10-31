@@ -41,6 +41,7 @@ object HaryanviLines {
         Music("Music"),
         Talk("Small talk"),
         Papers("Papers and FASTag pass"),
+        Radar("Fuel finder and radar"),
 
         /** Recorded human voice only: stand-ins for lines with a name or number in them. */
         HumanVoice("Human voice only (no names or numbers)"),
@@ -211,6 +212,53 @@ object HaryanviLines {
 
         /** Said right after a recorded number ("पाँच" + "ट्रिप बचे सैं…"). */
         PassTripsTail(Group.HumanVoice, "Pass trips after a number (human voice)"),
+
+        // Fuel finder and radar. No names or numbers in any of them, so all are recorded as is.
+
+        /** Red-light camera ahead (Pro). */
+        RedLightAhead(Group.Radar, "Red-light camera ahead"),
+
+        /** Entering an average-speed zone (Pro). */
+        AvgZoneStart(Group.Radar, "Average-speed zone starts"),
+
+        /** Leaving an average-speed zone (Pro). */
+        AvgZoneEnd(Group.Radar, "Average-speed zone ends"),
+
+        /** A police check reported ahead (Pro). */
+        PoliceAhead(Group.Radar, "Police check ahead"),
+
+        /** An accident reported ahead (Pro). */
+        AccidentAhead(Group.Radar, "Accident ahead"),
+
+        /** A traffic jam reported ahead (Pro). */
+        JamAhead(Group.Radar, "Traffic jam ahead"),
+
+        /** A mobile speed camera reported ahead (Pro). */
+        MobileCameraAhead(Group.Radar, "Mobile camera ahead"),
+
+        /** After the driver reports something ("police aage hai"). */
+        ReportSaved(Group.Radar, "Report saved"),
+
+        /** "Nearest petrol pump": the list is on screen. */
+        FuelPumpFound(Group.Radar, "Fuel pumps found"),
+
+        /** "Nearest CNG pump": the list is on screen. */
+        FuelCngFound(Group.Radar, "CNG pumps found"),
+
+        /** "Charging station": the list is on screen. */
+        FuelEvFound(Group.Radar, "EV chargers found"),
+
+        /** Nothing within 50 km, or no station data. */
+        FuelNone(Group.Radar, "No station nearby"),
+
+        /** Said right after a recorded distance: "दो किलोमीटर" + "पै पंप सै।". */
+        FuelPumpTail(Group.HumanVoice, "Pump after a distance (human voice)"),
+
+        /** Said right after a recorded distance: "दो किलोमीटर" + "पै सीएनजी पंप सै।". */
+        FuelCngTail(Group.HumanVoice, "CNG pump after a distance (human voice)"),
+
+        /** Said right after a recorded distance: "दो किलोमीटर" + "पै चार्जिंग स्टेशन सै।". */
+        FuelEvTail(Group.HumanVoice, "Charger after a distance (human voice)"),
 
         /** Safety prompts: never playful, never in this bank. */
         Sos(Group.Safety, "SOS", safety = true),
@@ -739,6 +787,98 @@ object HaryanviLines {
             Line("ट्रिप रह गे पास मैं, ध्यान राखिए।", "trip reh ge pass main, dhyan raakhiye.", "{n} trips left on the pass, keep it in mind."),
             Line("ट्रिप बाकी सैं सालाना पास मैं।", "trip baaki sain saalana pass main.", "{n} trips remain on the annual pass."),
             Line("ट्रिप और, फेर पास खतम।", "trip aur, pher pass khatam.", "{n} more trips, then the pass is used up."),
+        ),
+
+        // ------------------------------------------------------------------ Fuel finder and radar
+        Event.RedLightAhead to listOf(
+            Line("आगे लाल बत्ती का कैमरा सै, बत्ती देख कै चालिए।", "Aage laal batti ka camera sai, batti dekh ke chaliye.", "Red-light camera ahead, watch the signal."),
+            Line("भाई, आगे बत्ती पै कैमरा लाग्या सै।", "Bhai, aage batti pe camera laagya sai.", "Brother, there's a camera at the signal ahead."),
+            Line("लाल बत्ती आळे चौक पै कैमरा सै, जल्दबाजी ना करिए।", "Laal batti aale chauk pe camera sai, jaldbaazi na kariye.", "Camera at the red-light crossing ahead, don't rush."),
+            Line("आगे सिग्नल पै कैमरा सै, लाल हो तो रुक जाइयो।", "Aage signal pe camera sai, laal ho to ruk jaiyo.", "Camera at the signal ahead; stop if it's red."),
+        ),
+        Event.AvgZoneStart to listOf(
+            Line("औसत स्पीड आळा इलाका शुरू, पूरे रास्ते लिमिट मैं चालिए।", "Ausat speed aala ilaaka shuru, poore raaste limit main chaliye.", "Average-speed zone starts; keep to the limit all the way."),
+            Line("इब तै कैमरे औसत स्पीड नापैंगे, आराम तै चाल।", "Ib te camere ausat speed naapenge, aaram te chaal.", "From here the cameras measure your average speed; take it easy."),
+            Line("औसत स्पीड का जोन आ ग्या भाई, लिमिट स्क्रीन पै सै।", "Ausat speed ka zone aa gaya bhai, limit screen pe sai.", "Average-speed zone, brother; the limit is on the screen."),
+            Line("ध्यान दे, इड़ै तै औसत स्पीड गिणी जावैगी।", "Dhyan de, ide te ausat speed gini jaavegi.", "Careful, the average speed is counted from here."),
+        ),
+        Event.AvgZoneEnd to listOf(
+            Line("औसत स्पीड आळा इलाका खतम।", "Ausat speed aala ilaaka khatam.", "Average-speed zone over."),
+            Line("जोन पार हो ग्या, बढ़िया चलाई भाई।", "Zone paar ho gaya, badhiya chalaai bhai.", "Zone done, nicely driven, brother."),
+            Line("औसत स्पीड का कैमरा पाछै रह ग्या।", "Ausat speed ka camera paachhe reh gaya.", "The average-speed camera is behind us."),
+            Line("जोन खतम, फेर भी आराम तै चालियो।", "Zone khatam, pher bhi aaram te chaliyo.", "Zone over; still drive easy."),
+        ),
+        Event.PoliceAhead to listOf(
+            Line("आगे पुलिस का नाका सै, कागज त्यार राखिए।", "Aage police ka naka sai, kaagaz tyaar raakhiye.", "Police check ahead, keep your papers ready."),
+            Line("भाई, आगे पुलिस खड़ी सै, बेल्ट ला ले।", "Bhai, aage police khadi sai, belt la le.", "Brother, police ahead, put your belt on."),
+            Line("आगे चेकिंग चाल री सै, आराम तै चाल।", "Aage checking chaal ri sai, aaram te chaal.", "Checking going on ahead, take it easy."),
+            Line("पुलिस का नाका आण आळा सै, स्पीड कम कर ले।", "Police ka naka aan aala sai, speed kam kar le.", "A police check is coming up, slow down."),
+        ),
+        Event.AccidentAhead to listOf(
+            Line("आगे हादसा होया सै, धीरे चालिए।", "Aage haadsa hoya sai, dheere chaliye.", "Accident ahead, go slowly."),
+            Line("भाई, आगे एक्सीडेंट सै, ध्यान तै।", "Bhai, aage accident sai, dhyan te.", "Brother, accident ahead, careful."),
+            Line("आगे गाड्डी भिड़ री सैं, संभल कै चाल।", "Aage gaadi bhid ri sain, sambhal ke chaal.", "Vehicles have collided ahead, drive carefully."),
+            Line("आगे हादसे की खबर सै, स्पीड घटा ले।", "Aage haadse ki khabar sai, speed ghata le.", "Accident reported ahead, reduce speed."),
+        ),
+        Event.JamAhead to listOf(
+            Line("आगे जाम सै भाई, आराम तै।", "Aage jaam sai bhai, aaram te.", "Jam ahead, brother, take it easy."),
+            Line("आगे गाड्डी अटकी पड़ी सैं, धीरे हो ले।", "Aage gaadi atki padi sain, dheere ho le.", "Traffic is stuck ahead, slow down."),
+            Line("जाम आण आळा सै, टाइम लागैगा, सबर राखिए।", "Jaam aan aala sai, time laagega, sabar raakhiye.", "A jam is coming; it will take time, be patient."),
+            Line("आगे ट्रैफिक घणा सै, धीरे चालिए।", "Aage traffic ghana sai, dheere chaliye.", "Heavy traffic ahead, go slowly."),
+        ),
+        Event.MobileCameraAhead to listOf(
+            Line("आगे मोबाइल कैमरा सै, स्पीड कम कर ले।", "Aage mobile camera sai, speed kam kar le.", "Mobile camera ahead, slow down."),
+            Line("भाई, आगे स्पीड गन आळे खड़े सैं।", "Bhai, aage speed gun aale khade sain.", "Brother, a speed-gun team is standing ahead."),
+            Line("आगे इंटरसेप्टर गाड्डी सै, लिमिट मैं चाल।", "Aage interceptor gaadi sai, limit main chaal.", "Interceptor ahead, stay within the limit."),
+            Line("मोबाइल कैमरा की खबर सै, ध्यान तै चालिए।", "Mobile camera ki khabar sai, dhyan te chaliye.", "Mobile camera reported, drive carefully."),
+        ),
+        Event.ReportSaved to listOf(
+            Line("ठीक सै, निशान ला दिया। दो घंटे याद राखूंगा।", "Theek sai, nishaan la diya. Do ghante yaad raakhunga.", "OK, marked it. I'll remember it for two hours."),
+            Line("बढ़िया भाई, इड़ै का निशान ला दिया।", "Badhiya bhai, ide ka nishaan la diya.", "Nice, brother, marked this spot."),
+            Line("लिख लिया, इड़ै तै गुजरैगा तै चेता दूंगा।", "Likh liya, ide te gujrega te cheta dunga.", "Noted; I'll warn you when you pass here."),
+            Line("रिपोर्ट हो गी, शुक्रिया भाई।", "Report ho gi, shukriya bhai.", "Reported, thanks brother."),
+        ),
+        Event.FuelPumpFound to listOf(
+            Line("लै, नेड़े के पंप स्क्रीन पै सैं।", "Lai, nede ke pump screen pe sain.", "Here, the nearby pumps are on the screen."),
+            Line("पंप मिल ग्या भाई, दूरी स्क्रीन पै देख ले।", "Pump mil gaya bhai, doori screen pe dekh le.", "Found a pump, brother; see the distance on screen."),
+            Line("नेड़े का पंप ढूंढ दिया, बोल तै ले चालूं।", "Nede ka pump dhoondh diya, bol te le chaalun.", "Found the nearest pump; say so and I'll take you."),
+            Line("पंप त्यार सैं, पहला आळा सबतै नेड़े सै।", "Pump tyaar sain, pehla aala sabte nede sai.", "Pumps ready; the first one is the nearest."),
+        ),
+        Event.FuelCngFound to listOf(
+            Line("सीएनजी पंप मिल ग्या, दूरी स्क्रीन पै सै।", "CNG pump mil gaya, doori screen pe sai.", "Found a CNG pump; the distance is on screen."),
+            Line("लै भाई, नेड़े के सीएनजी पंप स्क्रीन पै सैं।", "Lai bhai, nede ke CNG pump screen pe sain.", "Here, brother, the nearby CNG pumps are on screen."),
+            Line("सीएनजी आळा पंप ढूंढ दिया, बोल तै ले चालूं।", "CNG aala pump dhoondh diya, bol te le chaalun.", "Found a CNG pump; say so and I'll take you."),
+            Line("गैस भरवाणी सै? पहला आळा सबतै नेड़े सै।", "Gas bharwaani sai? Pehla aala sabte nede sai.", "Need gas? The first one is the nearest."),
+        ),
+        Event.FuelEvFound to listOf(
+            Line("चार्जिंग स्टेशन मिल ग्या, स्क्रीन पै देख ले।", "Charging station mil gaya, screen pe dekh le.", "Found a charging station; see it on screen."),
+            Line("लै, नेड़े के चार्जर स्क्रीन पै सैं।", "Lai, nede ke charger screen pe sain.", "Here, the nearby chargers are on screen."),
+            Line("गाड्डी चार्ज करणी सै? पहला आळा सबतै नेड़े सै।", "Gaadi charge karni sai? Pehla aala sabte nede sai.", "Need a charge? The first one is the nearest."),
+            Line("चार्जिंग स्टेशन ढूंढ दिया, बोल तै ले चालूं।", "Charging station dhoondh diya, bol te le chaalun.", "Found a charging station; say so and I'll take you."),
+        ),
+        Event.FuelNone to listOf(
+            Line("भाई, नेड़े कोए पंप ना मिल्या।", "Bhai, nede koye pump na milya.", "Brother, no pump found nearby."),
+            Line("पचास किलोमीटर मैं कोए स्टेशन ना दिख्या।", "Pachaas kilometre main koye station na dikhya.", "No station within fifty kilometres."),
+            Line("माफ करिए, इड़ै आसपास किमे ना मिल्या।", "Maaf kariye, ide aaspaas kime na milya.", "Sorry, nothing found around here."),
+            Line("इस इलाके का डेटा कोन्या, नक्शे मैं देख ले।", "Is ilaake ka data konya, nakshe main dekh le.", "No data for this area; check the map."),
+        ),
+        Event.FuelPumpTail to listOf(
+            Line("पै पंप सै।", "pe pump sai.", "{distance}: a pump there."),
+            Line("दूर पेट्रोल पंप सै।", "door petrol pump sai.", "{distance} away there's a petrol pump."),
+            Line("पै सबतै नेड़े का पंप सै।", "pe sabte nede ka pump sai.", "{distance}: the nearest pump."),
+            Line("आगे पंप मिलैगा।", "aage pump milega.", "{distance} on you'll find a pump."),
+        ),
+        Event.FuelCngTail to listOf(
+            Line("पै सीएनजी पंप सै।", "pe CNG pump sai.", "{distance}: a CNG pump there."),
+            Line("दूर सीएनजी मिलैगी।", "door CNG milegi.", "{distance} away you'll get CNG."),
+            Line("पै सबतै नेड़े का सीएनजी पंप सै।", "pe sabte nede ka CNG pump sai.", "{distance}: the nearest CNG pump."),
+            Line("आगे सीएनजी स्टेशन सै।", "aage CNG station sai.", "{distance} on there's a CNG station."),
+        ),
+        Event.FuelEvTail to listOf(
+            Line("पै चार्जिंग स्टेशन सै।", "pe charging station sai.", "{distance}: a charging station there."),
+            Line("दूर चार्जर मिलैगा।", "door charger milega.", "{distance} away you'll find a charger."),
+            Line("पै सबतै नेड़े का चार्जर सै।", "pe sabte nede ka charger sai.", "{distance}: the nearest charger."),
+            Line("आगे चार्जिंग स्टेशन सै।", "aage charging station sai.", "{distance} on there's a charging station."),
         ),
     )
 

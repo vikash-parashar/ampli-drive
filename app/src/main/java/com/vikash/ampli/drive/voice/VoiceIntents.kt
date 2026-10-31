@@ -1,5 +1,7 @@
 package com.vikash.ampli.drive.voice
 
+import com.vikash.ampli.drive.cameras.ReportKind
+import com.vikash.ampli.drive.fuel.FuelFilter
 import com.vikash.ampli.drive.nav.SavedKind
 import java.util.Locale
 
@@ -14,6 +16,12 @@ sealed interface VoiceIntent {
     /** 0-based pick from the spoken list of places ("the second one" = 1). */
     data class ChooseOption(val index: Int) : VoiceIntent
     data object NextCamera : VoiceIntent
+
+    /** "Nearest CNG pump", "petrol pump kahan hai", "charging station": the offline fuel finder. */
+    data class FindFuel(val filter: FuelFilter) : VoiceIntent
+
+    /** "Police aage hai", "accident ahead", "आगे जाम है": a road report at the car's spot (Pro). */
+    data class ReportRoad(val kind: ReportKind) : VoiceIntent
 
     /** Song from USB / SD / internal storage. Also plain "play <song>". */
     data class PlayLocal(val query: String) : VoiceIntent
@@ -113,8 +121,16 @@ object VoiceIntents {
         if (!playWord) volume(t)?.let { return it }
         if (trimFillers(t, STOP_FILLERS) in STOP_EXACT) return VoiceIntent.Stop
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
+        // "Accident ahead" is a road report; "accident", "help me", "ambulance" alone stay SOS.
+        if (!playWord && REPORT_ACCIDENT.any { has(t, it) } && AHEAD.any { has(t, it) } && SOS_STRONG.none { has(t, it) }) {
+            roadReport(t, kw)?.let { return it }
+        }
         if (kw.sos.any { has(t, it) }) return VoiceIntent.Sos
         if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
+        if (!playWord) {
+            roadReport(t, kw)?.let { return it }
+            fuel(t)?.let { return it }
+        }
         if (WHAT_CAN_I_SAY.any { has(t, it) }) return VoiceIntent.WhatCanISay
         carQuestion(t)?.let { return it }
         // "Barish ke gaane bajao" is music and "take me to the weather station" a place.
@@ -400,6 +416,103 @@ object VoiceIntents {
         "help with commands", "kya bol sakta", "kya bol sakte", "kya kya bol", "kya kar sakti", "kya kar sakte",
         "commands dikhao", "क्या बोल सकता", "क्या बोल सकते", "क्या क्या बोल", "क्या कर सकती", "क्या कर सकते",
         "कमांड दिखाओ", "के के बोल सकूं", "के कर सकै",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    // ------------------------------------------------------------------ Fuel finder and road reports
+
+    /**
+     * "Nearest CNG pump", "CNG pump kahan hai", "petrol pump", "डीज़ल", "charging station". The most
+     * specific fuel wins (EV, CNG, diesel, petrol), else any pump. Not "air pump" / "hawa".
+     */
+    private fun fuel(t: String): VoiceIntent? {
+        if (FUEL_NOT.any { has(t, it) }) return null
+        return when {
+            FUEL_EV.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Ev)
+            FUEL_CNG.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Cng)
+            FUEL_DIESEL.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Diesel)
+            FUEL_PETROL.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.Petrol)
+            FUEL_ANY.any { has(t, it) } -> VoiceIntent.FindFuel(FuelFilter.All)
+            else -> null
+        }
+    }
+
+    /**
+     * "Police aage hai", "accident ahead", "aage jam hai", "mobile camera yahan hai". Needs the
+     * thing seen plus a "there is / ahead / here" word, and is not a question ("jam hai kya?"), a
+     * place ("police station le chalo") or a call ("police ko phone karo").
+     */
+    private fun roadReport(t: String, kw: Keywords): VoiceIntent? {
+        if (REPORT_CUE.none { has(t, it) }) return null
+        if (REPORT_NOT.any { has(t, it) } || kw.call.any { has(t, it) }) return null
+        return when {
+            REPORT_MOBILE.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.MobileCamera)
+            REPORT_ACCIDENT.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Accident)
+            REPORT_JAM.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Jam)
+            REPORT_POLICE.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Police)
+            else -> null
+        }
+    }
+
+    private val FUEL_EV = listOf(
+        "charging station", "charging stations", "charging point", "charge point", "ev charger", "ev charging",
+        "e v charger", "ev station", "car charging", "electric charger", "चार्जिंग स्टेशन", "चार्जिंग पॉइंट",
+        "चार्जिंग पॉइंट", "ईवी चार्जर", "ई वी चार्जर", "गाड़ी चार्ज", "charging station kahan", "chaarging station",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_CNG = listOf(
+        "cng", "c n g", "सीएनजी", "सी एन जी", "सीएनजी पंप", "cng pump", "cng station", "सीएनजी स्टेशन",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_DIESEL = listOf("diesel", "deisel", "डीजल", "डीज़ल", "डीज़ल पंप", "diesel pump")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_PETROL = listOf(
+        "petrol", "petrol pump", "पेट्रोल", "पेट्रोल पंप", "पैट्रोल", "petrol bharwana", "पेट्रोल भरवाना",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val FUEL_ANY = listOf(
+        "fuel station", "fuel pump", "filling station", "gas station", "nearest pump", "pump", "fuel", "पंप", "फ्यूल",
+        "तेल भरवाना", "तेल डलवाना", "tel bharwana", "tel dalwana", "tel bharwana hai", "तेल कित",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Not a fuel stop: tyre air, a water pump. */
+    private val FUEL_NOT = listOf("air pump", "hawa", "हवा", "tyre", "tire", "टायर", "water pump", "पानी")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_CUE = listOf(
+        "aage", "aagey", "age", "आगे", "ahead", "here", "yahan", "yaha", "यहाँ", "यहां", "ithe", "report", "रिपोर्ट",
+        "lagi", "laga", "lagi hai", "लगा", "लगी", "khadi", "khada", "खड़ी", "खड़ा", "hai", "है", "सै", "sai",
+        "ho gaya", "हो गया", "hua", "हुआ", "there is", "there s", "spotted", "mark", "chal rahi", "चल रही",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Questions, places and trips are not reports. */
+    private val REPORT_NOT = listOf(
+        "kya", "क्या", "kahan", "kaha", "कहाँ", "कहां", "kitna", "कितना", "is there", "any", "station", "thana", "थाना",
+        "chowki", "चौकी", "take me", "navigate", "go to", "le chalo", "le chal", "ले चलो", "ले चल", "जाना है",
+        "jana hai", "where", "kaisa", "kaisi", "कैसा", "कैसी", "how is", "how s",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** The accident is ahead of the car, not the car's own. */
+    private val AHEAD = listOf("aage", "aagey", "आगे", "ahead", "up ahead", "further on")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Words that keep "accident" an SOS even with "ahead" in it. */
+    private val SOS_STRONG = listOf("help", "ambulance", "sos", "emergency", "madad", "bachao", "मदद", "बचाओ", "एम्बुलेंस", "इमरजेंसी", "hurt", "injured", "चोट")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_MOBILE = listOf(
+        "mobile camera", "speed gun", "interceptor", "radar gun", "मोबाइल कैमरा", "स्पीड गन", "इंटरसेप्टर",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_ACCIDENT = listOf("accident", "एक्सीडेंट", "ऐक्सीडेंट", "दुर्घटना", "हादसा", "hadsa", "durghatna")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_JAM = listOf("traffic jam", "jam", "jaam", "जाम", "ट्रैफिक जाम", "ट्रैफ़िक जाम", "traffic", "ट्रैफिक", "ट्रैफ़िक")
+        .flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val REPORT_POLICE = listOf(
+        "police", "पुलिस", "naka", "नाका", "police check", "police checking", "पुलिस चेकिंग", "checking chal rahi",
+        "चेकिंग चल रही", "challan", "चालान",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     /** Small talk, Haryanvi / Hindi / English in any app language. Before "play" ("चुटकुला सुनाओ"). */

@@ -9,8 +9,13 @@ Reads, through the Overpass API:
   * nodes tagged enforcement=maxspeed (or average_speed)
   * relations type=enforcement + enforcement=maxspeed/average_speed, using their "device"
     members (the camera nodes) and the relation's maxspeed when the node has none.
+  * red-light cameras: nodes and relations with enforcement=traffic_signals (the relation's
+    "device" members, else its "force" member, the signal itself), written with type "red_light".
+  * average-speed zones: enforcement=average_speed relations with a start and an end point
+    ("from"/"to" nodes, else the first and last "device"), written to speed_zones.json.
 
-Writes a compact JSON array of {id, lat, lon, maxspeed, dir, type} plus cameras_meta.json.
+Writes a compact JSON array of {id, lat, lon, maxspeed, dir, type} plus cameras_meta.json, and
+speed_zones.json as [{id, a: [lat, lon], b: [lat, lon], maxspeed, name}].
 Never fails the build: on any error the committed files are left as they are and it exits 0.
 """
 import datetime
@@ -33,8 +38,8 @@ QUERY = """
 area["ISO3166-1"="IN"][admin_level=2]->.in;
 (
   node["highway"="speed_camera"](area.in);
-  node["enforcement"~"^(maxspeed|average_speed)$"](area.in);
-  relation["type"="enforcement"]["enforcement"~"^(maxspeed|average_speed)$"](area.in);
+  node["enforcement"~"^(maxspeed|average_speed|traffic_signals)$"](area.in);
+  relation["type"="enforcement"]["enforcement"~"^(maxspeed|average_speed|traffic_signals)$"](area.in);
 );
 out body;
 >;
@@ -95,6 +100,8 @@ def parse_dir(value):
 
 
 def camera_type(tags):
+    if tags.get("enforcement") == "traffic_signals":
+        return "red_light"
     if tags.get("enforcement") == "average_speed" or tags.get("speed_camera") == "average_speed":
         return "average_speed"
     return "speed_camera"
@@ -122,16 +129,50 @@ def build(elements):
 
     for n in nodes.values():
         tags = n.get("tags", {})
-        if tags.get("highway") == "speed_camera" or tags.get("enforcement") in ("maxspeed", "average_speed"):
+        if tags.get("highway") == "speed_camera" or tags.get("enforcement") in ("maxspeed", "average_speed", "traffic_signals"):
             add(n)
 
     for rel in (e for e in elements if e.get("type") == "relation"):
         rtags = rel.get("tags", {})
-        for m in rel.get("members", []):
-            if m.get("type") == "node" and m.get("role") == "device" and m.get("ref") in nodes:
-                add(nodes[m["ref"]], rtags)
+        members = [m for m in rel.get("members", []) if m.get("type") == "node" and m.get("ref") in nodes]
+        devices = [m for m in members if m.get("role") == "device"]
+        if not devices and rtags.get("enforcement") == "traffic_signals":
+            # Red-light relations often point only at the signal ("force"); warn at the signal.
+            devices = [m for m in members if m.get("role") == "force"]
+        for m in devices:
+            add(nodes[m["ref"]], rtags)
 
     return sorted(cams.values(), key=lambda c: c["id"])
+
+
+def build_zones(elements):
+    """Average-speed sections: one entry per relation with a usable start and end."""
+    nodes = {e["id"]: e for e in elements if e.get("type") == "node" and "lat" in e}
+    zones = []
+    for rel in (e for e in elements if e.get("type") == "relation"):
+        rtags = rel.get("tags", {})
+        if rtags.get("enforcement") != "average_speed":
+            continue
+        members = [m for m in rel.get("members", []) if m.get("type") == "node" and m.get("ref") in nodes]
+        start = next((m for m in members if m.get("role") == "from"), None)
+        end = next((m for m in members if m.get("role") == "to"), None)
+        if start is None or end is None:
+            devices = [m for m in members if m.get("role") == "device"]
+            if len(devices) < 2:
+                continue
+            start, end = devices[0], devices[-1]
+        a, b = nodes[start["ref"]], nodes[end["ref"]]
+        if a["id"] == b["id"]:
+            continue
+        maxspeed = parse_speed(rtags.get("maxspeed")) or parse_speed(a.get("tags", {}).get("maxspeed"))
+        zones.append({
+            "id": f"r{rel['id']}",
+            "a": [round(a["lat"], 6), round(a["lon"], 6)],
+            "b": [round(b["lat"], 6), round(b["lon"], 6)],
+            "maxspeed": maxspeed,
+            "name": (rtags.get("name") or rtags.get("description") or "")[:60],
+        })
+    return sorted(zones, key=lambda z: z["id"])
 
 
 def main():
@@ -145,9 +186,14 @@ def main():
         return
     with open(os.path.join(ASSETS, "cameras.json"), "w", encoding="utf-8") as f:
         json.dump(cams, f, separators=(",", ":"))
+    zones = build_zones(elements)
+    with open(os.path.join(ASSETS, "speed_zones.json"), "w", encoding="utf-8") as f:
+        json.dump(zones, f, separators=(",", ":"), ensure_ascii=False)
     meta = {
         "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
         "count": len(cams),
+        "red_light": sum(1 for c in cams if c["type"] == "red_light"),
+        "average_speed_zones": len(zones),
         "source": "OpenStreetMap (Overpass API)",
         "license": "ODbL 1.0. Speed camera data © OpenStreetMap contributors",
     }
@@ -155,7 +201,7 @@ def main():
         json.dump(meta, f, indent=2, ensure_ascii=False)
     with_limit = sum(1 for c in cams if c["maxspeed"] is not None)
     with_dir = sum(1 for c in cams if c["dir"] is not None)
-    print(f"fetch_cameras: wrote {len(cams)} cameras for India ({with_limit} with maxspeed, {with_dir} with direction)")
+    print(f"fetch_cameras: wrote {len(cams)} cameras for India ({with_limit} with maxspeed, {with_dir} with direction, {meta['red_light']} red-light) and {len(zones)} average-speed zones")
 
 
 if __name__ == "__main__":

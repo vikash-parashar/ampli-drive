@@ -59,6 +59,9 @@ enum class Screen {
 
     /** Car Hub's own turn-by-turn, and its "Where to?" search. */
     Navigation, NavSearch,
+
+    /** Fuel / CNG / EV finder and the speed-camera radar (from the Car hub, or by voice). */
+    Fuel, Radar,
 }
 
 @Composable
@@ -227,6 +230,11 @@ fun DriveRoot(
                                     CarDest.Trips -> onNavigate(Screen.Trips)
                                     CarDest.Obd -> onNavigate(Screen.Obd)
                                     CarDest.Tyres -> onNavigate(Screen.Tyres)
+                                    CarDest.Fuel -> {
+                                        app.fuel.requestedFilter.value = com.vikash.ampli.drive.fuel.FuelFilter.All
+                                        onNavigate(Screen.Fuel)
+                                    }
+                                    CarDest.Radar -> onNavigate(Screen.Radar)
                                     CarDest.Settings -> {
                                         settingsReturn = Screen.Car
                                         onNavigate(Screen.Settings)
@@ -290,6 +298,15 @@ fun DriveRoot(
                         Screen.NavSearch -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
                             NavSearchScreen(app = app, onBack = { onNavigate(Screen.Home) })
+                        }
+                        Screen.Fuel -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            val asked by app.fuel.requestedFilter.collectAsStateWithLifecycle()
+                            FuelScreen(app = app, onBack = { onNavigate(Screen.Car) }, initialFilter = asked)
+                        }
+                        Screen.Radar -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            RadarScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }

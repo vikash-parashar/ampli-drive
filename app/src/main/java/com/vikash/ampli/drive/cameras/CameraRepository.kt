@@ -13,7 +13,16 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** What Settings › Speed cameras shows. */
-data class CameraStats(val loaded: Int, val reported: Int, val dataDate: String?, val ready: Boolean)
+data class CameraStats(
+    val loaded: Int,
+    val reported: Int,
+    val dataDate: String?,
+    val ready: Boolean,
+    /** Red-light cameras among [loaded]. */
+    val redLight: Int = 0,
+    /** Average-speed zones (assets/speed_zones.json). */
+    val zones: Int = 0,
+)
 
 /**
  * The offline camera database: assets/cameras.json plus the driver's own reports.
@@ -25,7 +34,11 @@ data class CameraStats(val loaded: Int, val reported: Int, val dataDate: String?
  * under the ODbL (share-alike).
  *
  * Format: a JSON array of {"id", "lat", "lon", "maxspeed" (km/h or null), "dir" (bearing or null),
- * "type"}; assets/cameras_meta.json holds {"generated": "YYYY-MM-DD", ...}.
+ * "type"}; assets/cameras_meta.json holds {"generated": "YYYY-MM-DD", ...}. Types are
+ * "speed_camera", "average_speed" and "red_light" (enforcement=traffic_signals).
+ *
+ * assets/speed_zones.json lists average-speed sections (enforcement=average_speed relations with
+ * their from / to points): [{"id", "a": [lat, lon], "b": [lat, lon], "maxspeed", "name"}].
  */
 class CameraRepository(context: Context) {
     private val appContext = context.applicationContext
@@ -34,6 +47,7 @@ class CameraRepository(context: Context) {
     private val lock = Any()
 
     @Volatile private var index = CameraIndex(emptyList())
+    @Volatile private var zones: List<SpeedZone> = emptyList()
     private var bundled: List<SpeedCamera>? = null
     private var dataDate: String? = null
     private var started = false
@@ -52,6 +66,19 @@ class CameraRepository(context: Context) {
 
     /** Cameras within about [radiusM] of the point (bucket-accurate). */
     fun near(lat: Double, lon: Double, radiusM: Double): List<SpeedCamera> = index.near(lat, lon, radiusM)
+
+    /** Average-speed zones whose start or end is within about [radiusM] of the point. */
+    fun zonesNear(lat: Double, lon: Double, radiusM: Double): List<SpeedZone> {
+        val all = zones
+        if (all.isEmpty()) return emptyList()
+        // Cheap box test first: a few hundred zones at most for all of India.
+        val dLat = radiusM / 111_320.0
+        val dLon = dLat / kotlin.math.cos(Math.toRadians(lat)).coerceAtLeast(0.05)
+        return all.filter { z ->
+            (kotlin.math.abs(z.startLat - lat) <= dLat && kotlin.math.abs(z.startLon - lon) <= dLon) ||
+                (kotlin.math.abs(z.endLat - lat) <= dLat && kotlin.math.abs(z.endLon - lon) <= dLon)
+        }
+    }
 
     /**
      * For the voice assistant: the nearest camera within [maxMeters] ahead. [bearing] is the GPS
@@ -107,10 +134,16 @@ class CameraRepository(context: Context) {
 
     private fun rebuild() {
         synchronized(lock) {
+            val first = bundled == null
             val osm = bundled ?: loadBundled().also { bundled = it }
+            if (first) zones = loadZones()
             val mine = loadReports()
             index = CameraIndex(osm + mine)
-            _stats.value = CameraStats(osm.size, mine.size, dataDate, ready = true)
+            _stats.value = CameraStats(
+                osm.size, mine.size, dataDate, ready = true,
+                redLight = osm.count { it.type == SpeedCamera.TYPE_RED_LIGHT },
+                zones = zones.size,
+            )
         }
     }
 
@@ -129,6 +162,27 @@ class CameraRepository(context: Context) {
         } catch (_: Exception) {
             emptyList()
         }
+    }
+
+    private fun loadZones(): List<SpeedZone> = try {
+        val arr = JSONArray(appContext.assets.open(ZONES_ASSET).bufferedReader().use { it.readText() })
+        (0 until arr.length()).mapNotNull { i ->
+            val o = arr.optJSONObject(i) ?: return@mapNotNull null
+            val a = o.optJSONArray("a") ?: return@mapNotNull null
+            val b = o.optJSONArray("b") ?: return@mapNotNull null
+            if (a.length() < 2 || b.length() < 2) return@mapNotNull null
+            SpeedZone(
+                id = o.optString("id", "z$i"),
+                startLat = a.optDouble(0),
+                startLon = a.optDouble(1),
+                endLat = b.optDouble(0),
+                endLon = b.optDouble(1),
+                maxspeed = if (o.isNull("maxspeed")) null else o.optInt("maxspeed", 0).takeIf { it in 5..200 },
+                name = o.optString("name", ""),
+            ).takeIf { !it.startLat.isNaN() && !it.endLat.isNaN() && it.lengthM in 200.0..60_000.0 }
+        }
+    } catch (_: Exception) {
+        emptyList()
     }
 
     private fun loadReports(): List<SpeedCamera> {
@@ -161,6 +215,7 @@ class CameraRepository(context: Context) {
     private companion object {
         const val ASSET = "cameras.json"
         const val META_ASSET = "cameras_meta.json"
+        const val ZONES_ASSET = "speed_zones.json"
         const val REPORTS_FILE = "camera_reports"
         const val KEY_REPORTS = "reports"
         const val VOICE_RANGE_M = 20_000.0

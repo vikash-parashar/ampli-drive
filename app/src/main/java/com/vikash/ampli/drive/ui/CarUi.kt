@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Snooze
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.TireRepair
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
@@ -330,7 +331,7 @@ fun ParkedPill(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
 
 // ------------------------------------------------------------------------------ Car hub
 
-enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings }
+enum class CarDest { Parked, Papers, Expenses, Trips, Obd, Tyres, Settings, Fuel, Radar }
 
 @Composable
 fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
@@ -428,6 +429,23 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
             { m ->
                 CarTile(
+                    stringResource(R.string.fuel_title), Icons.Filled.LocalGasStation,
+                    stringResource(R.string.fuel_tile_hint),
+                    onClick = { onOpen(CarDest.Fuel) }, modifier = m,
+                )
+            },
+            { m ->
+                val cam by app.cameraAlerts.current.collectAsStateWithLifecycle()
+                CarTile(
+                    stringResource(R.string.radar_tile_title), Icons.Filled.Speed,
+                    cam?.let { stringResource(R.string.camera_distance, it.distanceMeters / 10 * 10) + " · " + cameraKindLabel(it.kind) }
+                        ?: stringResource(R.string.radar_tile_hint),
+                    alert = cam != null, danger = cam?.overLimit == true,
+                    onClick = { onOpen(CarDest.Radar) }, modifier = m,
+                )
+            },
+            { m ->
+                CarTile(
                     stringResource(R.string.break_tile), Icons.Filled.Coffee,
                     when {
                         !settings.breakReminder -> stringResource(R.string.car_off)
@@ -465,7 +483,7 @@ fun CarHubScreen(app: DriveApp, onBack: () -> Unit, onOpen: (CarDest) -> Unit) {
             },
         )
         Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-            // Two rows (5 + 4 tiles); the shorter row keeps the same tile width.
+            // Two rows (6 + 5 tiles); the shorter row keeps the same tile width.
             val perRow = (tiles.size + 1) / 2
             for (row in tiles.chunked(perRow)) {
                 Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {

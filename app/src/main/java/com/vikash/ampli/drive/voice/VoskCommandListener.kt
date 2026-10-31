@@ -121,6 +121,9 @@ object VoskCommands {
         "what time is it", "what is the time", "what is the date", "how is the weather", "weather",
         "will it rain", "what is my speed", "open maps", "brightness up", "brightness down",
         "bluetooth settings", "what can i say",
+        // Fuel finder and road reports.
+        "nearest cng pump", "cng pump", "petrol pump", "diesel pump", "charging station", "fuel station",
+        "police ahead", "accident ahead", "traffic jam ahead", "mobile camera ahead",
     )
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
@@ -149,6 +152,9 @@ object VoskCommands {
         "रुको", "बंद करो", "नेविगेशन बंद करो", "रास्ता बंद करो", "कितने बजे हैं", "टाइम क्या हुआ",
         "आज क्या तारीख है", "मौसम कैसा है", "बारिश होगी", "स्पीड कितनी है", "मैप खोलो", "नक्शा खोलो",
         "ब्लूटूथ खोलो", "ब्राइटनेस बढ़ाओ", "ब्राइटनेस कम करो", "क्या बोल सकता हूँ",
+        // Fuel finder and road reports.
+        "सीएनजी पंप कहाँ है", "सीएनजी पंप", "पेट्रोल पंप", "डीजल पंप", "चार्जिंग स्टेशन",
+        "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")

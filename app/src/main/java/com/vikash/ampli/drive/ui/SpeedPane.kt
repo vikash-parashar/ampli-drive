@@ -488,7 +488,7 @@ private fun TapeSpeed(speed: Float?, limit: Int?, maxHeight: Dp) {
 
 /** Round road-sign badge: the limit at an approaching speed camera, otherwise "--". */
 @Composable
-private fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier) {
+internal fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val hud = theme.font == FontChoice.Mono
@@ -528,6 +528,7 @@ private fun CameraBanner(alert: CameraAlert, modifier: Modifier = Modifier) {
                 CameraAlert.Kind.FixedCamera -> stringResource(R.string.camera_fixed)
                 CameraAlert.Kind.AverageSpeedStart -> stringResource(R.string.camera_average_start)
                 CameraAlert.Kind.AverageSpeedZone -> stringResource(R.string.camera_average_in)
+                else -> cameraKindLabel(alert.kind)
             },
         )
         append(" · ")
