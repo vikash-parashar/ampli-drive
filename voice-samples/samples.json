@@ -1,0 +1,120 @@
+{
+ "lines": [
+  {
+   "id": "welcome_01",
+   "text": "जय बाबा की, आज कित जाणा सै?"
+  },
+  {
+   "id": "welcome_02",
+   "text": "जय बाबा की भाई, आज कित का प्लान सै?"
+  },
+  {
+   "id": "welcome_04",
+   "text": "जय बाबा की ताई आले, आज कित की तैयारी सै?"
+  },
+  {
+   "id": "welcome_05",
+   "text": "जय बाबा की भाई! गाड्डी त्यार सै, बोल कित चालां?"
+  },
+  {
+   "id": "welcome_09",
+   "text": "जय बाबा की! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै?"
+  },
+  {
+   "id": "welcome_15",
+   "text": "जय बाबा की! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां?"
+  },
+  {
+   "id": "welcome_16_m",
+   "text": "जय बाबा की! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला।"
+  },
+  {
+   "id": "welcome_morning_02",
+   "text": "सवेरे सवेरे जय बाबा की! चाय पी ली के?"
+  },
+  {
+   "id": "welcome_evening_04",
+   "text": "साँझ हो गी, जय बाबा की!"
+  },
+  {
+   "id": "farewell_03",
+   "text": "जय बाबा की भाई, आराम कर ले, फेर मिलांगे।"
+  },
+  {
+   "id": "farewell_05",
+   "text": "आज का सफर बढ़िया रया, जय बाबा की!"
+  },
+  {
+   "id": "farewell_07",
+   "text": "जय बाबा की! आज का गेड़ा कसूत रया, फेर मिलांगे।"
+  },
+  {
+   "id": "greeting_01",
+   "text": "जय बाबा की भाई! कित चालणा सै आज?"
+  },
+  {
+   "id": "greeting_03",
+   "text": "जय बाबा की! बेल्ट ला ले, फेर चालांगे।"
+  },
+  {
+   "id": "greeting_05",
+   "text": "जय बाबा की! गाड्डी भी रेडी, मैं भी रेडी।"
+  },
+  {
+   "id": "cancelled_03",
+   "text": "जय बाबा की, मैं उरे ए सूं।"
+  },
+  {
+   "id": "talk_joke_02",
+   "text": "मन्नै ताऊ तै पूछ्या, हॉर्न क्यूं बजाया? बोल्या, भैंस नै जय बाबा की करी थी!"
+  },
+  {
+   "id": "toll_paid_plain_08",
+   "text": "टोल आळे भाई नै जय बाबा की, पीस्से फास्टैग तै कट गे।"
+  },
+  {
+   "id": "police_ahead_06",
+   "text": "आग्गै चेकिंग सै, स्पीड कम, पुलिस आळे भाइयां नै जय बाबा की करदे जाइए।"
+  },
+  {
+   "id": "mobile_camera_ahead_05",
+   "text": "आग्गै स्पीड गन सै, लिमिट मैं चाल, पुलिस आळे भाइयां नै जय बाबा की।"
+  }
+ ],
+ "voices": [
+  {
+   "gender": "male",
+   "voice_id": "WffdYtALnWHwMOtLM7Hk",
+   "name": "Jeet",
+   "owner": "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6",
+   "accent": "",
+   "age": "",
+   "description": "",
+   "current": false,
+   "key": "male-00",
+   "clips": {
+    "welcome_01": "male-00/welcome_01.ogg",
+    "welcome_02": "male-00/welcome_02.ogg",
+    "welcome_04": "male-00/welcome_04.ogg",
+    "welcome_05": "male-00/welcome_05.ogg",
+    "welcome_09": "male-00/welcome_09.ogg",
+    "welcome_15": "male-00/welcome_15.ogg",
+    "welcome_16_m": "male-00/welcome_16_m.ogg",
+    "welcome_morning_02": "male-00/welcome_morning_02.ogg",
+    "welcome_evening_04": "male-00/welcome_evening_04.ogg",
+    "farewell_03": "male-00/farewell_03.ogg",
+    "farewell_05": "male-00/farewell_05.ogg",
+    "farewell_07": "male-00/farewell_07.ogg",
+    "greeting_01": "male-00/greeting_01.ogg",
+    "greeting_03": "male-00/greeting_03.ogg",
+    "greeting_05": "male-00/greeting_05.ogg",
+    "cancelled_03": "male-00/cancelled_03.ogg",
+    "talk_joke_02": "male-00/talk_joke_02.ogg",
+    "toll_paid_plain_08": "male-00/toll_paid_plain_08.ogg",
+    "police_ahead_06": "male-00/police_ahead_06.ogg",
+    "mobile_camera_ahead_05": "male-00/mobile_camera_ahead_05.ogg"
+   }
+  }
+ ],
+ "characters": 1054
+}
