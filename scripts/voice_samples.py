@@ -91,16 +91,46 @@ def tts(voice_id, text, dest):
     os.unlink(src)
 
 
+LINES_FILE = os.path.join(vp.ROOT, "voice-samples-lines.json")
+VOICES_FILE = os.path.join(vp.ROOT, "voice-samples-voices.json")
+EXCITED = {"Welcome", "WelcomeMorning", "WelcomeEvening", "Farewell", "Greeting"}
+
+
+def file_lines():
+    out = []
+    for l in json.load(open(LINES_FILE)):
+        tag = "[excited] " if l["event"] in EXCITED else "[playfully] " if l["event"] == "TalkJoke" else ""
+        out.append((l["id"], tag + l["text"], l["text"]))
+    return out
+
+
+def file_voices():
+    out = []
+    for v in json.load(open(VOICES_FILE)):
+        owner = ""
+        for c in shared({"search": v["search"], "page_size": 20}):
+            if c.get("voice_id") == v["voice_id"]:
+                owner = c.get("public_owner_id", "")
+        out.append({"gender": v["gender"], "voice_id": v["voice_id"], "name": v["name"], "owner": owner,
+                    "accent": "", "age": "", "description": "", "current": False})
+    return out
+
+
 def main():
+    global LINES
+    if os.path.exists(LINES_FILE):
+        LINES = file_lines()
     mine = {v.get("voice_id") for v in vp.my_voices()}
-    voices = []
-    if os.path.exists(STYLE):
+    voices = file_voices() if os.path.exists(VOICES_FILE) else []
+    if voices:
+        pass
+    elif os.path.exists(STYLE):
         for v in style_candidates():
             voices.append({"gender": v.get("gender", "male"), "voice_id": v["voice_id"], "name": v.get("name", "?"),
                            "owner": v.get("public_owner_id", ""), "accent": v.get("accent", ""),
                            "age": v.get("age", ""), "style": v["_style"],
                            "description": (v.get("description") or "")[:200], "current": False})
-    for gender in (() if os.path.exists(STYLE) else ("male", "female")):
+    for gender in (() if voices or os.path.exists(STYLE) else ("male", "female")):
         vid, name = CURRENT[gender]
         voices.append({"gender": gender, "voice_id": vid, "name": name, "owner": "", "accent": "indian",
                        "age": "", "description": "The voice the app uses today.", "current": True})
