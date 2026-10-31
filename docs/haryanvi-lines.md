@@ -23,16 +23,16 @@ change a line there and here together (a unit test checks that every line in the
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Welcome on car start | राम राम जी, आज कित जाणा सै? | Ram Ram ji, aaj kit jaana sai? | Ram Ram! Where are we going today? |
-| Welcome on car start | राम राम भाई, आज कित का प्लान सै? | Ram Ram bhai, aaj kit ka plan sai? | Ram Ram brother, what's the plan today? |
+| Welcome on car start | जय बाबा की, आज कित जाणा सै? | Jai Baba Ki, aaj kit jaana sai? | Jai Baba Ki! Where are we going today? |
+| Welcome on car start | जय बाबा की भाई, आज कित का प्लान सै? | Jai Baba Ki bhai, aaj kit ka plan sai? | Jai Baba Ki brother, what's the plan today? |
 | Welcome on car start | और तैयारे? सुणा दे, के हाल सै? | Aur taiyaare? Suna de, ke haal sai? | So, all set? Tell me, how are things? |
-| Welcome on car start | राम राम ताई आले, आज कित की तैयारी सै? | Ram Ram Tai Aale, aaj kit ki taiyaari hai? | Ram Ram, dear friend! What are we ready for today? |
-| Welcome on car start | राम राम भाई! गाड्डी त्यार सै, बोल कित चालां? | Ram Ram bhai! Gaadi tyaar sai, bol kit chaalaan? | Ram Ram! The car is ready, say where we go. |
+| Welcome on car start | जय बाबा की ताई आले, आज कित की तैयारी सै? | Jai Baba Ki Tai Aale, aaj kit ki taiyaari hai? | Jai Baba Ki, dear friend! What are we ready for today? |
+| Welcome on car start | जय बाबा की भाई! गाड्डी त्यार सै, बोल कित चालां? | Jai Baba Ki bhai! Gaadi tyaar sai, bol kit chaalaan? | Jai Baba Ki! The car is ready, say where we go. |
 | Welcome on car start | भाई कित जाणा सै आज? | Bhai kit jaana sai aaj? | Brother, where are we going today? |
 | Welcome on car start | आज कित की तैयारी सै? | Aaj kit ki taiyaari sai? | What are we ready for today? |
 | Welcome on car start | आज कित का प्लान बणैगा? | Aaj kit ka plan banega? | What's the plan going to be today? |
 | Morning (4 to 11) | सवेरे सवेरे कित चाल पड़े ताऊ? | Savere savere kit chaal pade tau? | Off somewhere so early in the morning, Tau? |
-| Morning (4 to 11) | सवेरे की राम राम! चाय पी ली के? | Savere ki Ram Ram! Chai pi li ke? | Morning Ram Ram! Had your tea? |
+| Morning (4 to 11) | सवेरे सवेरे जय बाबा की! चाय पी ली के? | Savere savere Jai Baba Ki! Chai pi li ke? | Morning Jai Baba Ki! Had your tea? |
 | Morning (4 to 11) | सवेरे सवेरे सड़क खाली सै, फेर भी धीरे चलाइए। | Savere savere sadak khaali sai, pher bhi dheere chalaiye. | The road is empty this early, still drive slowly. |
 | Morning (4 to 11) | दिन की शुरुआत बढ़िया हो, चाल पड़ां। | Din ki shuruaat badhiya ho, chaal padaan. | May the day start well, let's go. |
 | Afternoon (12 to 4 pm) | दोपहर हो री सै, धूप तै बच कै चलाइए। | Dopahar ho ri sai, dhoop te bach ke chalaiye. | It's afternoon, mind the sun. |
@@ -42,16 +42,16 @@ change a line there and here together (a unit test checks that every line in the
 | Evening (5 to 8 pm) | साँझ हो ली, बत्ती जला ले भाई। | Saanjh ho li, batti jala le bhai. | Evening is here, switch on the lights. |
 | Evening (5 to 8 pm) | साँझ का टैम सै, सड़क पै भीड़ होगी, आराम तै चलाइए। | Saanjh ka time sai, sadak pe bheed hogi, aaram te chalaiye. | It's evening rush time, drive easy. |
 | Evening (5 to 8 pm) | काम निपट ग्या के? चाल घरां चालां। | Kaam nipat gaya ke? Chaal ghara chaalaan. | Work done? Let's head home. |
-| Evening (5 to 8 pm) | साँझ की राम राम जी! | Saanjh ki Ram Ram ji! | Good evening, Ram Ram! |
+| Evening (5 to 8 pm) | साँझ हो गी, जय बाबा की! | Saanjh ho gi, Jai Baba Ki! | Good evening, Jai Baba Ki! |
 | Night (9 pm to 3 am) | रात हो री सै, आराम तै चलाइए। | Raat ho ri sai, aaram te chalaiye. | It's night, drive easy. |
 | Night (9 pm to 3 am) | रात नै हेडलाइट ठीक राखिए, अर नींद आवै तो रुक जाइए। | Raat nai headlight theek raakhiye, ar neend aave to ruk jaaiye. | Keep the headlights right at night, and stop if you get sleepy. |
 | Night (9 pm to 3 am) | इतणी रात नै कित चाल पड़े भाई? ध्यान तै। | Itni raat nai kit chaal pade bhai? Dhyaan te. | Where to this late, brother? Carefully. |
 | Night (9 pm to 3 am) | रात का सफर सै, मैं जाग्गूं सूं, तू भी जाग्या रहिए। | Raat ka safar sai, main jaaggun sun, tu bhi jaagya rahiye. | It's a night trip: I'm awake, you stay awake too. |
 | Goodbye (ACC off / parked) | चाल फेर मिलांगे। | Chaal pher milaange. | Alright, see you again. |
 | Goodbye (ACC off / parked) | गाड्डी ढंग तै लॉक कर दिए। | Gaadi dhang te lock kar diye. | Lock the car properly. |
-| Goodbye (ACC off / parked) | राम राम भाई, आराम कर ले, फेर मिलांगे। | Ram Ram bhai, aaram kar le, pher milaange. | Ram Ram brother, get some rest, see you again. |
+| Goodbye (ACC off / parked) | जय बाबा की भाई, आराम कर ले, फेर मिलांगे। | Jai Baba Ki bhai, aaram kar le, pher milaange. | Jai Baba Ki brother, get some rest, see you again. |
 | Goodbye (ACC off / parked) | पहुँच गे, शीशे चढ़ा ले अर गाड्डी लॉक कर दिए। | Pahunch ge, sheeshe chadha le ar gaadi lock kar diye. | We're here: roll up the windows and lock the car. |
-| Goodbye (ACC off / parked) | आज का सफर बढ़िया रया, राम राम! | Aaj ka safar badhiya raya, Ram Ram! | Today's trip went well, Ram Ram! |
+| Goodbye (ACC off / parked) | आज का सफर बढ़िया रया, जय बाबा की! | Aaj ka safar badhiya raya, Jai Baba Ki! | Today's trip went well, Jai Baba Ki! |
 
 ## Hey Ampli
 
@@ -63,11 +63,11 @@ change a line there and here together (a unit test checks that every line in the
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Hey Ampli greeting | राम राम भाई! कित चालणा सै आज? | Ram Ram bhai! Kit chalna sai aaj? | Ram Ram brother! Where are we going today? |
+| Hey Ampli greeting | जय बाबा की भाई! कित चालणा सै आज? | Jai Baba Ki bhai! Kit chalna sai aaj? | Jai Baba Ki brother! Where are we going today? |
 | Hey Ampli greeting | सुणा ताई आळे, गाड्डी त्यार सै! | Suna tai aale, gaadi tyar sai! | Tell me, friend, the car is ready! |
-| Hey Ampli greeting | राम राम! बेल्ट ला ले, फेर चालांगे। | Ram Ram! Belt laga le, phir chalange. | Ram Ram! Put on your belt, then we go. |
+| Hey Ampli greeting | जय बाबा की! बेल्ट ला ले, फेर चालांगे। | Jai Baba Ki! Belt laga le, phir chalange. | Jai Baba Ki! Put on your belt, then we go. |
 | Hey Ampli greeting | आ ग्या भाई? चाल, आज कित की सैर करणी सै? | Aa gaya bhai? Chal, aaj kit ki sair karni sai? | You're here? Come on, where shall we ride today? |
-| Hey Ampli greeting | राम राम जी! गाड्डी भी रेडी, मैं भी रेडी। | Ram Ram ji! Gaadi bhi ready, main bhi ready. | Ram Ram! The car is ready, and so am I. |
+| Hey Ampli greeting | जय बाबा की! गाड्डी भी रेडी, मैं भी रेडी। | Jai Baba Ki! Gaadi bhi ready, main bhi ready. | Jai Baba Ki! The car is ready, and so am I. |
 | Hey Ampli greeting | भाई कैसा सै, सब राजी खुशी? परिवार में सब ठीक? | Bhai kaisa sai, sab raazi khushi? Parivaar mein sab theek? | How are you, brother, all well? Everyone fine at home? |
 | Hey Ampli reply | हाँ भाई, बोल। | Haan bhai, bol. | Yes brother, go ahead. |
 | Hey Ampli reply | हाँ जी, सुण रया सूं। | Haan ji, sun reya sun. | Yes, I'm listening. |
@@ -101,7 +101,7 @@ change a line there and here together (a unit test checks that every line in the
 | Didn't understand | भाई, न्यू बोल: रोहतक चाल, या गाणा बजा। | Bhai, nyu bol: Rohtak chaal, ya gaana baja. | Brother, say it like: go to Rohtak, or play a song. |
 | Cancelled | ठीक सै भाई, कोए बात ना। | Theek sai bhai, koi baat na. | OK brother, no problem. |
 | Cancelled | चाल छोड़, जद चाहिए तद बुला लियो। | Chal chhod, jad chahiye tad bula liyo. | Never mind, call me when you need me. |
-| Cancelled | राम राम, मैं उरे ए सूं। | Ram Ram, main ure e sun. | Ram Ram, I'm right here. |
+| Cancelled | जय बाबा की, मैं उरे ए सूं। | Jai Baba Ki, main ure e sun. | Jai Baba Ki, I'm right here. |
 | Cancelled | ठीक सै, जद मर्जी हो, हे एम्पली बोल दिए। | Theek sai, jad marzi ho, Hey Ampli bol diye. | OK, whenever you like, just say Hey Ampli. |
 
 ## Navigation
@@ -367,7 +367,7 @@ change a line there and here together (a unit test checks that every line in the
 | "कौन सै तू?" | थारा साथी एम्पली, रास्ता भी बताऊं, गाणे भी बजाऊं। | Thaara saathi Ampli, rasta bhi bataaun, gaane bhi bajaaun. | Your buddy Ampli: I show the way and play the songs. |
 | "कौन सै तू?" | मैं एम्पली सूं, देसी बोली आळी थारी गाड्डी। | Main Ampli sun, desi boli aali thaari gaadi. | I'm Ampli, your car that speaks desi. |
 | "चुटकला सुणा" | ताई बोली, गाड्डी धीरे चला। ताऊ बोल्या, धीरे ए चला रया सूं, सड़क ए तावळी भाज री सै! | Tai boli, gaadi dheere chala. Tau bolya, dheere e chala reya sun, sadak e taavli bhaaj ri sai! | Tai said: drive slowly. Tau said: I am; it's the road that's running fast! |
-| "चुटकला सुणा" | मन्नै ताऊ तै पूछ्या, हॉर्न क्यूं बजाया? बोल्या, भैंस नै राम राम करी थी! | Manne tau te poochhya, horn kyun bajaya? Bolya, bhains nai Ram Ram kari thi! | I asked Tau why he honked. He said: I was saying Ram Ram to the buffalo! |
+| "चुटकला सुणा" | मन्नै ताऊ तै पूछ्या, हॉर्न क्यूं बजाया? बोल्या, भैंस नै जय बाबा की करी थी! | Manne tau te poochhya, horn kyun bajaya? Bolya, bhains nai Jai Baba Ki kari thi! | I asked Tau why he honked. He said: I was saying Jai Baba Ki to the buffalo! |
 | "चुटकला सुणा" | जाम मैं फंस कै ताऊ बोल्या, इतणी देर मैं तो मेरी भैंस भी पहुँच ज्यांदी! | Jaam main phans ke tau bolya, itni der main to meri bhains bhi pahunch jyaandi! | Stuck in a jam, Tau said: my buffalo would have got there by now! |
 | "चुटकला सुणा" | ताऊ बोल्या, जीपीएस की के जरूरत, मैं तो हर चौक पै रास्ता पूछ ल्यूं सूं! | Tau bolya, GPS ki ke zaroorat, main to har chowk pe rasta poochh lyun sun! | Tau said: who needs GPS? I ask the way at every crossing! |
 | "चुटकला सुणा" | स्पीड ब्रेकर देख कै ताऊ बोल्या, यो सड़क भी थक कै बैठ गी! | Speed breaker dekh ke tau bolya, yo sadak bhi thak ke baith gi! | Seeing a speed breaker, Tau said: even the road got tired and sat down! |
@@ -566,17 +566,17 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
-| Welcome on car start | राम राम जी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै? | Ram Ram ji! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai? | Ram Ram! The car's awake and so am I. Where's today's round? |
+| Welcome on car start | जय बाबा की! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै? | Jai Baba Ki! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai? | Jai Baba Ki! The car's awake and so am I. Where's today's round? |
 | Welcome on car start | इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले। | Engine garjya, janu akhaade main pahalwaan utarya ho! Chaal, belt la le. | The engine roared like a wrestler stepping into the akhada! Come on, belt up. |
 | Welcome on car start | ल्यो जी, आपणी सवारी त्यार सै! चूरमा खा कै आए हो के? | Lyo ji, aapni sawaari tyaar sai! Choorma kha ke aaye ho ke? | Here we go, our ride is ready! Had your choorma before coming? |
 | Welcome on car start | गाड्डी त्यार, गाणे त्यार, मैं भी त्यार, बस बेल्ट की कसर सै! | Gaadi tyaar, gaane tyaar, main bhi tyaar, bas belt ki kasar sai! | Car ready, songs ready, me ready. Only the seat belt is missing! |
 | Welcome on car start | के बात! आज तो गाड्डी भी नहा-धो कै त्यार लाग री सै। | Ke baat! Aaj to gaadi bhi naha-dho ke tyaar laag ri sai. | Wow! Even the car looks freshly bathed and dressed up today. |
 | Welcome on car start | सीट सेट, शीशे सेट, बेल्ट ला ले, फेर बता कित चालां। | Seat set, sheeshe set, belt la le, pher bata kit chaalaan. | Seat set, mirrors set, belt on, then tell me where we go. |
-| Welcome on car start | राम राम! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां? | Ram Ram! Tractor jisa dam, ar mere jisi boli, chaal padaan? | Ram Ram! Power like a tractor and a tongue like mine. Shall we go? |
-| Welcome on car start | राम राम! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला। | Ram Ram! Aaj raasta main bataaunga, tu bas mauj te chala. | Ram Ram! I'll show the way today, you just drive and enjoy. *(male)* |
-| Welcome on car start | राम राम! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला। | Ram Ram! Aaj raasta main bataaungi, tu bas mauj te chala. | Ram Ram! I'll show the way today, you just drive and enjoy. *(female)* |
+| Welcome on car start | जय बाबा की! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां? | Jai Baba Ki! Tractor jisa dam, ar mere jisi boli, chaal padaan? | Jai Baba Ki! Power like a tractor and a tongue like mine. Shall we go? |
+| Welcome on car start | जय बाबा की! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला। | Jai Baba Ki! Aaj raasta main bataaunga, tu bas mauj te chala. | Jai Baba Ki! I'll show the way today, you just drive and enjoy. *(male)* |
+| Welcome on car start | जय बाबा की! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला। | Jai Baba Ki! Aaj raasta main bataaungi, tu bas mauj te chala. | Jai Baba Ki! I'll show the way today, you just drive and enjoy. *(female)* |
 | Goodbye (ACC off / parked) | पहुँच गे! गाड्डी लॉक कर दिए, अर मेरी याद आवै तो फेर स्टार्ट कर लिए। | Pahunch ge! Gaadi lock kar diye, ar meri yaad aave to pher start kar liye. | We're here! Lock the car, and if you miss me, just start it again. |
-| Goodbye (ACC off / parked) | राम राम जी! आज का गेड़ा कसूत रया, फेर मिलांगे। | Ram Ram ji! Aaj ka geda kasoot raya, pher milaange. | Ram Ram! Today's round was awesome. See you again. |
+| Goodbye (ACC off / parked) | जय बाबा की! आज का गेड़ा कसूत रया, फेर मिलांगे। | Jai Baba Ki! Aaj ka geda kasoot raya, pher milaange. | Jai Baba Ki! Today's round was awesome. See you again. |
 | Goodbye (ACC off / parked) | चाल, इब तू आराम कर, मैं भी थोड़ी झपकी ले ल्यूं। | Chaal, ib tu aaraam kar, main bhi thodi jhapki le lyun. | OK, you rest now, I'll grab a little nap too. |
 | Goodbye (ACC off / parked) | चाबी, फोन, बटुआ, तीनूं ले लिए? फेर ना कहिए बताया कोनी! | Chaabi, phone, batua, teenun le liye? Pher na kahiye bataaya koni! | Keys, phone, wallet: got all three? Don't say I didn't tell you! |
 | Goodbye (ACC off / parked) | गाड्डी नै भी सांस लेण दे, अर तू भी लस्सी पी कै आराम कर। | Gaadi nai bhi saans len de, ar tu bhi lassi pi ke aaraam kar. | Let the car breathe, and you have a lassi and rest. |
@@ -691,7 +691,7 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Toll deducted (human voice) | टोल कट ग्या, बैरियर खुल्या, बिना रुके पार, के बात! | Toll kat gya, barrier khulya, bina ruke paar, ke baat! | Toll paid, barrier up, through without stopping. Nice! |
 | Toll deducted (human voice) | फास्टैग नै काम कर दिया, कितणे कटे, स्क्रीन पै सै। | FASTag nai kaam kar diya, kitne kate, screen pe sai. | FASTag did its job; how much went is on the screen. |
 | Toll deducted (human voice) | टोल पार! पीस्से कटे, पर सड़क भी चिकणी मिलैगी। | Toll paar! Peesse kate, par sadak bhi chikni milaigi. | Through the toll! Money gone, but the road will be smooth. |
-| Toll deducted (human voice) | टोल आळे भाई नै राम राम, पीस्से फास्टैग तै कट गे। | Toll aale bhai nai Ram Ram, peesse FASTag te kat ge. | Ram Ram to the toll man; FASTag paid. |
+| Toll deducted (human voice) | टोल आळे भाई नै जय बाबा की, पीस्से फास्टैग तै कट गे। | Toll aale bhai nai Jai Baba Ki, peesse FASTag te kat ge. | Jai Baba Ki to the toll man; FASTag paid. |
 | Toll deducted (human voice) | ताऊ होंदा तो मोल-भाव करदा, फास्टैग नै चुपचाप भर दिया! | Tau honda to mol-bhaav karda, FASTag nai chupchaap bhar diya! | Tau would have haggled; FASTag just paid quietly! |
 | Toll deducted (human voice) | टोल हो ग्या, हिसाब स्क्रीन पै सै, रुक कै देख लिए। | Toll ho gya, hisaab screen pe sai, ruk ke dekh liye. | Toll done; the details are on screen, look once you've stopped. |
 | Break reminder (human voice) | घणी देर हो ली, अगले ढाबे पै रुकांगे, परांठे बाट देखैं सैं! | Ghani der ho li, agle dhaabe pe rukaange, paraanthe baat dekhain sain! | It's been long, we'll stop at the next dhaba. The parathas are waiting! |
@@ -717,7 +717,7 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Average-speed zone ends | जोन खतम! कछुआ जीत ग्या, जिसा हमेशा जीतै सै। | Zone khatam! Kachhua jeet gya, jisa hamesha jeetai sai. | Zone over! The tortoise won, like it always does. |
 | Average-speed zone ends | पार हो ग्या जोन, सड़क खुली सै, पर लिमिट वोए सै। | Paar ho gya zone, sadak khuli sai, par limit voe sai. | Through the zone. The road's open, but the limit is the same. |
 | Police check ahead | आग्गै पुलिस का नाका सै, बेल्ट ला ले अर कागज त्यार राख। | Aaggai police ka naaka sai, belt la le ar kaagaz tyaar raakh. | Police check ahead; belt on and keep your papers ready. |
-| Police check ahead | आग्गै चेकिंग सै, स्पीड कम, पुलिस आळे भाइयां नै राम राम करदे जाइए। | Aaggai checking sai, speed kam, police aale bhaiyaan nai Ram Ram karde jaaiye. | Checking ahead, slow down, and greet the police brothers with a Ram Ram. |
+| Police check ahead | आग्गै चेकिंग सै, स्पीड कम, पुलिस आळे भाइयां नै जय बाबा की करदे जाइए। | Aaggai checking sai, speed kam, police aale bhaiyaan nai Jai Baba Ki karde jaaiye. | Checking ahead, slow down, and greet the police brothers with a Jai Baba Ki. |
 | Police check ahead | नाका आ रया, धीरे कर, लाइसेंस, आरसी सब गेल्यां सैं ना? | Naaka aa raya, dheere kar, licence, RC sab gelyaan sain na? | Checkpoint coming, slow down. Licence and RC on you, right? |
 | Police check ahead | आग्गै पुलिस खड़ी सै, आराम तै, सीधे ड्राइवर नै के फिकर! | Aaggai police khadi sai, aaraam te, seedhe driver nai ke fikar! | Police ahead, easy. An honest driver has nothing to worry about! |
 | Police check ahead | चेकिंग चाल री सै, कहवैं तो रुक ज्याइए, शीशा नीचे अर स्माइल ऊपर। | Checking chaal ri sai, kahvain to ruk jyaaiye, sheesha neeche ar smile oopar. | Checking on; stop if they signal. Window down, smile up. |
@@ -728,7 +728,7 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Traffic jam ahead | आग्गै ट्रैफिक घणा सै, बार-बार लेन ना बदलिए, सबनै घरां जाणा सै। | Aaggai traffic ghana sai, baar-baar lane na badaliye, sabnai gharaan jaana sai. | Heavy traffic ahead, don't keep switching lanes. Everyone's going home. |
 | Traffic jam ahead | जाम सै आग्गै, ठंडा दिमाग राख, गुस्सा अर क्लच दोनूं हळवे। | Jaam sai aaggai, thanda dimaag raakh, gussa ar clutch donun halve. | Jam ahead; keep a cool head. Go easy on the temper and the clutch. |
 | Traffic jam ahead | आग्गै जाम, धीरे हो ले, आज सड़क बारात की चाल चाल री सै। | Aaggai jaam, dheere ho le, aaj sadak baaraat ki chaal chaal ri sai. | Jam ahead, slow down. The road's moving at wedding-procession pace. |
-| Mobile camera ahead | आग्गै स्पीड गन सै, लिमिट मैं चाल, पुलिस आळे भाइयां नै राम राम। | Aaggai speed gun sai, limit main chaal, police aale bhaiyaan nai Ram Ram. | Speed gun ahead, stay in the limit. Ram Ram to the police brothers. |
+| Mobile camera ahead | आग्गै स्पीड गन सै, लिमिट मैं चाल, पुलिस आळे भाइयां नै जय बाबा की। | Aaggai speed gun sai, limit main chaal, police aale bhaiyaan nai Jai Baba Ki. | Speed gun ahead, stay in the limit. Jai Baba Ki to the police brothers. |
 | Mobile camera ahead | आग्गै मोबाइल कैमरा सै, मंदी कर ले, छुप कै खड़्या सै, पर मन्नै बेरा सै! | Aaggai mobile camera sai, mandi kar le, chhup ke khadya sai, par mannai bera sai! | Mobile camera ahead, slow down. It's hiding, but I know! |
 | Mobile camera ahead | आग्गै इंटरसेप्टर सै, लिमिट मैं, आज शरीफ ड्राइवर बण कै दिखा। | Aaggai interceptor sai, limit main, aaj shareef driver ban ke dikha. | Interceptor ahead, stay in the limit. Show them a model driver today. |
 | Mobile camera ahead | आग्गै स्पीड नापण आळे सैं, धीरे कर, म्हारी तो रोज की आराम आळी चाल सै। | Aaggai speed naapan aale sain, dheere kar, mhaari to roj ki aaraam aali chaal sai. | Speed checkers ahead, slow down. Easy pace is our daily style anyway. |

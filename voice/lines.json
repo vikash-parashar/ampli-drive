@@ -1,7 +1,7 @@
 {
   "version": 1,
   "note": "Generated from HaryanviLines.kt by VoiceManifestTest. Do not edit by hand.",
-  "characters": 21569,
+  "characters": 21624,
   "lines": [
     {"id": "welcome_01", "event": "Welcome", "group": "Welcome", "text": "जय बाबा की, आज कित जाणा सै?", "hash": "18c04448a551"},
     {"id": "welcome_02", "event": "Welcome", "group": "Welcome", "text": "जय बाबा की भाई, आज कित का प्लान सै?", "hash": "ae735e0f2da1"},
