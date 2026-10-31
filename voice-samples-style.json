@@ -1,9 +1,7 @@
-{"per_search": 2,
+{"per_search": 1,
  "searches": [
-  {"q": "deep baritone hindi", "label": "Deep filmy baritone"},
-  {"q": "bambaiya", "label": "Tapori bhidu"},
-  {"q": "tapori", "label": "Tapori bhidu"},
-  {"q": "villain hindi", "label": "Comic villain"},
-  {"q": "old man hindi", "label": "Witty old tau"},
-  {"q": "haryanvi", "label": "Haryanvi desi"}
+  {"q": "AI assistant butler", "label": "Calm AI butler", "hindi": false},
+  {"q": "sophisticated british calm", "label": "Calm AI butler", "hindi": false},
+  {"q": "confident witty charming", "label": "Cocky hero", "hindi": false},
+  {"q": "epic deep warrior", "label": "Thunder warrior", "hindi": false}
  ]}
