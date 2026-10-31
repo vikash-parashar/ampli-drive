@@ -57,8 +57,8 @@ jobs:
         id: voices
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          VOICE_ID_MALE: ${{ vars.VOICE_ID_MALE || '7b9mYhmnp0y2qSH1FnBL' }}  # Bunty, funny best friend (owner's pick)
-          VOICE_ID_FEMALE: ${{ vars.VOICE_ID_FEMALE || '9w21nMuk8CWXIME31V1S' }}  # Simran, young and friendly (owner's pick)
+          VOICE_ID_MALE: ${{ vars.VOICE_ID_MALE || 'WffdYtALnWHwMOtLM7Hk' }}  # Jeet, expressive Bollywood villain (owner's pick 2026-10-31)
+          VOICE_ID_FEMALE: ${{ vars.VOICE_ID_FEMALE || '90ipbRoKi4CpHXvKVtl0' }}  # Anika, warm customer-care voice (owner's pick 2026-10-31)
         run: python3 scripts/voice_pack.py list-voices
 
   generate:
