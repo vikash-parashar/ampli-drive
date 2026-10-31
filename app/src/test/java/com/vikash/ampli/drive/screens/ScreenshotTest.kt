@@ -130,7 +130,7 @@ class ScreenshotTest {
         compose.setContent {
             Frame {
                 Box(Modifier.fillMaxSize().padding(top = 36.dpCompat()), contentAlignment = Alignment.TopCenter) {
-                    WelcomeCard(app, WelcomeGreeter.Card("Ram Ram Vikash Ji 🙏", "राम राम Vikash जी, आज कित का प्लान सै? सवेरे सवेरे कित चाल पड़े ताऊ?", 1L))
+                    WelcomeCard(app, WelcomeGreeter.Card("Jai Baba Ki Vikash Ji 🙏", "जय बाबा की Vikash जी, आज कित का प्लान सै? सवेरे सवेरे कित चाल पड़े ताऊ?", 1L))
                 }
             }
         }

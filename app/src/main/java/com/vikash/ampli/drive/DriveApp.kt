@@ -52,7 +52,7 @@ class DriveApp : Application() {
     /** Settings › Voice style "Haryanvi desi": playful lines for greetings, alerts and replies. */
     val desi: DesiVoice by lazy { DesiVoice(this) }
 
-    /** "Ram Ram {name} Ji, aaj kit ka plan hai?" once per car start (CarStart). */
+    /** "Jai Baba Ki {name} Ji, aaj kit ka plan hai?" once per car start (CarStart). */
     val welcome: WelcomeGreeter by lazy { WelcomeGreeter(this) }
 
     /** Speaks navigation turns: Car Hub's own, and Google Maps' (Settings › Haryanvi navigation prompts). */

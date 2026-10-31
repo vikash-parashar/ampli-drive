@@ -710,7 +710,7 @@
     <string name="nav_go">ಹೊರಡಿ</string>
     <string name="nav_routing_attribution">ಮಾರ್ಗಗಳು: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">ನಿಮ್ಮ ಹೆಸರು ಏನು?</string>
-    <string name="name_hint">ಕಾರು ಸ್ಟಾರ್ಟ್ ಆದಾಗಲೆಲ್ಲಾ ಸ್ವಾಗತ ಕಾರ್ಡ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಹೆಸರು ಕಾಣಿಸುತ್ತದೆ: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">ಕಾರು ಸ್ಟಾರ್ಟ್ ಆದಾಗಲೆಲ್ಲಾ ಸ್ವಾಗತ ಕಾರ್ಡ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಹೆಸರು ಕಾಣಿಸುತ್ತದೆ: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">ನಿಮ್ಮ ಹೆಸರು</string>
     <string name="name_skip">ಬಿಟ್ಟುಬಿಡಿ</string>
     <string name="name_mic">ನಿಮ್ಮ ಹೆಸರು ಹೇಳಿ</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">ಕೇಳಿಸಲಿಲ್ಲ. ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ.</string>
     <string name="name_mic_denied">ಮೈಕ್‌ಗೆ ಅನುಮತಿ ಇಲ್ಲ. ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ.</string>
     <string name="name_settings_title">ನಿಮ್ಮ ಹೆಸರು</string>
-    <string name="name_settings_empty">ಹೆಸರಿಲ್ಲ: ಸ್ವಾಗತ ಕಾರ್ಡ್‌ನಲ್ಲಿ “Ram Ram” ಕಾಣಿಸುತ್ತದೆ</string>
+    <string name="name_settings_empty">ಹೆಸರಿಲ್ಲ: ಸ್ವಾಗತ ಕಾರ್ಡ್‌ನಲ್ಲಿ “Jai Baba Ki” ಕಾಣಿಸುತ್ತದೆ</string>
     <string name="welcome_title">ಸ್ವಾಗತ ಸಂದೇಶ</string>
     <string name="welcome_hint">ಕಾರು ಸ್ಟಾರ್ಟ್ ಆದಾಗಲೆಲ್ಲಾ ಒಮ್ಮೆ ಮೊಳಗುತ್ತದೆ (ಬೂಟ್ ಅಥವಾ ಇಗ್ನಿಷನ್ ಆನ್)</string>
     <string name="welcome_play">ಈಗ ಸ್ವಾಗತ ಕೇಳಿ</string>

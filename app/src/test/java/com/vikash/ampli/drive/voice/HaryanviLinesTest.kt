@@ -145,10 +145,10 @@ class HaryanviLinesTest {
     fun ownersWordsAreInTheBank() {
         fun has(e: HaryanviLines.Event, deva: String) =
             assertTrue("$e lacks $deva", HaryanviLines.forEvent(e)!!.any { it.deva == deva })
-        has(HaryanviLines.Event.Welcome, "राम राम जी, आज कित जाणा सै?")
-        has(HaryanviLines.Event.Welcome, "राम राम भाई, आज कित का प्लान सै?")
+        has(HaryanviLines.Event.Welcome, "जय बाबा की, आज कित जाणा सै?")
+        has(HaryanviLines.Event.Welcome, "जय बाबा की भाई, आज कित का प्लान सै?")
         has(HaryanviLines.Event.Welcome, "और तैयारे? सुणा दे, के हाल सै?")
-        has(HaryanviLines.Event.Welcome, "राम राम ताई आले, आज कित की तैयारी सै?")
+        has(HaryanviLines.Event.Welcome, "जय बाबा की ताई आले, आज कित की तैयारी सै?")
         has(HaryanviLines.Event.Welcome, "भाई कित जाणा सै आज?")
         has(HaryanviLines.Event.Welcome, "आज कित की तैयारी सै?")
         has(HaryanviLines.Event.Welcome, "आज कित का प्लान बणैगा?")

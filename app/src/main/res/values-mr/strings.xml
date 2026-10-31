@@ -709,7 +709,7 @@
     <string name="nav_go">चला</string>
     <string name="nav_routing_attribution">मार्ग: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">तुमचे नाव काय?</string>
-    <string name="name_hint">गाडी सुरू झाल्यावर प्रत्येक वेळी स्वागत कार्डवर तुमचे नाव दिसेल: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">गाडी सुरू झाल्यावर प्रत्येक वेळी स्वागत कार्डवर तुमचे नाव दिसेल: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">तुमचे नाव</string>
     <string name="name_skip">वगळा</string>
     <string name="name_mic">तुमचे नाव सांगा</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">ऐकू आले नाही. नाव टाइप करा.</string>
     <string name="name_mic_denied">माइकला परवानगी नाही. नाव टाइप करा.</string>
     <string name="name_settings_title">तुमचे नाव</string>
-    <string name="name_settings_empty">नाव नाही: स्वागत कार्डवर “Ram Ram” दिसेल</string>
+    <string name="name_settings_empty">नाव नाही: स्वागत कार्डवर “Jai Baba Ki” दिसेल</string>
     <string name="welcome_title">स्वागत संदेश</string>
     <string name="welcome_hint">गाडी सुरू होताना प्रत्येक वेळी एकदा वाजतो (बूट किंवा इग्निशन सुरू)</string>
     <string name="welcome_play">आता स्वागत ऐका</string>

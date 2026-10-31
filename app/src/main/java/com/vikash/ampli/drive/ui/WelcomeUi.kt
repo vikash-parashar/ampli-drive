@@ -152,7 +152,7 @@ fun FirstRunNameHost(app: DriveApp) {
                     onSave = { name ->
                         commit = {
                             app.prefs.setOwnerName(name)
-                            // Let the driver hear it straight away: "Ram Ram {name} Ji…".
+                            // Let the driver hear it straight away: "Jai Baba Ki {name} Ji…".
                             app.welcome.playSoon()
                         }
                         shown.targetState = false
@@ -295,7 +295,7 @@ internal fun GlowBadge(content: @Composable () -> Unit) {
 }
 
 /**
- * "Ram Ram {name} Ji 🙏" for [WelcomeGreeter.CARD_MS] at the top of the screen when the welcome
+ * "Jai Baba Ki {name} Ji 🙏" for [WelcomeGreeter.CARD_MS] at the top of the screen when the welcome
  * plays: springs in from above, a thin bar runs down the time, then it slides away. Only the card
  * takes touches (a tap closes it).
  */

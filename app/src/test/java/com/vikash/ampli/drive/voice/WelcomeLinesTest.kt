@@ -16,9 +16,9 @@ class WelcomeLinesTest {
     @Test
     fun firstWelcomeIsTheOwnersWording() {
         val w = haryanvi("Vikash", 0)
-        assertTrue(w.text, w.text.startsWith("राम राम जी, आज कित जाणा सै?"))
+        assertTrue(w.text, w.text.startsWith("जय बाबा की, आज कित जाणा सै?"))
         assertEquals("hi", w.language)
-        assertEquals("Ram Ram Vikash Ji 🙏", w.card)
+        assertEquals("Jai Baba Ki Vikash Ji 🙏", w.card)
         assertFalse(w.text.contains("Vikash"))
     }
 
@@ -43,7 +43,7 @@ class WelcomeLinesTest {
         } finally {
             VoiceGate.recordedHasClip = null
         }
-        for (count in 0..5) assertEquals("Ram Ram 🙏", haryanvi("", count).card)
+        for (count in 0..5) assertEquals("Jai Baba Ki 🙏", haryanvi("", count).card)
     }
 
     @Test
@@ -66,7 +66,7 @@ class WelcomeLinesTest {
     @Test
     fun romanLinesWithEnglishVoiceWhenNoHindiVoice() {
         val first = haryanvi("Vikash", 0, hindiVoice = false)
-        assertTrue(first.text, first.text.startsWith("Ram Ram ji, aaj kit jaana sai?"))
+        assertTrue(first.text, first.text.startsWith("Jai Baba Ki, aaj kit jaana sai?"))
         assertEquals("en-IN", first.language)
         val plain = haryanvi(null, 3, hindiVoice = false)
         assertFalse(plain.text.any { it in 'ऀ'..'ॿ' })
@@ -88,8 +88,8 @@ class WelcomeLinesTest {
         // Standard never uses the Haryanvi lines, whatever the count.
         for (count in 0..3) {
             val w = WelcomeLines.select(VoiceStyle.Standard, "Vikash", count, hindiVoice = true, hindiScreen = true)
-            assertFalse(w.text.contains("राम राम"))
-            assertFalse(w.text.contains("Ram Ram"))
+            assertFalse(w.text.contains("जय बाबा की"))
+            assertFalse(w.text.contains("Jai Baba Ki"))
         }
     }
 
@@ -112,7 +112,7 @@ class WelcomeLinesTest {
         assertEquals("", OwnerName.clean("Ji"))
         assertTrue(OwnerName.clean("x".repeat(80)).length <= OwnerName.MAX_LENGTH)
         // The welcome adds its own "Ji": no "Ji Ji".
-        assertEquals("Ram Ram Vikash Ji 🙏", haryanvi("Vikash Ji", 0).card)
+        assertEquals("Jai Baba Ki Vikash Ji 🙏", haryanvi("Vikash Ji", 0).card)
     }
 
     @Test

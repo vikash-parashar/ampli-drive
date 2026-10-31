@@ -13,18 +13,18 @@ import com.vikash.ampli.drive.voice.HaryanviLines.Line
  */
 internal val LINES_V2: Map<Event, List<Line>> = mapOf(
     Event.Welcome to listOf(
-        Line("राम राम जी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै?", "Ram Ram ji! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai?", "Ram Ram! The car's awake and so am I. Where's today's round?"),
+        Line("जय बाबा की! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै?", "Jai Baba Ki! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai?", "Jai Baba Ki! The car's awake and so am I. Where's today's round?"),
         Line("इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।", "Engine garjya, janu akhaade main pahalwaan utarya ho! Chaal, belt la le.", "The engine roared like a wrestler stepping into the akhada! Come on, belt up."),
         Line("ल्यो जी, आपणी सवारी त्यार सै! चूरमा खा कै आए हो के?", "Lyo ji, aapni sawaari tyaar sai! Choorma kha ke aaye ho ke?", "Here we go, our ride is ready! Had your choorma before coming?"),
         Line("गाड्डी त्यार, गाणे त्यार, मैं भी त्यार, बस बेल्ट की कसर सै!", "Gaadi tyaar, gaane tyaar, main bhi tyaar, bas belt ki kasar sai!", "Car ready, songs ready, me ready. Only the seat belt is missing!"),
         Line("के बात! आज तो गाड्डी भी नहा-धो कै त्यार लाग री सै।", "Ke baat! Aaj to gaadi bhi naha-dho ke tyaar laag ri sai.", "Wow! Even the car looks freshly bathed and dressed up today."),
         Line("सीट सेट, शीशे सेट, बेल्ट ला ले, फेर बता कित चालां।", "Seat set, sheeshe set, belt la le, pher bata kit chaalaan.", "Seat set, mirrors set, belt on, then tell me where we go."),
-        Line("राम राम! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां?", "Ram Ram! Tractor jisa dam, ar mere jisi boli, chaal padaan?", "Ram Ram! Power like a tractor and a tongue like mine. Shall we go?"),
-        Line("राम राम! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला।", "Ram Ram! Aaj raasta main bataaunga, tu bas mauj te chala.", "Ram Ram! I'll show the way today, you just drive and enjoy.", devaF = "राम राम! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला।", romanF = "Ram Ram! Aaj raasta main bataaungi, tu bas mauj te chala."),
+        Line("जय बाबा की! ट्रैक्टर जिसा दम, अर मेरे जिसी बोली, चाल पड़ां?", "Jai Baba Ki! Tractor jisa dam, ar mere jisi boli, chaal padaan?", "Jai Baba Ki! Power like a tractor and a tongue like mine. Shall we go?"),
+        Line("जय बाबा की! आज रास्ता मैं बताऊंगा, तू बस मौज तै चला।", "Jai Baba Ki! Aaj raasta main bataaunga, tu bas mauj te chala.", "Jai Baba Ki! I'll show the way today, you just drive and enjoy.", devaF = "जय बाबा की! आज रास्ता मैं बताऊंगी, तू बस मौज तै चला।", romanF = "Jai Baba Ki! Aaj raasta main bataaungi, tu bas mauj te chala."),
     ),
     Event.Farewell to listOf(
         Line("पहुँच गे! गाड्डी लॉक कर दिए, अर मेरी याद आवै तो फेर स्टार्ट कर लिए।", "Pahunch ge! Gaadi lock kar diye, ar meri yaad aave to pher start kar liye.", "We're here! Lock the car, and if you miss me, just start it again."),
-        Line("राम राम जी! आज का गेड़ा कसूत रया, फेर मिलांगे।", "Ram Ram ji! Aaj ka geda kasoot raya, pher milaange.", "Ram Ram! Today's round was awesome. See you again."),
+        Line("जय बाबा की! आज का गेड़ा कसूत रया, फेर मिलांगे।", "Jai Baba Ki! Aaj ka geda kasoot raya, pher milaange.", "Jai Baba Ki! Today's round was awesome. See you again."),
         Line("चाल, इब तू आराम कर, मैं भी थोड़ी झपकी ले ल्यूं।", "Chaal, ib tu aaraam kar, main bhi thodi jhapki le lyun.", "OK, you rest now, I'll grab a little nap too."),
         Line("चाबी, फोन, बटुआ, तीनूं ले लिए? फेर ना कहिए बताया कोनी!", "Chaabi, phone, batua, teenun le liye? Pher na kahiye bataaya koni!", "Keys, phone, wallet: got all three? Don't say I didn't tell you!"),
         Line("गाड्डी नै भी सांस लेण दे, अर तू भी लस्सी पी कै आराम कर।", "Gaadi nai bhi saans len de, ar tu bhi lassi pi ke aaraam kar.", "Let the car breathe, and you have a lassi and rest."),
@@ -170,7 +170,7 @@ internal val LINES_V2: Map<Event, List<Line>> = mapOf(
         Line("टोल कट ग्या, बैरियर खुल्या, बिना रुके पार, के बात!", "Toll kat gya, barrier khulya, bina ruke paar, ke baat!", "Toll paid, barrier up, through without stopping. Nice!"),
         Line("फास्टैग नै काम कर दिया, कितणे कटे, स्क्रीन पै सै।", "FASTag nai kaam kar diya, kitne kate, screen pe sai.", "FASTag did its job; how much went is on the screen."),
         Line("टोल पार! पीस्से कटे, पर सड़क भी चिकणी मिलैगी।", "Toll paar! Peesse kate, par sadak bhi chikni milaigi.", "Through the toll! Money gone, but the road will be smooth."),
-        Line("टोल आळे भाई नै राम राम, पीस्से फास्टैग तै कट गे।", "Toll aale bhai nai Ram Ram, peesse FASTag te kat ge.", "Ram Ram to the toll man; FASTag paid."),
+        Line("टोल आळे भाई नै जय बाबा की, पीस्से फास्टैग तै कट गे।", "Toll aale bhai nai Jai Baba Ki, peesse FASTag te kat ge.", "Jai Baba Ki to the toll man; FASTag paid."),
         Line("ताऊ होंदा तो मोल-भाव करदा, फास्टैग नै चुपचाप भर दिया!", "Tau honda to mol-bhaav karda, FASTag nai chupchaap bhar diya!", "Tau would have haggled; FASTag just paid quietly!"),
         Line("टोल हो ग्या, हिसाब स्क्रीन पै सै, रुक कै देख लिए।", "Toll ho gya, hisaab screen pe sai, ruk ke dekh liye.", "Toll done; the details are on screen, look once you've stopped."),
     ),
@@ -206,7 +206,7 @@ internal val LINES_V2: Map<Event, List<Line>> = mapOf(
     ),
     Event.PoliceAhead to listOf(
         Line("आग्गै पुलिस का नाका सै, बेल्ट ला ले अर कागज त्यार राख।", "Aaggai police ka naaka sai, belt la le ar kaagaz tyaar raakh.", "Police check ahead; belt on and keep your papers ready."),
-        Line("आग्गै चेकिंग सै, स्पीड कम, पुलिस आळे भाइयां नै राम राम करदे जाइए।", "Aaggai checking sai, speed kam, police aale bhaiyaan nai Ram Ram karde jaaiye.", "Checking ahead, slow down, and greet the police brothers with a Ram Ram."),
+        Line("आग्गै चेकिंग सै, स्पीड कम, पुलिस आळे भाइयां नै जय बाबा की करदे जाइए।", "Aaggai checking sai, speed kam, police aale bhaiyaan nai Jai Baba Ki karde jaaiye.", "Checking ahead, slow down, and greet the police brothers with a Jai Baba Ki."),
         Line("नाका आ रया, धीरे कर, लाइसेंस, आरसी सब गेल्यां सैं ना?", "Naaka aa raya, dheere kar, licence, RC sab gelyaan sain na?", "Checkpoint coming, slow down. Licence and RC on you, right?"),
         Line("आग्गै पुलिस खड़ी सै, आराम तै, सीधे ड्राइवर नै के फिकर!", "Aaggai police khadi sai, aaraam te, seedhe driver nai ke fikar!", "Police ahead, easy. An honest driver has nothing to worry about!"),
         Line("चेकिंग चाल री सै, कहवैं तो रुक ज्याइए, शीशा नीचे अर स्माइल ऊपर।", "Checking chaal ri sai, kahvain to ruk jyaaiye, sheesha neeche ar smile oopar.", "Checking on; stop if they signal. Window down, smile up."),
@@ -221,7 +221,7 @@ internal val LINES_V2: Map<Event, List<Line>> = mapOf(
         Line("आग्गै जाम, धीरे हो ले, आज सड़क बारात की चाल चाल री सै।", "Aaggai jaam, dheere ho le, aaj sadak baaraat ki chaal chaal ri sai.", "Jam ahead, slow down. The road's moving at wedding-procession pace."),
     ),
     Event.MobileCameraAhead to listOf(
-        Line("आग्गै स्पीड गन सै, लिमिट मैं चाल, पुलिस आळे भाइयां नै राम राम।", "Aaggai speed gun sai, limit main chaal, police aale bhaiyaan nai Ram Ram.", "Speed gun ahead, stay in the limit. Ram Ram to the police brothers."),
+        Line("आग्गै स्पीड गन सै, लिमिट मैं चाल, पुलिस आळे भाइयां नै जय बाबा की।", "Aaggai speed gun sai, limit main chaal, police aale bhaiyaan nai Jai Baba Ki.", "Speed gun ahead, stay in the limit. Jai Baba Ki to the police brothers."),
         Line("आग्गै मोबाइल कैमरा सै, मंदी कर ले, छुप कै खड़्या सै, पर मन्नै बेरा सै!", "Aaggai mobile camera sai, mandi kar le, chhup ke khadya sai, par mannai bera sai!", "Mobile camera ahead, slow down. It's hiding, but I know!"),
         Line("आग्गै इंटरसेप्टर सै, लिमिट मैं, आज शरीफ ड्राइवर बण कै दिखा।", "Aaggai interceptor sai, limit main, aaj shareef driver ban ke dikha.", "Interceptor ahead, stay in the limit. Show them a model driver today."),
         Line("आग्गै स्पीड नापण आळे सैं, धीरे कर, म्हारी तो रोज की आराम आळी चाल सै।", "Aaggai speed naapan aale sain, dheere kar, mhaari to roj ki aaraam aali chaal sai.", "Speed checkers ahead, slow down. Easy pace is our daily style anyway."),

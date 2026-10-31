@@ -225,7 +225,7 @@ object CarStart {
         val now = mark(context)
         val settings = prefs.autoStart.value
 
-        // Welcome audio: "Ram Ram {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
+        // Welcome audio: "Jai Baba Ki {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
         // Its own once-per-start record, so a phone connecting first can't use up the greeting.
         if (StartPolicy.greets(trigger)) {
             val last = StartPolicy.RunMark.decode(prefs.lastGreetMark)
@@ -234,7 +234,7 @@ object CarStart {
             } else {
                 prefs.lastGreetMark = now.encode()
                 prefs.lastCarStartAt = now.wallMs
-                // Ampli startup animation first (Settings › Startup animation), then "Ram Ram…".
+                // Ampli startup animation first (Settings › Startup animation), then "Jai Baba Ki…".
                 // Never over the map while driving (an ACC or quick-boot event can arrive on the move,
                 // and any app can send the quick-boot broadcast): then the greeting is voice only.
                 val moving = DriveLock.movingNow(app.speedTracker.state.value.speedKmh)

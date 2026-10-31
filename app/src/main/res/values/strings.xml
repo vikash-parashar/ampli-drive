@@ -718,7 +718,7 @@
     <string name="nav_routing_attribution">Routes: OSRM, © OpenStreetMap contributors</string>
     <!-- Welcome message on car start, and the owner's name for it. -->
     <string name="name_title">Thara naam ke sai?</string>
-    <string name="name_hint">Your name shows on the welcome card every time the car starts: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">Your name shows on the welcome card every time the car starts: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">Your name</string>
     <string name="name_skip">Skip</string>
     <string name="name_mic">Say your name</string>
@@ -726,7 +726,7 @@
     <string name="name_not_heard">Didn\'t catch that. Type your name instead.</string>
     <string name="name_mic_denied">Microphone not allowed. Type your name instead.</string>
     <string name="name_settings_title">Your name</string>
-    <string name="name_settings_empty">Not set: the welcome card says “Ram Ram”</string>
+    <string name="name_settings_empty">Not set: the welcome card says “Jai Baba Ki”</string>
     <string name="welcome_title">Welcome message</string>
     <string name="welcome_hint">Plays once each time the car starts (boot or ignition on)</string>
     <string name="welcome_play">Play welcome now</string>

@@ -709,7 +709,7 @@
     <string name="nav_go">जाऔं</string>
     <string name="nav_routing_attribution">बाटो: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">तपाईंको नाम के हो?</string>
-    <string name="name_hint">गाडी स्टार्ट हुँदा हरेक पटक स्वागत कार्डमा तपाईंको नाम देखिन्छ: “Ram Ram {name} Ji 🙏”।</string>
+    <string name="name_hint">गाडी स्टार्ट हुँदा हरेक पटक स्वागत कार्डमा तपाईंको नाम देखिन्छ: “Jai Baba Ki {name} Ji 🙏”।</string>
     <string name="name_field">तपाईंको नाम</string>
     <string name="name_skip">छोड्नुहोस्</string>
     <string name="name_mic">आफ्नो नाम भन्नुहोस्</string>
@@ -717,7 +717,7 @@
     <string name="name_not_heard">सुनिएन। बरु नाम टाइप गर्नुहोस्।</string>
     <string name="name_mic_denied">माइकको अनुमति छैन। बरु नाम टाइप गर्नुहोस्।</string>
     <string name="name_settings_title">तपाईंको नाम</string>
-    <string name="name_settings_empty">नाम छैन: स्वागत कार्डमा “Ram Ram” देखिन्छ</string>
+    <string name="name_settings_empty">नाम छैन: स्वागत कार्डमा “Jai Baba Ki” देखिन्छ</string>
     <string name="welcome_title">स्वागत सन्देश</string>
     <string name="welcome_hint">गाडी स्टार्ट हुँदा हरेक पटक एक पटक बज्छ (बुट वा इग्निसन अन)</string>
     <string name="welcome_play">अहिले स्वागत सुन्नुहोस्</string>

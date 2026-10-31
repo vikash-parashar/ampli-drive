@@ -710,7 +710,7 @@
     <string name="nav_go">പോകാം</string>
     <string name="nav_routing_attribution">റൂട്ടുകൾ: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">നിങ്ങളുടെ പേര് എന്താണ്?</string>
-    <string name="name_hint">കാർ സ്റ്റാർട്ട് ആകുമ്പോഴെല്ലാം സ്വാഗത കാർഡിൽ നിങ്ങളുടെ പേര് കാണിക്കും: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">കാർ സ്റ്റാർട്ട് ആകുമ്പോഴെല്ലാം സ്വാഗത കാർഡിൽ നിങ്ങളുടെ പേര് കാണിക്കും: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">നിങ്ങളുടെ പേര്</string>
     <string name="name_skip">ഒഴിവാക്കുക</string>
     <string name="name_mic">നിങ്ങളുടെ പേര് പറയുക</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">കേട്ടില്ല. പകരം പേര് ടൈപ്പ് ചെയ്യുക.</string>
     <string name="name_mic_denied">മൈക്രോഫോൺ അനുവദിച്ചിട്ടില്ല. പകരം പേര് ടൈപ്പ് ചെയ്യുക.</string>
     <string name="name_settings_title">നിങ്ങളുടെ പേര്</string>
-    <string name="name_settings_empty">സെറ്റ് ചെയ്തിട്ടില്ല: സ്വാഗത കാർഡിൽ “Ram Ram” എന്ന് കാണിക്കും</string>
+    <string name="name_settings_empty">സെറ്റ് ചെയ്തിട്ടില്ല: സ്വാഗത കാർഡിൽ “Jai Baba Ki” എന്ന് കാണിക്കും</string>
     <string name="welcome_title">സ്വാഗത സന്ദേശം</string>
     <string name="welcome_hint">കാർ സ്റ്റാർട്ട് ആകുമ്പോഴെല്ലാം ഒരിക്കൽ പ്ലേ ചെയ്യും (ബൂട്ട് അല്ലെങ്കിൽ ഇഗ്നിഷൻ ഓൺ)</string>
     <string name="welcome_play">ഇപ്പോൾ സ്വാഗതം പ്ലേ ചെയ്യുക</string>

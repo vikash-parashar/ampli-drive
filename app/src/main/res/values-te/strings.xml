@@ -710,7 +710,7 @@
     <string name="nav_go">వెళ్దాం</string>
     <string name="nav_routing_attribution">దారులు: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">మీ పేరు ఏమిటి?</string>
-    <string name="name_hint">కారు స్టార్ట్ అయిన ప్రతిసారీ స్వాగత కార్డ్‌లో మీ పేరు కనిపిస్తుంది: “Ram Ram {name} Ji 🙏”.</string>
+    <string name="name_hint">కారు స్టార్ట్ అయిన ప్రతిసారీ స్వాగత కార్డ్‌లో మీ పేరు కనిపిస్తుంది: “Jai Baba Ki {name} Ji 🙏”.</string>
     <string name="name_field">మీ పేరు</string>
     <string name="name_skip">దాటవేయి</string>
     <string name="name_mic">మీ పేరు చెప్పండి</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">వినబడలేదు. బదులుగా మీ పేరు టైప్ చేయండి.</string>
     <string name="name_mic_denied">మైక్రోఫోన్‌కు అనుమతి లేదు. బదులుగా మీ పేరు టైప్ చేయండి.</string>
     <string name="name_settings_title">మీ పేరు</string>
-    <string name="name_settings_empty">సెట్ చేయలేదు: స్వాగత కార్డ్‌లో “Ram Ram” అని ఉంటుంది</string>
+    <string name="name_settings_empty">సెట్ చేయలేదు: స్వాగత కార్డ్‌లో “Jai Baba Ki” అని ఉంటుంది</string>
     <string name="welcome_title">స్వాగత సందేశం</string>
     <string name="welcome_hint">కారు స్టార్ట్ అయిన ప్రతిసారీ ఒకసారి ప్లే అవుతుంది (బూట్ లేదా ఇగ్నిషన్ ఆన్)</string>
     <string name="welcome_play">ఇప్పుడు స్వాగతం ప్లే చేయి</string>

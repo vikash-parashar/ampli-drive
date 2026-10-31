@@ -12,7 +12,7 @@ import java.time.LocalTime
 import java.util.Locale
 
 /**
- * The welcome audio message when the car starts: "राम राम भाई, आज कित का प्लान सै?" (see
+ * The welcome audio message when the car starts: "जय बाबा की भाई, आज कित का प्लान सै?" (see
  * [WelcomeLines]; the name shows on the card, never spoken). CarStart calls [play] once per ignition cycle (boot, ACC on, or the launcher
  * showing after a reboot, with its 3-minute dedupe); Settings › Voice › Play welcome now calls it
  * any time.
@@ -23,7 +23,7 @@ import java.util.Locale
  */
 class WelcomeGreeter(private val app: DriveApp) {
 
-    /** The card on screen ("Ram Ram Vikash Ji 🙏"), shown for [CARD_MS]; [id] changes per welcome. */
+    /** The card on screen ("Jai Baba Ki Vikash Ji 🙏"), shown for [CARD_MS]; [id] changes per welcome. */
     data class Card(val title: String, val line: String, val id: Long)
 
     private val _card = MutableStateFlow<Card?>(null)

@@ -706,7 +706,7 @@
     <string name="nav_routing_attribution">रास्ते: OSRM, © OpenStreetMap contributors</string>
     <!-- Welcome message on car start, and the owner's name for it. -->
     <string name="name_title">थारा नाम के सै?</string>
-    <string name="name_hint">गाड़ी स्टार्ट होते ही स्वागत कार्ड पर आपका नाम दिखेगा: “राम राम {name} जी 🙏”।</string>
+    <string name="name_hint">गाड़ी स्टार्ट होते ही स्वागत कार्ड पर आपका नाम दिखेगा: “जय बाबा की {name} जी 🙏”।</string>
     <string name="name_field">आपका नाम</string>
     <string name="name_skip">छोड़ें</string>
     <string name="name_mic">अपना नाम बोलें</string>
@@ -714,7 +714,7 @@
     <string name="name_not_heard">सुनाई नहीं दिया। नाम लिख दीजिए।</string>
     <string name="name_mic_denied">माइक की अनुमति नहीं है। नाम लिख दीजिए।</string>
     <string name="name_settings_title">आपका नाम</string>
-    <string name="name_settings_empty">नाम नहीं है: स्वागत कार्ड पर “राम राम” दिखेगा</string>
+    <string name="name_settings_empty">नाम नहीं है: स्वागत कार्ड पर “जय बाबा की” दिखेगा</string>
     <string name="welcome_title">स्वागत संदेश</string>
     <string name="welcome_hint">हर बार गाड़ी स्टार्ट होने पर एक बार बजता है (बूट या इग्निशन ऑन)</string>
     <string name="welcome_play">अभी स्वागत सुनें</string>

@@ -710,7 +710,7 @@
     <string name="nav_go">ব\'লক</string>
     <string name="nav_routing_attribution">বাট: OSRM, © OpenStreetMap contributors</string>
     <string name="name_title">আপোনাৰ নাম কি?</string>
-    <string name="name_hint">গাড়ী আৰম্ভ হ\'লে প্ৰতিবাৰ আদৰণি কাৰ্ডত আপোনাৰ নাম দেখা যাব: “Ram Ram {name} Ji 🙏”।</string>
+    <string name="name_hint">গাড়ী আৰম্ভ হ\'লে প্ৰতিবাৰ আদৰণি কাৰ্ডত আপোনাৰ নাম দেখা যাব: “Jai Baba Ki {name} Ji 🙏”।</string>
     <string name="name_field">আপোনাৰ নাম</string>
     <string name="name_skip">এৰি দিয়ক</string>
     <string name="name_mic">আপোনাৰ নাম কওক</string>
@@ -718,7 +718,7 @@
     <string name="name_not_heard">শুনা নগ\'ল। নামটো লিখি দিয়ক।</string>
     <string name="name_mic_denied">মাইকৰ অনুমতি নাই। নামটো লিখি দিয়ক।</string>
     <string name="name_settings_title">আপোনাৰ নাম</string>
-    <string name="name_settings_empty">নাম নাই: আদৰণি কাৰ্ডত “Ram Ram” দেখা যাব</string>
+    <string name="name_settings_empty">নাম নাই: আদৰণি কাৰ্ডত “Jai Baba Ki” দেখা যাব</string>
     <string name="welcome_title">আদৰণি বাৰ্তা</string>
     <string name="welcome_hint">প্ৰতিবাৰ গাড়ী আৰম্ভ হ\'লে এবাৰ বাজে (বুট বা ইগনিশ্বন অন)</string>
     <string name="welcome_play">এতিয়াই আদৰণি শুনক</string>

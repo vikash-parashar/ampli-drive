@@ -917,7 +917,7 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     /**
-     * The session greeting. Haryanvi desi: a greeting line and a time-of-day line ("राम राम भाई!
+     * The session greeting. Haryanvi desi: a greeting line and a time-of-day line ("जय बाबा की भाई!
      * कित चालणा सै आज? सवेरे सवेरे कित चाल पड़े ताऊ?"). Standard: good morning / evening.
      */
     private suspend fun greet(res: Context, lang: String) {
