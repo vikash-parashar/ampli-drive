@@ -2,12 +2,18 @@ package com.vikash.ampli.drive.ui.theme
 
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Crimson Drive: text at least 4.5:1 on the charcoal panes and on the forest background; key
  * edges, icons, the gauge and the focus ring at least 3:1; white on the crimson and green fills.
  * SOS keeps the usual emergency red with white text, clearly apart from the crimson.
+ * Runs under Robolectric because [DriveThemes] needs Android to initialise.
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [31])
 class CrimsonContrastTest {
 
     private fun check(what: String, fg: Long, bg: Long, min: Double) {
