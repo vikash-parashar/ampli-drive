@@ -14,7 +14,6 @@ import com.vikash.ampli.drive.voice.HaryanviLines.Line
 internal val LINES_V2: Map<Event, List<Line>> = mapOf(
     Event.Welcome to listOf(
         Line("जय माता दी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै?", "Jai Mata Di! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai?", "Jai Mata Di! The car's awake and so am I. Where's today's round?"),
-        Line("इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले।", "Engine garjya, janu akhaade main pahalwaan utarya ho! Chaal, belt la le.", "The engine roared like a wrestler stepping into the akhada! Come on, belt up."),
         Line("ल्यो जी, आपणी सवारी त्यार सै! चूरमा खा कै आए हो के?", "Lyo ji, aapni sawaari tyaar sai! Choorma kha ke aaye ho ke?", "Here we go, our ride is ready! Had your choorma before coming?"),
         Line("गाड्डी त्यार, गाणे त्यार, मैं भी त्यार, बस बेल्ट की कसर सै!", "Gaadi tyaar, gaane tyaar, main bhi tyaar, bas belt ki kasar sai!", "Car ready, songs ready, me ready. Only the seat belt is missing!"),
         Line("के बात! आज तो गाड्डी भी नहा-धो कै त्यार लाग री सै।", "Ke baat! Aaj to gaadi bhi naha-dho ke tyaar laag ri sai.", "Wow! Even the car looks freshly bathed and dressed up today."),
@@ -225,7 +224,7 @@ internal val LINES_V2: Map<Event, List<Line>> = mapOf(
         Line("आग्गै मोबाइल कैमरा सै, मंदी कर ले, छुप कै खड़्या सै, पर मन्नै बेरा सै!", "Aaggai mobile camera sai, mandi kar le, chhup ke khadya sai, par mannai bera sai!", "Mobile camera ahead, slow down. It's hiding, but I know!"),
         Line("आग्गै इंटरसेप्टर सै, लिमिट मैं, आज शरीफ ड्राइवर बण कै दिखा।", "Aaggai interceptor sai, limit main, aaj shareef driver ban ke dikha.", "Interceptor ahead, stay in the limit. Show them a model driver today."),
         Line("आग्गै स्पीड नापण आळे सैं, धीरे कर, म्हारी तो रोज की आराम आळी चाल सै।", "Aaggai speed naapan aale sain, dheere kar, mhaari to roj ki aaraam aali chaal sai.", "Speed checkers ahead, slow down. Easy pace is our daily style anyway."),
-        Line("मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवांगे।", "Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaange.", "Mobile camera reported, slow down. We'll pose for photos at a wedding."),
+        Line("मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवावांगे।", "Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaawange.", "Mobile camera reported, slow down. We'll pose for photos at a wedding."),
         Line("आग्गै स्पीड गन सै, लिमिट मैं राख, बढ़िया, तू तो पहलां ए आराम तै सै।", "Aaggai speed gun sai, limit main raakh, badhiya, tu to pahlaan e aaraam te sai.", "Speed gun ahead, keep in the limit. Good, you're already easy on it."),
     ),
     Event.FastagLowBalance to listOf(

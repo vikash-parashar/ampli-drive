@@ -567,7 +567,6 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Event | Devanagari | Roman | English meaning |
 |---|---|---|---|
 | Welcome on car start | जय माता दी! गाड्डी भी जाग गी अर मैं भी, बोल कित का गेड़ा सै? | Jai Mata Di! Gaadi bhi jaag gi ar main bhi, bol kit ka geda sai? | Jai Mata Di! The car's awake and so am I. Where's today's round? |
-| Welcome on car start | इंजन गरज्या, जणू अखाड़े मैं पहलवान उतर्या हो! चाल, बेल्ट ला ले। | Engine garjya, janu akhaade main pahalwaan utarya ho! Chaal, belt la le. | The engine roared like a wrestler stepping into the akhada! Come on, belt up. |
 | Welcome on car start | ल्यो जी, आपणी सवारी त्यार सै! चूरमा खा कै आए हो के? | Lyo ji, aapni sawaari tyaar sai! Choorma kha ke aaye ho ke? | Here we go, our ride is ready! Had your choorma before coming? |
 | Welcome on car start | गाड्डी त्यार, गाणे त्यार, मैं भी त्यार, बस बेल्ट की कसर सै! | Gaadi tyaar, gaane tyaar, main bhi tyaar, bas belt ki kasar sai! | Car ready, songs ready, me ready. Only the seat belt is missing! |
 | Welcome on car start | के बात! आज तो गाड्डी भी नहा-धो कै त्यार लाग री सै। | Ke baat! Aaj to gaadi bhi naha-dho ke tyaar laag ri sai. | Wow! Even the car looks freshly bathed and dressed up today. |
@@ -732,7 +731,7 @@ Added from the owner's lines-v2 list as more variants of the events above, plus 
 | Mobile camera ahead | आग्गै मोबाइल कैमरा सै, मंदी कर ले, छुप कै खड़्या सै, पर मन्नै बेरा सै! | Aaggai mobile camera sai, mandi kar le, chhup ke khadya sai, par mannai bera sai! | Mobile camera ahead, slow down. It's hiding, but I know! |
 | Mobile camera ahead | आग्गै इंटरसेप्टर सै, लिमिट मैं, आज शरीफ ड्राइवर बण कै दिखा। | Aaggai interceptor sai, limit main, aaj shareef driver ban ke dikha. | Interceptor ahead, stay in the limit. Show them a model driver today. |
 | Mobile camera ahead | आग्गै स्पीड नापण आळे सैं, धीरे कर, म्हारी तो रोज की आराम आळी चाल सै। | Aaggai speed naapan aale sain, dheere kar, mhaari to roj ki aaraam aali chaal sai. | Speed checkers ahead, slow down. Easy pace is our daily style anyway. |
-| Mobile camera ahead | मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवांगे। | Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaange. | Mobile camera reported, slow down. We'll pose for photos at a wedding. |
+| Mobile camera ahead | मोबाइल कैमरा की खबर सै, स्पीड कम, फोटो तो ब्याह मैं खिंचवावांगे। | Mobile camera ki khabar sai, speed kam, photo to byaah main khinchwaawange. | Mobile camera reported, slow down. We'll pose for photos at a wedding. |
 | Mobile camera ahead | आग्गै स्पीड गन सै, लिमिट मैं राख, बढ़िया, तू तो पहलां ए आराम तै सै। | Aaggai speed gun sai, limit main raakh, badhiya, tu to pahlaan e aaraam te sai. | Speed gun ahead, keep in the limit. Good, you're already easy on it. |
 | FASTag balance low (after a toll) | %1$s रुपये ए बचे सैं फास्टैग मैं, रुक कै रिचार्ज कर लिए। | %1$s rupaye e bache sain FASTag main, ruk ke recharge kar liye. | Only ₹{balance} left on FASTag; recharge once you've stopped. |
 | FASTag balance low (after a toll) | %1$s रुपये मैं अगला टोल भी मुश्किल, घरां पहुँच कै रिचार्ज कर दिए। | %1$s rupaye main agla toll bhi mushkil, gharaan pahunch ke recharge kar diye. | ₹{balance} may not cover the next toll; recharge when you get home. |
