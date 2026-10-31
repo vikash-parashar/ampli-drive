@@ -58,7 +58,7 @@ class FuelRadarScreenshotTest {
 
     @Composable
     private fun Frame(theme: DriveTheme, content: @Composable () -> Unit) {
-        val t = if (theme.glass != null) theme.withoutBlur() else theme
+        val t = theme
         AmpliDriveTheme(t) {
             Box(Modifier.fillMaxSize().themeBackground(t)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -124,52 +124,52 @@ class FuelRadarScreenshotTest {
 
     @Test
     fun fuelCrimson() {
-        fuel(DriveThemes.CrimsonDrive)
+        fuel(DriveThemes.MapFirst)
         shot("fuel-crimson-1280x800")
     }
 
     @Test
     fun fuelCngSoft() {
-        fuel(DriveThemes.Neumorphic, FuelFilter.Cng)
+        fuel(DriveThemes.RoadSign, FuelFilter.Cng)
         shot("fuel-cng-soft-1280x800")
     }
 
     @Test
     @Config(qualifiers = "hi-w1024dp-h600dp-land-mdpi")
     fun fuelHindiSmall() {
-        fuel(DriveThemes.CrimsonDrive)
+        fuel(DriveThemes.MapFirst)
         shot("fuel-crimson-hi-1024x600")
     }
 
     @Test
     fun radarOverLimitPro() {
-        radar(DriveThemes.CrimsonDrive, over = true, pro = true)
+        radar(DriveThemes.MapFirst, over = true, pro = true)
         shot("radar-over-crimson-1280x800")
     }
 
     @Test
     fun radarFree() {
-        radar(DriveThemes.CrimsonDrive, over = false, pro = false)
+        radar(DriveThemes.MapFirst, over = false, pro = false)
         shot("radar-free-crimson-1280x800")
     }
 
     @Test
     fun radarSoft() {
-        radar(DriveThemes.Neumorphic, over = false, pro = true)
+        radar(DriveThemes.RoadSign, over = false, pro = true)
         shot("radar-soft-1280x800")
     }
 
     @Test
     @Config(qualifiers = "hi-w1024dp-h600dp-land-mdpi")
     fun radarHindiSmall() {
-        radar(DriveThemes.CrimsonDrive, over = true, pro = true)
+        radar(DriveThemes.MapFirst, over = true, pro = true)
         shot("radar-over-crimson-hi-1024x600")
     }
 
     @Test
     fun reportSheet() {
         compose.setContent {
-            Frame(DriveThemes.CrimsonDrive) {
+            Frame(DriveThemes.MapFirst) {
                 RadarContent(
                     alert = null, speedKmh = 48, limitKmh = null, alertDistanceM = 500,
                     ahead = ahead, aheadMode = AheadMode.Heading, aheadLocked = false, reportLocked = false, now = now,

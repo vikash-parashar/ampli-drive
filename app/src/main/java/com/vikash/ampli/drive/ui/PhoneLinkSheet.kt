@@ -265,17 +265,9 @@ private fun DeviceRow(d: BtDevice, onSwitch: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .heightIn(min = MinTouch)
-            .then(
-                if (theme.isSoft) {
-                    // Soft list row: raised; the connected phone sits pressed in.
-                    Modifier.softSurface(theme, RoundedCornerShape(14.dp), if (d.connected) SoftDepth.Pressed else SoftDepth.Key).clip(RoundedCornerShape(14.dp))
-                } else {
-                    Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (d.connected) theme.accent.copy(alpha = 0.12f) else Color.Transparent)
-                        .border(1.dp, if (d.connected) theme.accentSoft.copy(alpha = 0.5f) else theme.border, RoundedCornerShape(14.dp))
-                },
-            )
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (d.connected) theme.accent.copy(alpha = 0.12f) else Color.Transparent)
+            .border(1.dp, if (d.connected) theme.accentSoft.copy(alpha = 0.5f) else theme.border, RoundedCornerShape(14.dp))
             .padding(horizontal = dims.d(1.6f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),

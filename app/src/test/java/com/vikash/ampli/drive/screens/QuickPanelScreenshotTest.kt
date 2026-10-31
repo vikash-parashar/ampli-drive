@@ -56,9 +56,7 @@ class QuickPanelScreenshotTest {
 
     @Composable
     private fun OverMaps(content: @Composable () -> Unit) {
-        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false).let {
-            if (it.glass != null) it.withoutBlur() else it
-        }
+        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false)
         Box(
             Modifier
                 .fillMaxSize()

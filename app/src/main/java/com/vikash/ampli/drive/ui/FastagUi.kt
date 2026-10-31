@@ -76,7 +76,7 @@ private fun ago(time: Long, now: Long): String =
     DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString()
 
 @Composable
-private fun minuteTicker(): Long {
+internal fun minuteTicker(): Long {
     val now by produceState(System.currentTimeMillis()) {
         while (true) {
             delay(60_000L)
@@ -114,7 +114,7 @@ fun FastagChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier
     val latest = remember(events) { FastagStore.latestBalance(events) }
     val balance = latest?.balance
     val isLow = balance != null && balance < low
-    val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
+    val shape = if (theme.radius <= 0f) RectangleShape else CircleShape
     val fg = if (isLow) theme.onDanger else theme.text
     val passText = passChipText(app)
 

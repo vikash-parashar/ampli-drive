@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import android.app.Activity
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -30,8 +29,6 @@ import com.vikash.ampli.drive.system.AppResolver
 import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.ui.theme.AmpliDriveTheme
 import com.vikash.ampli.drive.ui.theme.DriveThemes
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -93,19 +90,14 @@ fun DriveRoot(
     // Sun position decides day/night; before the first GPS fix, the clock does.
     val night = coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
         ?: SunTimes.isNightByClock(LocalTime.now())
-    val chosen = DriveThemes.resolve(themeChoice, night, pro.isPro)
-    // Glass themes blur the backdrop behind panels, except with "Reduce glass effects" (on by
-    // default on 2 GB units) or below Android 12L (API 32): there is no RenderEffect blur before
-    // Android 12, and on 12.0 RenderNode blur is unreliable. Without
-    // blur they switch to a stronger tint so text stays readable.
-    val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
-    val glassBlur = chosen.glass != null && !reduceGlass && Build.VERSION.SDK_INT >= 32
-    val theme = if (chosen.glass != null && !glassBlur) chosen.withoutBlur() else chosen
-    val haze = remember { HazeState() }
+    // Nothing is blurred in any theme: Map First's cards are a tint (solid below Android 9).
+    val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
     // Where Back goes from the emergency profile (opened from Settings or the Help panel).
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
     var settingsReturn by remember { mutableStateOf(Screen.Home) }
+    // Where Back goes from the Car hub's screens: Home when opened from Home's More sheet.
+    var subReturn by remember { mutableStateOf(Screen.Car) }
     var showPro by remember { mutableStateOf(false) }
     var showQuick by remember { mutableStateOf(false) }
     // A detected crash opens the SOS countdown over whatever is showing.
@@ -131,18 +123,10 @@ fun DriveRoot(
 
     AmpliDriveTheme(theme) {
       Box(Modifier.fillMaxSize()) {
-        // The backdrop is its own layer so glass panels can blur it (hazeSource must come first
-        // so the background drawing is recorded into the layer).
+        Box(Modifier.fillMaxSize().themeBackground(theme))
         Box(
             Modifier
                 .fillMaxSize()
-                .then(if (glassBlur) Modifier.hazeSource(haze) else Modifier)
-                .themeBackground(theme),
-        )
-        Box(
-            Modifier
-                .fillMaxSize()
-                .themeOverlay(theme)
                 .safeDrawingPadding(),
         ) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -153,7 +137,7 @@ fun DriveRoot(
                     uSp = with(density) { unit.toSp().value },
                     compact = maxWidth / maxHeight < 1.72f,
                 )
-                CompositionLocalProvider(LocalDims provides dims, LocalGlassHaze provides if (glassBlur) haze else null) {
+                CompositionLocalProvider(LocalDims provides dims) {
                     when (screen) {
                         Screen.Home -> {
                             // A home screen has nowhere to go back to.
@@ -166,7 +150,16 @@ fun DriveRoot(
                                 onOpenHelp = { sos -> onNavigate(if (sos) Screen.Sos else Screen.Help) },
                                 onOpenFastag = { onNavigate(Screen.Fastag) },
                                 onOpenCar = { onNavigate(Screen.Car) },
-                                onOpenParked = { onNavigate(Screen.Parked) },
+                                onOpenParked = {
+                                    subReturn = Screen.Home
+                                    onNavigate(Screen.Parked)
+                                },
+                                // The More sheet: the Car hub's screens, which then go back to Home.
+                                onOpenScreen = { target ->
+                                    subReturn = Screen.Home
+                                    if (target == Screen.Fuel) app.fuel.requestedFilter.value = com.vikash.ampli.drive.fuel.FuelFilter.All
+                                    onNavigate(target)
+                                },
                                 onRequestPermissions = onRequestPermissions,
                                 onOpenNavScreen = { onNavigate(Screen.Navigation) },
                                 onOpenNavSearch = { onNavigate(Screen.NavSearch) },
@@ -174,7 +167,6 @@ fun DriveRoot(
                                 // Ampli Shell: "Make Ampli your home screen" (until done or "Not now").
                                 banner = { DefaultHomeBannerHost(app = app, resumeTick = resumeTick) },
                             )
-                            TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                             CarAlertHost(app = app)
                         }
                         Screen.Apps -> {
@@ -222,6 +214,7 @@ fun DriveRoot(
                         }
                         Screen.Car -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
+                            LaunchedEffect(Unit) { subReturn = Screen.Car }
                             CarHubScreen(app = app, onBack = { onNavigate(Screen.Home) }, onOpen = { dest ->
                                 when (dest) {
                                     CarDest.Parked -> onNavigate(Screen.Parked)
@@ -243,32 +236,32 @@ fun DriveRoot(
                             })
                         }
                         Screen.Parked -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            ParkedScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            ParkedScreen(app = app, onBack = { onNavigate(subReturn) })
                         }
                         Screen.Papers -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            PapersScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            PapersScreen(app = app, onBack = { onNavigate(subReturn) })
                         }
                         Screen.Expenses -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            ExpensesScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            ExpensesScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Trips -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            TripsScreen(app = app, onBack = { onNavigate(Screen.Car) })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            TripsScreen(app = app, onBack = { onNavigate(subReturn) })
                         }
                         Screen.Store -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Apps) }
                             StoreScreen(app = app, onBack = { onNavigate(Screen.Apps) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Obd -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            ObdScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            ObdScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Tyres -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            TyresScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            TyresScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Fastag -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
@@ -300,13 +293,13 @@ fun DriveRoot(
                             NavSearchScreen(app = app, onBack = { onNavigate(Screen.Home) })
                         }
                         Screen.Fuel -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
                             val asked by app.fuel.requestedFilter.collectAsStateWithLifecycle()
-                            FuelScreen(app = app, onBack = { onNavigate(Screen.Car) }, initialFilter = asked)
+                            FuelScreen(app = app, onBack = { onNavigate(subReturn) }, initialFilter = asked)
                         }
                         Screen.Radar -> {
-                            BackHandler(enabled = true) { onNavigate(Screen.Car) }
-                            RadarScreen(app = app, onBack = { onNavigate(Screen.Car) }, onUnlockPro = { showPro = true })
+                            BackHandler(enabled = true) { onNavigate(subReturn) }
+                            RadarScreen(app = app, onBack = { onNavigate(subReturn) }, onUnlockPro = { showPro = true })
                         }
                         Screen.Emergency -> {
                             BackHandler(enabled = true) { onNavigate(emergencyReturn) }

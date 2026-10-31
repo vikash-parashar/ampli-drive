@@ -231,7 +231,7 @@ fun CarChip(app: DriveApp, onClick: () -> Unit, modifier: Modifier = Modifier) {
         due.isNotEmpty() -> CarMonitor.dueLine(context, due.first()) to (due.first().status.level == DueLevel.Overdue)
         else -> return
     }
-    val shape = if (theme.radius <= 0f || theme.cardStyle == CardStyle.Skewed) RectangleShape else CircleShape
+    val shape = if (theme.radius <= 0f) RectangleShape else CircleShape
     val bg = if (danger) theme.danger else theme.warning
     val fg = if (danger) theme.onDanger else Color(0xFF111111)
     Box(modifier.heightIn(min = MinTouch).widthIn(max = 280.dp).clickable(onClick = onClick), contentAlignment = Alignment.Center) {

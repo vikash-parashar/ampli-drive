@@ -9,7 +9,7 @@ name: Voice pack
 # list-voices job picks the most used Hindi male / female voice from the shared library.
 
 on:
-  # Pushing to voice-pack-run records the female voice (owner's pick 2026-10-31), only the clips that are missing or changed.
+  # Pushing to voice-pack-run records both voices, only the clips that are missing or changed.
   push:
     branches: [voice-pack-run]
   workflow_dispatch:

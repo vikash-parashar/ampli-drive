@@ -8,14 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Which home-screen themes are chosen. With [auto] on, [dayId] shows from sunrise to sunset and
- * [nightId] after dark; with it off, [fixedId] always shows. Ids come from DriveThemes.
+ * The home-screen theme the driver picked ([id], one of ThemeDefaults.IDS) and "Auto night":
+ * Big Glance between sunset and sunrise (Pro).
  */
 data class ThemeChoice(
-    val auto: Boolean,
-    val dayId: String,
-    val nightId: String,
-    val fixedId: String,
+    val id: String,
+    val autoNight: Boolean = false,
 )
 
 /** How Car Hub talks. [Haryanvi] swaps the playful lines for desi ones; safety prompts never change. */
@@ -310,15 +308,6 @@ class DrivePrefs(context: Context) {
     private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
     val voiceAlways: StateFlow<Boolean> = _voiceAlways.asStateFlow()
 
-    /**
-     * "Reduce glass effects": glass themes use a tinted panel with no backdrop blur. Until the
-     * driver changes it, it follows the device: on for low-RAM units (2 GB or less).
-     */
-    val reduceGlassByDevice: Boolean = DeviceClass.isLowEnd(context)
-    private val _reduceGlass = MutableStateFlow(
-        if (sp.contains(KEY_REDUCE_GLASS)) sp.getBoolean(KEY_REDUCE_GLASS, false) else reduceGlassByDevice,
-    )
-    val reduceGlass: StateFlow<Boolean> = _reduceGlass.asStateFlow()
 
     /** Speed-camera alerts: on/off, spoken alerts (Pro), alert distance in metres, quiet unless over the limit. */
     private val _cameraAlerts = MutableStateFlow(sp.getBoolean(KEY_CAM_ON, true))
@@ -415,10 +404,8 @@ class DrivePrefs(context: Context) {
 
     fun setTheme(choice: ThemeChoice) {
         sp.edit()
-            .putBoolean(KEY_THEME_AUTO, choice.auto)
-            .putString(KEY_THEME_DAY, choice.dayId)
-            .putString(KEY_THEME_NIGHT, choice.nightId)
-            .putString(KEY_THEME_FIXED, choice.fixedId)
+            .putString(KEY_HOME_THEME, choice.id)
+            .putBoolean(KEY_HOME_THEME_AUTO_NIGHT, choice.autoNight)
             .apply()
         _theme.value = choice
     }
@@ -444,10 +431,6 @@ class DrivePrefs(context: Context) {
         _speedVolume.value = value
     }
 
-    fun setReduceGlass(value: Boolean) {
-        sp.edit().putBoolean(KEY_REDUCE_GLASS, value).apply()
-        _reduceGlass.value = value
-    }
 
     fun setLanguage(tag: String) {
         // commit(), not apply(): Android 12 reads this back while the activity is recreated.
@@ -485,32 +468,27 @@ class DrivePrefs(context: Context) {
         _cameraOverOnly.value = value
     }
 
+    /**
+     * The saved theme. Ids from earlier builds (Crimson Drive, the Soft, Glass, Saffron and
+     * Classic families) are not read at all: those installs start on Map First.
+     */
     private fun readThemeChoice(): ThemeChoice = ThemeDefaults.choiceFor(
         StoredTheme(
-            auto = if (sp.contains(KEY_THEME_AUTO)) sp.getBoolean(KEY_THEME_AUTO, true) else null,
-            dayId = sp.getString(KEY_THEME_DAY, null),
-            nightId = sp.getString(KEY_THEME_NIGHT, null),
-            fixedId = sp.getString(KEY_THEME_FIXED, null),
-            // Earlier builds stored only "Auto" / "Day" / "Night".
-            legacyMode = sp.getString(KEY_THEME_LEGACY, null),
+            id = sp.getString(KEY_HOME_THEME, null),
+            autoNight = if (sp.contains(KEY_HOME_THEME_AUTO_NIGHT)) sp.getBoolean(KEY_HOME_THEME_AUTO_NIGHT, false) else null,
+            legacyIds = LEGACY_THEME_KEYS.mapNotNull { sp.getString(it, null) },
         ),
     )
 
     companion object {
-        /** Free defaults for day and night with Auto on (Ampli Soft). The full free set is ThemeAccess.FREE_IDS. */
-        const val DEFAULT_DAY = ThemeDefaults.SOFT_DAY
-        const val DEFAULT_NIGHT = ThemeDefaults.SOFT_NIGHT
-
-        /** Free default with Auto off: Crimson Drive (also the default for new installs). */
-        const val DEFAULT_FIXED = ThemeDefaults.CRIMSON
-
         private const val FILE = "drive_prefs"
         private const val KEY_SCREEN_ON = "keep_screen_on"
-        private const val KEY_THEME_LEGACY = "theme_mode"
-        private const val KEY_THEME_AUTO = "theme_auto"
-        private const val KEY_THEME_DAY = "theme_day"
-        private const val KEY_THEME_NIGHT = "theme_night"
-        private const val KEY_THEME_FIXED = "theme_fixed"
+        /** This version's theme keys (new names, so no old theme id is ever read as a choice). */
+        private const val KEY_HOME_THEME = "home_theme"
+        private const val KEY_HOME_THEME_AUTO_NIGHT = "home_theme_auto_night"
+
+        /** Theme keys of earlier builds; only checked to tell an upgraded install apart. */
+        private val LEGACY_THEME_KEYS = listOf("theme_fixed", "theme_day", "theme_night", "theme_mode")
         private const val KEY_PRO_PURCHASED = "pro_purchased"
         private const val KEY_PRO_TEST = "pro_test_unlock"
         private const val KEY_LANGUAGE = "app_language"
@@ -522,7 +500,6 @@ class DrivePrefs(context: Context) {
         private const val KEY_CAM_VOICE = "camera_voice"
         private const val KEY_CAM_DISTANCE = "camera_distance"
         private const val KEY_CAM_OVER_ONLY = "camera_over_only"
-        private const val KEY_REDUCE_GLASS = "reduce_glass"
         private const val KEY_SPEED_VOLUME = "speed_volume"
         private const val KEY_WAKE_SENS = "wake_sensitivity"
         private const val KEY_BUBBLE = "speed_bubble"

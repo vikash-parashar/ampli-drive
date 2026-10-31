@@ -1,6 +1,7 @@
 package com.vikash.ampli.drive.voice
 
 import com.vikash.ampli.drive.DriveApp
+import com.vikash.ampli.drive.fastag.FastagLowReminder
 import com.vikash.ampli.drive.fastag.TollEvent
 import com.vikash.ampli.drive.prefs.VoiceStyle
 import kotlinx.coroutines.Job
@@ -22,6 +23,7 @@ import kotlin.math.roundToLong
  */
 class DesiVoice(private val app: DriveApp) {
     private val picker = LinePicker()
+    private val fastagLow = FastagLowReminder()
     private val scope = MainScope()
     private var queue: Job? = null
     private var started = false
@@ -43,7 +45,9 @@ class DesiVoice(private val app: DriveApp) {
         val hindi = app.speaker.hasVoice(HINDI)
         val line = picked.line
         val clips = VoiceClips.clipsFor(picked, args) { picker.pickIndexed(it) }
-        return Spoken(format(if (hindi) line.deva else line.roman, args), if (hindi) "hi" else "en-IN", clips)
+        // A line worded per voice: the female wording when the female recorded voice speaks.
+        val voice = if (line.devaF != null) app.voicePlayer.voice else null
+        return Spoken(format(if (hindi) line.devaFor(voice) else line.romanFor(voice), args), if (hindi) "hi" else "en-IN", clips, caption = true)
     }
 
     /** Speaks the desi line; returns false when the style is off so the caller says the standard line. */
@@ -84,6 +88,10 @@ class DesiVoice(private val app: DriveApp) {
             sayLater(HaryanviLines.Event.TollPaid, rupees(amount), rupees(balance))
         } else {
             sayLater(HaryanviLines.Event.TollPaidNoBalance, rupees(amount))
+        }
+        // Under the driver's alert level: a gentle recharge nudge right after, once a day.
+        if (enabled && fastagLow.afterToll(balance, app.fastag.lowBalance.value, java.time.LocalDate.now().toEpochDay())) {
+            sayLater(HaryanviLines.Event.FastagLowBalance, rupees(balance!!))
         }
     }
 

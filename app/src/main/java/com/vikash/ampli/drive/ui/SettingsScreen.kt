@@ -80,18 +80,16 @@ import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.prefs.ThemeChoice
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.RestrictedSettings
 import com.vikash.ampli.drive.system.AppChooser
 import com.vikash.ampli.drive.system.AppResolver
 import com.vikash.ampli.drive.system.AppRole
 import com.vikash.ampli.drive.ui.theme.CardStyle
-import com.vikash.ampli.drive.ui.theme.Decoration
 import com.vikash.ampli.drive.ui.theme.DriveTheme
 import com.vikash.ampli.drive.ui.theme.DriveThemes
-import com.vikash.ampli.drive.prefs.ThemeDefaults
-import com.vikash.ampli.drive.ui.theme.HomeLayout
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
-import com.vikash.ampli.drive.ui.theme.ThemeFamily
 import com.vikash.ampli.drive.ui.theme.ThemeAccess
+import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.system.BtPermissions
 import com.vikash.ampli.drive.tripcost.TripCostFlags
 
@@ -116,7 +114,6 @@ fun SettingsScreen(
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
     val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
-    val reduceGlass by app.prefs.reduceGlass.collectAsStateWithLifecycle()
     val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
     val price by app.billing.price.collectAsStateWithLifecycle()
     val gps by app.speedTracker.state.collectAsStateWithLifecycle()
@@ -136,6 +133,7 @@ fun SettingsScreen(
     val hasCoarse = remember(resumeTick) { granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) }
     val hasBt = remember(resumeTick) { BtPermissions.hasConnect(context) }
     val hasNotif = remember(resumeTick) { app.mediaHub.hasAccess() }
+    val notifMayBlock = remember(resumeTick, hasNotif) { !hasNotif && RestrictedSettings.mayBlock(context) }
     val language = remember(resumeTick, savedLanguage) { AppLanguages.current(context, savedLanguage) }
 
     Column(
@@ -155,18 +153,9 @@ fun SettingsScreen(
             if (!isHome) DefaultHomeCard(onMake = makeHome, onLater = null, modifier = Modifier.fillMaxWidth())
             ThemePicker(
                 choice = themeChoice,
-                night = night,
                 isPro = pro.isPro,
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
-            )
-            ToggleRow(
-                title = stringResource(R.string.glass_reduce_title),
-                status = stringResource(
-                    if (app.prefs.reduceGlassByDevice) R.string.glass_reduce_hint_auto else R.string.glass_reduce_hint,
-                ),
-                checked = reduceGlass,
-                onChange = app.prefs::setReduceGlass,
             )
             if (BuildConfig.DEBUG) {
                 ToggleRow(
@@ -248,7 +237,10 @@ fun SettingsScreen(
                 status = stringResource(if (hasNotif) R.string.notif_ok else R.string.notif_needed),
                 ok = hasNotif,
                 action = stringResource(if (hasNotif) R.string.action_manage else R.string.allow_access),
-                onAction = { Launchers.openNotificationAccess(context) },
+                onAction = { if (hasNotif) Launchers.openNotificationAccess(context) else Launchers.allowNotificationAccess(context) },
+                // Android 13+ sideloaded: the switch is refused once; App info › ⋮ › Allow restricted settings.
+                secondaryAction = if (notifMayBlock) stringResource(R.string.restricted_open_app_info) else null,
+                onSecondary = { Launchers.openAppDetails(context) },
             )
             SettingRow(
                 title = stringResource(R.string.bt_label),
@@ -323,6 +315,7 @@ fun SettingsScreen(
                     stringResource(R.string.about_map, GLANCE_ATTRIBUTION),
                     stringResource(R.string.cameras_attribution),
                     stringResource(R.string.fuel_attribution),
+                    stringResource(R.string.fuel_attribution_ocm),
                     stringResource(R.string.weather_attribution),
                     stringResource(R.string.about_not_affiliated),
                 ),
@@ -475,11 +468,6 @@ internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) = Theme
 @Composable
 internal fun ThemedSwitch(checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val theme = LocalDriveTheme.current
-    if (theme.isSoft) {
-        // Inset track, raised thumb; padded to the same 48 dp touch height as a Material switch.
-        Box(Modifier.heightIn(min = 48.dp), contentAlignment = Alignment.Center) { SoftSwitch(checked, enabled, onChange) }
-        return
-    }
     Switch(
         checked = checked,
         onCheckedChange = onChange,
@@ -518,32 +506,19 @@ internal fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = if (theme.radius <= 0f) androidx.compose.ui.graphics.RectangleShape else CircleShape
-    val soft = theme.isSoft
     Box(
         modifier = modifier
             .heightIn(min = MinTouch)
-            .then(
-                if (soft) {
-                    // Soft chip: raised, pressed in (cyan text) while selected.
-                    Modifier.softClickable(theme, shape, onClick, active = selected, role = Role.RadioButton)
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(if (selected) theme.accent else theme.surfaceHigh)
-                        .border(1.dp, if (selected) theme.accent else theme.border, shape)
-                        .clickable(onClick = onClick)
-                },
-            )
+            .clip(shape)
+            .background(if (selected) theme.accent else theme.surfaceHigh)
+            .border(if (theme.borderWidth > 1.dp) theme.borderWidth else 1.dp, if (selected && theme.borderWidth <= 1.dp) theme.accent else theme.border, shape)
+            .clickable(onClick = onClick)
             .padding(horizontal = dims.d(2.4f)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text,
-            color = when {
-                soft && selected -> theme.accentSoft
-                selected -> theme.onAccent
-                else -> theme.text
-            },
+            color = if (selected) theme.onAccent else theme.text,
             fontSize = dims.t(2.6f, min = 16f),
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1,
@@ -554,23 +529,20 @@ internal fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier
 
 // ------------------------------------------------------------------------------------ Themes
 
-private enum class Slot { Day, Night }
-
+/**
+ * Settings › Home screen theme: the four themes as cards with a small picture of each Home, a
+ * Free / Pro badge, and the "Auto night" switch (Pro: Big Glance after sunset).
+ */
 @Composable
-private fun ThemePicker(
+internal fun ThemePicker(
     choice: ThemeChoice,
-    night: Boolean,
     isPro: Boolean,
     onChange: (ThemeChoice) -> Unit,
     onLocked: () -> Unit,
 ) {
     val dims = LocalDims.current
     val active = LocalDriveTheme.current
-    val context = LocalContext.current
-    // The chip starts on the slot showing now (and follows sunrise/sunset), so a tap changes the
-    // screen at once. It used to be saveable and could sit on "Day" after dark: the tap then only
-    // changed the day theme and nothing visible happened.
-    var slot by remember(night) { mutableStateOf(if (night) Slot.Night else Slot.Day) }
+    val autoNightOn = choice.autoNight && ThemeAccess.autoNightAvailable(isPro)
 
     SettingCard {
         Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -582,200 +554,70 @@ private fun ThemePicker(
                 Icon(Icons.Filled.Palette, contentDescription = null, tint = active.accentSoft, modifier = Modifier.size(32.dp))
                 Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.theme_title), null) }
             }
-            // Crimson Drive, the default (free): Ampli MP3's Car mode colours and the car on Home.
-            QuickThemeOption(
-                selected = ThemeDefaults.isCrimson(choice),
-                title = stringResource(R.string.theme_crimson_drive),
-                hint = stringResource(R.string.theme_crimson_hint),
-                swatches = DriveThemes.CrimsonDrive.let { t -> listOf(t.surface to (t.keys?.primary ?: t.accent), t.background to (t.keys?.voice ?: t.ok)) },
-                onClick = { onChange(ThemeDefaults.crimson(choice)) },
-            )
-            // "Soft: auto Day/Night": Ampli Soft Day by day, Ampli Soft Night after sunset (free).
-            QuickThemeOption(
-                selected = ThemeDefaults.isSoftAuto(choice),
-                title = stringResource(R.string.theme_soft_auto),
-                hint = stringResource(R.string.theme_soft_auto_hint),
-                swatches = listOf(DriveThemes.AmpliSoftDay, DriveThemes.AmpliSoftNight).map { it.surface to it.accent },
-                onClick = { onChange(ThemeDefaults.softAuto(choice)) },
-            )
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val columns = if (maxWidth < 760.dp) 2 else 4
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                    for (row in DriveThemes.all.chunked(columns)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+                            for (t in row) {
+                                val locked = ThemeAccess.locked(t.id, isPro)
+                                ThemeCard(
+                                    theme = t,
+                                    inUse = t.id == active.id,
+                                    locked = locked,
+                                    onClick = { if (locked) onLocked() else onChange(ThemeAccess.select(choice, t.id)) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                }
+            }
+            // Auto night: Big Glance between sunset and sunrise. Pro only; free drivers stay on Map First.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = MinTouch)
-                    .clickable { onChange(toggledAuto(choice, active)) },
+                    .clickable {
+                        if (ThemeAccess.autoNightAvailable(isPro)) onChange(choice.copy(autoNight = !choice.autoNight)) else onLocked()
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
             ) {
                 Box(Modifier.weight(1f)) {
-                    CardTitle(stringResource(R.string.theme_auto), stringResource(R.string.theme_auto_hint))
-                }
-                ThemedSwitch(choice.auto) { onChange(toggledAuto(choice, active)) }
-            }
-            if (choice.auto) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
-                ) {
-                    Text(stringResource(R.string.theme_choose_for), fontSize = dims.t(2.6f), color = active.muted)
-                    Chip(stringResource(R.string.theme_day), slot == Slot.Day, { slot = Slot.Day })
-                    Chip(stringResource(R.string.theme_night), slot == Slot.Night, { slot = Slot.Night })
-                }
-            }
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val columns = (maxWidth / 190.dp).toInt().coerceIn(2, 5)
-                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                  // The default soft family first, then the others in their usual order.
-                  for (family in listOf(ThemeFamily.Soft, ThemeFamily.Classic, ThemeFamily.Glass, ThemeFamily.Saffron)) {
-                    Text(
-                        stringResource(
-                            when (family) {
-                                ThemeFamily.Classic -> R.string.theme_family_classic
-                                ThemeFamily.Glass -> R.string.theme_family_glass
-                                ThemeFamily.Saffron -> R.string.theme_family_saffron
-                                ThemeFamily.Soft -> R.string.theme_family_soft
-                            },
-                        ),
-                        fontSize = dims.t(2.6f, min = 15f),
-                        fontWeight = FontWeight.Bold,
-                        color = active.muted,
-                        modifier = Modifier.padding(top = dims.d(0.8f)),
+                    CardTitle(
+                        stringResource(R.string.theme_auto_night),
+                        stringResource(if (isPro) R.string.theme_auto_night_hint else R.string.theme_auto_night_pro),
                     )
-                    for (row in DriveThemes.all.filter { it.family == family }.chunked(columns)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                            for (t in row) {
-                                val tag = when {
-                                    !choice.auto -> null
-                                    t.id == choice.dayId && t.id == choice.nightId ->
-                                        stringResource(R.string.theme_day) + " · " + stringResource(R.string.theme_night)
-                                    t.id == choice.dayId -> stringResource(R.string.theme_day)
-                                    t.id == choice.nightId -> stringResource(R.string.theme_night)
-                                    else -> null
-                                }
-                                ThemeCard(
-                                    theme = t,
-                                    inUse = t.id == active.id,
-                                    locked = t.isPro && !isPro,
-                                    slotTag = tag,
-                                    onClick = {
-                                        if (t.isPro && !isPro) {
-                                            onLocked()
-                                        } else {
-                                            val forNight = slot == Slot.Night
-                                            onChange(ThemeAccess.select(choice, t.id, forNight))
-                                            // Chosen for the other half of the day: say when it will show.
-                                            if (choice.auto && forNight != night) {
-                                                Toast.makeText(
-                                                    context,
-                                                    context.getString(if (forNight) R.string.theme_saved_for_night else R.string.theme_saved_for_day),
-                                                    Toast.LENGTH_LONG,
-                                                ).show()
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                            // Keep the last row's cards the same width as the others.
-                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
-                        }
-                    }
-                  }
                 }
+                if (!isPro) {
+                    Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.theme_locked), tint = active.muted, modifier = Modifier.size(24.dp))
+                }
+                ThemedSwitch(autoNightOn, enabled = isPro) { onChange(choice.copy(autoNight = it)) }
             }
         }
     }
 }
-
-/**
- * A one-tap choice at the top of the theme picker (Crimson Drive, "Soft: auto Day/Night"), with
- * small swatches: each a (fill, dot) pair.
- */
-@Composable
-private fun QuickThemeOption(selected: Boolean, title: String, hint: String, swatches: List<Pair<Color, Color>>, onClick: () -> Unit) {
-    val dims = LocalDims.current
-    val theme = LocalDriveTheme.current
-    val shape = RoundedCornerShape(dims.d(1.8f))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = MinTouch)
-            .then(
-                if (theme.isSoft) {
-                    Modifier.softClickable(theme, shape, onClick, active = selected, role = Role.RadioButton)
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(theme.surfaceHigh)
-                        .border(if (selected) 3.dp else 1.dp, if (selected) theme.accent else theme.border, shape)
-                        .clickable(onClick = onClick)
-                },
-            )
-            .padding(horizontal = dims.d(2f), vertical = dims.d(1.2f)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for ((fill, dot) in swatches) {
-                Box(
-                    Modifier
-                        .size(width = 44.dp, height = 30.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(fill)
-                        .border(1.dp, theme.softEdge ?: theme.border, RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center,
-                ) { Box(Modifier.size(10.dp).clip(CircleShape).background(dot)) }
-            }
-        }
-        Box(Modifier.weight(1f)) {
-            CardTitle(title, hint)
-        }
-        if (selected) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = stringResource(R.string.theme_in_use),
-                tint = theme.accentSoft,
-                modifier = Modifier.size(32.dp),
-            )
-        }
-    }
-}
-
-/** Turning Auto off keeps whatever is showing now; turning it on restores the day/night pair. */
-private fun toggledAuto(choice: ThemeChoice, showing: DriveTheme): ThemeChoice =
-    if (choice.auto) choice.copy(auto = false, fixedId = showing.id) else choice.copy(auto = true)
 
 @Composable
 private fun ThemeCard(
     theme: DriveTheme,
     inUse: Boolean,
     locked: Boolean,
-    slotTag: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dims = LocalDims.current
     val ui = LocalDriveTheme.current
-    val shape = RoundedCornerShape(dims.d(1.8f))
+    val shape = ui.cardShape(dims, scale = 0.5f)
     Column(
         modifier = modifier
-            .then(
-                if (ui.isSoft) {
-                    // In use: pressed in, with a cyan ring (the only accent on the card).
-                    Modifier
-                        .softClickable(ui, shape, onClick, active = inUse)
-                        .then(if (inUse) Modifier.border(3.dp, ui.accent, shape) else Modifier)
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(ui.surfaceHigh)
-                        .border(if (inUse) 3.dp else 1.dp, if (inUse) ui.accent else ui.border, shape)
-                        .clickable(onClick = onClick)
-                },
-            )
+            .themedTap(shape, ui.surfaceHigh, border = ui.border, active = inUse, role = Role.RadioButton, onClick = onClick)
             .padding(dims.d(1f)),
         verticalArrangement = Arrangement.spacedBy(dims.d(0.8f)),
     ) {
-        Box(Modifier.fillMaxWidth().aspectRatio(1024f / 600f).clip(RoundedCornerShape(dims.d(1.2f)))) {
+        Box(Modifier.fillMaxWidth().aspectRatio(1280f / 800f).clip(RoundedCornerShape(dims.d(1.2f)))) {
             ThemeSwatch(theme, Modifier.fillMaxSize())
             if (locked) {
                 Box(
@@ -814,31 +656,19 @@ private fun ThemeCard(
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                theme.code,
-                fontSize = dims.t(2f, min = 12f),
-                color = ui.muted,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-            )
-            Text(
-                theme.nameRes?.let { stringResource(it) } ?: theme.name,
-                fontSize = dims.t(2.4f, min = 14f),
-                fontWeight = FontWeight.SemiBold,
-                color = ui.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Badge(
-                text = stringResource(if (theme.isPro) R.string.theme_pro else R.string.theme_free),
-                background = if (theme.isPro) Color(0xFFFBBF24) else ui.ok,
-                content = Color(0xFF111111),
-            )
-            if (slotTag != null) Badge(text = slotTag, background = ui.accent, content = ui.onAccent)
-        }
+        Text(
+            stringResource(theme.nameRes),
+            fontSize = dims.t(2.6f, min = 16f),
+            fontWeight = FontWeight.SemiBold,
+            color = ui.text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Badge(
+            text = stringResource(if (theme.isPro) R.string.theme_pro else R.string.theme_free),
+            background = if (theme.isPro) Color(0xFFFBBF24) else ui.ok,
+            content = Color(0xFF111111),
+        )
     }
 }
 
@@ -848,7 +678,7 @@ private fun Badge(text: String, background: Color, content: Color) {
     Text(
         text,
         color = content,
-        fontSize = dims.t(1.8f, min = 11f),
+        fontSize = dims.t(1.8f, min = 12f),
         fontWeight = FontWeight.Bold,
         maxLines = 1,
         modifier = Modifier
@@ -858,148 +688,64 @@ private fun Badge(text: String, background: Color, content: Color) {
     )
 }
 
-/** A miniature of the home screen in [t]'s colours and layout, drawn with a few rectangles. */
+/** A miniature of [t]'s Home, drawn with a few rectangles in its own colours and layout. */
 @Composable
 private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
     Canvas(modifier) {
         val w = size.width
         val h = size.height
-        if (t.decoration == Decoration.Synthwave) {
-            drawRect(
-                Brush.verticalGradient(
-                    0f to Color(0xFF0D0221), 0.5f to Color(0xFF4A1366), 0.53f to Color(0xFFB8236F),
-                    0.532f to Color(0xFF12002A), 1f to Color(0xFF12002A),
-                ),
-            )
-            drawCircle(Color(0xFFFF901F), radius = h * 0.16f, center = Offset(w / 2f, h * 0.42f))
-        } else if (t.decoration == Decoration.Glass && t.glass != null) {
-            drawGlassBackdrop(t.glass)
-        } else if (t.decoration == Decoration.Forest) {
-            drawForest()
-        } else {
-            drawRect(t.background)
+        val sos = t.danger
+        fun box(x: Float, y: Float, bw: Float, bh: Float, color: Color, r: Float = 0.03f, edge: Color? = null) {
+            val cr = CornerRadius(w * r, w * r)
+            drawRoundRect(color, Offset(x * w, y * h), Size(bw * w, bh * h), cr)
+            if (edge != null) drawRoundRect(edge, Offset(x * w, y * h), Size(bw * w, bh * h), cr, style = Stroke(width = maxOf(1.5f, w * 0.008f)))
         }
-        if (t.decoration == Decoration.Holi) {
-            drawCircle(Color(0x8CFF3D8B), radius = h * 0.3f, center = Offset(0f, 0f))
-            drawCircle(Color(0x8CFFD23F), radius = h * 0.3f, center = Offset(w, 0f))
-        }
-        val pad = h * 0.05f
-        val gap = h * 0.035f
-        val dockH = h * 0.15f
-        val top = pad + h * 0.08f
-        val bottom = h - pad - dockH - gap
-        val r = CornerRadius(h * t.radius / 100f * 1.2f)
-        val mapColor = if (t.map.name == "Liberty" || t.map.name == "Positron" || t.map.name == "Bright") Color(0xFFE7EBF0) else Color(0xFF1A1D26)
-
-        fun pane(x: Float, y: Float, pw: Float, ph: Float, fill: Color) {
-            if (t.cardStyle == CardStyle.Pop) drawRoundRect(t.accent2, Offset(x + 3f, y + 3f), Size(pw, ph), r)
-            if (t.cardStyle == CardStyle.Neumorphic) {
-                drawRoundRect(t.shadowDark, Offset(x + 2f, y + 2f), Size(pw, ph), r)
-                drawRoundRect(t.shadowLight, Offset(x - 2f, y - 2f), Size(pw, ph), r)
+        drawRect(t.background)
+        when (t.style) {
+            HomeStyle.BigGlance -> {
+                box(0.04f, 0.15f, 0.29f, 0.6f, t.surface)
+                box(0.355f, 0.15f, 0.29f, 0.6f, t.surface)
+                box(0.67f, 0.15f, 0.29f, 0.6f, t.surface)
+                box(0.08f, 0.32f, 0.14f, 0.3f, t.text, 0.01f)
+                box(0.04f, 0.8f, 0.48f, 0.15f, t.accent)
+                box(0.55f, 0.8f, 0.2f, 0.15f, t.surface)
+                box(0.77f, 0.8f, 0.19f, 0.15f, sos)
             }
-            drawRoundRect(fill, Offset(x, y), Size(pw, ph), r)
-            if (t.borderWidth.value > 0f && t.border.alpha > 0f) {
-                drawRoundRect(t.border, Offset(x, y), Size(pw, ph), r, style = Stroke(width = maxOf(1f, t.borderWidth.value)))
+            HomeStyle.MapFirst -> {
+                drawRect(Color(0xFFE8E2D4))
+                drawRect(Color(0xFFF7F3EA), Offset(0f, h * 0.4f), Size(w, h * 0.06f))
+                drawRect(Color(0xFFF7F3EA), Offset(w * 0.48f, 0f), Size(w * 0.05f, h))
+                drawRect(t.accent, Offset(0f, h * 0.415f), Size(w * 0.5f, h * 0.03f))
+                drawRect(t.accent, Offset(w * 0.49f, h * 0.43f), Size(w * 0.03f, h * 0.57f))
+                box(0.03f, 0.05f, 0.34f, 0.2f, t.surface)
+                box(0.82f, 0.15f, 0.15f, 0.24f, t.surface, 0.08f)
+                box(0.03f, 0.74f, 0.37f, 0.21f, t.surface)
+                box(0.63f, 0.8f, 0.09f, 0.15f, t.surface)
+                box(0.74f, 0.75f, 0.13f, 0.21f, t.accent, 0.07f)
+                box(0.885f, 0.8f, 0.09f, 0.15f, sos)
             }
-        }
-
-        fun mapPane(x: Float, y: Float, pw: Float, ph: Float) {
-            if (t.keys?.heroCar == true) {
-                // The green car on a dark pane, with the crimson "Go" key under it.
-                pane(x, y, pw, ph, Color(0xFF050A07))
-                drawRoundRect(t.keys.voice, Offset(x + pw * 0.14f, y + ph * 0.38f), Size(pw * 0.72f, ph * 0.22f), CornerRadius(ph * 0.1f))
-                drawRoundRect(t.keys.primary, Offset(x + pw * 0.1f, y + ph * 0.76f), Size(pw * 0.42f, ph * 0.12f), CornerRadius(ph * 0.06f))
-                return
+            HomeStyle.Bento -> {
+                box(0.03f, 0.04f, 0.3f, 0.6f, t.ink, edge = t.border)
+                box(0.35f, 0.04f, 0.31f, 0.29f, t.accent)
+                box(0.68f, 0.04f, 0.29f, 0.29f, t.background, edge = t.border)
+                box(0.35f, 0.36f, 0.31f, 0.28f, t.surface)
+                box(0.68f, 0.36f, 0.29f, 0.28f, t.surfaceHigh)
+                box(0.03f, 0.68f, 0.46f, 0.28f, t.accent)
+                box(0.51f, 0.68f, 0.14f, 0.28f, t.background, edge = t.border)
+                box(0.67f, 0.68f, 0.14f, 0.28f, t.ink)
+                box(0.83f, 0.68f, 0.14f, 0.28f, sos)
             }
-            pane(x, y, pw, ph, mapColor)
-            drawLine(t.accent2, Offset(x + pw * 0.2f, y + ph * 0.9f), Offset(x + pw * 0.55f, y + ph * 0.45f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
-            drawLine(t.accent2, Offset(x + pw * 0.55f, y + ph * 0.45f), Offset(x + pw * 0.8f, y + ph * 0.2f), strokeWidth = h * 0.02f, cap = StrokeCap.Round)
-            if (t.mapTint.alpha > 0f) drawRoundRect(t.mapTint, Offset(x, y), Size(pw, ph), r)
-            // Turn card
-            drawRoundRect(t.accent, Offset(x + pw * 0.08f, y + ph * 0.08f), Size(pw * 0.25f, ph * 0.18f), r)
-        }
-
-        fun speedPane(x: Float, y: Float, pw: Float, ph: Float) {
-            pane(x, y, pw, ph, t.speedSurface ?: t.surface)
-            val d = minOf(pw, ph) * 0.62f
-            val c = Offset(x + pw / 2f, y + ph / 2f)
-            drawArc(t.track, 135f, 270f, false, Offset(c.x - d / 2, c.y - d / 2), Size(d, d), style = Stroke(width = d * 0.1f, cap = StrokeCap.Round))
-            drawArc(t.speedText ?: t.accent, 135f, 170f, false, Offset(c.x - d / 2, c.y - d / 2), Size(d, d), style = Stroke(width = d * 0.1f, cap = StrokeCap.Round))
-        }
-
-        fun musicPane(x: Float, y: Float, pw: Float, ph: Float) {
-            pane(x, y, pw, ph, t.musicSurface ?: t.surface)
-            drawRoundRect(t.accent, Offset(x + pw * 0.12f, y + ph * 0.1f), Size(pw * 0.76f, ph * 0.42f), r)
-            drawRoundRect(t.musicText.copy(alpha = 0.8f), Offset(x + pw * 0.12f, y + ph * 0.6f), Size(pw * 0.6f, ph * 0.06f))
-            drawRoundRect(t.muted.copy(alpha = 0.7f), Offset(x + pw * 0.12f, y + ph * 0.7f), Size(pw * 0.4f, ph * 0.05f))
-            drawCircle(t.accent, radius = ph * 0.08f, center = Offset(x + pw / 2f, y + ph * 0.86f))
-        }
-
-        // Clock stub
-        drawRoundRect(t.text.copy(alpha = 0.85f), Offset(pad, pad), Size(w * 0.09f, h * 0.05f))
-        val areaW = w - pad * 2
-        val areaH = bottom - top
-        when (t.layout) {
-            HomeLayout.MapSpeedMusic, HomeLayout.SpeedMapMusic, HomeLayout.MusicSpeedMap -> {
-                val ws = when (t.layout) {
-                    HomeLayout.MapSpeedMusic -> listOf(1.55f, 1f, 1.05f)
-                    HomeLayout.SpeedMapMusic -> listOf(0.95f, 1.5f, 1.05f)
-                    else -> listOf(1f, 0.95f, 1.6f)
-                }
-                val unit = (areaW - gap * 2) / ws.sum()
-                var x = pad
-                ws.forEachIndexed { i, wt ->
-                    val pw = unit * wt
-                    val kind = when (t.layout) {
-                        HomeLayout.MapSpeedMusic -> i
-                        HomeLayout.SpeedMapMusic -> listOf(1, 0, 2)[i]
-                        else -> listOf(2, 1, 0)[i]
-                    }
-                    when (kind) {
-                        0 -> mapPane(x, top, pw, areaH)
-                        1 -> speedPane(x, top, pw, areaH)
-                        else -> musicPane(x, top, pw, areaH)
-                    }
-                    x += pw + gap
-                }
-            }
-            HomeLayout.MapTopRow -> {
-                val mh = (areaH - gap) * 0.55f
-                mapPane(pad, top, areaW, mh)
-                val unit = (areaW - gap) / 2.2f
-                speedPane(pad, top + mh + gap, unit * 0.8f, areaH - mh - gap)
-                musicPane(pad + unit * 0.8f + gap, top + mh + gap, unit * 1.4f, areaH - mh - gap)
-            }
-            HomeLayout.MapStacked -> {
-                val unit = (areaW - gap) / 2.75f
-                mapPane(pad, top, unit * 1.75f, areaH)
-                val x = pad + unit * 1.75f + gap
-                val sh = (areaH - gap) * 0.45f
-                speedPane(x, top, unit, sh)
-                musicPane(x, top + sh + gap, unit, areaH - sh - gap)
-            }
-            HomeLayout.GiantSpeed -> {
-                val unit = (areaW - gap) / 2.45f
-                // Giant number blocks
-                drawRect(t.text, Offset(pad, top + areaH * 0.15f), Size(unit * 0.55f, areaH * 0.55f))
-                drawRect(t.text, Offset(pad + unit * 0.65f, top + areaH * 0.15f), Size(unit * 0.55f, areaH * 0.55f))
-                drawRect(t.accent2, Offset(pad, top + areaH * 0.82f), Size(unit * 0.9f, areaH * 0.08f))
-                val x = pad + unit * 1.45f + gap
-                mapPane(x, top, unit, (areaH - gap) * 0.45f)
-                musicPane(x, top + (areaH - gap) * 0.45f + gap, unit, (areaH - gap) * 0.55f)
-            }
-        }
-        // Dock
-        val dw = (areaW - gap * 5) / 6f
-        for (i in 0 until 6) {
-            val x = pad + i * (dw + gap)
-            pane(x, h - pad - dockH, dw, dockH, if (i == 0) t.dockActive else t.surface)
-        }
-        if (t.decoration == Decoration.Scanlines) {
-            var y = 0f
-            while (y < h) {
-                drawLine(t.accent.copy(alpha = 0.08f), Offset(0f, y), Offset(w, y), strokeWidth = 1f)
-                y += 3f
+            HomeStyle.RoadSign -> {
+                drawRect(t.ink, Offset.Zero, Size(w, h * 0.09f))
+                box(0.03f, 0.15f, 0.31f, 0.6f, t.surface, 0f, t.border)
+                box(0.37f, 0.15f, 0.31f, 0.6f, t.accent, 0f, t.border)
+                box(0.71f, 0.15f, 0.26f, 0.28f, t.ink, 0f)
+                box(0.71f, 0.47f, 0.26f, 0.28f, t.surface, 0f, t.border)
+                box(0.03f, 0.81f, 0.15f, 0.14f, t.surface, 0f, t.border)
+                box(0.2f, 0.81f, 0.15f, 0.14f, t.surface, 0f, t.border)
+                box(0.37f, 0.81f, 0.27f, 0.14f, t.accent, 0f, t.border)
+                box(0.66f, 0.81f, 0.15f, 0.14f, t.surface, 0f, t.border)
+                box(0.83f, 0.81f, 0.14f, 0.14f, sos, 0f, t.border)
             }
         }
     }
@@ -1019,7 +765,7 @@ internal fun ProSheet(
     val theme = LocalDriveTheme.current
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = if (theme.surface.alpha < 1f) theme.background else theme.surface,
+        containerColor = theme.surface.copy(alpha = 1f),
         contentColor = theme.text,
     ) {
         Column(
@@ -1038,14 +784,11 @@ internal fun ProSheet(
             Text(stringResource(R.string.pro_body), fontSize = dims.t(2.8f, min = 16f), color = theme.muted)
             // Little strip of the Pro themes.
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
-                for (t in listOf(
-                    DriveThemes.MidnightGlass, DriveThemes.SportRed, DriveThemes.Synthwave,
-                    DriveThemes.RoseGlass, DriveThemes.HoliPop, DriveThemes.SoftNight,
-                )) {
+                for (t in DriveThemes.all.filter { it.isPro }) {
                     Box(
                         Modifier
                             .weight(1f)
-                            .aspectRatio(1024f / 600f)
+                            .aspectRatio(1280f / 800f)
                             .clip(RoundedCornerShape(dims.d(1f))),
                     ) { ThemeSwatch(t, Modifier.fillMaxSize()) }
                 }

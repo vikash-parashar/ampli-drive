@@ -1,6 +1,5 @@
 package com.vikash.ampli.drive.ui.theme
 
-import com.vikash.ampli.drive.prefs.DrivePrefs
 import com.vikash.ampli.drive.prefs.ThemeChoice
 import com.vikash.ampli.drive.prefs.ThemeDefaults
 
@@ -10,54 +9,31 @@ import com.vikash.ampli.drive.prefs.ThemeDefaults
  */
 object ThemeAccess {
 
-    const val FROSTED_GLASS = "frosted_glass"
-    const val MIDNIGHT_FROST = "midnight_frost"
-    const val SAFFRON_NIGHT = "desi_saffron"
-
-    /** The eight free themes. Every other theme needs Pro. */
-    val FREE_IDS: Set<String> = setOf(
-        ThemeDefaults.CRIMSON, // Crimson Drive (default)
-        ThemeDefaults.SOFT_DAY, // Ampli Soft Day (Auto default)
-        ThemeDefaults.SOFT_NIGHT, // Ampli Soft Night (Auto default)
-        ThemeDefaults.ROSE, // Ampli Rose
-        ThemeDefaults.DAYLIGHT, // Daylight Clean
-        FROSTED_GLASS,
-        MIDNIGHT_FROST,
-        SAFFRON_NIGHT, // S1
-    )
+    /**
+     * The free themes. Every other theme needs Pro. One place to change the Free / Pro split:
+     * the owner's call (31 Oct 2026) is Map First free, Big Glance, Bento Grid and Road Sign Pro.
+     */
+    val FREE_IDS: Set<String> = setOf(ThemeDefaults.MAP_FIRST)
 
     fun isFree(id: String): Boolean = id in FREE_IDS
 
-    /**
-     * The id of the theme to show now. An unknown id, or a Pro theme without Pro (refund, test
-     * switch turned off), falls back to a free default: with Auto on, Ampli Soft Day by day and
-     * Ampli Soft Night after dark; with Auto off, Crimson Drive.
-     */
-    fun resolveId(choice: ThemeChoice, night: Boolean, isPro: Boolean, known: Set<String>): String {
-        val id = when {
-            !choice.auto -> choice.fixedId
-            night -> choice.nightId
-            else -> choice.dayId
-        }
-        val fallback = when {
-            !choice.auto -> DrivePrefs.DEFAULT_FIXED
-            night -> DrivePrefs.DEFAULT_NIGHT
-            else -> DrivePrefs.DEFAULT_DAY
-        }
-        return if (id !in known || (!isFree(id) && !isPro)) fallback else id
-    }
+    /** "Auto night" (Big Glance after sunset) is a Pro feature; free drivers stay on Map First. */
+    fun autoNightAvailable(isPro: Boolean): Boolean = isPro
 
     /**
-     * The choice after the driver taps theme [id] in the picker.
-     *
-     * Fixed mode: [id] always shows. Auto mode: [id] goes into the slot the picker's Day/Night chip
-     * points at ([forNight]). The picker points the chip at the slot showing *now*, so a tap changes
-     * the screen straight away; before this, the chip could stay on "Day" after dark, the tap
-     * only changed the day theme, and nothing on screen changed (head-unit report, build 21).
+     * The id of the theme to show now. An unknown id, or a Pro theme without Pro (refund, test
+     * switch turned off), falls back to Map First. With "Auto night" on (Pro only) Big Glance shows
+     * between sunset and sunrise.
      */
-    fun select(choice: ThemeChoice, id: String, forNight: Boolean): ThemeChoice = when {
-        !choice.auto -> choice.copy(fixedId = id)
-        forNight -> choice.copy(nightId = id)
-        else -> choice.copy(dayId = id)
+    fun resolveId(choice: ThemeChoice, night: Boolean, isPro: Boolean): String {
+        if (night && choice.autoNight && autoNightAvailable(isPro)) return ThemeDefaults.NIGHT_ID
+        val id = choice.id
+        return if (id !in ThemeDefaults.IDS || (!isFree(id) && !isPro)) ThemeDefaults.MAP_FIRST else id
     }
+
+    /** True when tapping [id] in the picker should open the Pro sheet instead. */
+    fun locked(id: String, isPro: Boolean): Boolean = !isFree(id) && !isPro
+
+    /** The choice after the driver taps theme [id] in the picker ("Auto night" is kept). */
+    fun select(choice: ThemeChoice, id: String): ThemeChoice = choice.copy(id = id)
 }

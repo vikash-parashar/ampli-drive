@@ -314,7 +314,7 @@ def generate(args):
     for e in entries:
         if e["hash"] != text_hash(e["text"]):
             annotate("error", "Voice pack", f"voice/lines.json hash mismatch for {e['id']}: regenerate it (see VoiceManifestTest)."); sys.exit(1)
-    ids = {e["id"] for e in entries}
+    all_entries = entries
     settings = Settings()
     summary = {"voices": {}, "failed": 0}
     try:
@@ -331,6 +331,10 @@ def generate(args):
                            os.environ.get(f"{voice.upper()}_OWNER", "").strip(), label)
         if not vid:
             annotate("error", "Voice pack", f"no voice id for {voice}: set the repo variable VOICE_ID_{voice.upper()}."); sys.exit(1)
+        # A line worded per voice ("voice": "male" / "female", ids <id>_m / <id>_f) is recorded
+        # only by that voice; every other line by both.
+        entries = [e for e in all_entries if e.get("voice") in (None, voice)]
+        ids = {e["id"] for e in entries}
         folder = os.path.join(ASSETS, voice)
         os.makedirs(folder, exist_ok=True)
         index_path = os.path.join(folder, "clips.json")

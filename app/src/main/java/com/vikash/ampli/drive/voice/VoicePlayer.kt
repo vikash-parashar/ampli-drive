@@ -31,6 +31,29 @@ class VoicePlayer(private val app: DriveApp) {
     private var player: ExoPlayer? = null
     private var playing: CompletableDeferred<Boolean>? = null
 
+    private val _lastLine = MutableStateFlow<String?>(null)
+
+    /**
+     * The last line Ampli said from the reviewed line bank (never message text or a search
+     * answer): Home shows it as the caption, so it is always family-safe.
+     */
+    val lastLine: StateFlow<String?> = _lastLine.asStateFlow()
+
+    private val _lastLineAt = MutableStateFlow(0L)
+
+    /** When [lastLine] was said (elapsedRealtime ms; 0 = never). Home hides a stale line. */
+    val lastLineAt: StateFlow<Long> = _lastLineAt.asStateFlow()
+
+    private fun setLine(line: String) {
+        _lastLine.value = line
+        _lastLineAt.value = android.os.SystemClock.elapsedRealtime().coerceAtLeast(1L)
+    }
+
+    /** Shows [line] as Home's caption without saying it (screen previews; only bank lines go here). */
+    internal fun showCaption(line: String) {
+        setLine(line)
+    }
+
     /** What is bundled in this build. Loaded once; an APK never changes its assets. */
     val library: ClipLibrary by lazy { load() }
 
@@ -60,6 +83,7 @@ class VoicePlayer(private val app: DriveApp) {
      * recorded Ampli voice even when Settings › Voice says phone voice (the car-start welcome).
      */
     suspend fun sayChecked(spoken: Spoken, needFocus: Boolean = false, preferRecorded: Boolean = false): Boolean {
+        if (spoken.caption) setLine(spoken.text)
         var v = voice
         // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
         // Ampli voice says it instead, rather than nothing at all.
@@ -92,6 +116,23 @@ class VoicePlayer(private val app: DriveApp) {
         _ttsMissing.value = !ok
         return ok
     }
+
+    /**
+     * [VoiceGate.hasClip]: may a round-2 line with clip [id] be picked now? Always with the phone
+     * voice; with a recorded voice (picked, or standing in on a unit without TTS) only when the
+     * clip is bundled and up to date.
+     */
+    fun allowsLine(id: String): Boolean {
+        val v = voice
+        return when {
+            v.human -> library.has(v, id)
+            _ttsMissing.value -> library.has(fallbackVoice(), id)
+            else -> true
+        }
+    }
+
+    /** [VoiceGate.recordedHasClip]: the recorded voice the car-start welcome uses has clip [id]. */
+    fun recordedHas(id: String): Boolean = library.has(voice.takeIf { it.human } ?: fallbackVoice(), id)
 
     /** The driver's recorded voice if they picked one, else Male. */
     private fun fallbackVoice(): VoicePack = app.prefs.voicePack.value?.takeIf { it.human } ?: VoicePack.Male

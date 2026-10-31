@@ -137,7 +137,7 @@ private fun etaText(remainingS: Double): String {
 
 /** Panels over the map can't blur it: glass themes use their stronger, near-opaque tint. */
 private fun mapPanelFill(theme: DriveTheme): androidx.compose.ui.graphics.Brush {
-    val c = theme.glass?.let { Color(it.overMap) } ?: theme.surface
+    val c = theme.overMap
     return androidx.compose.ui.graphics.Brush.linearGradient(listOf(c, c))
 }
 

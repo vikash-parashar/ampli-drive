@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_sheet_title">और</string>
+    <string name="more_say">या बस बोल: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">तेल अर CNG</string>
+    <string name="more_fuel_hint">पेट्रोल, CNG, EV</string>
+    <string name="more_radar">स्पीड रडार</string>
+    <string name="more_alerts_on">अलर्ट चालू</string>
+    <string name="more_alerts_off">अलर्ट बंद</string>
+    <string name="more_papers">गाड्डी के कागज</string>
+    <string name="more_papers_hint">बीमा, PUC, सर्विस</string>
+    <string name="more_trips_hint">थारी यात्रा</string>
+    <string name="more_expenses">खर्चा</string>
+    <string name="more_expenses_hint">माइलेज अर खर्चा</string>
+    <string name="more_health">गाड्डी की सेहत</string>
+    <string name="more_health_link">OBD जोड़</string>
+    <string name="more_tyres_hint">प्रेशर जाँच</string>
+    <string name="more_phone_hint">पसंद की कॉल</string>
+    <string name="more_link_hint">अपणा फोन जोड़</string>
+    <string name="more_apps_hint">सारे ऐप</string>
+    <string name="more_settings_hint">आवाज, डिस्प्ले</string>
+    <string name="more_fastag_hint">बैलेंस अर टोल</string>
+    <string name="home_next_turn">अगला मोड़</string>
+    <string name="home_playing">चाल रहया सै</string>
+    <string name="home_now_playing">इब्ब चाल रहया सै</string>
+    <string name="home_limit">सीमा %1$d</string>
+    <string name="home_mic_hint">बोल, के चाहिए</string>
+    <string name="home_sos_hold">3 सेकंड दबा</string>
+    <string name="home_map">नक्शा</string>
+    <string name="home_toll">%1$s कटे · %2$s बचे</string>
+    <string name="theme_auto_night">रात नै आप्पे: Big Glance</string>
+    <string name="theme_auto_night_hint">सूरज छिपण पाछै होम Big Glance पै बदल ज्या, सबतै गहरी थीम, अर सूरज लिकड़ण पै वापस</string>
+    <string name="theme_auto_night_pro">Pro: सूरज छिपण पाछै Big Glance। फ्री म्ह दिन-रात Map First रहवै।</string>
+    <string name="home_go_home">घरां चालो</string>
+</resources>

@@ -71,7 +71,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** How long the Help button must be held to start SOS. */
-private const val HOLD_MS = 3000
+internal const val HOLD_MS = 3000
 
 /** Seconds before the SOS composer opens, so a mistaken press can be cancelled. */
 private const val COUNTDOWN_S = 5
@@ -91,7 +91,7 @@ fun HelpDockButton(onTap: () -> Unit, onHold: () -> Unit, modifier: Modifier = M
     val progress = remember { Animatable(0f) }
     val tap by rememberUpdatedState(onTap)
     val hold by rememberUpdatedState(onHold)
-    val shape = if (theme.cardStyle == CardStyle.Skewed) skewShape(0.22f) else theme.cardShape(dims, scale = 0.9f)
+    val shape = theme.cardShape(dims, scale = 0.9f)
     val label = stringResource(R.string.dock_help)
     val iconSize = maxOf(dims.d(5f), 28.dp)
 

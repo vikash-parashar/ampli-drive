@@ -134,7 +134,11 @@ class VoiceClipsTest {
         val known = VoiceClips.expectedHashes.keys
         for (e in HaryanviLines.Event.entries.filter { !it.safety }) {
             repeat(10) {
-                for (id in clips(e, *HaryanviLines.sampleArgs(e))) assertTrue("$e → $id", id in known)
+                // A line worded per voice is recorded as <id>_m / <id>_f; each voice resolves its own.
+                for (id in clips(e, *HaryanviLines.sampleArgs(e))) {
+                    assertTrue("$e → $id", VoiceClips.voiceId(VoicePack.Male, id) in known)
+                    assertTrue("$e → $id", VoiceClips.voiceId(VoicePack.Female, id) in known)
+                }
             }
         }
     }

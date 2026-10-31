@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_sheet_title">आनीक</string>
+    <string name="more_say">वा फकत सांगात: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">इंधन आनी CNG</string>
+    <string name="more_fuel_hint">पेट्रोल, CNG, EV</string>
+    <string name="more_radar">स्पीड रडार</string>
+    <string name="more_alerts_on">सुचोवण्यो चालू</string>
+    <string name="more_alerts_off">सुचोवण्यो बंद</string>
+    <string name="more_papers">गाडयेचीं कागदां</string>
+    <string name="more_papers_hint">विमो, PUC, सर्विस</string>
+    <string name="more_trips_hint">तुमचे प्रवास</string>
+    <string name="more_expenses">खर्च</string>
+    <string name="more_expenses_hint">मायलेज आनी खर्च</string>
+    <string name="more_health">गाडयेची भलायकी</string>
+    <string name="more_health_link">OBD जोडात</string>
+    <string name="more_tyres_hint">प्रेशर तपासणी</string>
+    <string name="more_phone_hint">आवडीचे कॉल</string>
+    <string name="more_link_hint">तुमचो फोन जोडात</string>
+    <string name="more_apps_hint">सगळे ऍप</string>
+    <string name="more_settings_hint">आवाज, डिस्प्ले</string>
+    <string name="more_fastag_hint">बॅलन्स आनी टोल</string>
+    <string name="home_next_turn">फुडलो वळण</string>
+    <string name="home_playing">चालू आसा</string>
+    <string name="home_now_playing">आतां चालू आसा</string>
+    <string name="home_limit">मर्यादा %1$d</string>
+    <string name="home_mic_hint">सांगात कितें जाय</string>
+    <string name="home_sos_hold">3 सेकंद दाबून धरात</string>
+    <string name="home_map">नकासो</string>
+    <string name="home_toll">%1$s कापले · %2$s उरले</string>
+    <string name="theme_auto_night">रातीं आपसूक: Big Glance</string>
+    <string name="theme_auto_night_hint">सूर्य बुडटकच होम Big Glance चेर बदलता, सगळ्यांत गाड थीम, आनी सूर्य उदेतकच परत</string>
+    <string name="theme_auto_night_pro">Pro: सूर्य बुडटकच Big Glance. फ्री आवृत्तींत दीसरात Map First उरता.</string>
+    <string name="home_go_home">घरा वचूंया</string>
+</resources>

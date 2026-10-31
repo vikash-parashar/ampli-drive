@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_crimson_hint">निःशुल्क · डिफ़ॉल्ट · Ampli MP3 कार मोडक रंग, होम पर गाड़ी</string>
-    <string name="hero_ready">चलबाक लेल तैयार</string>
-    <string name="hero_go_home">घर चलू</string>
-    <string name="hero_show_map">नक्शा देखाउ</string>
-</resources>

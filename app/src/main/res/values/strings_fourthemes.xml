@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <!-- Theme names are brand names and stay in English. -->
+    <string name="theme_map_first" translatable="false">Map First</string>
+    <string name="theme_big_glance" translatable="false">Big Glance</string>
+    <string name="theme_bento" translatable="false">Bento Grid</string>
+    <string name="theme_road_sign" translatable="false">Neo-Brutal Road Sign</string>
+    <string name="home_ampli" translatable="false">Ampli</string>
+    <string name="fuel_attribution_ocm" translatable="false">EV charger data © Open Charge Map contributors (CC BY 4.0)</string>
+    <string name="more_sheet_title">More</string>
+    <string name="more_say">Or just say: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">Fuel &amp; CNG</string>
+    <string name="more_fuel_hint">Petrol, CNG, EV</string>
+    <string name="more_radar">Speed radar</string>
+    <string name="more_alerts_on">Alerts on</string>
+    <string name="more_alerts_off">Alerts off</string>
+    <string name="more_papers">Car papers</string>
+    <string name="more_papers_hint">Insurance, PUC, service</string>
+    <string name="more_trips_hint">Your drives</string>
+    <string name="more_expenses">Expenses</string>
+    <string name="more_expenses_hint">Mileage and costs</string>
+    <string name="more_health">Car health</string>
+    <string name="more_health_link">Link OBD</string>
+    <string name="more_tyres_hint">Pressure check</string>
+    <string name="more_phone_hint">Favourite calls</string>
+    <string name="more_link_hint">Connect your phone</string>
+    <string name="more_apps_hint">All apps</string>
+    <string name="more_settings_hint">Voice, display</string>
+    <string name="more_fastag_hint">Balance and tolls</string>
+    <string name="home_next_turn">Next turn</string>
+    <string name="home_playing">Playing</string>
+    <string name="home_now_playing">Now playing</string>
+    <string name="home_limit">limit %1$d</string>
+    <string name="home_mic_hint">Say what you need</string>
+    <string name="home_sos_hold">Hold 3 s</string>
+    <string name="home_map">Map</string>
+    <string name="home_toll">%1$s taken · %2$s left</string>
+    <string name="theme_auto_night">Auto night: Big Glance</string>
+    <string name="theme_auto_night_hint">After sunset Home switches to Big Glance, the darkest theme, and back at sunrise</string>
+    <string name="theme_auto_night_pro">Pro: Big Glance after sunset. Free uses Map First day and night.</string>
+    <string name="home_go_home">Go home</string>
+</resources>

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Ampli Soft themes (neumorphic look). Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_soft_auto">Soft: automatisch Tag/Nacht</string>
-    <string name="theme_soft_auto_hint">Ampli Soft Day ab Sonnenaufgang, Ampli Soft Night nach Sonnenuntergang</string>
-</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_sheet_title">మరిన్ని</string>
+    <string name="more_say">లేదా ఇలా చెప్పండి: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">ఇంధనం &amp; CNG</string>
+    <string name="more_fuel_hint">పెట్రోల్, CNG, EV</string>
+    <string name="more_radar">స్పీడ్ రాడార్</string>
+    <string name="more_alerts_on">హెచ్చరికలు ఆన్</string>
+    <string name="more_alerts_off">హెచ్చరికలు ఆఫ్</string>
+    <string name="more_papers">వాహన పత్రాలు</string>
+    <string name="more_papers_hint">బీమా, PUC, సర్వీస్</string>
+    <string name="more_trips_hint">మీ ప్రయాణాలు</string>
+    <string name="more_expenses">ఖర్చులు</string>
+    <string name="more_expenses_hint">మైలేజ్ మరియు ఖర్చులు</string>
+    <string name="more_health">వాహన ఆరోగ్యం</string>
+    <string name="more_health_link">OBD కలపండి</string>
+    <string name="more_tyres_hint">ప్రెషర్ తనిఖీ</string>
+    <string name="more_phone_hint">ఇష్టమైన కాల్స్</string>
+    <string name="more_link_hint">మీ ఫోన్ కలపండి</string>
+    <string name="more_apps_hint">అన్ని యాప్‌లు</string>
+    <string name="more_settings_hint">వాయిస్, డిస్‌ప్లే</string>
+    <string name="more_fastag_hint">బ్యాలెన్స్ మరియు టోల్</string>
+    <string name="home_next_turn">తదుపరి మలుపు</string>
+    <string name="home_playing">ప్లే అవుతోంది</string>
+    <string name="home_now_playing">ఇప్పుడు ప్లే అవుతోంది</string>
+    <string name="home_limit">పరిమితి %1$d</string>
+    <string name="home_mic_hint">ఏం కావాలో చెప్పండి</string>
+    <string name="home_sos_hold">3 సెకన్లు నొక్కి ఉంచండి</string>
+    <string name="home_map">మ్యాప్</string>
+    <string name="home_toll">%1$s కట్ అయింది · %2$s మిగిలింది</string>
+    <string name="theme_auto_night">రాత్రి ఆటోమేటిక్: Big Glance</string>
+    <string name="theme_auto_night_hint">సూర్యాస్తమయం తర్వాత హోమ్ Big Glanceకి మారుతుంది, అత్యంత ముదురు థీమ్, సూర్యోదయానికి తిరిగి వస్తుంది</string>
+    <string name="theme_auto_night_pro">Pro: సూర్యాస్తమయం తర్వాత Big Glance. ఉచితంలో పగలూ రాత్రీ Map First.</string>
+    <string name="home_go_home">ఇంటికి వెళ్దాం</string>
+</resources>

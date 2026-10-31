@@ -57,7 +57,6 @@ import com.vikash.ampli.drive.media.MediaHub
 import com.vikash.ampli.drive.media.MediaSource
 import com.vikash.ampli.drive.media.NowPlaying
 import com.vikash.ampli.drive.system.Launchers
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.shape.RoundedCornerShape as Rounded
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -65,89 +64,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import com.vikash.ampli.drive.ui.theme.CardStyle
-import com.vikash.ampli.drive.ui.theme.FontChoice
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
-
-@Composable
-fun MusicCard(
-    hub: MediaHub,
-    resumeTick: Int,
-    modifier: Modifier = Modifier,
-    /** A phone connected over Bluetooth: with no player session, the card shows "Phone music". */
-    phoneName: String? = null,
-    onPhoneKey: (Int) -> Unit = {},
-) {
-    val dims = LocalDims.current
-    val context = LocalContext.current
-    val state by hub.state.collectAsStateWithLifecycle()
-
-    // Returning from the notification-access screen: pick up the new permission.
-    LaunchedEffect(resumeTick) { hub.refresh() }
-
-    // Saffron themes draw this card on cream "paper"; everything inside reads the paper colours.
-    val outer = LocalDriveTheme.current
-    val paper = remember(outer) { outer.forMusicCard() }
-    Pane(modifier, fill = paper.surface) {
-      androidx.compose.runtime.CompositionLocalProvider(LocalDriveTheme provides paper) {
-        androidx.compose.material3.MaterialTheme(
-            colorScheme = MaterialTheme.colorScheme.copy(
-                onSurface = paper.text,
-                onSurfaceVariant = paper.muted,
-                surfaceContainerHigh = paper.surfaceHigh,
-            ),
-            typography = MaterialTheme.typography,
-        ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(dims.d(2.2f)),
-            verticalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
-        ) {
-            val np = state.nowPlaying
-            when {
-                np == null && phoneName != null -> PhoneMusic(phoneName, onPhoneKey)
-                !state.accessGranted -> AccessNeeded(onAllow = { Launchers.openNotificationAccess(context) })
-                np == null -> NothingPlaying(onOpen = { Launchers.openMusic(context) })
-                else -> {
-                    AlbumArt(np, Modifier.fillMaxWidth().weight(1f))
-                    Column {
-                        Text(
-                            np.title ?: stringResource(R.string.music_unknown_track),
-                            fontSize = dims.t(3.2f, min = 18f),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        if (!dims.compact) {
-                            val sub = listOfNotNull(np.artist, np.album).joinToString(" · ")
-                            if (sub.isNotEmpty()) {
-                                Text(
-                                    sub,
-                                    fontSize = dims.t(2.4f, min = 16f),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                    if (np.durationMs > 0) ProgressBar(np)
-                    Controls(
-                        playing = np.isPlaying,
-                        onPrev = hub::previous,
-                        onPlayPause = hub::playPause,
-                        onNext = hub::next,
-                    )
-                }
-            }
-            if (state.accessGranted && state.sources.isNotEmpty()) {
-                SourceChips(state.sources, state.selectedPackage, onSelect = hub::select)
-            }
-        }
-        }
-      }
-    }
-}
 
 /**
  * "Phone music": songs from the phone over Bluetooth when no player shares its session. The
@@ -206,7 +124,7 @@ internal fun PhoneMusic(phoneName: String, onKey: (Int) -> Unit) {
 }
 
 @Composable
-private fun AccessNeeded(onAllow: () -> Unit) {
+internal fun AccessNeeded(onAllow: () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val density = LocalDensity.current
@@ -256,7 +174,7 @@ private fun AccessNeeded(onAllow: () -> Unit) {
 }
 
 @Composable
-private fun NothingPlaying(onOpen: () -> Unit) {
+internal fun NothingPlaying(onOpen: () -> Unit) {
     val dims = LocalDims.current
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -291,7 +209,7 @@ private fun NothingPlaying(onOpen: () -> Unit) {
 }
 
 @Composable
-private fun AlbumArt(np: NowPlaying, modifier: Modifier) {
+internal fun AlbumArt(np: NowPlaying, modifier: Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val art = remember(np.art) { np.art?.asImageBitmap() }
@@ -315,7 +233,7 @@ private fun AlbumArt(np: NowPlaying, modifier: Modifier) {
 }
 
 @Composable
-private fun ProgressBar(np: NowPlaying) {
+internal fun ProgressBar(np: NowPlaying) {
     val dims = LocalDims.current
     // Ticks once a second while playing; frozen while paused.
     val now by produceState(SystemClock.elapsedRealtime(), np) {
@@ -327,27 +245,14 @@ private fun ProgressBar(np: NowPlaying) {
     }
     val fraction = (np.positionAt(now).toFloat() / np.durationMs.toFloat()).coerceIn(0f, 1f)
     val theme = LocalDriveTheme.current
-    if (theme.font == FontChoice.Mono) {
-        // HUD: segmented bar like an LED meter.
-        Canvas(Modifier.fillMaxWidth().height(maxOf(dims.d(2.4f), 12.dp))) {
-            val seg = 9.dp.toPx()
-            val gap = 3.dp.toPx()
-            var x = 0f
-            while (x + seg <= size.width) {
-                val lit = (x + seg / 2f) / size.width <= fraction
-                drawRect(if (lit) theme.accent else theme.accent.copy(alpha = 0.2f), Offset(x, 0f), Size(seg, size.height))
-                x += seg + gap
-            }
-        }
-        return
-    }
     val barShape: Shape = if (theme.radius <= 0f) RectangleShape else CircleShape
-    val h = if (theme.cardStyle == CardStyle.Neumorphic) maxOf(dims.d(1.6f), 8.dp) else maxOf(dims.d(0.8f), 4.dp)
+    val h = maxOf(dims.d(0.8f), 4.dp)
     Box(
         Modifier
             .fillMaxWidth()
             .height(h)
-            .then(if (theme.isSoft) Modifier.softWell(theme, barShape, SoftDepth.Groove) else Modifier.clip(barShape).background(theme.track)),
+            .clip(barShape)
+            .background(theme.track),
     ) {
         Box(
             Modifier
@@ -359,7 +264,7 @@ private fun ProgressBar(np: NowPlaying) {
 }
 
 @Composable
-private fun Controls(playing: Boolean, onPrev: () -> Unit, onPlayPause: () -> Unit, onNext: () -> Unit) {
+internal fun Controls(playing: Boolean, onPrev: () -> Unit, onPlayPause: () -> Unit, onNext: () -> Unit) {
     val dims = LocalDims.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -390,67 +295,22 @@ private fun RoundButton(
 ) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
-    val keys = theme.keys
-    if (keys != null && filled && theme.isSoft) {
-        // Crimson Drive: play/pause is the crimson key, white icon.
-        Box(
-            modifier = Modifier.size(size).primaryKey(theme, keys, CircleShape, onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = description, tint = keys.onPrimary, modifier = Modifier.size(size * 0.5f))
-        }
-        return
-    }
-    if (theme.isSoft) {
-        // Soft key; the play/pause key stays pressed in (cyan) while music plays.
-        Box(
-            modifier = Modifier.size(size).softClickable(theme, CircleShape, onClick, active = active),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = description, tint = if (active) theme.accentSoft else theme.text, modifier = Modifier.size(size * 0.5f))
-        }
-        return
-    }
-    val shape: Shape = when {
-        theme.cardStyle == CardStyle.Skewed -> skewShape()
-        theme.cardStyle == CardStyle.Solid && theme.isLight -> Rounded(dims.d(theme.radius * 0.6f))
-        theme.radius <= 0f -> RectangleShape
-        else -> CircleShape
-    }
-    val outlined = !filled && (theme.cardStyle == CardStyle.Outline || theme.cardStyle == CardStyle.NeonGlow)
-    val outlineColor = if (theme.cardStyle == CardStyle.NeonGlow) theme.accent2 else theme.border
+    val shape: Shape = if (theme.radius <= 0f) RectangleShape else CircleShape
+    val brutal = theme.cardStyle == CardStyle.Brutal
     Box(
         modifier = Modifier
             .size(size)
-            .then(
-                if (theme.cardStyle == CardStyle.Neumorphic) {
-                    Modifier.softShadow(shape, theme.surface, theme.shadowDark, theme.shadowLight, 4.dp, 8.dp)
-                } else {
-                    Modifier
-                },
-            )
+            .then(if (brutal && filled) Modifier.hardShadow(shape, theme.border, 4.dp) else Modifier)
             .clip(shape)
-            .background(
-                when {
-                    filled && theme.cardStyle == CardStyle.Neumorphic -> theme.surface
-                    filled -> theme.accent
-                    theme.cardStyle == CardStyle.Neumorphic || theme.cardStyle == CardStyle.Skewed -> theme.surfaceHigh
-                    else -> Color.Transparent
-                },
-            )
-            .then(if (outlined) Modifier.border(2.dp, outlineColor, shape) else Modifier)
+            .background(if (filled) theme.accent else Color.Transparent)
+            .then(if (brutal || (!filled && theme.borderWidth > 0.dp)) Modifier.border(maxOf(theme.borderWidth, 2.dp), theme.border, shape) else Modifier)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             icon,
             contentDescription = description,
-            tint = when {
-                filled && theme.cardStyle == CardStyle.Neumorphic -> theme.accent
-                filled -> theme.onAccent
-                theme.cardStyle == CardStyle.NeonGlow -> theme.accent2
-                else -> theme.text
-            },
+            tint = if (filled) theme.onAccent else theme.text,
             modifier = Modifier.size(size * 0.5f),
         )
     }
@@ -458,7 +318,7 @@ private fun RoundButton(
 
 /** One chip per app with a media session; tapping switches the card to it. */
 @Composable
-private fun SourceChips(sources: List<MediaSource>, selected: String?, onSelect: (String) -> Unit) {
+internal fun SourceChips(sources: List<MediaSource>, selected: String?, onSelect: (String) -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val chipShape: Shape = if (theme.radius <= 0f) RectangleShape else CircleShape

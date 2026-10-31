@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_crimson_hint">ఉచితం · డిఫాల్ట్ · Ampli MP3 కార్ మోడ్ రంగులు, హోమ్‌లో కారు</string>
-    <string name="hero_ready">నడపడానికి సిద్ధం</string>
-    <string name="hero_go_home">ఇంటికి వెళ్దాం</string>
-    <string name="hero_show_map">మ్యాప్ చూపించు</string>
-</resources>

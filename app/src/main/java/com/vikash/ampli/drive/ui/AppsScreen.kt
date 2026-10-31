@@ -284,7 +284,7 @@ private fun StoreTile(onClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         // Soft themes: the saffron icon is too faint on the light base (under 3:1), so it takes the accent.
-        Icon(Icons.Filled.Storefront, contentDescription = null, tint = if (theme.isSoft) theme.accentSoft else Saffron, modifier = Modifier.size(44.dp))
+        Icon(Icons.Filled.Storefront, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(44.dp))
         Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
     }
 }
@@ -327,20 +327,12 @@ private fun AppTile(entry: AppEntry, isAuto: Boolean, onOpen: () -> Unit, onLong
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
-            .then(
-                if (LocalDriveTheme.current.isSoft) {
-                    // Soft tile: raised, presses in; hold for the app's options.
-                    Modifier.softClickable(LocalDriveTheme.current, shape, { currentOnOpen() }, onLongClick = { currentOnLongPress() })
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .border(1.dp, if (isAuto) LocalDriveTheme.current.accent else MaterialTheme.colorScheme.outlineVariant, shape)
-                        .pointerInput(entry) {
-                            detectTapGestures(onTap = { currentOnOpen() }, onLongPress = { currentOnLongPress() })
-                        }
-                },
-            )
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .border(1.dp, if (isAuto) LocalDriveTheme.current.accent else MaterialTheme.colorScheme.outlineVariant, shape)
+            .pointerInput(entry) {
+                detectTapGestures(onTap = { currentOnOpen() }, onLongPress = { currentOnLongPress() })
+            }
             .padding(dims.d(1.4f)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),

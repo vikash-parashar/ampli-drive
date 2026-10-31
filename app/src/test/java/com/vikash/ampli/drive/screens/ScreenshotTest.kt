@@ -88,9 +88,7 @@ class ScreenshotTest {
     /** The app's theme, backdrop and 1024x600 proportions, as DriveRoot sets them up. */
     @Composable
     private fun Frame(backdrop: Boolean = true, content: @Composable () -> Unit) {
-        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false).let {
-            if (it.glass != null) it.withoutBlur() else it
-        }
+        val theme = DriveThemes.resolve(app.prefs.theme.value, night = false, isPro = false)
         AmpliDriveTheme(theme) {
             Box(Modifier.fillMaxSize().then(if (backdrop) Modifier.themeBackground(theme) else Modifier)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -263,6 +261,35 @@ class ScreenshotTest {
         }
         compose.mainClock.advanceTimeBy(2_000L)
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide.png")
+    }
+
+    /** The same guide before the switch (Allow access tapped): try once, App info › ⋮, come back. */
+    @Test
+    fun restrictedSettingsGuideBefore() {
+        app.prefs.setNameAsked()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Frame {
+                RestrictedSettingsGuide(visible = true, before = true, onOpenAppInfo = {}, onOpenAccess = {}, onClose = {})
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide-before.png")
+    }
+
+    /** On a phone (Android 13+, sideloaded; the app is landscape-only), in English: where the owner hit "App was denied access". */
+    @Test
+    @Config(sdk = [33], qualifiers = "en-w891dp-h411dp-land-xxhdpi")
+    fun restrictedSettingsGuidePhone() {
+        app.prefs.setNameAsked()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            Frame {
+                RestrictedSettingsGuide(visible = true, before = true, onOpenAppInfo = {}, onOpenAccess = {}, onClose = {})
+            }
+        }
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/restricted-settings-guide-phone.png")
     }
 
     @Test

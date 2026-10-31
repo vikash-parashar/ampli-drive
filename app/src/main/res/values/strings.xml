@@ -83,31 +83,13 @@
     <string name="about_title">About</string>
     <string name="about_map">Map: %1$s</string>
     <string name="theme_title">Home screen theme</string>
-    <string name="theme_auto">Auto day/night</string>
-    <string name="theme_auto_hint">Switches at local sunrise and sunset, worked out from GPS</string>
-    <string name="theme_choose_for">Choosing for</string>
-    <string name="theme_day">Day</string>
-    <string name="theme_night">Night</string>
     <string name="theme_free">Free</string>
     <string name="theme_pro">Pro</string>
     <string name="theme_in_use">In use</string>
     <string name="theme_locked">Locked: Pro theme</string>
-    <string name="theme_family_classic">Classic</string>
-    <string name="theme_family_glass" tools:ignore="MissingTranslation">Glass</string>
-    <string name="theme_frosted_glass" tools:ignore="MissingTranslation">Frosted Glass</string>
-    <string name="theme_midnight_frost" tools:ignore="MissingTranslation">Midnight Frost</string>
-    <string name="theme_rose_glass" tools:ignore="MissingTranslation">Ampli Rose Glass</string>
-    <string name="theme_cyan_glass" tools:ignore="MissingTranslation">Cyan Glass</string>
-    <string name="theme_violet_glass" tools:ignore="MissingTranslation">Violet Glass</string>
-    <string name="theme_sunset_glass" tools:ignore="MissingTranslation">Sunset Glass</string>
-    <string name="glass_reduce_title" tools:ignore="MissingTranslation">Reduce glass effects</string>
-    <string name="glass_reduce_hint" tools:ignore="MissingTranslation">Glass themes use a tinted panel with no blur. Smoother on slow head units.</string>
-    <string name="glass_reduce_hint_auto" tools:ignore="MissingTranslation">Glass themes use a tinted panel with no blur. On by default on this unit (2 GB RAM or less).</string>
-    <string name="theme_family_saffron">Saffron family</string>
-    <string name="theme_family_soft">Soft family</string>
     <string name="pro_title">Get Ampli Car Hub Pro</string>
     <string name="pro_body">Unlock all 25 home-screen themes. Pay once, keep it for good.</string>
-    <string name="pro_point_themes">20 extra themes, including Midnight Glass, tinted glass, the Saffron family and the Soft family</string>
+    <string name="pro_point_themes">Three more home themes: Big Glance, Bento Grid and Neo-Brutal Road Sign</string>
     <string name="pro_point_once">One payment, no subscription</string>
     <string name="pro_buy_price">Buy for %1$s</string>
     <string name="pro_buy">Buy Pro</string>
@@ -602,8 +584,6 @@
     <string name="feedback_waiting">%1$d waiting to be sent</string>
     <string name="feedback_reply">Reply: %1$s</string>
     <!-- Head-unit round 1: themes, music/phone apps, map, GPS, voice check, diagnostics, voice style, car start. -->
-    <string name="theme_saved_for_day">Saved for daytime. It shows from sunrise.</string>
-    <string name="theme_saved_for_night">Saved for night. It shows after sunset.</string>
     <string name="choose_music_app">Pick your music app</string>
     <string name="choose_phone_app">Pick your phone app</string>
     <string name="dial_number_hint">Dial %1$s (number copied)</string>
@@ -762,6 +742,9 @@
     <string name="restricted_play_note">This block goes away once the app is installed from Play.</string>
     <string name="restricted_open_app_info">Open App info</string>
     <string name="restricted_open_access">Open notification access</string>
+    <string name="restricted_before_title">One extra step on this phone</string>
+    <string name="restricted_before_hint">On Android 13 and newer, the phone blocks this for apps not installed from Play. If Android says \"App was denied access\", do this:</string>
+    <string name="restricted_step_try">Tap \"Open notification access\" and turn on Ampli Car Hub. The first time Android refuses (\"App was denied access\"): that is expected.</string>
 
     <!-- Settings › More from Ampli -->
     <string name="more_title">More from Ampli</string>

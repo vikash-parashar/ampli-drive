@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Crimson Drive theme and the car on Home. Machine-assisted; needs native review. -->
-<resources>
-    <string name="theme_crimson_hint">இலவசம் · இயல்புநிலை · Ampli MP3 கார் பயன்முறை வண்ணங்கள், முகப்பில் கார்</string>
-    <string name="hero_ready">ஓட்டத் தயார்</string>
-    <string name="hero_go_home">வீட்டுக்குச் செல்</string>
-    <string name="hero_show_map">வரைபடத்தைக் காட்டு</string>
-</resources>

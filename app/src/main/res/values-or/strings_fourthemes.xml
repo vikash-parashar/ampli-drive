@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four home themes, the simpler Home and its More sheet. -->
+<resources>
+    <string name="more_sheet_title">ଅଧିକ</string>
+    <string name="more_say">କିମ୍ବା କେବଳ କୁହନ୍ତୁ: “Ampli, FASTag dikha”</string>
+    <string name="more_fuel">ଇନ୍ଧନ ଓ CNG</string>
+    <string name="more_fuel_hint">ପେଟ୍ରୋଲ, CNG, EV</string>
+    <string name="more_radar">ସ୍ପିଡ୍ ରାଡାର</string>
+    <string name="more_alerts_on">ସତର୍କତା ଚାଲୁ</string>
+    <string name="more_alerts_off">ସତର୍କତା ବନ୍ଦ</string>
+    <string name="more_papers">ଗାଡ଼ିର କାଗଜ</string>
+    <string name="more_papers_hint">ବୀମା, PUC, ସର୍ଭିସ</string>
+    <string name="more_trips_hint">ଆପଣଙ୍କ ଯାତ୍ରା</string>
+    <string name="more_expenses">ଖର୍ଚ୍ଚ</string>
+    <string name="more_expenses_hint">ମାଇଲେଜ ଓ ଖର୍ଚ୍ଚ</string>
+    <string name="more_health">ଗାଡ଼ିର ସ୍ୱାସ୍ଥ୍ୟ</string>
+    <string name="more_health_link">OBD ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="more_tyres_hint">ପ୍ରେସର ଯାଞ୍ଚ</string>
+    <string name="more_phone_hint">ପସନ୍ଦର କଲ୍</string>
+    <string name="more_link_hint">ଆପଣଙ୍କ ଫୋନ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="more_apps_hint">ସମସ୍ତ ଆପ୍</string>
+    <string name="more_settings_hint">ସ୍ୱର, ଡିସପ୍ଲେ</string>
+    <string name="more_fastag_hint">ବାଲାନ୍ସ ଓ ଟୋଲ</string>
+    <string name="home_next_turn">ପରବର୍ତ୍ତୀ ମୋଡ଼</string>
+    <string name="home_playing">ବାଜୁଛି</string>
+    <string name="home_now_playing">ବର୍ତ୍ତମାନ ବାଜୁଛି</string>
+    <string name="home_limit">ସୀମା %1$d</string>
+    <string name="home_mic_hint">କ\'ଣ ଦରକାର କୁହନ୍ତୁ</string>
+    <string name="home_sos_hold">3 ସେକେଣ୍ଡ ଦବାଇ ରଖନ୍ତୁ</string>
+    <string name="home_map">ମାନଚିତ୍ର</string>
+    <string name="home_toll">%1$s କଟିଲା · %2$s ବାକି</string>
+    <string name="theme_auto_night">ରାତିରେ ନିଜେ: Big Glance</string>
+    <string name="theme_auto_night_hint">ସୂର୍ଯ୍ୟାସ୍ତ ପରେ ହୋମ Big Glance କୁ ବଦଳେ, ସବୁଠୁ ଗାଢ଼ ଥିମ୍, ଏବଂ ସୂର୍ଯ୍ୟୋଦୟରେ ଫେରେ</string>
+    <string name="theme_auto_night_pro">Pro: ସୂର୍ଯ୍ୟାସ୍ତ ପରେ Big Glance। ମାଗଣାରେ ଦିନରାତି Map First ରହେ।</string>
+    <string name="home_go_home">ଘରକୁ ଚାଲନ୍ତୁ</string>
+</resources>
