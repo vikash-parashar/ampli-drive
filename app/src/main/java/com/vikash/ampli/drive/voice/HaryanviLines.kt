@@ -294,9 +294,9 @@ object HaryanviLines {
         // ------------------------------------------------------------------ Welcome and goodbye
         Event.Welcome to listOf(
             Line("जय बाबा की, आज कित जाणा सै?", "Jai Baba Ki, aaj kit jaana sai?", "Jai Baba Ki! Where are we going today?"),
-            Line("जय बाबा की भाई, आज कित का प्लान सै?", "Jai Baba Ki bhai, aaj kit ka plan sai?", "Jai Baba Ki brother, what's the plan today?"),
+            Line("जय माता दी भाई, आज कित का प्लान सै?", "Jai Mata Di bhai, aaj kit ka plan sai?", "Jai Mata Di brother, what's the plan today?"),
             Line("और तैयारे? सुणा दे, के हाल सै?", "Aur taiyaare? Suna de, ke haal sai?", "So, all set? Tell me, how are things?"),
-            Line("जय बाबा की ताई आले, आज कित की तैयारी सै?", "Jai Baba Ki Tai Aale, aaj kit ki taiyaari hai?", "Jai Baba Ki, dear friend! What are we ready for today?"),
+            Line("राम राम ताई आले, आज कित की तैयारी सै?", "Ram Ram Tai Aale, aaj kit ki taiyaari hai?", "Ram Ram, dear friend! What are we ready for today?"),
             Line("जय बाबा की भाई! गाड्डी त्यार सै, बोल कित चालां?", "Jai Baba Ki bhai! Gaadi tyaar sai, bol kit chaalaan?", "Jai Baba Ki! The car is ready, say where we go."),
             Line("भाई कित जाणा सै आज?", "Bhai kit jaana sai aaj?", "Brother, where are we going today?"),
             Line("आज कित की तैयारी सै?", "Aaj kit ki taiyaari sai?", "What are we ready for today?"),
@@ -304,7 +304,7 @@ object HaryanviLines {
         ),
         Event.WelcomeMorning to listOf(
             Line("सवेरे सवेरे कित चाल पड़े ताऊ?", "Savere savere kit chaal pade tau?", "Off somewhere so early in the morning, Tau?"),
-            Line("सवेरे सवेरे जय बाबा की! चाय पी ली के?", "Savere savere Jai Baba Ki! Chai pi li ke?", "Morning Jai Baba Ki! Had your tea?"),
+            Line("सवेरे सवेरे जय माता दी! चाय पी ली के?", "Savere savere Jai Mata Di! Chai pi li ke?", "Morning Jai Mata Di! Had your tea?"),
             Line("सवेरे सवेरे सड़क खाली सै, फेर भी धीरे चलाइए।", "Savere savere sadak khaali sai, pher bhi dheere chalaiye.", "The road is empty this early, still drive slowly."),
             Line("दिन की शुरुआत बढ़िया हो, चाल पड़ां।", "Din ki shuruaat badhiya ho, chaal padaan.", "May the day start well, let's go."),
         ),
@@ -318,7 +318,7 @@ object HaryanviLines {
             Line("साँझ हो ली, बत्ती जला ले भाई।", "Saanjh ho li, batti jala le bhai.", "Evening is here, switch on the lights."),
             Line("साँझ का टैम सै, सड़क पै भीड़ होगी, आराम तै चलाइए।", "Saanjh ka time sai, sadak pe bheed hogi, aaram te chalaiye.", "It's evening rush time, drive easy."),
             Line("काम निपट ग्या के? चाल घरां चालां।", "Kaam nipat gaya ke? Chaal ghara chaalaan.", "Work done? Let's head home."),
-            Line("साँझ हो गी, जय बाबा की!", "Saanjh ho gi, Jai Baba Ki!", "Good evening, Jai Baba Ki!"),
+            Line("साँझ की राम राम जी!", "Saanjh ki Ram Ram ji!", "Good evening, Ram Ram!"),
         ),
         Event.WelcomeNight to listOf(
             Line("रात हो री सै, आराम तै चलाइए।", "Raat ho ri sai, aaram te chalaiye.", "It's night, drive easy."),
@@ -329,18 +329,18 @@ object HaryanviLines {
         Event.Farewell to listOf(
             Line("चाल फेर मिलांगे।", "Chaal pher milaange.", "Alright, see you again."),
             Line("गाड्डी ढंग तै लॉक कर दिए।", "Gaadi dhang te lock kar diye.", "Lock the car properly."),
-            Line("जय बाबा की भाई, आराम कर ले, फेर मिलांगे।", "Jai Baba Ki bhai, aaram kar le, pher milaange.", "Jai Baba Ki brother, get some rest, see you again."),
+            Line("राम राम भाई, आराम कर ले, फेर मिलांगे।", "Ram Ram bhai, aaram kar le, pher milaange.", "Ram Ram brother, get some rest, see you again."),
             Line("पहुँच गे, शीशे चढ़ा ले अर गाड्डी लॉक कर दिए।", "Pahunch ge, sheeshe chadha le ar gaadi lock kar diye.", "We're here: roll up the windows and lock the car."),
-            Line("आज का सफर बढ़िया रया, जय बाबा की!", "Aaj ka safar badhiya raya, Jai Baba Ki!", "Today's trip went well, Jai Baba Ki!"),
+            Line("आज का सफर बढ़िया रया, जय माता दी!", "Aaj ka safar badhiya raya, Jai Mata Di!", "Today's trip went well, Jai Mata Di!"),
         ),
 
         // ------------------------------------------------------------------ Hey Ampli
         Event.Greeting to listOf(
             Line("जय बाबा की भाई! कित चालणा सै आज?", "Jai Baba Ki bhai! Kit chalna sai aaj?", "Jai Baba Ki brother! Where are we going today?"),
             Line("सुणा ताई आळे, गाड्डी त्यार सै!", "Suna tai aale, gaadi tyar sai!", "Tell me, friend, the car is ready!"),
-            Line("जय बाबा की! बेल्ट ला ले, फेर चालांगे।", "Jai Baba Ki! Belt laga le, phir chalange.", "Jai Baba Ki! Put on your belt, then we go."),
+            Line("जय माता दी! बेल्ट ला ले, फेर चालांगे।", "Jai Mata Di! Belt laga le, phir chalange.", "Jai Mata Di! Put on your belt, then we go."),
             Line("आ ग्या भाई? चाल, आज कित की सैर करणी सै?", "Aa gaya bhai? Chal, aaj kit ki sair karni sai?", "You're here? Come on, where shall we ride today?"),
-            Line("जय बाबा की! गाड्डी भी रेडी, मैं भी रेडी।", "Jai Baba Ki! Gaadi bhi ready, main bhi ready.", "Jai Baba Ki! The car is ready, and so am I."),
+            Line("राम राम जी! गाड्डी भी रेडी, मैं भी रेडी।", "Ram Ram ji! Gaadi bhi ready, main bhi ready.", "Ram Ram! The car is ready, and so am I."),
             Line("भाई कैसा सै, सब राजी खुशी? परिवार में सब ठीक?", "Bhai kaisa sai, sab raazi khushi? Parivaar mein sab theek?", "How are you, brother, all well? Everyone fine at home?"),
         ),
         Event.WakeReply to listOf(
@@ -390,7 +390,7 @@ object HaryanviLines {
         Event.Cancelled to listOf(
             Line("ठीक सै भाई, कोए बात ना।", "Theek sai bhai, koi baat na.", "OK brother, no problem."),
             Line("चाल छोड़, जद चाहिए तद बुला लियो।", "Chal chhod, jad chahiye tad bula liyo.", "Never mind, call me when you need me."),
-            Line("जय बाबा की, मैं उरे ए सूं।", "Jai Baba Ki, main ure e sun.", "Jai Baba Ki, I'm right here."),
+            Line("राम राम, मैं उरे ए सूं।", "Ram Ram, main ure e sun.", "Ram Ram, I'm right here."),
             Line("ठीक सै, जद मर्जी हो, हे एम्पली बोल दिए।", "Theek sai, jad marzi ho, Hey Ampli bol diye.", "OK, whenever you like, just say Hey Ampli."),
         ),
 
@@ -704,9 +704,9 @@ object HaryanviLines {
                 "Tai said: drive slowly. Tau said: I am; it's the road that's running fast!",
             ),
             Line(
-                "मन्नै ताऊ तै पूछ्या, हॉर्न क्यूं बजाया? बोल्या, भैंस नै जय बाबा की करी थी!",
-                "Manne tau te poochhya, horn kyun bajaya? Bolya, bhains nai Jai Baba Ki kari thi!",
-                "I asked Tau why he honked. He said: I was saying Jai Baba Ki to the buffalo!",
+                "मन्नै ताऊ तै पूछ्या, हॉर्न क्यूं बजाया? बोल्या, भैंस नै राम राम करी थी!",
+                "Manne tau te poochhya, horn kyun bajaya? Bolya, bhains nai Ram Ram kari thi!",
+                "I asked Tau why he honked. He said: I was saying Ram Ram to the buffalo!",
             ),
             Line(
                 "जाम मैं फंस कै ताऊ बोल्या, इतणी देर मैं तो मेरी भैंस भी पहुँच ज्यांदी!",
