@@ -15,6 +15,11 @@ import com.vikash.ampli.drive.i18n.AppLanguages
 import com.vikash.ampli.drive.nav.SavedKind
 import com.vikash.ampli.drive.prefs.NavApp
 import com.vikash.ampli.drive.system.Launchers
+import com.vikash.ampli.drive.system.PowerAction
+import com.vikash.ampli.drive.system.PowerControl
+import com.vikash.ampli.drive.system.PowerPlan
+import com.vikash.ampli.drive.system.PowerUi
+import com.vikash.ampli.drive.calls.VoiceReplies
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -436,7 +441,13 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             VoiceIntent.Cancel -> {
+                // "Radd karo" also stops a power countdown that is still running.
+                if (PowerControl.busy) PowerControl.close()
                 styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                return null
+            }
+            is VoiceIntent.Power -> {
+                power(intent.action, res, lang, parserLang)
                 return null
             }
             VoiceIntent.Stop -> {
@@ -1026,6 +1037,62 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, res.getString(id))
+
+    /**
+     * "Screen band karo": the screen-off countdown shows and Ampli listens once for "radd karo".
+     * "Restart karo" / "power off karo": Ampli asks first (the card has Yes / No keys too) and
+     * acts only on a clear yes; Restart and Power off then still count down with Cancel.
+     */
+    private suspend fun power(action: PowerAction, res: Context, lang: String, parserLang: String) {
+        if (!MainActivity.inFront) bringLauncherForward(null)
+        if (action == PowerAction.ScreenOff) {
+            say(res, lang, R.string.power_say_screen_off)
+            PowerControl.request(app, PowerAction.ScreenOff, voiceSeconds = PowerPlan.VOICE_SCREEN_OFF_S)
+            val heard = hearOnce(lang) ?: return
+            if (powerCancel(heard, parserLang) && PowerControl.busy) {
+                PowerControl.close()
+                styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+            }
+            return
+        }
+        PowerControl.confirm(action)
+        say(res, lang, if (action == PowerAction.Restart) R.string.power_ask_restart else R.string.power_ask_off)
+        repeat(2) { turn ->
+            // A tap on Yes / No answered already.
+            if (PowerControl.state.value !is PowerUi.Confirm) return
+            val heard = hearOnce(lang)
+            if (PowerControl.state.value !is PowerUi.Confirm) return
+            when {
+                heard == null -> Unit
+                powerCancel(heard, parserLang) -> {
+                    PowerControl.close()
+                    styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                    return
+                }
+                VoiceReplies.yesNo(heard) == VoiceReplies.YesNo.Yes -> {
+                    PowerControl.request(app, action)
+                    return
+                }
+            }
+            if (turn == 0) say(res, lang, R.string.power_ask_hint)
+        }
+        // Still unanswered: the card stays with its Yes / No keys and nothing happens by itself.
+    }
+
+    /** "Nahin", "radd karo", "ruko", "cancel". */
+    private fun powerCancel(heard: String, parserLang: String): Boolean {
+        if (VoiceReplies.yesNo(heard) == VoiceReplies.YesNo.No) return true
+        val intent = VoiceIntents.parse(heard, parserLang)
+        return intent == VoiceIntent.Cancel || intent == VoiceIntent.Stop
+    }
+
+    /** One free-speech listen inside the session (beep first); null on silence. */
+    private suspend fun hearOnce(lang: String): String? {
+        speaker.earcon()
+        _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
+        val r = listener.listen(lang, onPartial = { p: String -> _state.update { it.copy(heard = p) } }, commandsOnly = false)
+        return (r as? Listener.Result.Heard)?.text?.also { t -> _state.update { it.copy(heard = t, phase = VoiceUiState.Phase.Working) } }
+    }
 
     /**
      * The Haryanvi desi line for [event] when that voice style is on, else [standard]. Safety

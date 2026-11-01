@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">रीस्टार्ट आ पावर ऑफ खातिर Android के accessibility सेटिंग में \"Ampli power helper\" चालू करे के पड़ी। ई खाली पावर मेन्यू खोले के काम आवेला।</string>
+    <string name="disclosure_power_private">ई खाली पावर मेन्यू, हाल के ऐप आ स्क्रीनशॉट खोलेला। Ampli स्क्रीन पर अउरी कुछ ना पढ़े, कुछ ना भेजे। Android के चेतावनी हर helper खातिर एके जइसन होला। रउआ एकरा के कबो बंद कर सकीले।</string>
+    <string name="disclosure_power_service">Ampli power helper बिना बटन वाला स्क्रीन खातिर Android के आपन बटन दबावेला: पावर मेन्यू (रीस्टार्ट, पावर ऑफ), हाल के ऐप आ स्क्रीनशॉट। ई स्क्रीन पर कुछ ना पढ़े आ कहीं कुछ ना भेजे। ई तबे काम करेला जब रउआ Ampli Car Hub में ई बटन दबाईं।</string>
+    <string name="disclosure_power_admin">Ampli Car Hub में स्क्रीन बंद से स्क्रीन लॉक हो सकेला। Ampli अउरी कुछ मिटा, पढ़ भा बदल ना सके। सेटिंग्स › पावर में कबो बंद करीं।</string>
+</resources>

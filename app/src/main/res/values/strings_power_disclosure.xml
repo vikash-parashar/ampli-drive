@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">Restart and Power off need the \"Ampli power helper\" turned on in Android\'s Accessibility settings. It is only used to open the power menu.</string>
+    <string name="disclosure_power_private">It only opens the power menu, recent apps and screenshots. Ampli reads nothing on the screen and sends nothing. Android shows the same warning for every helper. You can turn it off any time.</string>
+    <string name="disclosure_power_service">Ampli power helper presses Android\'s own keys for head units without buttons: the power menu (Restart, Power off), recent apps and screenshots. It reads nothing on the screen and sends nothing anywhere. It acts only when you tap these keys in Ampli Car Hub.</string>
+    <string name="disclosure_power_admin">Lets Screen off in Ampli Car Hub lock the screen. Ampli cannot erase, read or change anything else. Turn it off any time in Settings › Power.</string>
+</resources>

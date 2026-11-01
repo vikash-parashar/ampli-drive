@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">ৰিষ্টাৰ্ট আৰু পাৱাৰ অফৰ বাবে Android-ৰ accessibility ছেটিংছত \"Ampli power helper\" অন কৰিব লাগিব। ই কেৱল পাৱাৰ মেনু খুলিবলৈ ব্যৱহাৰ হয়।</string>
+    <string name="disclosure_power_private">ই কেৱল পাৱাৰ মেনু, শেহতীয়া এপ আৰু স্ক্ৰীণশ্বট খোলে। Ampli-এ স্ক্ৰীণত আন একো নপঢ়ে, একো নপঠিয়ায়। Android-এ প্ৰতিটো helper-ৰ বাবে একেই সতৰ্কবাণী দেখুৱায়। আপুনি যিকোনো সময়ত ইয়াক বন্ধ কৰিব পাৰে।</string>
+    <string name="disclosure_power_service">Ampli power helper-এ বুটাম নথকা স্ক্ৰীণৰ বাবে Android-ৰ নিজৰ বুটাম টিপে: পাৱাৰ মেনু (ৰিষ্টাৰ্ট, পাৱাৰ অফ), শেহতীয়া এপ আৰু স্ক্ৰীণশ্বট। ই স্ক্ৰীণত একো নপঢ়ে আৰু ক\'তো একো নপঠিয়ায়। আপুনি Ampli Car Hub-ত এই বুটামবোৰ টিপিলেহে ই কাম কৰে।</string>
+    <string name="disclosure_power_admin">Ampli Car Hub-ৰ স্ক্ৰীণ বন্ধই স্ক্ৰীণ লক কৰিব পাৰে। Ampli-এ আন একো মচিব, পঢ়িব বা সলনি কৰিব নোৱাৰে। ছেটিংছ › পাৱাৰত যিকোনো সময়ত বন্ধ কৰক।</string>
+</resources>

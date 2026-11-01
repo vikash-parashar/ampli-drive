@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">ரீஸ்டார்ட் மற்றும் பவர் ஆஃப் செய்ய Android இன் accessibility அமைப்பில் \"Ampli power helper\" ஐ இயக்க வேண்டும். இது பவர் மெனுவைத் திறக்க மட்டுமே பயன்படுகிறது.</string>
+    <string name="disclosure_power_private">இது பவர் மெனு, சமீபத்திய ஆப்கள் மற்றும் ஸ்கிரீன்ஷாட்டை மட்டுமே திறக்கும். Ampli திரையில் வேறு எதையும் படிக்காது, எதையும் அனுப்பாது. Android ஒவ்வொரு helper க்கும் ஒரே எச்சரிக்கையைக் காட்டும். எப்போது வேண்டுமானாலும் இதை அணைக்கலாம்.</string>
+    <string name="disclosure_power_service">Ampli power helper பொத்தான் இல்லாத திரைகளுக்காக Android இன் சொந்த பொத்தான்களை அழுத்துகிறது: பவர் மெனு (ரீஸ்டார்ட், பவர் ஆஃப்), சமீபத்திய ஆப்கள் மற்றும் ஸ்கிரீன்ஷாட். இது திரையில் எதையும் படிக்காது, எங்கும் எதையும் அனுப்பாது. Ampli Car Hub இல் இந்தப் பொத்தான்களை நீங்கள் அழுத்தும்போது மட்டுமே இது செயல்படும்.</string>
+    <string name="disclosure_power_admin">Ampli Car Hub இன் திரை அணை திரையைப் பூட்டலாம். Ampli வேறு எதையும் அழிக்கவோ, படிக்கவோ, மாற்றவோ முடியாது. அமைப்புகள் › பவர் இல் எப்போது வேண்டுமானாலும் அணைக்கலாம்.</string>
+</resources>

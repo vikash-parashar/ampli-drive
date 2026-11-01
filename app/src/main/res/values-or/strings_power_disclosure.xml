@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">ରିଷ୍ଟାର୍ଟ ଓ ପାୱାର ଅଫ ପାଇଁ Android ର accessibility ସେଟିଂସରେ \"Ampli power helper\" ଚାଲୁ କରିବାକୁ ପଡ଼ିବ। ଏହା କେବଳ ପାୱାର ମେନୁ ଖୋଲିବା ପାଇଁ ବ୍ୟବହୃତ ହୁଏ।</string>
+    <string name="disclosure_power_private">ଏହା କେବଳ ପାୱାର ମେନୁ, ସାମ୍ପ୍ରତିକ ଆପ୍ ଓ ସ୍କ୍ରିନସଟ୍ ଖୋଲେ। Ampli ସ୍କ୍ରିନରେ ଆଉ କିଛି ପଢ଼େ ନାହିଁ, କିଛି ପଠାଏ ନାହିଁ। Android ପ୍ରତ୍ୟେକ helper ପାଇଁ ସମାନ ଚେତାବନୀ ଦେଖାଏ। ଆପଣ ଯେକୌଣସି ସମୟରେ ଏହାକୁ ବନ୍ଦ କରିପାରିବେ।</string>
+    <string name="disclosure_power_service">Ampli power helper ବଟନ ନଥିବା ସ୍କ୍ରିନ ପାଇଁ Android ର ନିଜ ବଟନ ଦବାଏ: ପାୱାର ମେନୁ (ରିଷ୍ଟାର୍ଟ, ପାୱାର ଅଫ), ସାମ୍ପ୍ରତିକ ଆପ୍ ଓ ସ୍କ୍ରିନସଟ୍। ଏହା ସ୍କ୍ରିନରେ କିଛି ପଢ଼େ ନାହିଁ ଏବଂ କେଉଁଠିକୁ କିଛି ପଠାଏ ନାହିଁ। ଆପଣ Ampli Car Hub ରେ ଏହି ବଟନ ଦବାଇଲେ ହିଁ ଏହା କାମ କରେ।</string>
+    <string name="disclosure_power_admin">Ampli Car Hub ର ସ୍କ୍ରିନ ବନ୍ଦ ସ୍କ୍ରିନକୁ ଲକ୍ କରିପାରେ। Ampli ଆଉ କିଛି ଲିଭାଇ, ପଢ଼ି କିମ୍ବା ବଦଳାଇ ପାରିବ ନାହିଁ। ସେଟିଂସ › ପାୱାରରେ ଯେକୌଣସି ସମୟରେ ବନ୍ଦ କରନ୍ତୁ।</string>
+</resources>

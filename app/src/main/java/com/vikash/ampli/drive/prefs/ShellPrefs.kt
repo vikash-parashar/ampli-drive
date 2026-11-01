@@ -13,9 +13,12 @@ import java.security.MessageDigest
 class ShellPrefs(context: Context) {
     private val sp = context.getSharedPreferences("ampli_shell", Context.MODE_PRIVATE)
 
-    private val _fullScreen = MutableStateFlow(sp.getBoolean(KEY_FULL_SCREEN, false))
+    private val _fullScreen = MutableStateFlow(sp.getBoolean(KEY_FULL_SCREEN, true))
 
-    /** Hides the status and navigation bars; a swipe from the edge shows them for a moment. */
+    /**
+     * Hides the status and navigation bars while Car Hub is in front (on by default: Home has its
+     * own Back, Home and Apps keys on the left rail); a swipe from the edge shows them for a moment.
+     */
     val fullScreen: StateFlow<Boolean> = _fullScreen.asStateFlow()
 
     fun setFullScreen(value: Boolean) {
@@ -62,6 +65,45 @@ class ShellPrefs(context: Context) {
             if (value == null) sp.edit().remove(KEY_EQ_COMPONENT).apply() else sp.edit().putString(KEY_EQ_COMPONENT, value).apply()
         }
 
+    private val _stripPower = MutableStateFlow(sp.getBoolean(KEY_STRIP_POWER, true))
+
+    /** Settings › Power: the ⏻ key next to the pull-down handle at the top of Home. */
+    val stripPower: StateFlow<Boolean> = _stripPower.asStateFlow()
+
+    fun setStripPower(value: Boolean) {
+        sp.edit().putBoolean(KEY_STRIP_POWER, value).apply()
+        _stripPower.value = value
+    }
+
+    private val _lockScreenOff = MutableStateFlow(sp.getBoolean(KEY_LOCK_SCREEN_OFF, false))
+
+    /**
+     * Settings › Power › Turn the display fully off: Screen off uses Android's screen lock (device
+     * admin) instead of the touch-to-wake black cover. Off by default: a unit without keys may
+     * only wake from a lock with the ignition.
+     */
+    val lockScreenOff: StateFlow<Boolean> = _lockScreenOff.asStateFlow()
+
+    fun setLockScreenOff(value: Boolean) {
+        sp.edit().putBoolean(KEY_LOCK_SCREEN_OFF, value).apply()
+        _lockScreenOff.value = value
+    }
+
+    /** The rooted unit's "restarts directly" note was shown once. */
+    var rootNoticeSeen: Boolean
+        get() = sp.getBoolean(KEY_ROOT_NOTICE, false)
+        set(value) = sp.edit().putBoolean(KEY_ROOT_NOTICE, value).apply()
+
+    /** Brightness slider: Android's "Modify system settings" page was opened once already. */
+    var askedWriteSettings: Boolean
+        get() = sp.getBoolean(KEY_ASKED_WRITE_SETTINGS, false)
+        set(value) = sp.edit().putBoolean(KEY_ASKED_WRITE_SETTINGS, value).apply()
+
+    /** Screenshot on Android 8 / 9: storage was asked for once (Pictures/Ampli). */
+    var askedStorage: Boolean
+        get() = sp.getBoolean(KEY_ASKED_STORAGE, false)
+        set(value) = sp.edit().putBoolean(KEY_ASKED_STORAGE, value).apply()
+
     /** "Not now" on the Home card; Settings still shows its card until Ampli is the home app. */
     var homeCardDismissed: Boolean
         get() = sp.getBoolean(KEY_HOME_CARD_DISMISSED, false)
@@ -100,6 +142,11 @@ class ShellPrefs(context: Context) {
         private const val KEY_EQ_COMPONENT = "eq_component"
         private const val KEY_HIDDEN_APPS = "hidden_apps"
         private const val KEY_GREET_BANNER = "greet_home_banner_shown"
+        private const val KEY_STRIP_POWER = "strip_power"
+        private const val KEY_LOCK_SCREEN_OFF = "lock_screen_off"
+        private const val KEY_ROOT_NOTICE = "root_notice_seen"
+        private const val KEY_ASKED_WRITE_SETTINGS = "asked_write_settings"
+        private const val KEY_ASKED_STORAGE = "asked_storage"
 
         /** A PIN is exactly four digits. */
         fun validPin(pin: String): Boolean = pin.length == 4 && pin.all { it in '0'..'9' }
