@@ -191,7 +191,7 @@ jobs:
 
       # Offline speech models for the Play install-time asset pack (:voicemodels), so a Play
       # install has voice on first start with no download. Only this job needs them: asset packs
-      # go into the app bundle, never into assembleDebug APKs (the sideloaded test APK downloads
+      # go into the app bundle, never into assembled test APKs (the sideloaded test APK downloads
       # the models itself on first start). Cached by file name; bump the names in WakeModel.kt
       # (VoskModelSpec) and here together.
       - name: Cache speech models
