@@ -127,6 +127,12 @@ android {
         buildConfig = true
     }
 
+    // Both offline speech models ride in an install-time asset pack, so a Play install has them
+    // on the first start without any download (WakeModel unpacks assets/vosk/<model>.zip). Asset
+    // packs go only into the app bundle (bundleRelease): assembleDebug APKs carry no models and
+    // download them by themselves on first start (VoiceModels), so the test APK stays small.
+    assetPacks += setOf(":voicemodels")
+
     // CI runs lintDebug: any call to an API newer than minSdk without a version check fails the
     // build, so head units on Android 8 to 11 can't crash on a missing method.
     lint {
@@ -172,7 +178,8 @@ dependencies {
     // Parking-spot QR on the "Where's my car" screen.
     implementation(libs.zxing.core)
 
-    // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
+    // "Hey Ampli" wake word and offline commands. The speech models (~36 + ~42 MB) come from the
+    // :voicemodels asset pack in Play installs and are downloaded at runtime by sideloaded APKs.
     implementation(libs.vosk.android)
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 

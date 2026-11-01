@@ -392,6 +392,20 @@ class DrivePrefs(context: Context) {
         get() = sp.getLong(KEY_VOICE_GREETED, 0L)
         set(value) { sp.edit().putLong(KEY_VOICE_GREETED, value).apply() }
 
+    /**
+     * First launch of a fresh install (MainActivity, before the first permission prompt): "Hey
+     * Ampli" always listening goes on unless a choice is stored (FirstRunDefaults.voiceAlways).
+     */
+    fun applyFirstRunVoice() {
+        val stored = if (sp.contains(KEY_VOICE_ALWAYS)) sp.getBoolean(KEY_VOICE_ALWAYS, false) else null
+        FirstRunDefaults.voiceAlways(stored, freshInstall = !sp.contains(KEY_ASKED))?.let { setVoiceAlways(it) }
+    }
+
+    /** The first-start microphone request for "Hey Ampli" was shown (agreed, declined or denied). */
+    var micFirstRunAsked: Boolean
+        get() = sp.getBoolean(KEY_MIC_FIRST_RUN, false)
+        set(value) { sp.edit().putBoolean(KEY_MIC_FIRST_RUN, value).apply() }
+
     /** Whether we already asked for location/Bluetooth once (first-launch flow). */
     var askedPermissions: Boolean
         get() = sp.getBoolean(KEY_ASKED, false)
@@ -508,6 +522,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_BUBBLE_Y = "speed_bubble_y"
         private const val KEY_BG_DISCLOSURE = "disclosure_background_location"
         private const val KEY_MIC_DISCLOSURE = "disclosure_microphone"
+        private const val KEY_MIC_FIRST_RUN = "mic_first_run_asked"
         private const val KEY_INSTALL_ID = "install_id"
         private const val KEY_MUSIC_PKG = "music_package"
         private const val KEY_PHONE_PKG = "phone_package"

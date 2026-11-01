@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">ଏବେ ମାନଚିତ୍ର ଦେଖାଯାଉନାହିଁ। ଇଣ୍ଟରନେଟ୍ ଯାଞ୍ଚ କରନ୍ତୁ, କିମ୍ବା Google Maps ବ୍ୟବହାର କରନ୍ତୁ।</string>
     <string name="voice_hindi_model_missing">ଅଫଲାଇନ୍ ହିନ୍ଦୀ କମାଣ୍ଡ: ଡାଉନଲୋଡ୍ ହୋଇନାହିଁ (ପ୍ରାୟ 42 MB, Google ସ୍ପିଚ୍ ନଥିବା ୟୁନିଟ୍ ପାଇଁ)</string>
     <string name="voice_hindi_model_downloading">ଅଫଲାଇନ୍ ହିନ୍ଦୀ କମାଣ୍ଡ: ଡାଉନଲୋଡ୍ ହେଉଛି %1$d%%</string>
+    <string name="voice_getting_ready">Ampli ପ୍ରସ୍ତୁତ ହେଉଛି… %1$d%%</string>
     <string name="voice_hindi_model_ready">ଅଫଲାଇନ୍ ହିନ୍ଦୀ କମାଣ୍ଡ: ପ୍ରସ୍ତୁତ</string>
     <string name="voice_hindi_model_failed">ଅଫଲାଇନ୍ ହିନ୍ଦୀ କମାଣ୍ଡ: ଡାଉନଲୋଡ୍ ବିଫଳ</string>
     <string name="voice_hindi_model_download">ଡାଉନଲୋଡ୍ କରନ୍ତୁ</string>

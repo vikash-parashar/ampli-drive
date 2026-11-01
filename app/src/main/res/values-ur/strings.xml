@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">ابھی نقشہ نہیں دکھ رہا۔ انٹرنیٹ جانچیں، یا Google Maps استعمال کریں۔</string>
     <string name="voice_hindi_model_missing">آف لائن ہندی کمانڈز: ڈاؤن لوڈ نہیں (تقریباً 42 MB، بغیر Google اسپیچ والے یونٹس کے لیے)</string>
     <string name="voice_hindi_model_downloading">آف لائن ہندی کمانڈز: ڈاؤن لوڈ ہو رہا ہے %1$d%%</string>
+    <string name="voice_getting_ready">Ampli تیار ہو رہا ہے… %1$d%%</string>
     <string name="voice_hindi_model_ready">آف لائن ہندی کمانڈز: تیار</string>
     <string name="voice_hindi_model_failed">آف لائن ہندی کمانڈز: ڈاؤن لوڈ ناکام</string>
     <string name="voice_hindi_model_download">ڈاؤن لوڈ کریں</string>

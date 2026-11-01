@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">एखन नक्शा नहि देखा रहल। इंटरनेट जाँचू, वा Google Maps प्रयोग करू।</string>
     <string name="voice_hindi_model_missing">ऑफलाइन हिंदी कमांड: डाउनलोड नहि (करीब 42 MB, बिना Google स्पीच बला यूनिटक लेल)</string>
     <string name="voice_hindi_model_downloading">ऑफलाइन हिंदी कमांड: डाउनलोड भऽ रहल अछि %1$d%%</string>
+    <string name="voice_getting_ready">Ampli तैयार भऽ रहल अछि… %1$d%%</string>
     <string name="voice_hindi_model_ready">ऑफलाइन हिंदी कमांड: तैयार</string>
     <string name="voice_hindi_model_failed">ऑफलाइन हिंदी कमांड: डाउनलोड नहि भऽ सकल</string>
     <string name="voice_hindi_model_download">डाउनलोड करू</string>

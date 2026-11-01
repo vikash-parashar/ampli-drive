@@ -109,8 +109,11 @@ class DriveApp : Application() {
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }
     val wakeModel: WakeModel by lazy { WakeModel(this) }
 
-    /** Optional offline Hindi command model (~42 MB), downloaded only when the driver asks. */
+    /** Offline Hindi command model (~42 MB): from the Play asset pack, else downloaded by itself. */
     val hindiModel: WakeModel by lazy { WakeModel(this, com.vikash.ampli.drive.voice.VoskModelSpec.Hindi) }
+
+    /** Gets both offline models in place on first start, with no download step for the driver. */
+    val voiceModels: com.vikash.ampli.drive.voice.VoiceModels by lazy { com.vikash.ampli.drive.voice.VoiceModels(this) }
 
     /** Home, Office and favourite places (Where to? and the Home chips; "ghar chalo"). */
     val places: com.vikash.ampli.drive.nav.SavedPlacesStore by lazy { com.vikash.ampli.drive.nav.SavedPlacesStore(this) }

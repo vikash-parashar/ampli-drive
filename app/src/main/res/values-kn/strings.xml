@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">ಈಗ ನಕ್ಷೆ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ, ಅಥವಾ Google Maps ಬಳಸಿ.</string>
     <string name="voice_hindi_model_missing">ಆಫ್‌ಲೈನ್ ಹಿಂದಿ ಆಜ್ಞೆಗಳು: ಡೌನ್‌ಲೋಡ್ ಆಗಿಲ್ಲ (ಸುಮಾರು 42 MB, Google ಸ್ಪೀಚ್ ಇಲ್ಲದ ಯೂನಿಟ್‌ಗಳಿಗೆ)</string>
     <string name="voice_hindi_model_downloading">ಆಫ್‌ಲೈನ್ ಹಿಂದಿ ಆಜ್ಞೆಗಳು: ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ %1$d%%</string>
+    <string name="voice_getting_ready">Ampli ಸಿದ್ಧವಾಗುತ್ತಿದೆ… %1$d%%</string>
     <string name="voice_hindi_model_ready">ಆಫ್‌ಲೈನ್ ಹಿಂದಿ ಆಜ್ಞೆಗಳು: ಸಿದ್ಧ</string>
     <string name="voice_hindi_model_failed">ಆಫ್‌ಲೈನ್ ಹಿಂದಿ ಆಜ್ಞೆಗಳು: ಡೌನ್‌ಲೋಡ್ ವಿಫಲ</string>
     <string name="voice_hindi_model_download">ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>

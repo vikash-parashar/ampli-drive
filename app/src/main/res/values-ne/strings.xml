@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">अहिले नक्सा देखिँदैन। इन्टरनेट जाँच्नुहोस्, वा Google Maps प्रयोग गर्नुहोस्।</string>
     <string name="voice_hindi_model_missing">अफलाइन हिन्दी आदेश: डाउनलोड भएको छैन (करिब 42 MB, Google स्पीच नभएका युनिटका लागि)</string>
     <string name="voice_hindi_model_downloading">अफलाइन हिन्दी आदेश: डाउनलोड हुँदैछ %1$d%%</string>
+    <string name="voice_getting_ready">Ampli तयार हुँदैछ… %1$d%%</string>
     <string name="voice_hindi_model_ready">अफलाइन हिन्दी आदेश: तयार</string>
     <string name="voice_hindi_model_failed">अफलाइन हिन्दी आदेश: डाउनलोड असफल</string>
     <string name="voice_hindi_model_download">डाउनलोड गर्नुहोस्</string>

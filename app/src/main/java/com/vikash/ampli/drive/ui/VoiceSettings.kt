@@ -74,8 +74,8 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
 
     // Start listening as soon as the model is in place (the switch may have been flipped mid-download).
     LaunchedEffect(always, model) {
-        if (always && model == WakeModel.State.Missing) app.wakeModel.ensure(automatic = true)
-        if (always) com.vikash.ampli.drive.voice.VoskCommandListener.ensureHindiModel(app)
+        // English then Hindi (for Hindi-family languages), one at a time.
+        if (always) app.voiceModels.ensureAll()
         if (always && model == WakeModel.State.Ready) VoiceService.start(context)
     }
 

@@ -26,7 +26,7 @@ The app stores these in its private storage on the head unit. Uninstalling the a
 | FASTag tolls read from bank SMS notifications | Toll balance, toll totals, toll expenses (see Notification access) |
 | Emergency contacts, blood group, medical notes | The SOS message you can send from the Help panel |
 | Paired tyre-sensor ids, OBD-II dongle address | Tyre pressure and engine readings (Pro) |
-| Settings, theme, language, wake-word model | Your preferences; the 36 MB offline speech model for "Hey Ampli" |
+| Settings, theme, language, wake-word model | Your preferences; the offline speech models for "Hey Ampli" and offline commands (English about 36 MB, Hindi about 42 MB) |
 | Your name, if you enter it | The spoken welcome when the car starts ("Ram Ram {name} Ji"). Optional; if you say it with the mic, the audio goes to your device's own speech recognition service like a "Hey Ampli" command |
 | Dashcam clips (Pro, off by default) | Loop recording from the unit's camera, video only (no sound), in the app's own folder; the oldest clips are deleted when the storage limit you set is reached. Never uploaded |
 | Bhajan settings (off by default) | Which days a short bhajan plays when the car starts, and its volume |
@@ -46,7 +46,7 @@ Location is used on the unit. It is sent off the unit only in these cases:
 
 ## Microphone and "Hey Ampli"
 
-If you switch on **Always listen for "Hey Ampli"**, the app uses the microphone to listen for the wake word, **including when the app is closed or not in use**. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.
+New installs have **Always listen for "Hey Ampli"** switched on, but nothing listens until you agree to the explanation and allow the microphone. With it on, the app uses the microphone to listen for the wake word, **including when the app is closed or not in use**. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.
 
 ## Phone calls and contacts (announce incoming calls)
 
@@ -97,7 +97,7 @@ These go to Ampli Studio's support server (or, until it is live, open in your em
 
 ## Other network use
 
-- **Speech model download** (alphacephei.com): the "Hey Ampli" wake-word model, once, when you switch it on.
+- **Speech model download** (alphacephei.com): the offline speech models (English, and Hindi for Hindi-family languages), once, on first start, only when the app did not come with them (Play installs include them).
 - Speed-camera data is built into the app (OpenStreetMap, ODbL); checking cameras needs no network.
 
 ## Children

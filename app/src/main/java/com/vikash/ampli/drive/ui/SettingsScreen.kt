@@ -52,6 +52,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -93,6 +95,7 @@ import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.system.BtPermissions
 import com.vikash.ampli.drive.tripcost.TripCostFlags
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     app: DriveApp,
@@ -107,6 +110,9 @@ fun SettingsScreen(
     onOpenVoiceCheck: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
     onOpenVoiceCommands: () -> Unit = {},
+    /** Opened from Home's "Getting Ampli ready" strip: scroll to the Voice card once. */
+    focusVoice: Boolean = false,
+    onVoiceFocused: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -267,7 +273,18 @@ fun SettingsScreen(
             SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)
-            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
+            val voiceCard = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+            LaunchedEffect(focusVoice) {
+                if (focusVoice) {
+                    // One frame so the card is laid out, then bring it to the top.
+                    kotlinx.coroutines.delay(150)
+                    voiceCard.bringIntoView()
+                    onVoiceFocused()
+                }
+            }
+            Box(Modifier.fillMaxWidth().bringIntoViewRequester(voiceCard)) {
+                VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
+            }
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)
             DesiSamplesCard(app = app)

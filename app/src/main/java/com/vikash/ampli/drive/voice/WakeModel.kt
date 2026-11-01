@@ -32,22 +32,26 @@ enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: 
 
     /**
      * Hindi commands (and Haryanvi said with Hindi words) on head units without Google speech.
-     * ~42 MB zipped, so it is never bundled: fetched by itself for Hindi-family app languages when
-     * there is no working system recogniser, or from Settings › Voice when the driver asks.
+     * ~42 MB zipped. Play installs carry it in the install-time asset pack; other installs fetch
+     * it by themselves for Hindi-family (or unset) app languages (VoiceModelPlan).
      */
     Hindi(
         "vosk-model-small-hi-0.22",
         "https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip",
         42L * 1024 * 1024,
     ),
+    ;
+
+    /** Where the Play install-time asset pack (module :voicemodels) puts this model's zip. */
+    val assetPath: String get() = "vosk/$dirName.zip"
 }
 
 /**
- * A small offline Vosk model, downloaded once into filesDir/vosk/<model>/ (never in the APK).
- * [VoskModelSpec.EnglishIndia] spots "Hey Ampli" and is fetched the first time the driver switches
- * the wake word on; [VoskModelSpec.Hindi] hears Hindi/Haryanvi commands and is fetched when a
- * Hindi-family app language has no working system recogniser (or on demand).
- * Progress shows in Settings › Voice.
+ * A small offline Vosk model in filesDir/vosk/<model>/. Play installs unpack it from the
+ * install-time asset pack (no network); sideloaded APKs, which carry no models, download it once.
+ * [VoskModelSpec.EnglishIndia] spots "Hey Ampli"; [VoskModelSpec.Hindi] hears Hindi/Haryanvi
+ * commands. [VoiceModels] decides which to fetch on first start. Progress shows in Settings › Voice
+ * and on Home ("Getting Ampli ready… 40%").
  */
 class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.EnglishIndia) {
     private val appContext = context.applicationContext
@@ -72,41 +76,65 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
 
     fun isInstalled(): Boolean = File(modelDir, READY_MARKER).exists()
 
+    /** 0..100 while [State.Unpacking] (bytes of the zip read so far). */
+    private val _unpackPercent = MutableStateFlow(0)
+    val unpackPercent: StateFlow<Int> = _unpackPercent.asStateFlow()
+
+    /** True while the current job unpacks the copy shipped in the Play asset pack. */
+    @Volatile var fromAssets: Boolean = false
+        private set
+
+    /** A download or unpack is running now. */
+    val busy: Boolean get() = job?.isActive == true
+
     private val prefs = appContext.getSharedPreferences("wake_model", Context.MODE_PRIVATE)
     private val failedKey = "${spec.dirName}.failedAt"
+    private val failCountKey = "${spec.dirName}.failures"
     private val removedKey = "${spec.dirName}.removedByUser"
 
     /** The driver removed this model in Settings: automatic downloads leave it alone. */
     fun removedByUser(): Boolean = prefs.getBoolean(removedKey, false)
 
     private fun markFailed() {
-        prefs.edit().putLong(failedKey, System.currentTimeMillis()).apply()
+        prefs.edit()
+            .putLong(failedKey, System.currentTimeMillis())
+            .putInt(failCountKey, failures() + 1)
+            .apply()
     }
 
-    /** True while an [automatic] retry should wait after a failed download or load. */
-    private fun backingOff(now: Long = System.currentTimeMillis()): Boolean {
-        val at = prefs.getLong(failedKey, 0L)
-        return at > 0L && now - at in 0 until RETRY_BACKOFF_MS
-    }
+    /** Failed downloads or loads in a row (0 after a success). */
+    fun failures(): Int = prefs.getInt(failCountKey, 0)
+
+    /**
+     * True while an [automatic] retry should wait after a failed download or load: 30 s after
+     * the first failure, growing to [RETRY_BACKOFF_MS] (VoiceModelPlan.retryDelayMs).
+     */
+    private fun backingOff(now: Long = System.currentTimeMillis()): Boolean =
+        VoiceModelPlan.backingOff(failures(), prefs.getLong(failedKey, 0L), now)
 
     /**
      * Starts the download unless it is installed or already running. [automatic] (app start,
-     * every return home, a voice attempt): skipped for [RETRY_BACKOFF_MS] after a failure, so a
-     * model that will not download or load is not fetched again on every onResume. A tap in
-     * Settings passes false and always retries.
+     * every return home, a voice attempt): skipped during the back-off after a failure, so a
+     * model that will not download or load is not fetched again on every onResume, and never
+     * after the driver removed it. [ignoreBackoff]: a network just came back (still automatic, so
+     * a removed model stays removed). A tap in Settings passes automatic = false and always retries.
+     *
+     * The copy in the Play asset pack is unpacked first when there is one; the download is the
+     * fallback (sideloaded APKs, or a damaged pack).
      */
-    fun ensure(automatic: Boolean = false) {
+    @Synchronized
+    fun ensure(automatic: Boolean = false, ignoreBackoff: Boolean = false) {
         if (isInstalled()) {
             _state.value = State.Ready
             return
         }
         if (job?.isActive == true) return
-        if (automatic && (backingOff() || removedByUser())) return
+        if (automatic && (removedByUser() || (!ignoreBackoff && backingOff()))) return
         if (!automatic) prefs.edit().remove(removedKey).apply()
         job = scope.launch {
             try {
-                download()
-                prefs.edit().remove(failedKey).apply()
+                if (!installFromAssets()) download()
+                prefs.edit().remove(failedKey).remove(failCountKey).apply()
                 _state.value = State.Ready
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
@@ -157,13 +185,64 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
             }
         }
 
+        fromAssets = false
+        zip.inputStream().use { unpack(it, zip.length(), wantSha = null) }
+        zip.delete()
+    }
+
+    /**
+     * Unpacks the zip shipped in the Play install-time asset pack (assets/vosk/<model>.zip), if
+     * this install has one. False when there is none (sideloaded APK, or a local debug build) or
+     * when the copy is damaged: the download takes over then.
+     */
+    private suspend fun installFromAssets(): Boolean {
+        val assets = appContext.assets
+        val length = try {
+            assets.openFd(spec.assetPath).use { it.length }
+        } catch (_: Exception) {
+            // Compressed or absent: open() below tells which.
+            -1L
+        }
+        val input = try {
+            assets.open(spec.assetPath)
+        } catch (_: IOException) {
+            return false
+        }
+        root.mkdirs()
+        fromAssets = true
+        return try {
+            input.use { unpack(it, length.takeIf { l -> l > 0 } ?: spec.approxBytes, wantSha = spec.sha256) }
+            true
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            File(root, "${spec.dirName}.tmp").deleteRecursively()
+            false
+        } finally {
+            fromAssets = false
+        }
+    }
+
+    /**
+     * Unpacks a model zip into [modelDir] (through a .tmp folder, moved in place at the end).
+     * [totalBytes]: the zip's size, for [unpackPercent]. [wantSha]: when set, the zip's SHA-256
+     * must match or nothing is installed.
+     */
+    private suspend fun unpack(source: java.io.InputStream, totalBytes: Long, wantSha: String?) {
+        _unpackPercent.value = 0
         _state.value = State.Unpacking
         val tmp = File(root, "${spec.dirName}.tmp")
         tmp.deleteRecursively()
         tmp.mkdirs()
         val base = tmp.canonicalPath + File.separator
-        ZipInputStream(zip.inputStream().buffered()).use { zin ->
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val counted = ProgressInputStream(java.security.DigestInputStream(source, md)) { read ->
+            _unpackPercent.value = (read * 100 / totalBytes.coerceAtLeast(1L)).toInt().coerceIn(0, 99)
+        }
+        val buffered = counted.buffered(64 * 1024)
+        ZipInputStream(buffered).use { zin ->
             while (true) {
+                currentCoroutineContext().ensureActive()
                 val entry = zin.nextEntry ?: break
                 // The zip has one top folder (vosk-model-small-en-in-0.4/); drop it.
                 val rel = entry.name.substringAfter('/', "")
@@ -178,12 +257,25 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
                     out.outputStream().use { zin.copyTo(it) }
                 }
             }
+            // The zip's central directory follows the last entry: read it too, so the checksum
+            // covers the whole file.
+            if (wantSha != null) {
+                val rest = ByteArray(64 * 1024)
+                while (buffered.read(rest) >= 0) Unit
+            }
         }
-        zip.delete()
+        if (wantSha != null) {
+            val got = md.digest().joinToString("") { "%02x".format(it) }
+            if (!got.equals(wantSha, ignoreCase = true)) {
+                tmp.deleteRecursively()
+                throw IOException("Checksum mismatch")
+            }
+        }
         if (!File(tmp, "am").exists() && !File(tmp, "conf").exists()) throw IOException("Model incomplete")
         modelDir.deleteRecursively()
         if (!tmp.renameTo(modelDir)) throw IOException("Cannot move model")
         File(modelDir, READY_MARKER).writeText("ok")
+        _unpackPercent.value = 100
     }
 
     /**
@@ -250,8 +342,8 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
     companion object {
         private const val READY_MARKER = ".ampli-ready"
 
-        /** Wait before an automatic retry after a failed download or load. */
-        const val RETRY_BACKOFF_MS = 6 * 60 * 60_000L
+        /** Longest wait before an automatic retry after failed downloads or loads. */
+        const val RETRY_BACKOFF_MS = VoiceModelPlan.MAX_RETRY_MS
 
         fun sha256Hex(file: File): String {
             val md = java.security.MessageDigest.getInstance("SHA-256")
@@ -266,4 +358,25 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
             return md.digest().joinToString("") { "%02x".format(it) }
         }
     }
+}
+
+/** Counts the bytes read through it, for unpack progress. */
+private class ProgressInputStream(input: java.io.InputStream, private val onRead: (Long) -> Unit) : java.io.FilterInputStream(input) {
+    private var total = 0L
+    private var lastReported = 0L
+
+    private fun add(n: Long) {
+        if (n <= 0) return
+        total += n
+        if (total - lastReported >= 256 * 1024) {
+            lastReported = total
+            onRead(total)
+        }
+    }
+
+    override fun read(): Int = super.read().also { if (it >= 0) add(1) }
+
+    override fun read(b: ByteArray, off: Int, len: Int): Int = super.read(b, off, len).also { add(it.toLong()) }
+
+    override fun skip(n: Long): Long = super.skip(n).also { add(it) }
 }

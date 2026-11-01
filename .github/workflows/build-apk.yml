@@ -166,6 +166,43 @@ jobs:
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+      # Offline speech models for the Play install-time asset pack (:voicemodels), so a Play
+      # install has voice on first start with no download. Only this job needs them: asset packs
+      # go into the app bundle, never into assembleDebug APKs (the sideloaded test APK downloads
+      # the models itself on first start). Cached by file name; bump the names in WakeModel.kt
+      # (VoskModelSpec) and here together.
+      - name: Cache speech models
+        uses: actions/cache@v4
+        with:
+          path: voicemodels/src/main/assets/vosk/*.zip
+          key: vosk-vosk-model-small-en-in-0.4.zip-vosk-model-small-hi-0.22.zip
+
+      - name: Fetch speech models
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=voicemodels/src/main/assets/vosk
+          mkdir -p "$dir"
+          for name in vosk-model-small-en-in-0.4 vosk-model-small-hi-0.22; do
+            zip="$dir/$name.zip"
+            if [ -s "$zip" ] && unzip -tq "$zip" >/dev/null 2>&1; then
+              echo "$name: cached"
+              continue
+            fi
+            rm -f "$zip"
+            curl -fL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 30 \
+              -o "$zip.part" "https://alphacephei.com/vosk/models/$name.zip" || {
+              echo "::error title=Speech models::Could not download $name.zip from alphacephei.com"
+              exit 1
+            }
+            # A whole, readable zip with the model's top folder (WakeModel drops that folder).
+            unzip -tq "$zip.part" >/dev/null || { echo "::error title=Speech models::$name.zip is damaged"; exit 1; }
+            unzip -l "$zip.part" | grep " $name/" >/dev/null || { echo "::error title=Speech models::$name.zip has no $name/ folder"; exit 1; }
+            mv "$zip.part" "$zip"
+          done
+          ls -l "$dir"
+          sha256sum "$dir"/*.zip
+
       # Play upload key: only when the secret exists (never on pull requests from forks).
       - name: Upload key
         env:
@@ -191,6 +228,21 @@ jobs:
             grep -E "^e: |ERROR:|Missing class|R8: " release.log | head -40 | sed 's/^/::error::/'
             exit 1
           }
+
+      # The bundle must carry both models in the install-time pack, or Play installs would
+      # fall back to downloading them.
+      - name: Check speech models in the bundle
+        shell: bash
+        run: |
+          aab=$(ls app/build/outputs/bundle/release/*.aab | head -1)
+          for name in vosk-model-small-en-in-0.4 vosk-model-small-hi-0.22; do
+            unzip -l "$aab" | grep "voicemodels/assets/vosk/$name.zip" >/dev/null || {
+              echo "::error title=Speech models::$name.zip is missing from the voicemodels asset pack in $aab"
+              unzip -l "$aab" | grep voicemodels | head -20
+              exit 1
+            }
+          done
+          ls -l "$aab"
 
       - uses: actions/upload-artifact@v4
         with:

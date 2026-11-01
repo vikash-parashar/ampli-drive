@@ -46,7 +46,7 @@ If Play review asks for the background-location declaration anyway:
 | Service | Type | Permission | What the user sees | Why it can't wait / be deferred |
 | --- | --- | --- | --- | --- |
 | `car.CarMonitorService` | `location` | `FOREGROUND_SERVICE_LOCATION` | Ongoing "Watching your drive" notification, next camera in the text | Real-time alerts while driving; stops when switched off in Settings › Car |
-| `voice.VoiceService` | `microphone` | `FOREGROUND_SERVICE_MICROPHONE` | Ongoing "Hey Ampli is listening" notification | Hands-free wake word while driving; only after the driver turns it on and agrees to the disclosure |
+| `voice.VoiceService` | `microphone` | `FOREGROUND_SERVICE_MICROPHONE` | Ongoing "Hey Ampli is listening" notification | Hands-free wake word while driving; on by default for new installs, but only after the driver agrees to the disclosure and allows the microphone |
 | `dashcam.DashcamService` | `camera` | `FOREGROUND_SERVICE_CAMERA` | Ongoing "Dashcam recording" notification | Loop recording must continue while Google Maps is in front; Pro, off by default, started only from the visible launcher or the dashcam switch |
 
 ### Notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`)
@@ -59,7 +59,7 @@ Used for the optional **speed bubble** (current speed, speed limit, next camera)
 Used only for the **crash SOS alarm**: when a crash countdown runs out while Car Hub is not in front, a full-screen alert brings the SOS screen forward (nothing is sent without a tap). Fill in the Play Console "Full-screen intent" declaration on the App content page as a safety alert. On Android 14+ the driver can also grant it from the status row in Settings › Car (opens Android's full-screen notification setting); without it the alert is a heads-up notification.
 
 ### Microphone (`RECORD_AUDIO`)
-"Hey Ampli" wake word and voice commands, only after the driver turns them on and agrees to the in-app disclosure.
+"Hey Ampli" wake word and voice commands (on by default for new installs), only after the driver agrees to the in-app disclosure and allows the microphone.
 
 ### Phone and contacts (`READ_PHONE_STATE`, `READ_CONTACTS`, `ANSWER_PHONE_CALLS`)
 Requested only from Settings › Announce incoming calls (free, off by default): know a call is ringing, speak the caller's contact name, and answer / decline on a spoken "haan / naa". Each is optional; nothing is stored or sent. Car Hub is not the default dialer and makes no calls by itself.

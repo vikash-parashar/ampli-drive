@@ -99,6 +99,8 @@ fun DriveRoot(
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
     var settingsReturn by remember { mutableStateOf(Screen.Home) }
+    // Settings opened from Home's "Getting Ampli ready" strip scrolls to the Voice card.
+    var settingsFocusVoice by remember { mutableStateOf(false) }
     // Where Back goes from the Car hub's screens: Home when opened from Home's More sheet.
     var subReturn by remember { mutableStateOf(Screen.Car) }
     var showPro by remember { mutableStateOf(false) }
@@ -168,7 +170,14 @@ fun DriveRoot(
                                 onOpenNavSearch = { onNavigate(Screen.NavSearch) },
                                 onOpenQuick = { showQuick = true },
                                 // Ampli Shell: "Make Ampli your home screen" (until done or "Not now").
-                                banner = { DefaultHomeBannerHost(app = app, resumeTick = resumeTick) },
+                                // First start: "Getting Ampli ready… 40%" while the speech models arrive.
+                                banner = {
+                                    VoiceSetupStrip(app = app, onOpen = {
+                                        settingsFocusVoice = true
+                                        onNavigate(Screen.Settings)
+                                    })
+                                    DefaultHomeBannerHost(app = app, resumeTick = resumeTick)
+                                },
                             )
                             CarAlertHost(app = app)
                         }
@@ -194,6 +203,8 @@ fun DriveRoot(
                                 onOpenVoiceCheck = { onNavigate(Screen.VoiceCheck) },
                                 onOpenVoiceCommands = { onNavigate(Screen.VoiceCommands) },
                                 onOpenDiagnostics = { onNavigate(Screen.Diagnostics) },
+                                focusVoice = settingsFocusVoice,
+                                onVoiceFocused = { settingsFocusVoice = false },
                             )
                         }
                         Screen.Help, Screen.Sos, Screen.Crash -> {
@@ -349,7 +360,7 @@ fun DriveRoot(
                     if (!nameAsked && screen == Screen.Home) {
                         FirstRunNameHost(app = app)
                     } else {
-                        BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
+                        BackgroundDisclosureHost(app = app, resumeTick = resumeTick, onHome = screen == Screen.Home)
                     }
                     // Quick controls, pulled down from Home's status row.
                     if (showQuick) BackHandler(enabled = true) { showQuick = false }
@@ -398,14 +409,18 @@ fun DriveRoot(
  * back on (and shows this again).
  */
 @Composable
-private fun BackgroundDisclosureHost(app: DriveApp, resumeTick: Int) {
+private fun BackgroundDisclosureHost(app: DriveApp, resumeTick: Int, onHome: Boolean) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val settings by app.car.store.settings.collectAsStateWithLifecycle()
     val accepted by app.prefs.bgDisclosureAccepted.collectAsStateWithLifecycle()
     val hasFine = remember(resumeTick) {
         context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
-    if (!settings.backgroundMonitor || accepted || !hasFine) return
+    if (!settings.backgroundMonitor || accepted || !hasFine) {
+        // Next in line on first start: the microphone for "Hey Ampli" (on by default).
+        if (onHome) FirstRunMicHost(app = app, resumeTick = resumeTick)
+        return
+    }
     DisclosureDialog(
         kind = Disclosure.BackgroundLocation,
         onAgree = {

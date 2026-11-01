@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">ਹੁਣੇ ਨਕਸ਼ਾ ਨਹੀਂ ਦਿਸ ਰਿਹਾ। ਇੰਟਰਨੈੱਟ ਜਾਂਚੋ, ਜਾਂ Google Maps ਵਰਤੋ।</string>
     <string name="voice_hindi_model_missing">ਆਫ਼ਲਾਈਨ ਹਿੰਦੀ ਕਮਾਂਡ: ਡਾਊਨਲੋਡ ਨਹੀਂ (ਲਗਭਗ 42 MB, ਬਿਨਾਂ Google ਸਪੀਚ ਵਾਲੇ ਯੂਨਿਟਾਂ ਲਈ)</string>
     <string name="voice_hindi_model_downloading">ਆਫ਼ਲਾਈਨ ਹਿੰਦੀ ਕਮਾਂਡ: ਡਾਊਨਲੋਡ ਹੋ ਰਹੀ ਹੈ %1$d%%</string>
+    <string name="voice_getting_ready">Ampli ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ… %1$d%%</string>
     <string name="voice_hindi_model_ready">ਆਫ਼ਲਾਈਨ ਹਿੰਦੀ ਕਮਾਂਡ: ਤਿਆਰ</string>
     <string name="voice_hindi_model_failed">ਆਫ਼ਲਾਈਨ ਹਿੰਦੀ ਕਮਾਂਡ: ਡਾਊਨਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ</string>
     <string name="voice_hindi_model_download">ਡਾਊਨਲੋਡ ਕਰੋ</string>

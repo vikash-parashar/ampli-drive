@@ -653,6 +653,7 @@
     <string name="map_tiles_unavailable">इबे मैप कोनी दिखता। इंटरनेट देख ले, या Google Maps चला ले।</string>
     <string name="voice_hindi_model_missing">बिना नेट हिंदी कमांड: डाउनलोड कोनी होया (लगभग 42 MB, जिस यूनिट मैं Google स्पीच ना हो)</string>
     <string name="voice_hindi_model_downloading">बिना नेट हिंदी कमांड: डाउनलोड हो रया सै %1$d%%</string>
+    <string name="voice_getting_ready">Ampli त्यार हो रया सै… %1$d%%</string>
     <string name="voice_hindi_model_ready">बिना नेट हिंदी कमांड: त्यार सै</string>
     <string name="voice_hindi_model_failed">बिना नेट हिंदी कमांड: डाउनलोड ना हो पाया</string>
     <string name="voice_hindi_model_download">डाउनलोड कर</string>

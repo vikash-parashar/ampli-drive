@@ -802,6 +802,8 @@
     <string name="map_tiles_unavailable">Map tiles are not available right now. Check the internet connection, or use Google Maps.</string>
     <string name="voice_hindi_model_missing">Offline Hindi commands: not downloaded (about 42 MB, for units without Google speech)</string>
     <string name="voice_hindi_model_downloading">Offline Hindi commands: downloading %1$d%%</string>
+    <!-- Home strip while the offline speech models download or unpack on first start. -->
+    <string name="voice_getting_ready">Getting Ampli ready… %1$d%%</string>
     <string name="voice_hindi_model_ready">Offline Hindi commands: ready</string>
     <string name="voice_hindi_model_failed">Offline Hindi commands: download failed</string>
     <string name="voice_hindi_model_download">Download</string>
