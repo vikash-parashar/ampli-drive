@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -126,21 +126,31 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
 private fun MicPulse(phase: Phase) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val transition = rememberInfiniteTransition(label = "mic")
-    val pulse by transition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.18f,
-        animationSpec = infiniteRepeatable(tween(650, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "pulse",
-    )
     val listening = phase == Phase.Listening
     val size = maxOf(dims.d(11f), 72.dp)
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(size * 1.25f)) {
         if (listening) {
+            // Only while listening (the overlay stays still while Ampli works or speaks), and
+            // read in the draw layer, so a frame of the pulse never recomposes the overlay.
+            // Lite mode (weak units): the halo shows but stands still.
+            val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+            val pulse = if (still) {
+                remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
+            } else {
+                rememberInfiniteTransition(label = "mic").animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.18f,
+                    animationSpec = infiniteRepeatable(tween(650, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+                    label = "pulse",
+                )
+            }
             Box(
                 Modifier
                     .size(size)
-                    .scale(pulse * 1.1f)
+                    .graphicsLayer {
+                        scaleX = pulse.value * 1.1f
+                        scaleY = pulse.value * 1.1f
+                    }
                     .clip(CircleShape)
                     .background(theme.accent.copy(alpha = 0.25f)),
             )

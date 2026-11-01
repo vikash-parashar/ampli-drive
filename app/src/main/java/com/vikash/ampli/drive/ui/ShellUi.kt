@@ -381,9 +381,11 @@ internal fun QuickControlsPanel(
 private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier, onLongClick: (() -> Unit)? = null) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    // Tiles pop in one after another as the panel lands.
-    val enter = remember { Animatable(0f) }
+    // Tiles pop in one after another as the panel lands (already in place in lite mode).
+    val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+    val enter = remember { Animatable(if (still) 1f else 0f) }
     LaunchedEffect(Unit) {
+        if (still) return@LaunchedEffect
         delay(60L + index * 35L)
         enter.animateTo(1f, spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow))
     }
@@ -533,9 +535,12 @@ fun BootSplashHost() {
     val progress = remember { Animatable(0f) }
     LaunchedEffect(requested) {
         if (requested == 0L) return@LaunchedEffect
-        progress.snapTo(0f)
+        // Lite mode (weak units): the finished splash stands still for the same time instead of
+        // animating full screen while the unit is still busy starting up.
+        val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+        progress.snapTo(if (still) 1f else 0f)
         shown.targetState = true
-        progress.animateTo(1f, tween((Shell.SPLASH_MS - 400L).toInt(), easing = LinearEasing))
+        if (still) delay(Shell.SPLASH_MS - 400L) else progress.animateTo(1f, tween((Shell.SPLASH_MS - 400L).toInt(), easing = LinearEasing))
         delay(400L)
         shown.targetState = false
         Shell.splashDone()

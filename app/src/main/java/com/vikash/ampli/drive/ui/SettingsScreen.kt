@@ -157,7 +157,7 @@ fun SettingsScreen(
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
             )
-            if (BuildConfig.DEBUG) {
+            if (BuildConfig.TEST_BUILD) {
                 ToggleRow(
                     title = stringResource(R.string.pro_test_title),
                     status = stringResource(R.string.pro_test_hint),

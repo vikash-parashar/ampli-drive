@@ -92,6 +92,8 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
+            // Test-only switches (Pro test unlock in Settings). True for every sideloaded test APK.
+            buildConfigField("boolean", "TEST_BUILD", "true")
             // Public demo servers for test builds only: OSRM demo, komoot Photon, Open-Meteo free API.
             buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
             buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
@@ -108,10 +110,26 @@ android {
             buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL")}\"")
             // The Play bundle never downloads or installs other APKs (and never declares the permission).
             buildConfigField("boolean", "SIDELOAD_INSTALL", "false")
+            buildConfigField("boolean", "TEST_BUILD", "false")
             signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        // The CI test APK (pr-test-N / build-N): a release-type build, so it runs at full speed on
+        // weak head units (not debuggable, R8-optimised, ART compiles it with the baseline profile),
+        // but signed with the same fixed test key and with the same application id as the old
+        // debug test APKs, so it installs as an update over them. Test servers and switches as in
+        // debug. `assembleFastTest`; unit tests still run on the debug build.
+        create("fastTest") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
+            buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
+            buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL").ifEmpty { "https://api.open-meteo.com/v1/forecast" }}\"")
+            buildConfigField("boolean", "SIDELOAD_INSTALL", "true")
+            buildConfigField("boolean", "TEST_BUILD", "true")
         }
     }
 
@@ -164,6 +182,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    // Applies the baseline profile (src/main/baseline-prof.txt plus the Compose libraries' own) on
+    // sideloaded installs too, so the test APK starts compiled instead of interpreted.
+    implementation(libs.androidx.profileinstaller)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.maplibre.android)

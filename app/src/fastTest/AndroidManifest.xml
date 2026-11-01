@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The CI test APK (fastTest build type: release-speed, test key). Like src/debug, never in the
+     Play bundle: "Get Ampli MP3 Player" › Download and install opens the system installer for the
+     APK downloaded from the player's public GitHub releases. See system/Mp3Install.kt. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>

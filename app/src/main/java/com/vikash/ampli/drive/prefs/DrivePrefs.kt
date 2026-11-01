@@ -71,9 +71,9 @@ data class AutoStartSettings(
     }
 }
 
-/** Pro entitlement. [purchased] is the cached Play Billing result; [testUnlock] only counts in debug builds. */
+/** Pro entitlement. [purchased] is the cached Play Billing result; [testUnlock] only counts in test builds. */
 data class ProState(val purchased: Boolean, val testUnlock: Boolean) {
-    val isPro: Boolean get() = purchased || (BuildConfig.DEBUG && testUnlock)
+    val isPro: Boolean get() = purchased || (BuildConfig.TEST_BUILD && testUnlock)
 }
 
 /** Small settings store. SharedPreferences is enough here and costs nothing at startup. */
@@ -304,6 +304,11 @@ class DrivePrefs(context: Context) {
         _mapTextureMode.value = value
     }
 
+    /** Lite mode (Diagnostics): Auto (on for low-memory units), On or Off. Applies from the next start. */
+    var liteMode: LiteMode.Choice
+        get() = LiteMode.Choice.from(sp.getString(KEY_LITE_MODE, null))
+        set(value) { sp.edit().putString(KEY_LITE_MODE, value.key).apply() }
+
     /** "Always listen for Hey Ampli": off by default; VoiceService runs only while this is on. */
     private val _voiceAlways = MutableStateFlow(sp.getBoolean(KEY_VOICE_ALWAYS, false))
     val voiceAlways: StateFlow<Boolean> = _voiceAlways.asStateFlow()
@@ -417,7 +422,7 @@ class DrivePrefs(context: Context) {
 
     /** Test builds only: lets sideloaded APKs try the Pro themes without Play Billing. */
     fun setProTestUnlock(value: Boolean) {
-        if (!BuildConfig.DEBUG) return
+        if (!BuildConfig.TEST_BUILD) return
         sp.edit().putBoolean(KEY_PRO_TEST, value).apply()
         _pro.value = _pro.value.copy(testUnlock = value)
     }
@@ -515,6 +520,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_VOICE_STYLE = "voice_style"
         private const val KEY_VOICE_PACK = "voice_pack"
         private const val KEY_MAP_TEXTURE = "map_texture_mode"
+        private const val KEY_LITE_MODE = "lite_mode"
         private const val KEY_NAV_PROMPTS = "nav_prompts"
         private const val KEY_NAV_APP = "nav_app"
         private const val KEY_START_GREETED = "start_greeting_at"

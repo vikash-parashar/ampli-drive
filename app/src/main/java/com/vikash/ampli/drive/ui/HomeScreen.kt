@@ -42,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -93,7 +94,7 @@ import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.em
 import java.time.LocalDateTime
@@ -136,13 +137,29 @@ fun HomeScreen(
 ) {
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
-    val gps by app.speedTracker.state.collectAsStateWithLifecycle()
+    // GPS and the assistant change many times a second (fixes, satellite counts, the live
+    // transcript). Home only recomposes when what it shows changes: the speed in whole km/h,
+    // over the limit or not, location there or not, listening or not. The map reads the full
+    // state in its own scope below.
+    val gpsState = app.speedTracker.state.collectAsStateWithLifecycle()
     val nav by app.navigator.state.collectAsStateWithLifecycle()
     val navApp by app.prefs.navApp.collectAsStateWithLifecycle()
     val turn by NavTurnRepository.turn.collectAsStateWithLifecycle()
-    val limit by app.cameraAlerts.speedLimitKmh.collectAsStateWithLifecycle()
+    val limitState = app.cameraAlerts.speedLimitKmh.collectAsStateWithLifecycle()
+    val limit = limitState.value
     val obd by app.obd.state.collectAsStateWithLifecycle()
-    val voice by app.voice.state.collectAsStateWithLifecycle()
+    val voiceState = app.voice.state.collectAsStateWithLifecycle()
+    val speed by remember { derivedStateOf { gpsState.value.speedKmh?.roundToInt() } }
+    val over by remember {
+        derivedStateOf {
+            val l = limitState.value
+            l != null && (gpsState.value.speedKmh ?: 0f) > l
+        }
+    }
+    val locationPrompt by remember { derivedStateOf { !gpsState.value.hasPermission || gpsState.value.location == null } }
+    val listening by remember {
+        derivedStateOf { voiceState.value.phase == com.vikash.ampli.drive.voice.VoiceUiState.Phase.Listening }
+    }
     val caption by app.voicePlayer.lastLine.collectAsStateWithLifecycle()
     val captionAt by app.voicePlayer.lastLineAt.collectAsStateWithLifecycle()
     // Ampli's line stays up for AmpliLine.SHOWN_MS after it was said, then the slot shows its hint.
@@ -163,7 +180,7 @@ fun HomeScreen(
         when {
             nav.visible -> onOpenNavScreen()
             navApp == NavApp.Ampli -> onOpenNavSearch()
-            else -> Launchers.openNavigation(context, gps.location)
+            else -> Launchers.openNavigation(context, gpsState.value.location)
         }
         Unit
     }
@@ -194,17 +211,17 @@ fun HomeScreen(
 
     val alert = homeAlert(app, onRequestPermissions, onOpenFastag, onOpenCar)
     val ui = HomeUi(
-        speed = gps.speedKmh?.roundToInt(),
+        speed = speed,
         limit = limit,
-        over = limit != null && (gps.speedKmh ?: 0f) > limit!!,
+        over = over,
         rpm = obd.rpm?.roundToInt()?.takeIf { obd.phase == ObdState.Phase.Connected },
         turn = turnUi(nav, turn),
         music = musicUi(app),
         alert = alert,
         caption = freshCaption,
-        locationPrompt = !gps.hasPermission || gps.location == null,
+        locationPrompt = locationPrompt,
         onGoHome = savedHome?.let { home -> { goToSavedPlace(app, context, home) } },
-        listening = voice.phase == com.vikash.ampli.drive.voice.VoiceUiState.Phase.Listening,
+        listening = listening,
         onMic = { app.voice.start() },
         onMore = { more = true },
         onHelp = { onOpenHelp(false) },
@@ -245,7 +262,7 @@ fun HomeScreen(
                         val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
                         val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
                         MapPane(
-                            gps = gps,
+                            gps = gpsState.value,
                             onOpenNavigation = openNav,
                             onRequestPermissions = onRequestPermissions,
                             modifier = Modifier.fillMaxSize(),
@@ -418,6 +435,9 @@ private fun musicUi(app: DriveApp): MusicUi {
     }
 }
 
+/** What the location alert needs from the GPS state. */
+private data class LocationFlags(val hasPermission: Boolean, val hasGps: Boolean, val providerEnabled: Boolean)
+
 /** The alert slot's content and where a tap on it goes. */
 internal class AlertUi(val alert: HomeAlert, val onClick: () -> Unit)
 
@@ -428,7 +448,9 @@ internal class AlertUi(val alert: HomeAlert, val onClick: () -> Unit)
 @Composable
 private fun homeAlert(app: DriveApp, onRequestPermissions: () -> Unit, onOpenFastag: () -> Unit, onOpenCar: () -> Unit): AlertUi? {
     val context = LocalContext.current
-    val gps by app.speedTracker.state.collectAsStateWithLifecycle()
+    // Only the three location switches matter here, not every fix.
+    val gpsState = app.speedTracker.state.collectAsStateWithLifecycle()
+    val gps by remember { derivedStateOf { LocationFlags(gpsState.value.hasPermission, gpsState.value.hasGps, gpsState.value.providerEnabled) } }
     val camerasOn by app.prefs.cameraAlerts.collectAsStateWithLifecycle()
     val camera by app.cameraAlerts.current.collectAsStateWithLifecycle()
     val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
@@ -728,8 +750,13 @@ private fun DockKey(
 @Composable
 private fun MicRing(listening: Boolean, color: Color, modifier: Modifier) {
     if (!listening) return
+    // Lite mode (weak units): the ring shows but stands still.
+    if (com.vikash.ampli.drive.prefs.LiteMode.enabled) {
+        Box(modifier.border(6.dp, color.copy(alpha = 0.5f), CircleShape))
+        return
+    }
     val pulse = androidx.compose.animation.core.rememberInfiniteTransition(label = "mic")
-    val s by pulse.animateFloat(
+    val s = pulse.animateFloat(
         initialValue = 1f,
         targetValue = 1.12f,
         animationSpec = androidx.compose.animation.core.infiniteRepeatable(
@@ -740,7 +767,11 @@ private fun MicRing(listening: Boolean, color: Color, modifier: Modifier) {
     )
     Box(
         modifier
-            .scale(s)
+            // Read in the draw layer only: the pulse redraws the ring without recomposing Home.
+            .graphicsLayer {
+                scaleX = s.value
+                scaleY = s.value
+            }
             .border(6.dp, color.copy(alpha = 0.5f), CircleShape),
     )
 }
