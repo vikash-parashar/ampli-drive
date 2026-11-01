@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">Neustart und Ausschalten brauchen den \"Ampli power helper\" in den Bedienungshilfen von Android. Er öffnet nur das Ein/Aus-Menü.</string>
+    <string name="disclosure_power_private">Er öffnet nur das Ein/Aus-Menü, die letzten Apps und Screenshots. Ampli liest sonst nichts auf dem Bildschirm und sendet nichts. Android zeigt dieselbe Warnung für jeden Helfer. Sie können ihn jederzeit ausschalten.</string>
+    <string name="disclosure_power_service">Ampli power helper drückt für Geräte ohne Tasten die Android-eigenen Tasten: Ein/Aus-Menü (Neustart, Ausschalten), letzte Apps und Screenshots. Er liest nichts auf dem Bildschirm und sendet nichts. Er handelt nur, wenn Sie diese Tasten in Ampli Car Hub antippen.</string>
+    <string name="disclosure_power_admin">Damit kann \"Bildschirm aus\" in Ampli Car Hub den Bildschirm sperren. Ampli kann sonst nichts löschen, lesen oder ändern. Jederzeit abschaltbar unter Einstellungen › Power.</string>
+</resources>

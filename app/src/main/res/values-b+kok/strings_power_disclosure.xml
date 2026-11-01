@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">रीस्टार्ट आनी पावर ऑफ खातीर Android च्या accessibility सेटिंगांत \"Ampli power helper\" चालू करचो पडटलो। तो फकत पावर मेन्यू उगडपाक वापरतात।</string>
+    <string name="disclosure_power_private">तो फकत पावर मेन्यू, हालीच्या ऍप्स आनी स्क्रीनशॉट उगडटा। Ampli स्क्रीनार हेर कांयच वाचना, कांयच धाडिना। Android ची शिटकावणी दर helper खातीर एकूच आसता। तुमी केन्नाय तो बंद करूंक शकतात।</string>
+    <string name="disclosure_power_service">Ampli power helper बटण नाशिल्ल्या स्क्रीनां खातीर Android चीं स्वताचीं बटणां दाबता: पावर मेन्यू (रीस्टार्ट, पावर ऑफ), हालीच्या ऍप्स आनी स्क्रीनशॉट। तो स्क्रीनार कांयच वाचना आनी खंयच कांयच धाडिना। तुमी Ampli Car Hub त हीं बटणां दाबतात तेन्नाच तो काम करता।</string>
+    <string name="disclosure_power_admin">Ampli Car Hub तलें स्क्रीन बंद स्क्रीन लॉक करूंक शकता। Ampli हेर कांयच पुसूंक, वाचूंक वा बदलूंक शकना। सेटिंग्स › पावर हांगा केन्नाय बंद करात।</string>
+</resources>

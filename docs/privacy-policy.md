@@ -1,6 +1,6 @@
 # Ampli Car Hub privacy policy
 
-_Last updated: 31 October 2026_
+_Last updated: 1 November 2026_
 
 Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by **Ampli Studio** ("we"). This policy explains what the app does with your data.
 
@@ -62,6 +62,16 @@ A head unit's Bluetooth call is detected from its ringing notification (see Noti
 
 Only if you have Pro and switch on **Dashcam** (off by default), the app asks for the camera permission and records video (no sound) from a camera on the unit while Car Hub is running, with a notification showing whenever it records. Clips stay in the app's own folder on the unit and are deleted with the app. A hard jolt, a crash or saying "save kar" keeps the current clip from being overwritten. Clips are never uploaded or sent anywhere; you can open one in your video player.
 
+## Power keys, the Ampli power helper and Screen off
+
+Head units often have no physical buttons, so Home has its own Back, Home, Apps, volume and power keys.
+
+- **Ampli power helper** (an Android accessibility service, off until you turn it on in Android's Accessibility settings from the one-time card). It only presses Android's own keys when you tap a key in Car Hub: the power menu (for Restart and Power off), recent apps (long press on Apps) and, on Android 9 and newer, a screenshot. It asks Android for no accessibility events and cannot read window content, so it does not see, collect, store or send anything on your screen. Android shows the same general warning for every accessibility service. You can turn it off at any time in Android's Accessibility settings.
+- **Turn the display fully off** (Settings › Power, off by default). With your approval on Android's "Activate device admin app?" screen, the app uses the device-admin **lock** policy only, so Screen off can lock the screen. It cannot erase, read or change anything else. Switching the setting off gives the permission back. Otherwise Screen off is a black cover over the app that wakes on touch.
+- **Rooted units**: if the unit offers root (`su`), Restart and Power off run `reboot` directly after a 5-second countdown. Nothing else is run as root.
+- **Screenshots** from the quick panel are saved on the unit (Pictures/Ampli, or the app's own Pictures folder) and never uploaded. On Android 8 and 9 Android asks first ("start capturing?"), and storage permission is asked once.
+- **Clear memory** asks Android to stop other apps' background processes (they restart when needed); it reads nothing from them.
+
 ## Notification access (FASTag SMS, music, navigation, calls and WhatsApp / Telegram read-aloud)
 
 With your permission (Android's notification access), the app reads:
@@ -106,7 +116,7 @@ The app is meant for drivers and is not directed at children.
 
 ## Your choices
 
-Every feature that uses location in the background, the microphone, the camera, phone and contacts permissions or notification access can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help & feedback reports, write to the contact address above with your install id (shown in the report email or available on request).
+Every feature that uses location in the background, the microphone, the camera, phone and contacts permissions, notification access, the Ampli power helper or the screen lock (device admin) can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help & feedback reports, write to the contact address above with your install id (shown in the report email or available on request).
 
 ## Changes
 

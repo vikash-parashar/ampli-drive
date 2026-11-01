@@ -21,6 +21,8 @@ object VoskCommands {
         // Fuel finder and road reports.
         "nearest cng pump", "cng pump", "petrol pump", "diesel pump", "charging station", "fuel station",
         "police ahead", "accident ahead", "traffic jam ahead", "mobile camera ahead",
+        // Power keys by voice (Restart and Power off always ask first).
+        "screen off", "turn off the screen", "restart", "reboot", "power off", "shut down",
     )
 
     /**
@@ -46,6 +48,8 @@ object VoskCommands {
         "tyre pressure kitna hai", "service kab hai", "engine kaisa hai",
         "police aage hai", "aage jam hai", "accident aage hai", "mobile camera aage hai",
         "kya haal hai", "ke haal sai", "tum kaun ho", "chutkula sunao", "kya bol sakta hoon",
+        "screen band karo", "screen off karo", "display band karo", "restart karo", "power off karo",
+        "gaadi ki screen band karo", "radd karo",
     )
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
@@ -80,6 +84,8 @@ object VoskCommands {
         // Fuel finder and road reports.
         "सीएनजी पंप कहाँ है", "सीएनजी पंप", "पेट्रोल पंप", "डीजल पंप", "चार्जिंग स्टेशन",
         "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
+        // Power keys.
+        "स्क्रीन बंद करो", "स्क्रीन ऑफ करो", "रीस्टार्ट करो", "पावर ऑफ करो", "गाड़ी की स्क्रीन बंद करो",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")

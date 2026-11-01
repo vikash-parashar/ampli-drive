@@ -439,7 +439,7 @@ internal fun PhoneLinkMissingDialog(onOpenApps: () -> Unit, onDismiss: () -> Uni
 
 /** Every launchable app, EQ-looking ones first, plus "Automatic"; [onPick] gets "package/activity" or null. */
 @Composable
-private fun EqChooserDialog(onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+internal fun EqChooserDialog(onPick: (String?) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val (bg, fg) = dialogColors()
     val theme = LocalDriveTheme.current

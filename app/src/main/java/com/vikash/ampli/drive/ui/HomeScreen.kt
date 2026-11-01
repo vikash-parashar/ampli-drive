@@ -826,7 +826,7 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
                 Text(time, style = theme.numberStyle(theme.text), fontSize = dims.t(6.6f, min = 30f), maxLines = 1)
                 if (ampm != null) Text(" $ampm", color = theme.muted, fontSize = dims.t(2.8f, min = 16f), modifier = Modifier.padding(bottom = dims.d(0.6f)))
             }
-            ui.alert?.let { AlertPill(it, Modifier.widthIn(max = dims.d(60f))) }
+            ui.alert?.let { AlertPill(it, Modifier.widthIn(max = dims.d(44f))) }
             Spacer(Modifier.weight(0.01f))
             CaptionLine(ui.caption, Modifier.weight(1f))
         }
@@ -1306,7 +1306,7 @@ private fun RoadSignHome(ui: HomeUi, pullDown: Modifier) {
                 Row(
                     Modifier
                         .fillMaxHeight()
-                        .widthIn(max = dims.d(70f))
+                        .widthIn(max = dims.d(52f))
                         .background(if (a.alert.danger) theme.danger else theme.background)
                         .border(bw, theme.border)
                         .clickable(onClick = a.onClick)

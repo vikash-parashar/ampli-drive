@@ -50,6 +50,8 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             startSensors()
             resumeTick.intValue++
+        // Back from Accessibility settings: Restart / Power off carry on once the helper is on.
+        com.vikash.ampli.drive.system.PowerControl.onResume(this)
         }
 
     /** Android 12 has no per-app language API: apply the saved language here. */

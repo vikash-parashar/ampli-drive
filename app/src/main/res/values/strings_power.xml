@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's left rail, the quick panel and the power keys (Screen off, Restart, Power off). -->
+<resources>
+    <string name="power_helper_name" translatable="false">Ampli power helper</string>
+
+    <!-- Rail: short labels, under an icon 96 px wide. -->
+    <string name="rail_back">Back</string>
+    <string name="rail_home">Home</string>
+    <string name="rail_apps">Apps</string>
+    <string name="rail_vol_up">Vol +</string>
+    <string name="rail_vol_down">Vol −</string>
+    <string name="rail_mute">Mute</string>
+    <string name="rail_unmute">Unmute</string>
+    <string name="rail_controls">Controls</string>
+    <string name="rail_volume_title">Volume</string>
+    <string name="rail_muted">Muted</string>
+    <string name="strip_open">Open quick controls</string>
+
+    <!-- Quick panel -->
+    <string name="qp_title">Quick controls</string>
+    <string name="qp_wifi">Wi-Fi</string>
+    <string name="qp_bt">Bluetooth</string>
+    <string name="qp_eq">EQ</string>
+    <string name="qp_screensaver">Screensaver</string>
+    <string name="qp_settings">Settings</string>
+    <string name="qp_clear">Clear memory</string>
+    <string name="qp_screenshot">Screenshot</string>
+    <string name="qp_volume">Volume</string>
+    <string name="qp_brightness">Brightness</string>
+    <string name="qp_on">On</string>
+    <string name="qp_off">Off</string>
+    <string name="qp_clearing">Clearing…</string>
+    <string name="qp_cleared">%1$s freed</string>
+    <string name="qp_cleared_none">Memory is already clear</string>
+    <string name="qp_shot_saved">Screenshot saved in Pictures/Ampli</string>
+    <string name="qp_shot_android">Screenshot taken</string>
+    <string name="qp_shot_failed">Could not take a screenshot on this unit</string>
+    <string name="qp_shot_needs_helper">Screenshots need the Ampli power helper on this Android version</string>
+
+    <!-- Power sheet and countdowns -->
+    <string name="power_title">Power</string>
+    <string name="power_screen_off">Screen off</string>
+    <string name="power_restart">Restart</string>
+    <string name="power_off">Power off</string>
+    <string name="power_wait_note">Restart and Power off wait 5 s so you can cancel.</string>
+    <string name="power_cancel">Cancel</string>
+    <string name="power_now">Now</string>
+    <string name="power_counting_screen">Screen off in %1$d s</string>
+    <string name="power_counting_restart">Restarting in %1$d s</string>
+    <string name="power_counting_off">Powering off in %1$d s</string>
+    <string name="power_countdown_root">This unit allows root: it restarts by itself.</string>
+    <string name="power_countdown_menu">Android\'s power menu opens next: tap the same key there.</string>
+    <string name="power_counting_hint_voice">Say \"radd karo\" to stop</string>
+    <string name="power_screen_music">Music keeps playing.</string>
+    <string name="power_ask_restart">Restart the screen?</string>
+    <string name="power_ask_off">Power off the screen?</string>
+    <string name="power_ask_hint">Say \"haan\" or \"nahin\"</string>
+    <string name="power_yes">Yes</string>
+    <string name="power_no">No</string>
+    <string name="power_say_screen_off">Turning the screen off. Say radd karo to stop.</string>
+    <string name="power_working_restart">Restarting…</string>
+    <string name="power_working_off">Powering off…</string>
+    <string name="power_pointer_restart">Tap Restart here</string>
+    <string name="power_pointer_off">Tap Power off here</string>
+    <string name="power_pointer_body">Android\'s power menu is open.</string>
+    <string name="power_failed_title">This unit did not allow it</string>
+    <string name="power_failed_body">Turn the car off and on again, or use the unit\'s own power key.</string>
+    <string name="power_touch_wake">Touch to wake</string>
+
+    <!-- One-time cards -->
+    <string name="power_setup_title">One-time setup: turn on the Ampli power helper</string>
+    <string name="power_setup_step1">Tap Turn on</string>
+    <string name="power_setup_step2">Pick Ampli power helper</string>
+    <string name="power_setup_step3">Switch it on, come back</string>
+    <string name="power_setup_turn_on">Turn on</string>
+    <string name="power_setup_later">Not now</string>
+    <string name="power_root_title">This screen restarts directly</string>
+    <string name="power_root_body">This unit allows root, so Restart and Power off happen without Android\'s menu, after a 5-second countdown. Android may ask once to allow root for Ampli Car Hub.</string>
+    <string name="power_root_ok">OK, continue</string>
+
+    <!-- Android 13+ sideload: the helper's switch is a restricted setting. -->
+    <string name="power_guide_title">The power helper is still off</string>
+    <string name="power_guide_hint">On Android 13 and newer, the phone blocks this for apps not installed from Play (\"restricted setting\"). Allow it once like this:</string>
+    <string name="power_guide_step_try">Tap \"Open Accessibility\" and switch on Ampli power helper. The first time Android refuses: that is expected.</string>
+    <string name="power_guide_step_3">Come back, tap \"Open Accessibility\" and switch on Ampli power helper.</string>
+    <string name="power_guide_menu_missing">No \"Allow restricted settings\" in the ⋮ menu? Try the switch once, let Android say no, then open the ⋮ menu again.</string>
+    <string name="power_guide_open">Open Accessibility</string>
+
+    <!-- Settings › Power -->
+    <string name="settings_power_title">Power keys</string>
+    <string name="settings_power_hint">Screen off, Restart and Power off</string>
+    <string name="settings_power_helper_on">On: Restart and Power off open Android\'s power menu</string>
+    <string name="settings_power_helper_off">Off: turn it on for Restart and Power off</string>
+    <string name="settings_power_root">Root found: Restart and Power off work directly</string>
+    <string name="settings_power_strip">⏻ in the top strip</string>
+    <string name="settings_power_strip_hint">A power key next to the pull-down strip on Home</string>
+    <string name="settings_power_lock">Turn the display fully off</string>
+    <string name="settings_power_lock_hint">Screen off locks the screen (device admin, lock only). Some units then wake only with the ignition. Off: a black cover that wakes on touch.</string>
+
+    <!-- Settings › Voice › What can I say? -->
+    <string name="voice_cmds_power">Screen and power</string>
+</resources>

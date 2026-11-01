@@ -3,6 +3,7 @@ package com.vikash.ampli.drive.voice
 import com.vikash.ampli.drive.cameras.ReportKind
 import com.vikash.ampli.drive.fuel.FuelFilter
 import com.vikash.ampli.drive.nav.SavedKind
+import com.vikash.ampli.drive.system.PowerAction
 import java.util.Locale
 
 /** What the driver asked for, after the wake word. */
@@ -92,6 +93,12 @@ sealed interface VoiceIntent {
 
     /** "What can I say?", "kya kya bol sakte hain": the full command list. */
     data object WhatCanISay : VoiceIntent
+
+    /**
+     * "Screen band karo", "restart karo", "power off karo": the Power keys by voice. Restart and
+     * Power off always ask "हाँ / नहीं" first; Screen off counts down and "radd karo" stops it.
+     */
+    data class Power(val action: PowerAction) : VoiceIntent
     data object Cancel : VoiceIntent
     data class Unknown(val text: String) : VoiceIntent
 }
@@ -119,6 +126,8 @@ object VoiceIntents {
             ordinal(t, kw)?.let { return VoiceIntent.ChooseOption(it) }
         }
         if (STOP_NAV.any { has(t, it) }) return VoiceIntent.StopNavigation
+        // Before "band karo" (cancel) and "off" (volume): "screen band karo" is the screen.
+        power(t, kw)?.let { return it }
         if (kw.pause.any { has(t, it) }) return VoiceIntent.Pause
         val playWord = kw.play.any { has(t, it) }
         if (!playWord) volume(t)?.let { return it }
@@ -420,6 +429,44 @@ object VoiceIntents {
         "help with commands", "kya bol sakta", "kya bol sakte", "kya kya bol", "kya kar sakti", "kya kar sakte",
         "commands dikhao", "क्या बोल सकता", "क्या बोल सकते", "क्या क्या बोल", "क्या कर सकती", "क्या कर सकते",
         "कमांड दिखाओ", "के के बोल सकूं", "के कर सकै",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /**
+     * "Screen band karo", "turn off the screen", "restart karo", "reboot", "power off karo",
+     * "gaadi ki screen band karo" (the whole unit). Power off is checked first, as its phrases
+     * contain "screen band". Never with music or navigation words ("restart the song").
+     */
+    private fun power(t: String, kw: Keywords): VoiceIntent? {
+        if (kw.music.any { has(t, it) } || POWER_NOT.any { has(t, it) }) return null
+        return when {
+            POWER_OFF.any { has(t, it) } -> VoiceIntent.Power(PowerAction.PowerOff)
+            POWER_RESTART.any { has(t, it) } -> VoiceIntent.Power(PowerAction.Restart)
+            SCREEN_OFF.any { has(t, it) } -> VoiceIntent.Power(PowerAction.ScreenOff)
+            else -> null
+        }
+    }
+
+    private val POWER_OFF = listOf(
+        "power off", "poweroff", "switch off the unit", "switch off the system", "turn off the unit", "turn off the system",
+        "shut down", "shutdown", "power band karo", "power band", "gaadi ki screen band", "gadi ki screen band",
+        "gaadi ka system band", "system band karo", "पावर ऑफ", "पावर ऑफ़", "पावर बंद", "गाड़ी की स्क्रीन बंद", "गाडी की स्क्रीन बंद",
+        "सिस्टम बंद करो", "शट डाउन", "शटडाउन",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val POWER_RESTART = listOf(
+        "restart", "re start", "reboot", "re boot", "restart karo", "reboot karo", "रीस्टार्ट", "री स्टार्ट", "रिस्टार्ट",
+        "रीबूट", "री बूट",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val SCREEN_OFF = listOf(
+        "screen off", "screen band", "screen bandh", "turn off the screen", "turn off screen", "switch off the screen",
+        "switch off screen", "screen ko band", "display off", "display band", "display ko band", "स्क्रीन बंद", "स्क्रीन ऑफ",
+        "स्क्रीन ऑफ़", "स्क्रीन को बंद", "डिस्प्ले बंद", "डिस्प्ले ऑफ",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** Restarting a song, the route or the app is not the unit. */
+    private val POWER_NOT = listOf(
+        "navigation", "route", "rasta", "raasta", "रास्ता", "नेविगेशन", "app", "ऐप", "video", "वीडियो", "recording", "dashcam",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     // ------------------------------------------------------------------ Fuel finder and road reports
@@ -854,7 +901,7 @@ object VoiceIntents {
         ),
         cancel = listOf(
             "रद्द करो", "रद्द", "कैंसल", "बस", "छोड़ो", "रहने दो", "कुछ नहीं", "बंद करो", "rehne do",
-            "chhodo", "chodo", "bas", "kuch nahi", "band karo", "cancel karo",
+            "chhodo", "chodo", "bas", "kuch nahi", "band karo", "cancel karo", "radd karo", "rad karo", "radd",
         ),
         sos = listOf("मदद", "बचाओ", "आपातकाल", "इमरजेंसी", "एम्बुलेंस", "madad", "bachao"),
         call = listOf(
