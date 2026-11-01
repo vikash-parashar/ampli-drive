@@ -52,6 +52,10 @@ import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.map.MapDiagnostics
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.Listener
+import com.vikash.ampli.drive.voice.RecognizerFallback
+import com.vikash.ampli.drive.voice.SystemRecognizerHealth
+import com.vikash.ampli.drive.voice.VoiceEngine
+import com.vikash.ampli.drive.voice.VoiceLocales
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.VoskCommandListener
 import com.vikash.ampli.drive.voice.WakeModel
@@ -190,6 +194,12 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
     val tts = rememberTtsInfo()
     val hasMic = remember(tick) { context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED }
     val sysRecognizer = remember(tick) { SpeechRecognizer.isRecognitionAvailable(context) }
+    val sysPresent = remember(tick) { Listener.systemPresent(context) }
+    val sysDeadTurns = remember(tick) { SystemRecognizerHealth.deadTurns(context) }
+    val sysWorks = remember(tick) { Listener.systemWorks(context) }
+    val lastEngine by SystemRecognizerHealth.lastEngine.collectAsStateWithLifecycle()
+    val language by app.prefs.language.collectAsStateWithLifecycle()
+    val hindiLanguage = VoiceLocales.parserLanguage(language) == "hi"
     val recognizerSetting = remember(tick) {
         try {
             Settings.Secure.getString(context.contentResolver, "voice_recognition_service")
@@ -216,7 +226,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     is WakeModel.State.Failed -> "FAILED: ${m.message}"
                 }
                 DiagRow(
-                    "Offline model (Vosk)",
+                    "English offline model (wake word + commands)",
                     modelText + (app.wakeModel.loadError?.let { " · load error: $it" } ?: ""),
                     model == WakeModel.State.Ready,
                     action = if (model == WakeModel.State.Ready || model is WakeModel.State.Downloading || model == WakeModel.State.Unpacking) {
@@ -227,30 +237,63 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     onAction = { app.wakeModel.ensure() },
                 )
                 val hindi by app.hindiModel.state.collectAsStateWithLifecycle()
+                val hindiAuto = RecognizerFallback.wantHindiModel(
+                    VoiceLocales.parserLanguage(language),
+                    sysWorks,
+                    app.hindiModel.removedByUser(),
+                )
                 DiagRow(
-                    "Offline Hindi commands (Vosk)",
+                    "Hindi offline model (commands)",
                     when (val m = hindi) {
-                        WakeModel.State.Missing -> "not downloaded (optional, Settings › Voice)"
+                        WakeModel.State.Missing -> when {
+                            hindiAuto -> "not downloaded yet: downloads by itself (needs internet)"
+                            app.hindiModel.removedByUser() -> "not downloaded (removed in Settings › Voice)"
+                            else -> "not downloaded (optional, Settings › Voice)"
+                        }
                         is WakeModel.State.Downloading -> "downloading ${m.percent}%"
                         WakeModel.State.Unpacking -> "unpacking"
                         WakeModel.State.Ready -> "ready (${app.hindiModel.spec.dirName})"
                         is WakeModel.State.Failed -> "FAILED: ${m.message}"
                     } + (app.hindiModel.loadError?.let { " · load error: $it" } ?: ""),
-                    if (hindi == WakeModel.State.Ready) true else null,
+                    if (hindi == WakeModel.State.Ready) true else if (hindiLanguage && !sysPresent) false else null,
+                    action = if (hindiLanguage && (hindi == WakeModel.State.Missing || hindi is WakeModel.State.Failed)) {
+                        stringResource(R.string.vcheck_download)
+                    } else {
+                        null
+                    },
+                    onAction = { app.hindiModel.ensure() },
                 )
             }
             DiagSection("Speech recognition") {
+                DiagRow("System recognizer present", yes(sysPresent), sysPresent)
+                DiagRow(
+                    "System recognizer working",
+                    when {
+                        !sysPresent -> "no (none installed)"
+                        sysDeadTurns >= RecognizerFallback.DEAD_AFTER -> "NO: no response $sysDeadTurns turns in a row, offline model used"
+                        !sysWorks -> "NO: did not respond last time; tried once more this run"
+                        sysDeadTurns > 0 -> "no response last turn"
+                        else -> "yes (or not tried yet)"
+                    },
+                    if (!sysPresent) null else sysWorks && sysDeadTurns == 0,
+                )
+                DiagRow("Last turn served by", lastEngine.label, if (lastEngine == VoiceEngine.None) null else true)
                 DiagRow("SpeechRecognizer available", yes(sysRecognizer), sysRecognizer)
                 DiagRow("Recognizer setting", recognizerSetting ?: "(none)", null)
                 DiagRow("Recognition services", services.joinToString(", ").ifEmpty { "(none installed)" }, services.isNotEmpty())
+                val hindiReady = hindiLanguage && app.hindiModel.isInstalled()
+                val offlineReady = model == WakeModel.State.Ready || hindiReady
+                val systemUsable = sysWorks
+                val offlineName = if (hindiReady) "offline Hindi model" else "offline English model (with Hinglish)"
                 DiagRow(
                     "Used for commands",
                     when {
-                        sysRecognizer -> "system recognizer"
-                        model == WakeModel.State.Ready -> "offline model (English commands)"
+                        systemUsable && offlineReady -> "system recognizer, $offlineName if it does not respond"
+                        systemUsable -> "system recognizer"
+                        offlineReady -> offlineName
                         else -> "NONE: download the offline model"
                     },
-                    sysRecognizer || model == WakeModel.State.Ready,
+                    systemUsable || offlineReady,
                 )
             }
             DiagSection("Text to speech") {
@@ -294,12 +337,13 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         listening = true
                         heard = null
                         scope.launch {
+                            val testListener = Listener(app, VoskCommandListener(app))
                             val result = app.voice.withMic {
-                                Listener(app, VoskCommandListener(app)).listen(app.prefs.language.value, onPartial = { heard = "… $it" })
+                                testListener.listen(app.prefs.language.value, onPartial = { heard = "… $it" })
                             }
                             heard = when (result) {
-                                is Listener.Result.Heard -> "Heard: \"${result.text}\"" + if (result.offline) " (offline model)" else " (system recognizer)"
-                                Listener.Result.Silence -> "Nothing heard"
+                                is Listener.Result.Heard -> "Heard: \"${result.text}\" (${testListener.lastEngine.label})"
+                                Listener.Result.Silence -> "Nothing heard (${testListener.lastEngine.label})"
                                 Listener.Result.Unavailable -> "No recognizer available"
                             }
                             listening = false

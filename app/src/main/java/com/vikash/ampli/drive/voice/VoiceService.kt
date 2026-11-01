@@ -337,6 +337,9 @@ class VoiceService : Service() {
                 setStatus(Status.Failed("no microphone permission"))
                 return false
             }
+            // Hindi-family language on a unit without working system speech: the Hindi command
+            // model downloads by itself (automatic rules: back-off, not after the driver removed it).
+            VoskCommandListener.ensureHindiModel(app)
             if (!app.wakeModel.isInstalled()) {
                 // A download that failed (or never ran) is retried here, so the wake word comes
                 // up by itself after boot instead of waiting for Settings to be opened.

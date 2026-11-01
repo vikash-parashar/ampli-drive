@@ -82,7 +82,12 @@ class VoiceAssistant(private val app: DriveApp) {
     /** Set by VoiceService: closes the wake-word microphone synchronously before we listen. */
     var releaseWakeMic: (() -> Unit)? = null
 
-    private enum class Expect { Nothing, Destination, Choice, MoreVolume }
+    /**
+     * What the next turn listens for. [Open]: right after a greeting, a command or a place name
+     * (offline, commands are tried first and "where to?" is asked only when none is heard);
+     * [Destination]: a place name after "where to?" (commands still win when one is said).
+     */
+    private enum class Expect { Nothing, Open, Destination, Choice, MoreVolume }
 
     /** The last volume change, for a follow-up "aur" / "more". */
     private var lastVolume = VoiceIntent.VolumeAction.Show
@@ -196,16 +201,19 @@ class VoiceAssistant(private val app: DriveApp) {
             // Neither a system recogniser nor the offline model: start the model download so
             // the next try works, and point at Settings › Voice › Check voice.
             app.wakeModel.ensure(automatic = true)
+            VoskCommandListener.ensureHindiModel(app)
             say(res, lang, R.string.voice_unavailable)
             return
         }
+        // Hindi-family language without a working system recogniser: fetch the Hindi model.
+        VoskCommandListener.ensureHindiModel(app)
 
         var expect = Expect.Nothing
         val now = System.currentTimeMillis()
         if (now - app.prefs.lastVoiceGreeting > GREETING_EVERY_MS) {
             app.prefs.lastVoiceGreeting = now
             greet(res, lang)
-            expect = Expect.Destination
+            expect = Expect.Open
         } else {
             // Haryanvi desi between greetings: a short "हाँ भाई, बोल।" (Standard: just the beep).
             app.desi.line(HaryanviLines.Event.WakeReply)?.let { speakDesi(it) }
@@ -215,12 +223,26 @@ class VoiceAssistant(private val app: DriveApp) {
         repeat(MAX_TURNS) {
             speaker.earcon()
             _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
-            val result = listener.listen(
+            val onPartial = { partial: String -> _state.update { it.copy(heard = partial) } }
+            var result = listener.listen(
                 lang,
-                onPartial = { partial -> _state.update { it.copy(heard = partial) } },
-                // Offline fallback: command phrases only, except when a place name is expected.
+                onPartial = onPartial,
+                // Offline fallback: command phrases only, except right after "where to?". After
+                // the greeting the offline model hears commands first ("gaana chalao" must not
+                // become a place search); a place name is asked for next.
                 commandsOnly = expect != Expect.Destination,
             )
+            if (listener.lastEngine.offline) VoskCommandListener.ensureHindiModel(app)
+            if (expect == Expect.Open && listener.lastEngine.offline &&
+                RecognizerFallback.offlineNeedsWhereTo((result as? Listener.Result.Heard)?.text, parserLang)
+            ) {
+                // No command heard offline: ask for the place and transcribe it freely.
+                styled(res, lang, HaryanviLines.Event.AskDestination, res.getString(R.string.voice_where_to))
+                expect = Expect.Destination
+                speaker.earcon()
+                _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
+                result = listener.listen(lang, onPartial = onPartial, commandsOnly = false)
+            }
             val text = when (result) {
                 Listener.Result.Unavailable -> {
                     say(res, lang, R.string.voice_unavailable)
@@ -280,7 +302,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 return null
             }
             is VoiceIntent.Unknown -> return when (expect) {
-                Expect.Destination -> {
+                Expect.Open, Expect.Destination -> {
                     val dest = VoiceIntents.destinationFrom(text, parserLang)
                     val saved = VoiceIntents.savedKind(dest)
                     when {
@@ -382,7 +404,7 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             VoiceIntent.Greeting -> {
                 greet(res, lang)
-                return Expect.Destination
+                return Expect.Open
             }
             is VoiceIntent.SmallTalk -> return smallTalk(intent.kind, res, lang)
             VoiceIntent.DashcamSave -> {
@@ -976,7 +998,7 @@ class VoiceAssistant(private val app: DriveApp) {
         VoiceIntent.Talk.HowAreYou -> {
             val desi = app.desi.line(HaryanviLines.Event.TalkHowAreYou)
             if (desi != null) speakDesi(desi) else say(res, lang, greeting(res))
-            Expect.Destination
+            Expect.Open
         }
         VoiceIntent.Talk.WhoAreYou -> {
             styled(res, lang, HaryanviLines.Event.TalkWhoAreYou, res.getString(R.string.voice_who_am_i))

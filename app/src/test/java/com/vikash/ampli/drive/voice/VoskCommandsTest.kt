@@ -56,4 +56,43 @@ class VoskHindiCommandsTest {
         assertFalse(g.contains("\"next song\""))
         assertTrue(g.endsWith("\"[unk]\"]"))
     }
+
+    @Test
+    fun hinglishPhrasesParseInEveryHindiFamilyAndEnglish() {
+        // The English model serves Hindi-speaking drivers until the Hindi model is downloaded.
+        for (p in VoskCommands.HINGLISH_COMMANDS) {
+            assertFalse(p, VoiceIntents.parse(p, "en") is VoiceIntent.Unknown)
+            assertFalse(p, VoiceIntents.parse(p, "hi") is VoiceIntent.Unknown)
+        }
+    }
+
+    @Test
+    fun everyEnglishGrammarPhraseIsUnderstood() {
+        // Each phrase is a command, a choice (while a list shows) or a volume follow-up.
+        for (p in VoskCommands.phrases(hindi = false)) {
+            val understood = VoiceIntents.parse(p, "hi") !is VoiceIntent.Unknown ||
+                VoiceIntents.parse(p, "hi", expectingChoice = true) is VoiceIntent.ChooseOption ||
+                VoiceIntents.volumeFollowUp(p, VoiceIntent.VolumeAction.Up) != null
+            assertTrue(p, understood)
+        }
+    }
+
+    @Test
+    fun englishGrammarHoldsTheFieldCommands() {
+        val g = VoskCommands.grammarJson()
+        for (p in listOf("gaana chalao", "awaaz badhao", "le chalo", "cng pump kahan hai", "play music")) {
+            assertTrue(p, g.contains("\"$p\""))
+        }
+        assertTrue(g.endsWith("\"[unk]\"]"))
+        val phrases = VoskCommands.phrases()
+        assertEquals(phrases.size, phrases.toSet().size)
+    }
+
+    @Test
+    fun englishGrammarStaysRoman() {
+        // The English model cannot hear Devanagari words; they would only be dropped.
+        for (p in VoskCommands.phrases(hindi = false)) {
+            assertTrue(p, p.all { it.code < 128 })
+        }
+    }
 }

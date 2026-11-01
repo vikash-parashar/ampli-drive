@@ -32,7 +32,8 @@ enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: 
 
     /**
      * Hindi commands (and Haryanvi said with Hindi words) on head units without Google speech.
-     * ~42 MB zipped, so it is never bundled: Settings › Voice downloads it when the driver asks.
+     * ~42 MB zipped, so it is never bundled: fetched by itself for Hindi-family app languages when
+     * there is no working system recogniser, or from Settings › Voice when the driver asks.
      */
     Hindi(
         "vosk-model-small-hi-0.22",
@@ -44,7 +45,8 @@ enum class VoskModelSpec(val dirName: String, val url: String, val approxBytes: 
 /**
  * A small offline Vosk model, downloaded once into filesDir/vosk/<model>/ (never in the APK).
  * [VoskModelSpec.EnglishIndia] spots "Hey Ampli" and is fetched the first time the driver switches
- * the wake word on; [VoskModelSpec.Hindi] hears Hindi/Haryanvi commands and is fetched on demand.
+ * the wake word on; [VoskModelSpec.Hindi] hears Hindi/Haryanvi commands and is fetched when a
+ * Hindi-family app language has no working system recogniser (or on demand).
  * Progress shows in Settings › Voice.
  */
 class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.EnglishIndia) {
@@ -72,6 +74,10 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
 
     private val prefs = appContext.getSharedPreferences("wake_model", Context.MODE_PRIVATE)
     private val failedKey = "${spec.dirName}.failedAt"
+    private val removedKey = "${spec.dirName}.removedByUser"
+
+    /** The driver removed this model in Settings: automatic downloads leave it alone. */
+    fun removedByUser(): Boolean = prefs.getBoolean(removedKey, false)
 
     private fun markFailed() {
         prefs.edit().putLong(failedKey, System.currentTimeMillis()).apply()
@@ -95,7 +101,8 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
             return
         }
         if (job?.isActive == true) return
-        if (automatic && backingOff()) return
+        if (automatic && (backingOff() || removedByUser())) return
+        if (!automatic) prefs.edit().remove(removedKey).apply()
         job = scope.launch {
             try {
                 download()
@@ -179,8 +186,12 @@ class WakeModel(context: Context, val spec: VoskModelSpec = VoskModelSpec.Englis
         File(modelDir, READY_MARKER).writeText("ok")
     }
 
-    /** Frees this model's space (the other model stays). */
-    fun delete() {
+    /**
+     * Frees this model's space (the other model stays). [byUser]: the driver tapped Remove, so
+     * automatic downloads do not bring it back (a tap on Download does).
+     */
+    fun delete(byUser: Boolean = false) {
+        if (byUser) prefs.edit().putBoolean(removedKey, true).apply()
         job?.cancel()
         synchronized(this) {
             loaded?.close()
