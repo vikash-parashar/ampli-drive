@@ -81,23 +81,46 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon lintDebug || { cat app/build/reports/lint-results-debug.txt; exit 1; }
 
-      - name: Build debug APK
+      # The sideloaded test APK is a release-speed build (build type fastTest: R8, not debuggable,
+      # baseline profile), signed with the same fixed test key and the same application id as the
+      # earlier debug test APKs, so it still installs as an update over them. A debug build runs
+      # several times slower on 1-2 GB head units. If R8 trips over a missing keep rule, the debug
+      # APK is shipped instead (with an error annotation), so there is always something to install.
+      - name: Build test APK
+        shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+          if ./gradlew --no-daemon assembleFastTest 2>&1 | tee fast-test.log; then
+            cp app/build/outputs/apk/fastTest/app-fastTest.apk test.apk
+          else
+            for f in $(find app/build/outputs/mapping -name missing_rules.txt 2>/dev/null); do
+              grep -v '^#' "$f" | grep . | head -40 | sed 's/^/::error title=R8 missing rule::/'
+            done
+            grep -E "^e: |ERROR:|Missing class|R8: " fast-test.log | head -20 | sed 's/^/::error title=Fast test build::/'
+            echo "::error title=Test APK is a debug build::The fast (release-type) test build failed, so this APK is the slower debug build. Fix the error above."
+            ./gradlew --no-daemon assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk test.apk
+          fi
 
       - name: Rename APK
         if: github.event_name != 'pull_request'
-        run: cp app/build/outputs/apk/debug/app-debug.apk "AmpliCarHub-${GITHUB_RUN_NUMBER}.apk"
+        run: cp test.apk "AmpliCarHub-${GITHUB_RUN_NUMBER}.apk"
 
       - name: Rename PR APK
         if: github.event_name == 'pull_request'
-        run: cp app/build/outputs/apk/debug/app-debug.apk "AmpliCarHub-pr-${GITHUB_RUN_NUMBER}.apk"
+        run: cp test.apk "AmpliCarHub-pr-${GITHUB_RUN_NUMBER}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
           name: AmpliCarHub-apk
           path: AmpliCarHub-*.apk
+
+      # R8 renames classes in the test APK: this file turns a crash stack trace back into names.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AmpliCarHub-r8-mapping
+          path: app/build/outputs/mapping/fastTest/mapping.txt
+          if-no-files-found: ignore
 
       # Screen previews to look at without installing the APK.
       - uses: actions/upload-artifact@v4
@@ -166,6 +189,43 @@ jobs:
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+      # Offline speech models for the Play install-time asset pack (:voicemodels), so a Play
+      # install has voice on first start with no download. Only this job needs them: asset packs
+      # go into the app bundle, never into assembled test APKs (the sideloaded test APK downloads
+      # the models itself on first start). Cached by file name; bump the names in WakeModel.kt
+      # (VoskModelSpec) and here together.
+      - name: Cache speech models
+        uses: actions/cache@v4
+        with:
+          path: voicemodels/src/main/assets/vosk/*.zip
+          key: vosk-vosk-model-small-en-in-0.4.zip-vosk-model-small-hi-0.22.zip
+
+      - name: Fetch speech models
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=voicemodels/src/main/assets/vosk
+          mkdir -p "$dir"
+          for name in vosk-model-small-en-in-0.4 vosk-model-small-hi-0.22; do
+            zip="$dir/$name.zip"
+            if [ -s "$zip" ] && unzip -tq "$zip" >/dev/null 2>&1; then
+              echo "$name: cached"
+              continue
+            fi
+            rm -f "$zip"
+            curl -fL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 30 \
+              -o "$zip.part" "https://alphacephei.com/vosk/models/$name.zip" || {
+              echo "::error title=Speech models::Could not download $name.zip from alphacephei.com"
+              exit 1
+            }
+            # A whole, readable zip with the model's top folder (WakeModel drops that folder).
+            unzip -tq "$zip.part" >/dev/null || { echo "::error title=Speech models::$name.zip is damaged"; exit 1; }
+            unzip -l "$zip.part" | grep " $name/" >/dev/null || { echo "::error title=Speech models::$name.zip has no $name/ folder"; exit 1; }
+            mv "$zip.part" "$zip"
+          done
+          ls -l "$dir"
+          sha256sum "$dir"/*.zip
+
       # Play upload key: only when the secret exists (never on pull requests from forks).
       - name: Upload key
         env:
@@ -191,6 +251,21 @@ jobs:
             grep -E "^e: |ERROR:|Missing class|R8: " release.log | head -40 | sed 's/^/::error::/'
             exit 1
           }
+
+      # The bundle must carry both models in the install-time pack, or Play installs would
+      # fall back to downloading them.
+      - name: Check speech models in the bundle
+        shell: bash
+        run: |
+          aab=$(ls app/build/outputs/bundle/release/*.aab | head -1)
+          for name in vosk-model-small-en-in-0.4 vosk-model-small-hi-0.22; do
+            unzip -l "$aab" | grep "voicemodels/assets/vosk/$name.zip" >/dev/null || {
+              echo "::error title=Speech models::$name.zip is missing from the voicemodels asset pack in $aab"
+              unzip -l "$aab" | grep voicemodels | head -20
+              exit 1
+            }
+          done
+          ls -l "$aab"
 
       - uses: actions/upload-artifact@v4
         with:

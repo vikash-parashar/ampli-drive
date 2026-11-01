@@ -790,6 +790,7 @@
     <string name="map_tiles_unavailable">अभी मैप नहीं दिख रहा। इंटरनेट जाँचें, या Google Maps इस्तेमाल करें।</string>
     <string name="voice_hindi_model_missing">ऑफ़लाइन हिंदी कमांड: डाउनलोड नहीं हुआ (लगभग 42 MB, बिना Google स्पीच वाली यूनिट के लिए)</string>
     <string name="voice_hindi_model_downloading">ऑफ़लाइन हिंदी कमांड: डाउनलोड हो रहा है %1$d%%</string>
+    <string name="voice_getting_ready">Ampli तैयार हो रहा है… %1$d%%</string>
     <string name="voice_hindi_model_ready">ऑफ़लाइन हिंदी कमांड: तैयार</string>
     <string name="voice_hindi_model_failed">ऑफ़लाइन हिंदी कमांड: डाउनलोड नहीं हो पाया</string>
     <string name="voice_hindi_model_download">डाउनलोड करें</string>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">重启和关机需要在 Android 无障碍设置中开启 \"Ampli power helper\"。它只用于打开电源菜单。</string>
+    <string name="disclosure_power_private">它只会打开电源菜单、最近应用和截图。Ampli 不会读取屏幕上的其他内容，也不会发送任何内容。Android 对每个助手都显示相同的警告。您可以随时关闭它。</string>
+    <string name="disclosure_power_service">Ampli power helper 为没有实体按键的车机按下 Android 自带的按键：电源菜单（重启、关机）、最近应用和截图。它不读取屏幕内容，也不向任何地方发送内容。只有在您点按 Ampli Car Hub 中的这些按键时才会动作。</string>
+    <string name="disclosure_power_admin">让 Ampli Car Hub 的“关闭屏幕”可以锁定屏幕。Ampli 无法清除、读取或更改其他任何内容。可随时在 设置 › 电源 中关闭。</string>
+</resources>

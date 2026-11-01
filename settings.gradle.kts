@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AmpliDrive"
 include(":app")
+// Play install-time asset pack with the offline speech models (filled by CI; see voicemodels/build.gradle.kts).
+include(":voicemodels")

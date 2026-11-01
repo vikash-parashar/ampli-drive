@@ -31,6 +31,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
@@ -52,6 +54,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -93,6 +97,7 @@ import com.vikash.ampli.drive.ui.theme.HomeStyle
 import com.vikash.ampli.drive.system.BtPermissions
 import com.vikash.ampli.drive.tripcost.TripCostFlags
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     app: DriveApp,
@@ -107,6 +112,9 @@ fun SettingsScreen(
     onOpenVoiceCheck: () -> Unit = {},
     onOpenDiagnostics: () -> Unit = {},
     onOpenVoiceCommands: () -> Unit = {},
+    /** Opened from Home's "Getting Ampli ready" strip: scroll to the Voice card once. */
+    focusVoice: Boolean = false,
+    onVoiceFocused: () -> Unit = {},
 ) {
     val dims = LocalDims.current
     val context = LocalContext.current
@@ -157,7 +165,7 @@ fun SettingsScreen(
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
             )
-            if (BuildConfig.DEBUG) {
+            if (BuildConfig.TEST_BUILD) {
                 ToggleRow(
                     title = stringResource(R.string.pro_test_title),
                     status = stringResource(R.string.pro_test_hint),
@@ -267,7 +275,18 @@ fun SettingsScreen(
             SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)
-            VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
+            val voiceCard = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+            LaunchedEffect(focusVoice) {
+                if (focusVoice) {
+                    // One frame so the card is laid out, then bring it to the top.
+                    kotlinx.coroutines.delay(150)
+                    voiceCard.bringIntoView()
+                    onVoiceFocused()
+                }
+            }
+            Box(Modifier.fillMaxWidth().bringIntoViewRequester(voiceCard)) {
+                VoiceSettingsCard(app = app, resumeTick = resumeTick, onOpenVoiceCheck = onOpenVoiceCheck, onOpenCommands = onOpenVoiceCommands)
+            }
             VoiceStyleCard(app = app)
             VoicePackCard(app = app)
             DesiSamplesCard(app = app)
@@ -298,6 +317,8 @@ fun SettingsScreen(
                 checked = keepScreenOn,
                 onChange = app.prefs::setKeepScreenOn,
             )
+            // Settings › Power: the power keys, the helper and how Screen off works.
+            PowerSettings(app = app, resumeTick = resumeTick)
             // Settings only: never on the driving screens.
             MoreFromAmpliCard()
             SupportCard(app = app)
@@ -445,6 +466,66 @@ const val WEBSITE_URL = "https://ampliapps.in"
 
 /** Car Hub privacy policy on the Ampli website (source: docs/privacy-policy.html). */
 const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
+
+@Composable
+private fun PowerSettings(app: DriveApp, resumeTick: Int) {
+    val context = LocalContext.current
+    val stripPower by app.shell.stripPower.collectAsStateWithLifecycle()
+    val lockWanted by app.shell.lockScreenOff.collectAsStateWithLifecycle()
+    var adminAsked by remember { mutableStateOf(0) }
+    val adminActive = remember(resumeTick, adminAsked) { com.vikash.ampli.drive.system.PowerControl.adminActive(context) }
+    val helperOn = remember(resumeTick) { com.vikash.ampli.drive.system.PowerHelperService.enabled(context) }
+    val rooted = remember { com.vikash.ampli.drive.system.PowerControl.rooted() }
+    val adminLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+    ) { adminAsked++ }
+    val reason = stringResource(R.string.disclosure_power_admin)
+    LinkRow(
+        icon = Icons.Filled.PowerSettingsNew,
+        title = stringResource(R.string.settings_power_title),
+        hint = stringResource(R.string.settings_power_hint),
+        action = stringResource(R.string.action_open),
+        onClick = { com.vikash.ampli.drive.system.PowerControl.openSheet() },
+    )
+    LinkRow(
+        icon = Icons.Filled.Shield,
+        title = stringResource(R.string.power_helper_name),
+        hint = stringResource(
+            when {
+                rooted -> R.string.settings_power_root
+                helperOn -> R.string.settings_power_helper_on
+                else -> R.string.settings_power_helper_off
+            },
+        ),
+        action = stringResource(R.string.action_open),
+        onClick = { com.vikash.ampli.drive.system.PowerHelperService.openSettings(context) },
+    )
+    ToggleRow(
+        title = stringResource(R.string.settings_power_strip),
+        status = stringResource(R.string.settings_power_strip_hint),
+        checked = stripPower,
+        onChange = app.shell::setStripPower,
+    )
+    ToggleRow(
+        title = stringResource(R.string.settings_power_lock),
+        status = stringResource(R.string.settings_power_lock_hint),
+        checked = lockWanted && adminActive,
+        onChange = { on ->
+            app.shell.setLockScreenOff(on)
+            if (on && !adminActive) {
+                try {
+                    adminLauncher.launch(com.vikash.ampli.drive.system.PowerControl.adminRequestIntent(context, reason))
+                } catch (_: Exception) {
+                    app.shell.setLockScreenOff(false)
+                }
+            } else if (!on && adminActive) {
+                // Give the grant back: nothing else ever uses it.
+                com.vikash.ampli.drive.system.PowerControl.removeAdmin(context)
+                adminAsked++
+            }
+        },
+    )
+}
 
 @Composable
 private fun LinkRow(icon: ImageVector, title: String, hint: String, action: String, onClick: () -> Unit) {

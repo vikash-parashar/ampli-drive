@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">地图图块暂时不可用。请检查网络连接，或使用 Google Maps。</string>
     <string name="voice_hindi_model_missing">离线印地语指令：未下载（约 42 MB，适用于没有 Google 语音识别的车机）</string>
     <string name="voice_hindi_model_downloading">离线印地语指令：正在下载 %1$d%%</string>
+    <string name="voice_getting_ready">正在准备 Ampli… %1$d%%</string>
     <string name="voice_hindi_model_ready">离线印地语指令：已就绪</string>
     <string name="voice_hindi_model_failed">离线印地语指令：下载失败</string>
     <string name="voice_hindi_model_download">下载</string>

@@ -29,7 +29,11 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import com.vikash.ampli.drive.nav.route.LatLon
+import com.vikash.ampli.drive.prefs.LiteMode
 import org.maplibre.android.location.LocationComponentConstants
+import org.maplibre.android.style.layers.FillExtrusionLayer
+import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.HillshadeLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
@@ -50,6 +54,9 @@ private const val FOLLOW_ZOOM = 15.5
 /** While navigating: closer, tilted, and the car low on the screen so more road ahead shows. */
 private const val NAV_ZOOM = 17.0
 private const val NAV_TILT = 45.0
+
+/** Lite mode (weak units): a flat navigation camera, which also loads far fewer tiles. */
+private fun navTilt(): Double = if (LiteMode.enabled) 0.0 else NAV_TILT
 private const val NAV_CAR_FROM_TOP = 0.72
 private const val NAV_ANIM_MS = 700L
 private const val ROUTE_SOURCE = "ampli-route"
@@ -160,7 +167,8 @@ fun GlanceMap(
             .textureMode(textureMode)
         MapView(context, options).also { view ->
             view.onCreate(null)
-            view.setMaximumFps(MAX_FPS)
+            // Lite mode: fewer map frames, so a weak GPU and the CPU have time for everything else.
+            view.setMaximumFps(if (LiteMode.enabled) LiteMode.MAP_MAX_FPS else MAX_FPS)
             view.addOnDidFailLoadingMapListener { message ->
                 MapDiagnostics.error("Style failed: $message")
                 holder.onStyleFailed()
@@ -384,6 +392,8 @@ private class MapHolder(
         try {
             map.setStyle(builder) { style ->
                 if (destroyed) return@setStyle
+                // Lite mode: no 3D buildings or hill shading (flat footprints stay).
+                if (LiteMode.enabled) flatten(style)
                 // A new style drops our own layers: put the route and the parking pin back.
                 addRouteLayers(style)
                 addParkedLayer(style)
@@ -393,6 +403,27 @@ private class MapHolder(
         } catch (e: Exception) {
             MapDiagnostics.error("setStyle: ${e.message}")
             MapDiagnostics.update { it.copy(phase = MapStatus.Phase.Failed) }
+        }
+    }
+
+    /** Hides 3D building extrusions and hill shading; flat building fills keep showing at every zoom. */
+    private fun flatten(style: Style) {
+        try {
+            val layers = style.layers
+            val buildingSources = HashSet<String>()
+            for (layer in layers) {
+                if (layer is FillExtrusionLayer) {
+                    layer.setProperties(PropertyFactory.visibility(Property.NONE))
+                    buildingSources.add(layer.sourceLayer)
+                } else if (layer is HillshadeLayer) {
+                    layer.setProperties(PropertyFactory.visibility(Property.NONE))
+                }
+            }
+            for (layer in layers) {
+                if (layer is FillLayer && layer.sourceLayer in buildingSources) layer.maxZoom = 24f
+            }
+        } catch (_: Exception) {
+            // The full style still draws; it is only heavier.
         }
     }
 
@@ -471,7 +502,7 @@ private class MapHolder(
             val top = if (navigating && viewHeight > 0) viewHeight * (2 * NAV_CAR_FROM_TOP - 1) else 0.0
             lc.paddingWhileTracking(doubleArrayOf(0.0, top, 0.0, 0.0), NAV_ANIM_MS)
             lc.zoomWhileTracking(if (navigating) NAV_ZOOM else FOLLOW_ZOOM, NAV_ANIM_MS)
-            lc.tiltWhileTracking(if (navigating) NAV_TILT else 0.0, NAV_ANIM_MS)
+            lc.tiltWhileTracking(if (navigating) navTilt() else 0.0, NAV_ANIM_MS)
         } catch (_: Exception) {
         }
     }
@@ -502,6 +533,9 @@ private class MapHolder(
             .backgroundTintColor(COLOR_WHITE)
             .accuracyAlpha(0f)
             .pulseEnabled(false)
+            // The accuracy circle is invisible and the compass unused: don't animate them either.
+            .accuracyAnimationEnabled(false)
+            .compassAnimationEnabled(false)
             .build()
 
     private fun recolourPuck(map: MapLibreMap) {
@@ -538,6 +572,8 @@ private class MapHolder(
             lc.setLocationComponentEnabled(true)
             lc.setCameraMode(CameraMode.TRACKING_GPS)
             lc.setRenderMode(RenderMode.GPS)
+            // Lite mode: the car marker glides between fixes at the map's lower frame rate.
+            if (LiteMode.enabled) lc.setMaxAnimationFps(LiteMode.MAP_MAX_FPS)
             tracking = true
             pending?.let { lc.forceLocationUpdate(it) }
             if (navigating) applyNavCamera(map)

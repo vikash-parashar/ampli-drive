@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">રીસ્ટાર્ટ અને પાવર ઓફ માટે Android ના accessibility સેટિંગમાં \"Ampli power helper\" ચાલુ કરવો પડશે. તે ફક્ત પાવર મેનુ ખોલવા માટે વપરાય છે.</string>
+    <string name="disclosure_power_private">તે ફક્ત પાવર મેનુ, તાજેતરની ઍપ અને સ્ક્રીનશૉટ ખોલે છે. Ampli સ્ક્રીન પર બીજું કંઈ વાંચતું નથી, કંઈ મોકલતું નથી. Android દરેક helper માટે એક જ ચેતવણી બતાવે છે. તમે તેને ગમે ત્યારે બંધ કરી શકો છો.</string>
+    <string name="disclosure_power_service">Ampli power helper બટન વગરની સ્ક્રીન માટે Android નાં પોતાનાં બટન દબાવે છે: પાવર મેનુ (રીસ્ટાર્ટ, પાવર ઓફ), તાજેતરની ઍપ અને સ્ક્રીનશૉટ. તે સ્ક્રીન પર કંઈ વાંચતું નથી અને ક્યાંય કંઈ મોકલતું નથી. તમે Ampli Car Hub માં આ બટન દબાવો ત્યારે જ તે કામ કરે છે.</string>
+    <string name="disclosure_power_admin">Ampli Car Hub નું સ્ક્રીન બંધ સ્ક્રીનને લૉક કરી શકે છે. Ampli બીજું કંઈ ભૂંસી, વાંચી કે બદલી શકતું નથી. સેટિંગ્સ › પાવરમાં ગમે ત્યારે બંધ કરો.</string>
+</resources>

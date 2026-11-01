@@ -10,6 +10,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Quick controls: Wi-Fi on/off and the connected network's name (normal permission). -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Quick panel: the Wi-Fi tile switches Wi-Fi on Android 8 and 9 (normal permission). -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- Quick panel › Clear memory: stops other apps' background processes (normal permission). -->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <!-- Connected phone name in the status row; OBD-II dongle (Bluetooth SPP). -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <!-- Android 8 to 11 (many head units): legacy install-time Bluetooth permissions. There, a BLE
@@ -45,6 +49,11 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Quick panel › Screenshot on Android 8 and 9: saves to Pictures/Ampli. Asked once; without it
+         the picture goes to Car Hub's own Pictures folder. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <!-- Boot only marks "the car started" (greeting, Settings › When the car starts); the actions run
          when the launcher shows. The wake-word microphone service is still never started from boot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -298,6 +307,39 @@
             android:name=".dashcam.DashcamService"
             android:exported="false"
             android:foregroundServiceType="camera" />
+
+        <!-- "Ampli power helper" (off until the driver turns it on in Accessibility settings): only
+             presses Android's own keys for a unit without buttons: the power menu (Restart / Power
+             off), recent apps and, on Android 9+, a screenshot. It receives no events and cannot
+             read the screen (res/xml/power_helper.xml). -->
+        <service
+            android:name=".system.PowerHelperService"
+            android:exported="true"
+            android:label="@string/power_helper_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/power_helper" />
+        </service>
+
+        <!-- Settings › Power › Turn the display fully off (off by default): device admin with the
+             force-lock policy only, so Screen off can lock the screen. -->
+        <receiver
+            android:name=".system.AmpliDeviceAdmin"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:description="@string/disclosure_power_admin"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Expenses › Export CSV: shares a file from the cache folder. -->
         <provider

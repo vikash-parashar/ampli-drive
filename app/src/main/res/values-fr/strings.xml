@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">Les tuiles de carte sont indisponibles pour le moment. Vérifiez la connexion internet, ou utilisez Google Maps.</string>
     <string name="voice_hindi_model_missing">Commandes hindi hors ligne : non téléchargées (environ 42 Mo, pour les appareils sans reconnaissance Google)</string>
     <string name="voice_hindi_model_downloading">Commandes hindi hors ligne : téléchargement %1$d%%</string>
+    <string name="voice_getting_ready">Préparation d’Ampli… %1$d%%</string>
     <string name="voice_hindi_model_ready">Commandes hindi hors ligne : prêtes</string>
     <string name="voice_hindi_model_failed">Commandes hindi hors ligne : échec du téléchargement</string>
     <string name="voice_hindi_model_download">Télécharger</string>

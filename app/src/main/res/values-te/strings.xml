@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">మ్యాప్ టైల్స్ ఇప్పుడు అందుబాటులో లేవు. ఇంటర్నెట్ కనెక్షన్ చెక్ చేయండి, లేదా Google Maps వాడండి.</string>
     <string name="voice_hindi_model_missing">ఆఫ్‌లైన్ హిందీ కమాండ్‌లు: డౌన్‌లోడ్ కాలేదు (సుమారు 42 MB, Google speech లేని యూనిట్ల కోసం)</string>
     <string name="voice_hindi_model_downloading">ఆఫ్‌లైన్ హిందీ కమాండ్‌లు: డౌన్‌లోడ్ అవుతోంది %1$d%%</string>
+    <string name="voice_getting_ready">Ampli సిద్ధమవుతోంది… %1$d%%</string>
     <string name="voice_hindi_model_ready">ఆఫ్‌లైన్ హిందీ కమాండ్‌లు: సిద్ధం</string>
     <string name="voice_hindi_model_failed">ఆఫ్‌లైన్ హిందీ కమాండ్‌లు: డౌన్‌లోడ్ విఫలమైంది</string>
     <string name="voice_hindi_model_download">డౌన్‌లోడ్</string>

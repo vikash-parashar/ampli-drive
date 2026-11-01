@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">હમણાં નકશો દેખાતો નથી. ઇન્ટરનેટ તપાસો, અથવા Google Maps વાપરો.</string>
     <string name="voice_hindi_model_missing">ઑફલાઇન હિન્દી આદેશ: ડાઉનલોડ નથી (લગભગ 42 MB, Google સ્પીચ વિનાના યુનિટ માટે)</string>
     <string name="voice_hindi_model_downloading">ઑફલાઇન હિન્દી આદેશ: ડાઉનલોડ થાય છે %1$d%%</string>
+    <string name="voice_getting_ready">Ampli તૈયાર થઈ રહ્યું છે… %1$d%%</string>
     <string name="voice_hindi_model_ready">ઑફલાઇન હિન્દી આદેશ: તૈયાર</string>
     <string name="voice_hindi_model_failed">ઑફલાઇન હિન્દી આદેશ: ડાઉનલોડ નિષ્ફળ</string>
     <string name="voice_hindi_model_download">ડાઉનલોડ કરો</string>

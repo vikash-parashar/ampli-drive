@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">এখন ম্যাপ দেখা যাচ্ছে না। ইন্টারনেট দেখুন, বা Google Maps ব্যবহার করুন।</string>
     <string name="voice_hindi_model_missing">অফলাইন হিন্দি কমান্ড: ডাউনলোড হয়নি (প্রায় 42 MB, Google স্পিচ ছাড়া ইউনিটের জন্য)</string>
     <string name="voice_hindi_model_downloading">অফলাইন হিন্দি কমান্ড: ডাউনলোড হচ্ছে %1$d%%</string>
+    <string name="voice_getting_ready">Ampli তৈরি হচ্ছে… %1$d%%</string>
     <string name="voice_hindi_model_ready">অফলাইন হিন্দি কমান্ড: প্রস্তুত</string>
     <string name="voice_hindi_model_failed">অফলাইন হিন্দি কমান্ড: ডাউনলোড ব্যর্থ</string>
     <string name="voice_hindi_model_download">ডাউনলোড করুন</string>

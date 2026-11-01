@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper (accessibility) and Screen off lock (device admin): what they do and do not do. -->
+<resources>
+    <string name="disclosure_power_body">Redémarrer et Éteindre nécessitent l\'activation de \"Ampli power helper\" dans les paramètres d\'accessibilité d\'Android. Il sert uniquement à ouvrir le menu d\'alimentation.</string>
+    <string name="disclosure_power_private">Il ouvre uniquement le menu d\'alimentation, les applis récentes et les captures d\'écran. Ampli ne lit rien d\'autre à l\'écran et n\'envoie rien. Android affiche le même avertissement pour chaque assistant. Vous pouvez le désactiver à tout moment.</string>
+    <string name="disclosure_power_service">Ampli power helper appuie sur les touches d\'Android pour les écrans sans boutons : menu d\'alimentation (Redémarrer, Éteindre), applis récentes et captures d\'écran. Il ne lit rien à l\'écran et n\'envoie rien. Il agit seulement quand vous touchez ces touches dans Ampli Car Hub.</string>
+    <string name="disclosure_power_admin">Permet à « Écran éteint » d\'Ampli Car Hub de verrouiller l\'écran. Ampli ne peut rien effacer, lire ou modifier d\'autre. Désactivable à tout moment dans Paramètres › Alimentation.</string>
+</resources>

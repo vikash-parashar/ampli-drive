@@ -14,3 +14,6 @@
 !app/test-debug.keystore
 # Written by scripts/voice_pack.py in the Voice pack workflow.
 /voice-pack-summary.json
+/voicemodels/build/
+# Offline speech models: downloaded by CI into the Play asset pack, never committed.
+/voicemodels/src/main/assets/vosk/*.zip

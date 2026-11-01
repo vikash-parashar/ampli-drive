@@ -32,4 +32,14 @@ class FirstRunDefaultsTest {
         assertNull(FirstRunDefaults.language(stored = "", freshInstall = true))
         assertNull(FirstRunDefaults.language(stored = "ta", freshInstall = true))
     }
+
+    @Test
+    fun wakeWordOnOnlyForAFreshInstallWithNothingStored() {
+        assertEquals(true, FirstRunDefaults.voiceAlways(stored = null, freshInstall = true))
+        // An explicit off (or on) is never overridden.
+        assertNull(FirstRunDefaults.voiceAlways(stored = false, freshInstall = true))
+        assertNull(FirstRunDefaults.voiceAlways(stored = true, freshInstall = true))
+        // Updated installs keep what they had.
+        assertNull(FirstRunDefaults.voiceAlways(stored = null, freshInstall = false))
+    }
 }

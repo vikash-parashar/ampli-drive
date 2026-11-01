@@ -784,6 +784,7 @@
     <string name="map_tiles_unavailable">Kartenkacheln sind gerade nicht verfügbar. Prüfe die Internetverbindung oder nutze Google Maps.</string>
     <string name="voice_hindi_model_missing">Offline-Befehle auf Hindi: nicht geladen (etwa 42 MB, für Geräte ohne Google-Spracherkennung)</string>
     <string name="voice_hindi_model_downloading">Offline-Befehle auf Hindi: wird geladen %1$d%%</string>
+    <string name="voice_getting_ready">Ampli wird vorbereitet… %1$d%%</string>
     <string name="voice_hindi_model_ready">Offline-Befehle auf Hindi: bereit</string>
     <string name="voice_hindi_model_failed">Offline-Befehle auf Hindi: Download fehlgeschlagen</string>
     <string name="voice_hindi_model_download">Herunterladen</string>

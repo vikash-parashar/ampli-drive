@@ -253,13 +253,18 @@ internal fun NameEntry(
 @Composable
 private fun MicButton(listening: Boolean, onClick: () -> Unit) {
     val theme = LocalDriveTheme.current
-    val pulse = rememberInfiniteTransition(label = "mic")
-    val scale by pulse.animateFloat(
-        initialValue = 1f,
-        targetValue = if (listening) 1.12f else 1f,
-        animationSpec = infiniteRepeatable(tween(650), RepeatMode.Reverse),
-        label = "micScale",
-    )
+    // Breathes only while listening (an idle infinite transition still draws every frame), and
+    // not at all in lite mode (weak units).
+    val scale = if (listening && !com.vikash.ampli.drive.prefs.LiteMode.enabled) {
+        rememberInfiniteTransition(label = "mic").animateFloat(
+            initialValue = 1f,
+            targetValue = 1.12f,
+            animationSpec = infiniteRepeatable(tween(650), RepeatMode.Reverse),
+            label = "micScale",
+        ).value
+    } else {
+        1f
+    }
     Box(
         Modifier
             .size(MinTouch)

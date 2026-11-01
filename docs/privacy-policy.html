@@ -22,7 +22,7 @@ code { font-size:.9em; }
 <body>
 <main>
 <h1>Ampli Car Hub privacy policy</h1>
-<p><em>Last updated: 31 October 2026</em></p>
+<p><em>Last updated: 1 November 2026</em></p>
 <p>Ampli Car Hub ("the app") is a home-screen launcher for Android car head units, made by <strong>Ampli Studio</strong> ("we"). This policy explains what the app does with your data.</p>
 <p><strong>Contact:</strong> Ampli Studio, <a href="mailto:support@ampliapps.in">support@ampliapps.in</a> · Website: <a href="https://ampliapps.in">ampliapps.in</a></p>
 <p><strong>Online copy:</strong> <a href="https://ampliapps.in/privacy/carhub/">ampliapps.in/privacy/carhub/</a></p>
@@ -41,7 +41,7 @@ code { font-size:.9em; }
 <tr><td>FASTag tolls read from bank SMS notifications</td><td>Toll balance, toll totals, toll expenses (see Notification access)</td></tr>
 <tr><td>Emergency contacts, blood group, medical notes</td><td>The SOS message you can send from the Help panel</td></tr>
 <tr><td>Paired tyre-sensor ids, OBD-II dongle address</td><td>Tyre pressure and engine readings (Pro)</td></tr>
-<tr><td>Settings, theme, language, wake-word model</td><td>Your preferences; the 36 MB offline speech model for "Hey Ampli"</td></tr>
+<tr><td>Settings, theme, language, wake-word model</td><td>Your preferences; the offline speech models for "Hey Ampli" and offline commands (English about 36 MB, Hindi about 42 MB)</td></tr>
 <tr><td>Your name, if you enter it</td><td>The spoken welcome when the car starts ("Ram Ram {name} Ji"). Optional; if you say it with the mic, the audio goes to your device's own speech recognition service like a "Hey Ampli" command</td></tr>
 <tr><td>Dashcam clips (Pro, off by default)</td><td>Loop recording from the unit's camera, video only (no sound), in the app's own folder; the oldest clips are deleted when the storage limit you set is reached. Never uploaded</td></tr>
 <tr><td>Bhajan settings (off by default)</td><td>Which days a short bhajan plays when the car starts, and its volume</td></tr>
@@ -58,7 +58,7 @@ code { font-size:.9em; }
 <li><strong>SOS</strong>: only if you send it, your position goes in the SMS or message you send to your own contacts (see below).</li>
 </ul>
 <h2>Microphone and "Hey Ampli"</h2>
-<p>If you switch on <strong>Always listen for "Hey Ampli"</strong>, the app uses the microphone to listen for the wake word, <strong>including when the app is closed or not in use</strong>. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.</p>
+<p>New installs have <strong>Always listen for "Hey Ampli"</strong> switched on, but nothing listens until you agree to the explanation and allow the microphone. With it on, the app uses the microphone to listen for the wake word, <strong>including when the app is closed or not in use</strong>. The app explains this and asks you to agree first. The wake word is recognised offline on the unit with the Vosk model, and audio is never recorded or sent to us. After the wake word, your spoken command is handled by your device's speech recognition service (for example Google's), under that provider's own privacy policy. A notification shows while listening, and you can switch it off in Settings › Voice.</p>
 <h2>Phone calls and contacts (announce incoming calls)</h2>
 <p>Only if you switch on <strong>Announce incoming calls</strong> (free, off by default), the app asks for these permissions from that switch, and each one is optional:</p>
 <ul>
@@ -69,6 +69,15 @@ code { font-size:.9em; }
 <p>A head unit's Bluetooth call is detected from its ringing notification (see Notification access), and its own Answer / Decline buttons are pressed. The caller's name or number is spoken and shown on the call card only while it rings. Nothing about your calls or contacts is stored, and nothing is sent to us or anyone else. After the name, the app listens once for "haan / naa"; that short answer is handled by your device's speech recognition service like a "Hey Ampli" command.</p>
 <h2>Camera (dashcam)</h2>
 <p>Only if you have Pro and switch on <strong>Dashcam</strong> (off by default), the app asks for the camera permission and records video (no sound) from a camera on the unit while Car Hub is running, with a notification showing whenever it records. Clips stay in the app's own folder on the unit and are deleted with the app. A hard jolt, a crash or saying "save kar" keeps the current clip from being overwritten. Clips are never uploaded or sent anywhere; you can open one in your video player.</p>
+<h2>Power keys, the Ampli power helper and Screen off</h2>
+<p>Head units often have no physical buttons, so Home has its own Back, Home, Apps, volume and power keys.</p>
+<ul>
+<li><strong>Ampli power helper</strong> (an Android accessibility service, off until you turn it on in Android's Accessibility settings from the one-time card). It only presses Android's own keys when you tap a key in Car Hub: the power menu (for Restart and Power off), recent apps (long press on Apps) and, on Android 9 and newer, a screenshot. It asks Android for no accessibility events and cannot read window content, so it does not see, collect, store or send anything on your screen. Android shows the same general warning for every accessibility service. You can turn it off at any time in Android's Accessibility settings.</li>
+<li><strong>Turn the display fully off</strong> (Settings › Power, off by default). With your approval on Android's "Activate device admin app?" screen, the app uses the device-admin <strong>lock</strong> policy only, so Screen off can lock the screen. It cannot erase, read or change anything else. Switching the setting off gives the permission back. Otherwise Screen off is a black cover over the app that wakes on touch.</li>
+<li><strong>Rooted units</strong>: if the unit offers root (<code>su</code>), Restart and Power off run <code>reboot</code> directly after a 5-second countdown. Nothing else is run as root.</li>
+<li><strong>Screenshots</strong> from the quick panel are saved on the unit (Pictures/Ampli, or the app's own Pictures folder) and never uploaded. On Android 8 and 9 Android asks first ("start capturing?"), and storage permission is asked once.</li>
+<li><strong>Clear memory</strong> asks Android to stop other apps' background processes (they restart when needed); it reads nothing from them.</li>
+</ul>
 <h2>Notification access (FASTag SMS, music, navigation, calls and WhatsApp / Telegram read-aloud)</h2>
 <p>With your permission (Android's notification access), the app reads:</p>
 <ul>
@@ -96,13 +105,13 @@ code { font-size:.9em; }
 <p>These go to Ampli Studio's support server (or, until it is live, open in your email app addressed to our support address). We use them only to answer you and improve the app, and we don't sell or share them. Reports waiting to be sent while offline are kept on the unit until they go out.</p>
 <h2>Other network use</h2>
 <ul>
-<li><strong>Speech model download</strong> (alphacephei.com): the "Hey Ampli" wake-word model, once, when you switch it on.</li>
+<li><strong>Speech model download</strong> (alphacephei.com): the offline speech models (English, and Hindi for Hindi-family languages), once, on first start, only when the app did not come with them (Play installs include them).</li>
 <li>Speed-camera data is built into the app (OpenStreetMap, ODbL); checking cameras needs no network.</li>
 </ul>
 <h2>Children</h2>
 <p>The app is meant for drivers and is not directed at children.</p>
 <h2>Your choices</h2>
-<p>Every feature that uses location in the background, the microphone, the camera, phone and contacts permissions or notification access can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help &amp; feedback reports, write to the contact address above with your install id (shown in the report email or available on request).</p>
+<p>Every feature that uses location in the background, the microphone, the camera, phone and contacts permissions, notification access, the Ampli power helper or the screen lock (device admin) can be switched off in Settings, and Android lets you revoke any permission at any time. To delete everything the app keeps, clear its storage or uninstall it. To ask about or delete Help &amp; feedback reports, write to the contact address above with your install id (shown in the report email or available on request).</p>
 <h2>Changes</h2>
 <p>We will update this page when the app's data use changes, and change the date at the top.</p>
 </main>

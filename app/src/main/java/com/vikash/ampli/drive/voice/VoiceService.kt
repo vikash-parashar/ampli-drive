@@ -337,10 +337,12 @@ class VoiceService : Service() {
                 setStatus(Status.Failed("no microphone permission"))
                 return false
             }
+            // A download that failed (or never ran) is retried here, so the wake word comes up by
+            // itself after boot instead of waiting for Settings to be opened. English first, then
+            // Hindi for Hindi-family languages (automatic rules: back-off, never after the driver
+            // removed a model).
+            app.voiceModels.ensureAll()
             if (!app.wakeModel.isInstalled()) {
-                // A download that failed (or never ran) is retried here, so the wake word comes
-                // up by itself after boot instead of waiting for Settings to be opened.
-                app.wakeModel.ensure(automatic = true)
                 setStatus(Status.Failed("model not downloaded yet"))
                 return false
             }

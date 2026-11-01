@@ -92,6 +92,8 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
+            // Test-only switches (Pro test unlock in Settings). True for every sideloaded test APK.
+            buildConfigField("boolean", "TEST_BUILD", "true")
             // Public demo servers for test builds only: OSRM demo, komoot Photon, Open-Meteo free API.
             buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
             buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
@@ -108,10 +110,26 @@ android {
             buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL")}\"")
             // The Play bundle never downloads or installs other APKs (and never declares the permission).
             buildConfigField("boolean", "SIDELOAD_INSTALL", "false")
+            buildConfigField("boolean", "TEST_BUILD", "false")
             signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        // The CI test APK (pr-test-N / build-N): a release-type build, so it runs at full speed on
+        // weak head units (not debuggable, R8-optimised, ART compiles it with the baseline profile),
+        // but signed with the same fixed test key and with the same application id as the old
+        // debug test APKs, so it installs as an update over them. Test servers and switches as in
+        // debug. `assembleFastTest`; unit tests still run on the debug build.
+        create("fastTest") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            buildConfigField("String", "ROUTING_BASE_URL", "\"${env("ROUTING_BASE_URL").ifEmpty { "https://router.project-osrm.org" }}\"")
+            buildConfigField("String", "GEOCODER_URL", "\"${env("GEOCODER_URL").ifEmpty { "https://photon.komoot.io/api/" }}\"")
+            buildConfigField("String", "WEATHER_URL", "\"${env("WEATHER_URL").ifEmpty { "https://api.open-meteo.com/v1/forecast" }}\"")
+            buildConfigField("boolean", "SIDELOAD_INSTALL", "true")
+            buildConfigField("boolean", "TEST_BUILD", "true")
         }
     }
 
@@ -126,6 +144,12 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Both offline speech models ride in an install-time asset pack, so a Play install has them
+    // on the first start without any download (WakeModel unpacks assets/vosk/<model>.zip). Asset
+    // packs go only into the app bundle (bundleRelease): assembleDebug APKs carry no models and
+    // download them by themselves on first start (VoiceModels), so the test APK stays small.
+    assetPacks += setOf(":voicemodels")
 
     // CI runs lintDebug: any call to an API newer than minSdk without a version check fails the
     // build, so head units on Android 8 to 11 can't crash on a missing method.
@@ -164,6 +188,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    // Applies the baseline profile (src/main/baseline-prof.txt plus the Compose libraries' own) on
+    // sideloaded installs too, so the test APK starts compiled instead of interpreted.
+    implementation(libs.androidx.profileinstaller)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.maplibre.android)
@@ -172,7 +199,8 @@ dependencies {
     // Parking-spot QR on the "Where's my car" screen.
     implementation(libs.zxing.core)
 
-    // "Hey Ampli" wake word. The ~36 MB speech model is downloaded at runtime, not bundled.
+    // "Hey Ampli" wake word and offline commands. The speech models (~36 + ~42 MB) come from the
+    // :voicemodels asset pack in Play installs and are downloaded at runtime by sideloaded APKs.
     implementation(libs.vosk.android)
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 

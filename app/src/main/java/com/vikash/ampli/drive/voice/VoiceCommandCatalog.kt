@@ -87,6 +87,15 @@ object VoiceCommandCatalog {
             ),
         ),
         Group(
+            R.string.voice_cmds_power,
+            listOf(
+                item("Screen off", "Screen band karo", "स्क्रीन बंद करो"),
+                item("Restart", "Restart karo", "रीस्टार्ट करो"),
+                item("Power off", "Power off karo", "पावर ऑफ करो"),
+                item("Gaadi ki screen band karo", "Radd karo", "रद्द करो"),
+            ),
+        ),
+        Group(
             R.string.voice_cmds_help,
             listOf(
                 item("SOS", "Madad", "बचाओ"),

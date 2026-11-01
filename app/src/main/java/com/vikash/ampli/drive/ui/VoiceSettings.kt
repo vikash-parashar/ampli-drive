@@ -74,7 +74,8 @@ internal fun VoiceSettingsCard(app: DriveApp, resumeTick: Int, onOpenVoiceCheck:
 
     // Start listening as soon as the model is in place (the switch may have been flipped mid-download).
     LaunchedEffect(always, model) {
-        if (always && model == WakeModel.State.Missing) app.wakeModel.ensure(automatic = true)
+        // English then Hindi (for Hindi-family languages), one at a time.
+        if (always) app.voiceModels.ensureAll()
         if (always && model == WakeModel.State.Ready) VoiceService.start(context)
     }
 
@@ -225,8 +226,9 @@ private fun sensitivityLabel(level: Int): Int = when (level) {
 
 /**
  * Optional offline Hindi command model (~42 MB) for head units without Google speech. Shown for
- * Hindi-family app languages (and whenever it is already downloaded); downloads only on a tap,
- * with progress, and can be removed again.
+ * Hindi-family app languages (and whenever it is already downloaded); downloads by itself when
+ * the unit has no working system recogniser, or on a tap, with progress, and can be removed again
+ * (then it is not fetched automatically until Download is tapped).
  */
 @Composable
 private fun HindiModelLine(app: DriveApp) {
@@ -250,7 +252,7 @@ private fun HindiModelLine(app: DriveApp) {
                 WakeModel.State.Ready -> stringResource(R.string.voice_hindi_model_delete)
                 else -> null
             },
-            onAction = { if (state == WakeModel.State.Ready) app.hindiModel.delete() else app.hindiModel.ensure() },
+            onAction = { if (state == WakeModel.State.Ready) app.hindiModel.delete(byUser = true) else app.hindiModel.ensure() },
         )
         (state as? WakeModel.State.Downloading)?.let { d ->
             androidx.compose.material3.LinearProgressIndicator(

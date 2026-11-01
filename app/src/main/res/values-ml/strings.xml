@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">മാപ്പ് ടൈലുകൾ ഇപ്പോൾ ലഭ്യമല്ല. ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കുക, അല്ലെങ്കിൽ Google Maps ഉപയോഗിക്കുക.</string>
     <string name="voice_hindi_model_missing">ഓഫ്‌ലൈൻ ഹിന്ദി കമാൻഡുകൾ: ഡൗൺലോഡ് ചെയ്തിട്ടില്ല (ഏകദേശം 42 MB, Google speech ഇല്ലാത്ത യൂണിറ്റുകൾക്ക്)</string>
     <string name="voice_hindi_model_downloading">ഓഫ്‌ലൈൻ ഹിന്ദി കമാൻഡുകൾ: ഡൗൺലോഡ് ചെയ്യുന്നു %1$d%%</string>
+    <string name="voice_getting_ready">Ampli തയ്യാറാകുന്നു… %1$d%%</string>
     <string name="voice_hindi_model_ready">ഓഫ്‌ലൈൻ ഹിന്ദി കമാൻഡുകൾ: തയ്യാർ</string>
     <string name="voice_hindi_model_failed">ഓഫ്‌ലൈൻ ഹിന്ദി കമാൻഡുകൾ: ഡൗൺലോഡ് പരാജയപ്പെട്ടു</string>
     <string name="voice_hindi_model_download">ഡൗൺലോഡ്</string>

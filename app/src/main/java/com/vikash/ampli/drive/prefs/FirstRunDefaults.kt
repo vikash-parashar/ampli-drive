@@ -18,6 +18,12 @@ object FirstRunDefaults {
      */
     const val LANGUAGE: String = "hi"
 
+    /**
+     * "Hey Ampli" always listening: on for a fresh install (the microphone permission is asked
+     * on first start, after Play's prominent disclosure). The models it needs come by themselves.
+     */
+    const val VOICE_ALWAYS: Boolean = true
+
     /** The voice style to use: the stored key, or the Haryanvi default when none is stored. */
     fun voiceStyle(stored: String?): VoiceStyle = if (stored == null) VOICE_STYLE else VoiceStyle.from(stored)
 
@@ -31,4 +37,12 @@ object FirstRunDefaults {
      */
     fun language(stored: String?, freshInstall: Boolean): String? =
         if (stored == null && freshInstall) LANGUAGE else null
+
+    /**
+     * The wake-word switch to store on first start, or null to leave it alone: only a fresh
+     * install with nothing stored gets [VOICE_ALWAYS]. A driver's own choice (an explicit off)
+     * and updated installs keep what they have.
+     */
+    fun voiceAlways(stored: Boolean?, freshInstall: Boolean): Boolean? =
+        if (stored == null && freshInstall) VOICE_ALWAYS else null
 }

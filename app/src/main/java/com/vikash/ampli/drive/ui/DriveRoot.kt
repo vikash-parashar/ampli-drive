@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
@@ -99,6 +100,8 @@ fun DriveRoot(
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
     var settingsReturn by remember { mutableStateOf(Screen.Home) }
+    // Settings opened from Home's "Getting Ampli ready" strip scrolls to the Voice card.
+    var settingsFocusVoice by remember { mutableStateOf(false) }
     // Where Back goes from the Car hub's screens: Home when opened from Home's More sheet.
     var subReturn by remember { mutableStateOf(Screen.Car) }
     var showPro by remember { mutableStateOf(false) }
@@ -145,31 +148,50 @@ fun DriveRoot(
                         Screen.Home -> {
                             // A home screen has nowhere to go back to.
                             BackHandler(enabled = true) {}
-                            HomeScreen(
+                            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                            // The left rail (Back, Home, Apps, volume, Controls) for units without keys.
+                            HomeShell(
                                 app = app,
                                 resumeTick = resumeTick,
+                                quickOpen = showQuick,
+                                onQuick = { showQuick = it },
+                                onBack = { backDispatcher?.onBackPressed() },
                                 onOpenApps = { onNavigate(Screen.Apps) },
                                 onOpenSettings = { onNavigate(Screen.Settings) },
-                                onOpenHelp = { sos -> onNavigate(if (sos) Screen.Sos else Screen.Help) },
-                                onOpenFastag = { onNavigate(Screen.Fastag) },
-                                onOpenCar = { onNavigate(Screen.Car) },
-                                onOpenParked = {
-                                    subReturn = Screen.Home
-                                    onNavigate(Screen.Parked)
-                                },
-                                // The More sheet: the Car hub's screens, which then go back to Home.
-                                onOpenScreen = { target ->
-                                    subReturn = Screen.Home
-                                    if (target == Screen.Fuel) app.fuel.requestedFilter.value = com.vikash.ampli.drive.fuel.FuelFilter.All
-                                    onNavigate(target)
-                                },
-                                onRequestPermissions = onRequestPermissions,
-                                onOpenNavScreen = { onNavigate(Screen.Navigation) },
-                                onOpenNavSearch = { onNavigate(Screen.NavSearch) },
-                                onOpenQuick = { showQuick = true },
-                                // Ampli Shell: "Make Ampli your home screen" (until done or "Not now").
-                                banner = { DefaultHomeBannerHost(app = app, resumeTick = resumeTick) },
-                            )
+                            ) {
+                                HomeScreen(
+                                    app = app,
+                                    resumeTick = resumeTick,
+                                    onOpenApps = { onNavigate(Screen.Apps) },
+                                    onOpenSettings = { onNavigate(Screen.Settings) },
+                                    onOpenHelp = { sos -> onNavigate(if (sos) Screen.Sos else Screen.Help) },
+                                    onOpenFastag = { onNavigate(Screen.Fastag) },
+                                    onOpenCar = { onNavigate(Screen.Car) },
+                                    onOpenParked = {
+                                        subReturn = Screen.Home
+                                        onNavigate(Screen.Parked)
+                                    },
+                                    // The More sheet: the Car hub's screens, which then go back to Home.
+                                    onOpenScreen = { target ->
+                                        subReturn = Screen.Home
+                                        if (target == Screen.Fuel) app.fuel.requestedFilter.value = com.vikash.ampli.drive.fuel.FuelFilter.All
+                                        onNavigate(target)
+                                    },
+                                    onRequestPermissions = onRequestPermissions,
+                                    onOpenNavScreen = { onNavigate(Screen.Navigation) },
+                                    onOpenNavSearch = { onNavigate(Screen.NavSearch) },
+                                    onOpenQuick = { showQuick = true },
+                                    // Ampli Shell: "Make Ampli your home screen" (until done or "Not now").
+                                    // First start: "Getting Ampli ready… 40%" while the speech models arrive.
+                                    banner = {
+                                        VoiceSetupStrip(app = app, onOpen = {
+                                            settingsFocusVoice = true
+                                            onNavigate(Screen.Settings)
+                                        })
+                                        DefaultHomeBannerHost(app = app, resumeTick = resumeTick)
+                                    },
+                                )
+                            }
                             CarAlertHost(app = app)
                         }
                         Screen.Apps -> {
@@ -194,6 +216,8 @@ fun DriveRoot(
                                 onOpenVoiceCheck = { onNavigate(Screen.VoiceCheck) },
                                 onOpenVoiceCommands = { onNavigate(Screen.VoiceCommands) },
                                 onOpenDiagnostics = { onNavigate(Screen.Diagnostics) },
+                                focusVoice = settingsFocusVoice,
+                                onVoiceFocused = { settingsFocusVoice = false },
                             )
                         }
                         Screen.Help, Screen.Sos, Screen.Crash -> {
@@ -349,12 +373,12 @@ fun DriveRoot(
                     if (!nameAsked && screen == Screen.Home) {
                         FirstRunNameHost(app = app)
                     } else {
-                        BackgroundDisclosureHost(app = app, resumeTick = resumeTick)
+                        BackgroundDisclosureHost(app = app, resumeTick = resumeTick, onHome = screen == Screen.Home)
                     }
                     // Quick controls, pulled down from Home's status row.
                     if (showQuick) BackHandler(enabled = true) { showQuick = false }
                     LaunchedEffect(screen) { if (screen != Screen.Home) showQuick = false }
-                    QuickControlsHost(app = app, open = showQuick && screen == Screen.Home, onClose = { showQuick = false })
+                    // (The quick panel itself is part of Home's rail shell.)
                     // Android 13+: notification access still off after "Allow access" (sideloaded
                     // APK, restricted settings): show how to allow it.
                     RestrictedSettingsGuideHost(resumeTick = resumeTick)
@@ -378,6 +402,8 @@ fun DriveRoot(
                     }
                     // Settings opened from the Home dock returns to Home.
                     LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
+                    // Power sheet, countdowns, the helper card and the Screen off cover.
+                    PowerHost(resumeTick = resumeTick, inset = if (screen == Screen.Home) dims.d(RAIL_UNITS) else 0.dp)
                     // "Hey Ampli" sheet over whichever screen is showing.
                     val voice by app.voice.state.collectAsStateWithLifecycle()
                     if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
@@ -398,14 +424,18 @@ fun DriveRoot(
  * back on (and shows this again).
  */
 @Composable
-private fun BackgroundDisclosureHost(app: DriveApp, resumeTick: Int) {
+private fun BackgroundDisclosureHost(app: DriveApp, resumeTick: Int, onHome: Boolean) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val settings by app.car.store.settings.collectAsStateWithLifecycle()
     val accepted by app.prefs.bgDisclosureAccepted.collectAsStateWithLifecycle()
     val hasFine = remember(resumeTick) {
         context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
-    if (!settings.backgroundMonitor || accepted || !hasFine) return
+    if (!settings.backgroundMonitor || accepted || !hasFine) {
+        // Next in line on first start: the microphone for "Hey Ampli" (on by default).
+        if (onHome) FirstRunMicHost(app = app, resumeTick = resumeTick)
+        return
+    }
     DisclosureDialog(
         kind = Disclosure.BackgroundLocation,
         onAgree = {

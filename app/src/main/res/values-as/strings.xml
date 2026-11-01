@@ -785,6 +785,7 @@
     <string name="map_tiles_unavailable">এতিয়া মেপ দেখা পোৱা নাই। ইণ্টাৰনেট পৰীক্ষা কৰক, বা Google Maps ব্যৱহাৰ কৰক।</string>
     <string name="voice_hindi_model_missing">অফলাইন হিন্দী কমাণ্ড: ডাউনলোড হোৱা নাই (প্ৰায় 42 MB, Google স্পীচ নথকা ইউনিটৰ বাবে)</string>
     <string name="voice_hindi_model_downloading">অফলাইন হিন্দী কমাণ্ড: ডাউনলোড হৈ আছে %1$d%%</string>
+    <string name="voice_getting_ready">Ampli সাজু হৈ আছে… %1$d%%</string>
     <string name="voice_hindi_model_ready">অফলাইন হিন্দী কমাণ্ড: সাজু</string>
     <string name="voice_hindi_model_failed">অফলাইন হিন্দী কমাণ্ড: ডাউনলোড বিফল</string>
     <string name="voice_hindi_model_download">ডাউনলোড কৰক</string>

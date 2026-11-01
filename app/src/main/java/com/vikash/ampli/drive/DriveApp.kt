@@ -109,8 +109,11 @@ class DriveApp : Application() {
     val voice: VoiceAssistant by lazy { VoiceAssistant(this) }
     val wakeModel: WakeModel by lazy { WakeModel(this) }
 
-    /** Optional offline Hindi command model (~42 MB), downloaded only when the driver asks. */
+    /** Offline Hindi command model (~42 MB): from the Play asset pack, else downloaded by itself. */
     val hindiModel: WakeModel by lazy { WakeModel(this, com.vikash.ampli.drive.voice.VoskModelSpec.Hindi) }
+
+    /** Gets both offline models in place on first start, with no download step for the driver. */
+    val voiceModels: com.vikash.ampli.drive.voice.VoiceModels by lazy { com.vikash.ampli.drive.voice.VoiceModels(this) }
 
     /** Home, Office and favourite places (Where to? and the Home chips; "ghar chalo"). */
     val places: com.vikash.ampli.drive.nav.SavedPlacesStore by lazy { com.vikash.ampli.drive.nav.SavedPlacesStore(this) }
@@ -126,6 +129,15 @@ class DriveApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Weak units: no decorative motion, a lighter map (LiteMode). Decided once per start.
+        com.vikash.ampli.drive.prefs.LiteMode.enabled =
+            com.vikash.ampli.drive.prefs.LiteMode.resolve(prefs.liteMode, lowEnd)
+        // The small settings files Home reads and the voice-pack index load on a background thread
+        // while the activity starts, so the first frame doesn't wait on the disk for them.
+        // (Not in JVM screen tests, where a thread outliving a test would only add noise.)
+        if (android.os.Build.FINGERPRINT != "robolectric") {
+            Thread({ warmUp() }, "ampli-warmup").apply { priority = Thread.NORM_PRIORITY - 1 }.start()
+        }
         // Server endpoints: cached remote config over BuildConfig (one small GET at most every 12 h).
         com.vikash.ampli.drive.config.RemoteConfig.init(this)
         // Round-2 Haryanvi lines wait for their recorded clips (checked lazily, nothing loads now).
@@ -138,6 +150,15 @@ class DriveApp : Application() {
         }
     }
 
+    private fun warmUp() {
+        try {
+            for (name in WARM_PREFS) getSharedPreferences(name, Context.MODE_PRIVATE).all
+            voicePlayer.library
+        } catch (_: Throwable) {
+            // Only a head start: whatever failed here loads on first use as before.
+        }
+    }
+
     /** Hidden or short of memory: let go of icon, QR and map tile caches (they reload on demand). */
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
@@ -147,5 +168,13 @@ class DriveApp : Application() {
     /** Android 12: strings fetched through the app context follow the in-app language too. */
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(AppLanguages.wrap(base))
+    }
+
+    private companion object {
+        /** Preference files read while Home is first drawn (CarStore, FastagStore, Trips, ShellPrefs…). */
+        val WARM_PREFS = listOf(
+            "car", "fastag", "trips", "places", "ampli_shell", "emergency", "fav_calls", "camera_reports",
+            "road_reports", "start_log", "startup", "wake_model", "ampli_calls", "ampli_dashcam",
+        )
     }
 }

@@ -104,6 +104,8 @@ internal fun RestrictedSettingsGuide(
     onOpenAppInfo: () -> Unit,
     onOpenAccess: () -> Unit,
     onClose: () -> Unit,
+    /** The same guide for another restricted switch (the Ampli power helper's Accessibility page). */
+    copy: RestrictedCopy = RestrictedCopy.Notifications,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -146,13 +148,13 @@ internal fun RestrictedSettingsGuide(
                     GlowBadge { Icon(Icons.Filled.Shield, contentDescription = null, tint = theme.text, modifier = Modifier.size(26.dp)) }
                     Column(Modifier.weight(1f)) {
                         Text(
-                            stringResource(if (before) R.string.restricted_before_title else R.string.restricted_title),
+                            stringResource(if (before) copy.beforeTitle else copy.title),
                             color = theme.text,
                             fontSize = dims.t(4f, min = 21f),
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            stringResource(if (before) R.string.restricted_before_hint else R.string.restricted_hint),
+                            stringResource(if (before) copy.beforeHint else copy.hint),
                             color = theme.muted,
                             fontSize = dims.t(2.4f, min = 14f),
                         )
@@ -169,11 +171,11 @@ internal fun RestrictedSettingsGuide(
                 }
                 // Android shows ⋮ › "Allow restricted settings" only after one refused try, so the
                 // try comes first. Coming back with access still off, that step is done.
-                val steps = restrictedSteps().map { stringResource(it) }
+                val steps = copy.steps.map { stringResource(it) }
                 steps.forEachIndexed { i, step ->
                     GuideStep(number = i + 1, text = step, index = i, done = !before && i == 0)
                 }
-                if (!before) GuideStep(number = null, text = stringResource(R.string.restricted_menu_missing), index = steps.size)
+                if (!before) GuideStep(number = null, text = stringResource(copy.menuMissing), index = steps.size)
                 Text(
                     stringResource(R.string.restricted_play_note),
                     color = theme.accentSoft,
@@ -192,9 +194,9 @@ internal fun RestrictedSettingsGuide(
                     }
                     val access: @Composable (Modifier) -> Unit = { m ->
                         BigButton(
-                            text = stringResource(R.string.restricted_open_access),
+                            text = stringResource(copy.openAccess),
                             onClick = onOpenAccess,
-                            icon = Icons.Filled.NotificationsActive,
+                            icon = copy.accessIcon,
                             primary = before,
                             modifier = m,
                         )
@@ -212,6 +214,36 @@ internal fun RestrictedSettingsGuide(
     }
 }
 
+/** The words of the guide: notification access, or the power helper's Accessibility switch. */
+internal class RestrictedCopy(
+    val title: Int,
+    val hint: Int,
+    val beforeTitle: Int,
+    val beforeHint: Int,
+    val steps: List<Int>,
+    val menuMissing: Int,
+    val openAccess: Int,
+    val accessIcon: androidx.compose.ui.graphics.vector.ImageVector,
+) {
+    companion object {
+        val Notifications = RestrictedCopy(
+            R.string.restricted_title, R.string.restricted_hint,
+            R.string.restricted_before_title, R.string.restricted_before_hint,
+            restrictedSteps(), R.string.restricted_menu_missing, R.string.restricted_open_access,
+            Icons.Filled.NotificationsActive,
+        )
+
+        /** "Ampli power helper" is an accessibility service: Android 13+ restricts it the same way. */
+        val PowerHelper = RestrictedCopy(
+            R.string.power_guide_title, R.string.power_guide_hint,
+            R.string.power_guide_title, R.string.power_guide_hint,
+            listOf(R.string.power_guide_step_try, R.string.restricted_step_1, R.string.restricted_step_2, R.string.power_guide_step_3),
+            R.string.power_guide_menu_missing, R.string.power_guide_open,
+            Icons.Filled.Shield,
+        )
+    }
+}
+
 /** The steps in order: try the switch (refused once), App info, ⋮ › Allow restricted settings, back and on. */
 internal fun restrictedSteps(): List<Int> = listOf(
     R.string.restricted_step_try,
@@ -225,8 +257,10 @@ internal fun restrictedSteps(): List<Int> = listOf(
 private fun GuideStep(number: Int?, text: String, index: Int, done: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val enter = remember { Animatable(0f) }
+    val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+    val enter = remember { Animatable(if (still) 1f else 0f) }
     LaunchedEffect(Unit) {
+        if (still) return@LaunchedEffect
         delay(120L + index * 70L)
         enter.animateTo(1f, spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow))
     }

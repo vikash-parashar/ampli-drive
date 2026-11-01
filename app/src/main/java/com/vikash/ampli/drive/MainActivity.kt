@@ -50,6 +50,8 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             startSensors()
             resumeTick.intValue++
+        // Back from Accessibility settings: Restart / Power off carry on once the helper is on.
+        com.vikash.ampli.drive.system.PowerControl.onResume(this)
         }
 
     /** Android 12 has no per-app language API: apply the saved language here. */
@@ -71,6 +73,9 @@ class MainActivity : ComponentActivity() {
             app.desi.start()
             // Settings › Announce calls (off until switched on): listens for the phone ringing.
             app.calls.start()
+            // Offline speech models: unpacked from the Play asset pack, or downloaded on any
+            // network (sideloaded APKs). Nothing for the driver to do; Home shows the progress.
+            app.voiceModels.start()
         }
         // 1-2 GB units: Home draws first; Play Billing and the voice helpers start just after.
         if (app.lowEnd) window.decorView.post { background() } else background()
@@ -130,6 +135,9 @@ class MainActivity : ComponentActivity() {
         handleVoiceIntent(intent)
 
         if (!app.prefs.askedPermissions) {
+            // Fresh install: "Hey Ampli" on by default; Home asks for the microphone next
+            // (FirstRunMicHost, after Play's disclosure). Must run before askedPermissions is set.
+            app.prefs.applyFirstRunVoice()
             app.prefs.askedPermissions = true
             askPermissions()
         }
@@ -159,6 +167,8 @@ class MainActivity : ComponentActivity() {
         // which as the HOME app includes right after boot (see VoiceService). A missing model
         // starts downloading here too, so a failed download is retried on every return home.
         VoiceService.start(this)
+        // Both offline models (English, and Hindi for Hindi-family languages), wake word on or off.
+        app.voiceModels.ensureAll()
         // Boot (or a start noticed while hidden): greeting and auto start, from the foreground.
         CarStart.launcherVisible = true
         // Ampli MP3 Player may have just been installed: it becomes the music app (once).

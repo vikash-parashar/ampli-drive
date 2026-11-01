@@ -46,7 +46,7 @@ If Play review asks for the background-location declaration anyway:
 | Service | Type | Permission | What the user sees | Why it can't wait / be deferred |
 | --- | --- | --- | --- | --- |
 | `car.CarMonitorService` | `location` | `FOREGROUND_SERVICE_LOCATION` | Ongoing "Watching your drive" notification, next camera in the text | Real-time alerts while driving; stops when switched off in Settings › Car |
-| `voice.VoiceService` | `microphone` | `FOREGROUND_SERVICE_MICROPHONE` | Ongoing "Hey Ampli is listening" notification | Hands-free wake word while driving; only after the driver turns it on and agrees to the disclosure |
+| `voice.VoiceService` | `microphone` | `FOREGROUND_SERVICE_MICROPHONE` | Ongoing "Hey Ampli is listening" notification | Hands-free wake word while driving; on by default for new installs, but only after the driver agrees to the disclosure and allows the microphone |
 | `dashcam.DashcamService` | `camera` | `FOREGROUND_SERVICE_CAMERA` | Ongoing "Dashcam recording" notification | Loop recording must continue while Google Maps is in front; Pro, off by default, started only from the visible launcher or the dashcam switch |
 
 ### Notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`)
@@ -59,7 +59,7 @@ Used for the optional **speed bubble** (current speed, speed limit, next camera)
 Used only for the **crash SOS alarm**: when a crash countdown runs out while Car Hub is not in front, a full-screen alert brings the SOS screen forward (nothing is sent without a tap). Fill in the Play Console "Full-screen intent" declaration on the App content page as a safety alert. On Android 14+ the driver can also grant it from the status row in Settings › Car (opens Android's full-screen notification setting); without it the alert is a heads-up notification.
 
 ### Microphone (`RECORD_AUDIO`)
-"Hey Ampli" wake word and voice commands, only after the driver turns them on and agrees to the in-app disclosure.
+"Hey Ampli" wake word and voice commands (on by default for new installs), only after the driver agrees to the in-app disclosure and allows the microphone.
 
 ### Phone and contacts (`READ_PHONE_STATE`, `READ_CONTACTS`, `ANSWER_PHONE_CALLS`)
 Requested only from Settings › Announce incoming calls (free, off by default): know a call is ringing, speak the caller's contact name, and answer / decline on a spoken "haan / naa". Each is optional; nothing is stored or sent. Car Hub is not the default dialer and makes no calls by itself.
@@ -69,6 +69,15 @@ Requested only from Car › Dashcam (Pro, off by default) on units that have a c
 
 ### Bluetooth (`BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` with `neverForLocation`)
 Connected phone name, OBD-II dongle (Pro), BLE tyre-pressure sensors (Pro). Scan results are never used for location.
+
+### Accessibility service (`BIND_ACCESSIBILITY_SERVICE`): "Ampli power helper"
+Off until the driver turns it on from a one-time card that explains it (prominent disclosure: `disclosure_power_body` / `disclosure_power_private`, shown before Android's Accessibility settings open). Purpose: head units without physical buttons. It calls only `performGlobalAction` for `GLOBAL_ACTION_POWER_DIALOG` (Restart / Power off, which the driver then taps in Android's own menu), `GLOBAL_ACTION_RECENTS` (long press on Apps) and `GLOBAL_ACTION_TAKE_SCREENSHOT` (Android 9+), each only after a tap in Car Hub. Config (`res/xml/power_helper.xml`): no event types, `canRetrieveWindowContent="false"`, `canPerformGestures="false"`. It collects, stores and sends nothing, so it adds nothing to the Data safety form. Not declared as an accessibility tool (`isAccessibilityTool` is not set); the Play declaration describes it as above.
+
+### Device admin (`BIND_DEVICE_ADMIN`, `force-lock` only)
+Settings › Power › "Turn the display fully off" (off by default) asks Android's "Activate device admin app?" screen so Screen off can call `lockNow()`. Only the `force-lock` policy is declared (`res/xml/device_admin.xml`); turning the setting off calls `removeActiveAdmin`. No data involved.
+
+### Quick panel permissions
+`CHANGE_WIFI_STATE` (Wi-Fi tile on Android 8/9), `KILL_BACKGROUND_PROCESSES` (Clear memory), `WRITE_EXTERNAL_STORAGE` with `maxSdkVersion="28"` (screenshots in Pictures/Ampli, asked once), `WRITE_SETTINGS` (brightness slider, already declared). Screenshots use Android's MediaProjection prompt on Android 8/9 and stay on the unit, so nothing is collected.
 
 ## Help & feedback (install id and reports)
 - The install id is a random UUID stored in the app's preferences, created the first time a report is made. It is not linked to the Android ID, the advertising id, the Google account or Play purchase tokens.

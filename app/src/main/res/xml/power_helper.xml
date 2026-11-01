@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ampli power helper: no event types, no window content, no gestures. It only calls
+     performGlobalAction (power menu, recent apps, screenshot) when the driver taps a key in Car Hub. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canPerformGestures="false"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/disclosure_power_service"
+    android:notificationTimeout="1000" />
