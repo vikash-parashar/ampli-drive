@@ -2,7 +2,7 @@
 
 Car Hub is a paid app, so it must not use the free public servers it used during testing:
 
-| What | Test default (debug builds only) | Why it can't ship |
+| What | Test default (test APKs only: debug and fastTest builds) | Why it can't ship |
 |---|---|---|
 | Routing | `router.project-osrm.org` (OSRM demo) | Demo server: ~1 request/s, no SLA, its usage policy forbids production apps |
 | Place search | `photon.komoot.io` | Fair-use public instance, no SLA, can block the app at any time |

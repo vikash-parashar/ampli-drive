@@ -225,8 +225,10 @@ internal fun restrictedSteps(): List<Int> = listOf(
 private fun GuideStep(number: Int?, text: String, index: Int, done: Boolean = false) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val enter = remember { Animatable(0f) }
+    val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+    val enter = remember { Animatable(if (still) 1f else 0f) }
     LaunchedEffect(Unit) {
+        if (still) return@LaunchedEffect
         delay(120L + index * 70L)
         enter.animateTo(1f, spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow))
     }

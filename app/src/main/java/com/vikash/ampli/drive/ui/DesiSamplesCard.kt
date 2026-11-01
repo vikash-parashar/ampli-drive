@@ -139,8 +139,10 @@ private fun SampleRow(event: HaryanviLines.Event, order: Int, speaking: String?,
     val theme = LocalDriveTheme.current
     val shape = RoundedCornerShape(18.dp)
     // Staggered entrance: each row rises and fades in a beat after the one above.
-    val enter = remember { Animatable(0f) }
+    val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
+    val enter = remember { Animatable(if (still) 1f else 0f) }
     LaunchedEffect(Unit) {
+        if (still) return@LaunchedEffect
         delay((order.coerceAtMost(18) * 28).toLong())
         enter.animateTo(1f, spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow))
     }

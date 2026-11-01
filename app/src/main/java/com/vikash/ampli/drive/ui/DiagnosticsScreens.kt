@@ -410,7 +410,7 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 DiagRow("Screen", "${context.resources.displayMetrics.widthPixels}x${context.resources.displayMetrics.heightPixels} @ ${context.resources.displayMetrics.densityDpi} dpi", null)
             }
             DiagSection("App") {
-                DiagRow("Version", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})${if (BuildConfig.DEBUG) " test build" else ""}", null)
+                DiagRow("Version", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})${if (BuildConfig.TEST_BUILD) " test build" else ""}", null)
                 DiagRow("Pro", "active=${yes(pro.isPro)} · purchased=${yes(pro.purchased)} · test unlock=${yes(pro.testUnlock)}", pro.isPro)
                 DiagRow("Voice style", style.key, null)
                 DiagRow("When the car starts", autoStart.mode.key + " · delay ${autoStart.delaySec}s" + (autoStart.btDeviceName?.let { " · BT: $it" } ?: ""), null)
@@ -427,6 +427,20 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 DiagRow("Last cold start", if (coldMs > 0) "$coldMs ms" else "(not measured yet)", if (coldMs > 0) coldMs < 3000 else null)
                 if (warmMs > 0) DiagRow("Last warm start", "$warmMs ms", warmMs < 1500)
                 DiagRow("Low-memory unit", if (app.lowEnd) "yes: map and music card load after the first frame" else "no", null)
+                // Lite mode: no decorative motion, map at 15 fps without 3D. Auto = on for low-memory units.
+                var liteChoice by remember { mutableStateOf(app.prefs.liteMode) }
+                val liteNext = com.vikash.ampli.drive.prefs.LiteMode.resolve(liteChoice, app.lowEnd)
+                DiagRow(
+                    "Lite mode",
+                    "${liteChoice.key} · now ${if (com.vikash.ampli.drive.prefs.LiteMode.enabled) "on" else "off"}" +
+                        if (liteNext != com.vikash.ampli.drive.prefs.LiteMode.enabled) " · ${if (liteNext) "on" else "off"} after a restart" else "",
+                    null,
+                    action = stringResource(R.string.diag_switch),
+                    onAction = {
+                        liteChoice = com.vikash.ampli.drive.prefs.LiteMode.next(liteChoice)
+                        app.prefs.liteMode = liteChoice
+                    },
+                )
                 DiagRow("Memory released", "${com.vikash.ampli.drive.system.MemoryTrim.trims} times this run", null)
             }
             // Why the welcome did or did not play after a start (power cut, ACC on, boot).
