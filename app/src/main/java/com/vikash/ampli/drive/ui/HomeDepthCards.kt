@@ -45,7 +45,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -61,170 +67,263 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlin.math.max
 
 /*
- * Big Glance's three cards with depth: something drawn behind the big text and something on top
- * of it (the road and the ego car around the speed, the disc over the song's first words, the
- * car's dot over the place name). Low glare: theme fills, the theme accent for what moves.
+ * Big Glance's three cards: the neon speed dial, and two with depth (something drawn behind the
+ * big text and something on top of it: the disc over the song's first words, the car's dot over
+ * the place name). Low glare: theme fills, the accent for what moves.
  */
 
-/** The speed card's road. Pure, so the flow and the perspective are unit-tested. */
-internal object RoadMotion {
-    /** Road cycles (one dash spacing) per second for each km/h: 60 km/h ≈ 0.7 dashes a second. */
-    const val FLOW_PER_KMH = 0.012f
+/** The speed gauge's geometry and motion. Pure, so it is unit-tested. */
+internal object GaugeMath {
+    const val VMAX = 220
+    const val TICK_STEP = 20
 
-    /** Dashes on the centre line at once. */
-    const val DASHES = 8
+    /** Start of the 270° sweep (bottom left), clockwise from 3 o'clock as Android draws arcs. */
+    const val START_DEG = 135f
+    const val SWEEP_DEG = 270f
 
-    /** Length of one dash along the road (0..1 before the perspective). */
-    const val DASH_LEN = 0.06f
+    /** Ember pool size: never more on screen, never allocated per frame. */
+    const val MAX_PARTICLES = 120
 
-    /** Horizon, as a share of the card's height. */
-    const val HORIZON = 0.38f
+    /** Idle (parked) redraws at most this often: the slow breathing glow only. */
+    const val IDLE_FRAME_NS = 33_000_000L
 
-    /** Redraw at most this often while moving (a weak ARMv7 unit needs no more). */
-    const val FRAME_NS = 33_000_000L
+    val TICKS: List<Int> = (0..VMAX step TICK_STEP).toList()
 
-    /** The road's position after [dtSec] at [kmh]; never moves at 0 (or below). */
-    fun advance(offset: Float, kmh: Int, dtSec: Float): Float {
-        if (kmh <= 0 || dtSec <= 0f) return offset
-        val next = offset + kmh * FLOW_PER_KMH * dtSec
-        return next - kotlin.math.floor(next)
-    }
+    fun share(kmh: Float): Float = (kmh / VMAX).coerceIn(0f, 1f)
 
-    /**
-     * Where dash [i] sits: its near and far edges as depth 0 (horizon) .. 1 (bottom of the card),
-     * squared so dashes grow and speed up as they come closer.
-     */
-    fun dashDepth(i: Int, offset: Float): Pair<Float, Float> {
-        var p = i.toFloat() / DASHES + offset
-        p -= kotlin.math.floor(p)
-        val far = p * p
-        val nearP = (p + DASH_LEN).coerceAtMost(1f)
-        return far to nearP * nearP
+    /** Angle (degrees, Android arc convention) of [kmh] on the dial. */
+    fun angleDeg(kmh: Float): Float = START_DEG + SWEEP_DEG * share(kmh)
+
+    /** New embers a second: a trickle when slow, a blaze near the top. None when parked. */
+    fun emberRate(kmh: Float): Float = if (kmh <= 0.5f) 0f else 4f + 90f * share(kmh)
+
+    /** Breathing speed (radians a second): slow when parked, faster with speed. */
+    fun pulseRate(kmh: Float): Float = 1.5f + 6f * share(kmh)
+
+    /** Red once over the road's limit, mint otherwise (and without a known limit). */
+    fun over(kmh: Int?, limit: Int?): Boolean = kmh != null && limit != null && kmh > limit
+}
+
+/** Mint neon and the over-limit red (fixed, like the SOS red). */
+private val NeonMint = Color(0xFF6FD9A8)
+private val NeonRed = Color(0xFFFF5C5C)
+private val LimitRing = Color(0xFFD7263D)
+private val LimitMarker = Color(0xFFFFB547)
+
+/** A soft round glow, drawn once per colour and stamped for every ember (cheaper than gradients per ember). */
+private fun glowSprite(color: Color): ImageBitmap {
+    val size = 64
+    val bmp = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(bmp)
+    val argb = color.toArgb()
+    val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    p.shader = android.graphics.RadialGradient(
+        size / 2f, size / 2f, size / 2f,
+        intArrayOf(argb, (argb and 0x00FFFFFF) or 0x66000000, argb and 0x00FFFFFF),
+        floatArrayOf(0f, 0.35f, 1f),
+        android.graphics.Shader.TileMode.CLAMP,
+    )
+    c.drawCircle(size / 2f, size / 2f, size / 2f, p)
+    return bmp.asImageBitmap()
+}
+
+/** The ember pool: parallel arrays, reused for the card's whole life. */
+private class Embers {
+    val x = FloatArray(GaugeMath.MAX_PARTICLES)
+    val y = FloatArray(GaugeMath.MAX_PARTICLES)
+    val vx = FloatArray(GaugeMath.MAX_PARTICLES)
+    val vy = FloatArray(GaugeMath.MAX_PARTICLES)
+    val life = FloatArray(GaugeMath.MAX_PARTICLES)
+    val r = FloatArray(GaugeMath.MAX_PARTICLES)
+    var carry = 0f
+
+    /** Moves the embers [dt] seconds on and lights new ones along the lit arc of a dial [radius] px. */
+    fun step(dt: Float, kmh: Float, cx: Float, cy: Float, radius: Float) {
+        val s = GaugeMath.share(kmh)
+        val fade = dt * (1.2f - 0.4f * s)
+        for (i in 0 until GaugeMath.MAX_PARTICLES) {
+            if (life[i] <= 0f) continue
+            life[i] -= fade
+            x[i] += vx[i] * dt
+            y[i] += vy[i] * dt
+            vy[i] -= radius * 0.25f * dt
+        }
+        carry += GaugeMath.emberRate(kmh) * dt
+        var i = 0
+        while (carry >= 1f && i < GaugeMath.MAX_PARTICLES) {
+            if (life[i] <= 0f) {
+                val a = Math.toRadians(GaugeMath.angleDeg(kotlin.random.Random.nextFloat() * kmh).toDouble())
+                val ca = kotlin.math.cos(a).toFloat()
+                val sa = kotlin.math.sin(a).toFloat()
+                val out = radius * (0.1f + 0.5f * s)
+                x[i] = cx + ca * radius
+                y[i] = cy + sa * radius
+                vx[i] = ca * out + (kotlin.random.Random.nextFloat() - 0.5f) * radius * 0.15f
+                vy[i] = sa * out - radius * (0.15f + 0.5f * s * kotlin.random.Random.nextFloat())
+                life[i] = 1f
+                r[i] = radius * (0.03f + 0.07f * s * kotlin.random.Random.nextFloat())
+                carry -= 1f
+            }
+            i++
+        }
+        if (carry > 1f) carry = 1f
     }
 }
 
 /**
- * Speed: the road in perspective with lane dashes flowing towards the driver (speed-proportional,
- * still at 0 km/h), the huge number over the road and the ego car, seen from behind, on top of the
- * number. Frames run only while moving and the screen is on.
+ * Speed: a neon dial 0..220 km/h (ticks every 20, a 270° sweep), lit up to the current speed with
+ * embers rising off the lit arc. Embers, glow and breathing grow with speed; parked, only a slow,
+ * faint breathing glow. Over the road's limit everything turns red. In the middle the huge number
+ * and "km/h"; below it the road's limit sign (hidden when unknown) and the FASTag balance (hidden
+ * when none). One Canvas, a fixed ember pool and pre-drawn glow sprites: no allocation per frame;
+ * 30 fps when parked, nothing at all while the screen is off.
  */
 @Composable
-internal fun RoadSpeedCard(ui: HomeUi, shape: Shape, modifier: Modifier = Modifier) {
+internal fun GaugeSpeedCard(ui: HomeUi, shape: Shape, modifier: Modifier = Modifier) {
     val theme = LocalDriveTheme.current
-    val dims = LocalDims.current
-    val kmh = ui.speed ?: 0
-    val speedNow by rememberUpdatedState(kmh)
-    val offset = remember { mutableFloatStateOf(0f) }
-    val moving = kmh > 0
-    LaunchedEffect(moving) {
-        if (!moving) return@LaunchedEffect
-        var last = 0L
-        while (true) {
-            withFrameNanos { t ->
-                if (last == 0L) {
-                    last = t
-                } else if (t - last >= RoadMotion.FRAME_NS) {
-                    offset.floatValue = RoadMotion.advance(offset.floatValue, speedNow, (t - last) / 1_000_000_000f)
-                    last = t
+    val kmhNow by rememberUpdatedState((ui.speed ?: 0).toFloat())
+    val over = GaugeMath.over(ui.speed, ui.limit)
+    val hue = if (over) NeonRed else NeonMint
+    val mintSprite = remember { glowSprite(NeonMint) }
+    val redSprite = remember { glowSprite(NeonRed) }
+    val embers = remember { Embers() }
+    // The animation clock (seconds) and a tick that the draw step reads, so frames only redraw.
+    val clock = remember { mutableFloatStateOf(0f) }
+    val frame = remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    val geo = remember { FloatArray(3) }
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(Unit) {
+        // Robolectric previews: one still frame (an endless clock would never let a test settle).
+        if (!GaugeLive.enabled) return@LaunchedEffect
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            var last = 0L
+            while (true) {
+                withFrameNanos { t ->
+                    val idle = kmhNow <= 0.5f
+                    if (last == 0L) {
+                        last = t
+                    } else if (!idle || t - last >= GaugeMath.IDLE_FRAME_NS) {
+                        val dt = ((t - last) / 1_000_000_000f).coerceAtMost(0.05f)
+                        last = t
+                        clock.floatValue += dt
+                        if (geo[2] > 0f) embers.step(dt, kmhNow, geo[0], geo[1], geo[2])
+                        frame.longValue++
+                    }
                 }
             }
         }
     }
-    val bg = if (ui.over) theme.danger else theme.surface
-    val fg = if (ui.over) theme.onDanger else theme.text
-    val road = if (ui.over) Color.Black.copy(alpha = 0.18f) else theme.surfaceHigh
-    val edge = fg.copy(alpha = 0.22f)
-    val dash = if (ui.over) theme.onDanger.copy(alpha = 0.8f) else theme.accent
-    val path = remember { Path() }
-    BoxWithConstraints(modifier.clip(shape).background(bg)) {
-        val h = maxHeight
-        // Background: the road.
-        Canvas(Modifier.fillMaxSize()) {
-            val w = size.width
-            val ht = size.height
-            val hy = ht * RoadMotion.HORIZON
-            val cx = w / 2f
-            val topHalf = w * 0.03f
-            val bottomHalf = w * 0.55f
-            path.reset()
-            path.moveTo(cx - topHalf, hy)
-            path.lineTo(cx + topHalf, hy)
-            path.lineTo(cx + bottomHalf, ht)
-            path.lineTo(cx - bottomHalf, ht)
-            path.close()
-            drawPath(path, road)
-            val sw = 2.dp.toPx()
-            drawLine(edge, Offset(cx - topHalf, hy), Offset(cx - bottomHalf, ht), sw)
-            drawLine(edge, Offset(cx + topHalf, hy), Offset(cx + bottomHalf, ht), sw)
-            val o = offset.floatValue
-            val unit = 1.dp.toPx()
-            for (i in 0 until RoadMotion.DASHES) {
-                val (z1, z2) = RoadMotion.dashDepth(i, o)
-                val y1 = hy + (ht - hy) * z1
-                val y2 = hy + (ht - hy) * z2
-                val w1 = unit * (1f + 5f * z1)
-                val w2 = unit * (1f + 5f * z2)
-                path.reset()
-                path.moveTo(cx - w1, y1)
-                path.lineTo(cx + w1, y1)
-                path.lineTo(cx + w2, y2)
-                path.lineTo(cx - w2, y2)
-                path.close()
-                drawPath(path, dash)
-            }
-        }
-        // Middle: the number, about 42% of the card tall, its baseline near 78% down.
-        val numberSize = with(LocalDensity.current) { minOf(h * 0.42f, maxWidth * 0.5f).toSp() }
-        Text(
-            ui.speed?.toString() ?: "0",
-            color = if (ui.speed == null) fg.copy(alpha = 0.35f) else fg.copy(alpha = 0.95f),
-            fontFamily = theme.numberFont.family,
-            fontWeight = FontWeight.Black,
-            fontSize = numberSize,
-            maxLines = 1,
-            softWrap = false,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = h * 0.34f),
+    val fastag = ui.fastag?.first
+    val limit = ui.limit
+    val text = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { textAlign = android.graphics.Paint.Align.CENTER } }
+    val bold = remember { android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD) }
+    val tickLabels = remember { GaugeMath.TICKS.map { it.toString() } }
+    val ink = theme.text
+    val unit = stringResource(R.string.speed_unit)
+    val speedText = (ui.speed ?: 0).toString()
+    Canvas(modifier.clip(shape).background(Color(0xFF060A12))) {
+        frame.longValue // redraw on every animation frame
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h * 0.5f
+        val radius = minOf(w, h) * 0.36f
+        geo[0] = cx
+        geo[1] = cy
+        geo[2] = radius
+        val kmh = kmhNow
+        val s = GaugeMath.share(kmh)
+        val pulse = 0.6f + 0.4f * kotlin.math.sin(clock.floatValue * GaugeMath.pulseRate(kmh))
+        // Background halo: faint when parked, stronger with speed.
+        val sprite = if (over) redSprite else mintSprite
+        val halo = (radius * 3f).toInt()
+        drawImage(
+            sprite,
+            dstOffset = androidx.compose.ui.unit.IntOffset((cx - halo / 2f).toInt(), (cy - halo / 2f).toInt()),
+            dstSize = androidx.compose.ui.unit.IntSize(halo, halo),
+            alpha = ((0.06f + 0.22f * s) * (0.7f + 0.3f * pulse)).coerceIn(0f, 1f),
         )
-        // On top: the ego car from behind, with a soft shadow.
-        val body = fg.copy(alpha = 0.92f)
-        val glass = bg.copy(alpha = 0.9f)
-        val lamp = Color(0xFFB8323F)
-        Canvas(Modifier.fillMaxSize()) {
-            val w = size.width
-            val ht = size.height
-            val cw = max(w * 0.2f, 40.dp.toPx())
-            val ch = ht * 0.16f
-            val cx = w / 2f
-            val cy = ht * 0.7f
-            drawOval(Color.Black.copy(alpha = 0.45f), topLeft = Offset(cx - cw * 0.62f, cy + ch * 0.86f), size = Size(cw * 1.24f, ch * 0.32f))
-            drawRoundRect(body, topLeft = Offset(cx - cw / 2f, cy), size = Size(cw, ch), cornerRadius = CornerRadius(cw * 0.25f))
-            drawRoundRect(glass, topLeft = Offset(cx - cw * 0.34f, cy + ch * 0.12f), size = Size(cw * 0.68f, ch * 0.32f), cornerRadius = CornerRadius(cw * 0.08f))
-            val lw = cw * 0.16f
-            val lh = ch * 0.13f
-            drawRoundRect(lamp, topLeft = Offset(cx - cw * 0.44f, cy + ch * 0.58f), size = Size(lw, lh), cornerRadius = CornerRadius(lh / 2f))
-            drawRoundRect(lamp, topLeft = Offset(cx + cw * 0.44f - lw, cy + ch * 0.58f), size = Size(lw, lh), cornerRadius = CornerRadius(lh / 2f))
-        }
-        Text(
-            stringResource(R.string.speed_label).uppercase() + " · " + stringResource(R.string.speed_unit),
-            color = fg.copy(alpha = 0.7f),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = dims.t(2.4f, min = 14f),
-            maxLines = 1,
-            modifier = Modifier.align(Alignment.TopStart).padding(dims.d(2.6f)),
-        )
-        if (ui.limit != null) {
-            LimitBadge(ui.limit, dims.d(10f), Modifier.align(Alignment.TopEnd).padding(dims.d(2f)), dark = true)
-        }
-        ui.rpm?.let {
-            Text(
-                stringResource(R.string.speed_rpm, it),
-                color = fg.copy(alpha = 0.7f),
-                fontSize = dims.t(2.4f, min = 14f),
-                modifier = Modifier.align(Alignment.BottomStart).padding(dims.d(2.6f)),
+        // Embers, added light.
+        for (i in 0 until GaugeMath.MAX_PARTICLES) {
+            val life = embers.life[i]
+            if (life <= 0f) continue
+            val rr = embers.r[i] * (1.5f - life) * 3f
+            drawImage(
+                sprite,
+                dstOffset = androidx.compose.ui.unit.IntOffset((embers.x[i] - rr).toInt(), (embers.y[i] - rr).toInt()),
+                dstSize = androidx.compose.ui.unit.IntSize((rr * 2).toInt().coerceAtLeast(1), (rr * 2).toInt().coerceAtLeast(1)),
+                alpha = (0.8f * life).coerceIn(0f, 1f),
+                blendMode = androidx.compose.ui.graphics.BlendMode.Plus,
             )
         }
+        // The ring: a dim track, then the lit arc with a layered glow (no blur filters on 8.1).
+        val tl = Offset(cx - radius, cy - radius)
+        val sz = Size(radius * 2, radius * 2)
+        drawArc(hue.copy(alpha = 0.22f), GaugeMath.START_DEG, GaugeMath.SWEEP_DEG, false, tl, sz, style = Stroke(radius * 0.05f, cap = StrokeCap.Round))
+        val lit = (GaugeMath.SWEEP_DEG * s).coerceAtLeast(0.6f)
+        val glow = (0.35f + 0.65f * s) * pulse
+        drawArc(hue.copy(alpha = 0.10f * glow), GaugeMath.START_DEG, lit, false, tl, sz, style = Stroke(radius * 0.26f, cap = StrokeCap.Round))
+        drawArc(hue.copy(alpha = 0.20f * glow), GaugeMath.START_DEG, lit, false, tl, sz, style = Stroke(radius * 0.16f, cap = StrokeCap.Round))
+        drawArc(hue, GaugeMath.START_DEG, lit, false, tl, sz, style = Stroke(radius * 0.07f, cap = StrokeCap.Round))
+        drawIntoCanvas { canvas ->
+            val nc = canvas.nativeCanvas
+            // Ticks and labels every 20.
+            text.typeface = bold
+            text.textSize = radius * 0.13f
+            text.setShadowLayer(0f, 0f, 0f, 0)
+            for (k in tickLabels.indices) {
+                val v = GaugeMath.TICKS[k]
+                val a = Math.toRadians(GaugeMath.angleDeg(v.toFloat()).toDouble())
+                val ca = kotlin.math.cos(a).toFloat()
+                val sa = kotlin.math.sin(a).toFloat()
+                val on = v <= kmh
+                drawLine(if (on) hue else ink.copy(alpha = 0.4f), Offset(cx + ca * radius * 0.86f, cy + sa * radius * 0.86f), Offset(cx + ca * radius * 0.76f, cy + sa * radius * 0.76f), 2.dp.toPx())
+                text.color = ink.copy(alpha = 0.85f).toArgb()
+                nc.drawText(tickLabels[k], cx + ca * radius * 1.2f, cy + sa * radius * 1.2f + text.textSize * 0.35f, text)
+            }
+            // The limit's marker on the ring.
+            if (limit != null) {
+                val a = Math.toRadians(GaugeMath.angleDeg(limit.toFloat()).toDouble())
+                drawCircle(LimitMarker, radius * 0.04f, Offset(cx + kotlin.math.cos(a).toFloat() * radius * 0.86f, cy + kotlin.math.sin(a).toFloat() * radius * 0.86f))
+            }
+            // The number, glowing, and km/h.
+            text.textSize = radius * 0.55f
+            text.color = Color(0xFFF2F5FA).toArgb()
+            text.setShadowLayer(radius * 0.12f, 0f, 0f, hue.toArgb())
+            nc.drawText(speedText, cx, cy + radius * 0.14f, text)
+            text.setShadowLayer(0f, 0f, 0f, 0)
+            text.textSize = radius * 0.12f
+            text.color = ink.copy(alpha = 0.6f).toArgb()
+            nc.drawText(unit, cx, cy + radius * 0.34f, text)
+            // The road's limit sign and the FASTag balance, side by side below.
+            val sy = cy + radius * 0.66f
+            val sr = radius * 0.17f
+            val sx = if (fastag != null) cx - radius * 0.32f else cx
+            if (limit != null) {
+                drawCircle(Color.White, sr, Offset(sx, sy))
+                drawCircle(LimitRing, sr * 0.88f, Offset(sx, sy), style = Stroke(sr * 0.25f))
+                text.textSize = sr * 0.85f
+                text.color = 0xFF111111.toInt()
+                nc.drawText(limit.toString(), sx, sy + sr * 0.3f, text)
+            }
+            if (fastag != null) {
+                text.textAlign = android.graphics.Paint.Align.LEFT
+                val fx = if (limit != null) cx + radius * 0.05f else cx - radius * 0.25f
+                text.textSize = radius * 0.11f
+                text.color = ink.copy(alpha = 0.9f).toArgb()
+                nc.drawText("FASTag", fx, sy - radius * 0.04f, text)
+                text.textSize = radius * 0.14f
+                text.color = NeonMint.toArgb()
+                nc.drawText(fastag, fx, sy + radius * 0.13f, text)
+                text.textAlign = android.graphics.Paint.Align.CENTER
+            }
+        }
     }
+}
+
+/** Live animation on a real unit; a still frame under Robolectric (screen previews, tests). */
+private object GaugeLive {
+    val enabled: Boolean = android.os.Build.FINGERPRINT != "robolectric"
 }
 
 /** The first two words of a title, one per line ("राम\nमेरे"): the card's big excerpt. */

@@ -932,8 +932,8 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier, map: (@Composable () -
             CaptionLine(ui.caption, Modifier.weight(1f))
         }
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
-            // Speed: road behind, the number, the ego car on top (HomeDepthCards).
-            RoadSpeedCard(ui, tile, Modifier.weight(1f).fillMaxHeight())
+            // Speed: the neon dial with embers (HomeDepthCards); a little wider so it reads well.
+            GaugeSpeedCard(ui, tile, Modifier.weight(1.2f).fillMaxHeight())
             // Map: streets, the place name, the car's dot on top.
             DepthMapCard(ui, tile, map, Modifier.weight(1f).fillMaxHeight())
             // Playing: source badge, the title's first words under the disc, bars.

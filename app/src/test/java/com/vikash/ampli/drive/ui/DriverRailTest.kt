@@ -42,20 +42,19 @@ class DriverRailTest {
     }
 
     @Test
-    fun roadStillAtZeroAndFasterWithSpeed() {
-        assertEquals(0.3f, RoadMotion.advance(0.3f, 0, 1f), 0f)
-        assertEquals(0.3f, RoadMotion.advance(0.3f, -5, 1f), 0f)
-        val slow = RoadMotion.advance(0f, 20, 0.5f)
-        val fast = RoadMotion.advance(0f, 60, 0.5f)
-        assertTrue(fast > slow && slow > 0f)
-        // Wraps instead of growing.
-        val wrapped = RoadMotion.advance(0.9f, 100, 1f)
-        assertTrue(wrapped in 0f..1f)
-        // Dashes: in range, far edge above near edge, and closer dashes are longer (perspective).
-        val (f0, n0) = RoadMotion.dashDepth(0, 0.05f)
-        val (f6, n6) = RoadMotion.dashDepth(6, 0.05f)
-        assertTrue(f0 < n0 && f6 < n6 && n6 <= 1f)
-        assertTrue(n6 - f6 > n0 - f0)
+    fun gaugeDialAndEmbers() {
+        assertEquals((0..220 step 20).toList(), GaugeMath.TICKS)
+        assertEquals(135f, GaugeMath.angleDeg(0f), 0f)
+        assertEquals(405f, GaugeMath.angleDeg(220f), 0.001f)
+        assertEquals(405f, GaugeMath.angleDeg(300f), 0.001f)
+        assertEquals(270f, GaugeMath.angleDeg(110f), 0.001f)
+        // Parked: no embers, slow breathing; more of both with speed.
+        assertEquals(0f, GaugeMath.emberRate(0f), 0f)
+        assertTrue(GaugeMath.emberRate(120f) > GaugeMath.emberRate(30f))
+        assertTrue(GaugeMath.pulseRate(100f) > GaugeMath.pulseRate(0f))
+        // Red only over a known limit.
+        assertTrue(GaugeMath.over(92, 80))
+        assertTrue(!GaugeMath.over(80, 80) && !GaugeMath.over(92, null) && !GaugeMath.over(null, 80))
     }
 
     @Test
