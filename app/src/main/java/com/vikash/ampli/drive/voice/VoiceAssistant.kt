@@ -40,6 +40,12 @@ data class VoiceUiState(
     val heard: String = "",
     /** What Ampli said last. */
     val reply: String = "",
+    /**
+     * What the last listen of this session heard, kept on screen until the next result ("Heard:
+     * gaana chalao", "didn't understand", "nothing"), so a driver can tell us what Ampli heard.
+     * Empty before the first listen.
+     */
+    val suna: String = "",
     /** Destinations waiting for "the first / second / third one" (or a tap). */
     val options: List<Place> = emptyList(),
     /** A big answer card: the time, the weather, the volume… */
@@ -106,6 +112,11 @@ class VoiceAssistant(private val app: DriveApp) {
     /** This session acted on something (a command, a search). */
     private var acted = false
 
+    /** Ampli's last line in this session and how many it has said, for [FollowUp]. */
+    private var lastLine: String = ""
+    private var linesSaid = 0
+    private var linesAtListen = 0
+
     /** Starts a session unless one is running. */
     fun start() {
         if (job?.isActive == true) return
@@ -114,14 +125,27 @@ class VoiceAssistant(private val app: DriveApp) {
         releaseWakeMic?.invoke()
         _state.value = VoiceUiState(active = true, phase = VoiceUiState.Phase.Working)
         acted = false
+        lastLine = ""
+        linesSaid = 0
+        linesAtListen = 0
+        VoiceDebugLog.add("session start")
         job = scope.launch {
             try {
                 session()
             } catch (e: CancellationException) {
+                VoiceDebugLog.add("session cancelled")
                 throw e
-            } catch (_: Exception) {
-                // A failing engine must never leave the mic or the overlay stuck.
+            } catch (e: Exception) {
+                // A failing engine must never leave the mic or the overlay stuck, but it must not
+                // be silent either: shown for a moment and written to the voice log.
+                VoiceDebugLog.add("session error: ${e.javaClass.simpleName}: ${e.message}")
+                _state.update { it.copy(phase = VoiceUiState.Phase.Working, reply = "Voice error: ${e.javaClass.simpleName}") }
+                try {
+                    kotlinx.coroutines.delay(ERROR_SHOW_MS)
+                } catch (_: Exception) {
+                }
             } finally {
+                VoiceDebugLog.add("session end")
                 listener.cancel()
                 app.voicePlayer.stop()
                 if (acted) lastActionAt = android.os.SystemClock.elapsedRealtime()
@@ -164,8 +188,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!listener.isAvailable()) return null
         return withMic {
             waitUntilQuiet()
-            speaker.earcon()
-            when (val r = listener.listen(language(), onPartial = {}, mode = mode)) {
+            when (val r = listener.listen(language(), onPartial = {}, mode = mode, beforeStart = { speaker.earcon() })) {
                 is Listener.Result.Heard -> r.text
                 else -> null
             }
@@ -182,6 +205,7 @@ class VoiceAssistant(private val app: DriveApp) {
             kotlinx.coroutines.delay(QUIET_POLL_MS)
             waited += QUIET_POLL_MS
         }
+        VoiceDebugLog.add(if (waited >= QUIET_WAIT_MS) "speech still playing after ${waited} ms: listening anyway" else "speech done (waited ${waited} ms)")
         kotlinx.coroutines.delay(SETTLE_MS)
     }
 
@@ -259,40 +283,53 @@ class VoiceAssistant(private val app: DriveApp) {
 
         var misses = 0
         repeat(MAX_TURNS) {
-            speaker.earcon()
-            _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
+            // A line Ampli said since the last listen (the greeting, "हाँ भाई, बोल।", a question):
+            // the driver is answering it, so the follow-up grammar and gentler thresholds apply.
+            val spokeLine = linesSaid > linesAtListen
+            if (!FollowUp.mayListen(sessionActive = true, inCall = speaker.inCall(), lastActionAt = lastActionAt, now = android.os.SystemClock.elapsedRealtime())) {
+                VoiceDebugLog.add("no listen: phone call (audio mode ${speaker.audioMode()})")
+                return
+            }
+            val mode = FollowUp.mode(destination = expect == Expect.Destination, spokeLine = spokeLine)
+            val followUp = mode == ListenMode.FollowUp
             val onPartial = { partial: String -> _state.update { it.copy(heard = partial) } }
-            var result = listener.listen(
-                lang,
-                onPartial = onPartial,
-                // Offline fallback: command phrases only, except right after "where to?". After
-                // the greeting the offline model hears commands first ("gaana chalao" must not
-                // become a place search); a place name is asked for next.
-                commandsOnly = expect != Expect.Destination,
-            )
+            var result = listenTurn(lang, mode, onPartial)
+            showHeard(result, res)
             if (listener.lastEngine.offline) VoskCommandListener.ensureHindiModel(app)
-            if (expect == Expect.Open && listener.lastEngine.offline &&
-                RecognizerFallback.offlineNeedsWhereTo((result as? Listener.Result.Heard)?.text, parserLang)
+            if (expect == Expect.Open && listener.lastEngine.offline && result != Listener.Result.Silence && result != Listener.Result.Unavailable &&
+                RecognizerFallback.offlineNeedsWhereTo((result as? Listener.Result.Heard)?.text, parserLang) &&
+                (result as? Listener.Result.Heard)?.let { FollowUp.reply(it.text) == FollowUp.Reply.Other } != false
             ) {
-                // No command heard offline: ask for the place and transcribe it freely.
+                // Something was said offline but it was no command (a place name): ask for the
+                // place and transcribe it freely.
                 styled(res, lang, HaryanviLines.Event.AskDestination, res.getString(R.string.voice_where_to))
                 expect = Expect.Destination
-                speaker.earcon()
-                _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
-                result = listener.listen(lang, onPartial = onPartial, commandsOnly = false)
+                result = listenTurn(lang, ListenMode.Free, onPartial)
+                showHeard(result, res)
             }
             val text = when (result) {
                 Listener.Result.Unavailable -> {
+                    // Shown, not only spoken: on a unit whose voice is quiet the driver still sees why.
+                    val why = listener.lastError()
+                    _state.update { it.copy(suna = res.getString(R.string.voice_suna_error, why ?: "—")) }
                     say(res, lang, R.string.voice_unavailable)
+                    kotlinx.coroutines.delay(ERROR_SHOW_MS)
                     return
                 }
                 Listener.Result.Silence -> {
-                    misses++
                     // After a volume change, silence just means "that's enough".
                     if (expect == Expect.MoreVolume) return
-                    if (misses >= 2 || expect == Expect.Nothing) {
-                        // Nothing said after the wake word: usually a false wake, so stay quiet.
-                        if (expect != Expect.Nothing) styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                    // Ampli said something and heard nothing back: one short line, then close.
+                    // After a bare beep (usually a false wake) it stays quiet.
+                    if (FollowUp.onSilence(spokeLine || expect != Expect.Nothing) == FollowUp.Silence.CloseWithLine) {
+                        styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                    }
+                    return
+                }
+                Listener.Result.Unclear -> {
+                    misses++
+                    if (misses >= 2) {
+                        styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
                         return
                     }
                     styled(res, lang, HaryanviLines.Event.DidntCatch, res.getString(R.string.voice_didnt_catch))
@@ -303,12 +340,31 @@ class VoiceAssistant(private val app: DriveApp) {
             val quality = (result as? Listener.Result.Heard)?.quality
             _state.update { it.copy(heard = text, phase = VoiceUiState.Phase.Working) }
             val intent = VoiceIntents.parse(text, parserLang, expectingChoice = expect == Expect.Choice)
+            VoiceDebugLog.add("intent: $intent")
+            // A plain answer to Ampli's question ("haan", "badhiya", "sab theek", "nahi"): never a
+            // place search. Fine → ask where to; no → OK, and close.
+            if (intent is VoiceIntent.Unknown && expect != Expect.Choice && expect != Expect.MoreVolume) {
+                when (FollowUp.reply(text)) {
+                    FollowUp.Reply.Fine -> {
+                        styled(res, lang, HaryanviLines.Event.AskDestination, res.getString(R.string.voice_where_to))
+                        expect = Expect.Destination
+                        return@repeat
+                    }
+                    FollowUp.Reply.No -> {
+                        styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
+                        return
+                    }
+                    FollowUp.Reply.Other -> Unit
+                }
+            }
             // Opening an app, starting a route or a place search needs a clear result: music or
             // talk forced onto "bluetooth kholo" / "ghar chalo", or a place name made of noise,
-            // is asked again instead of acted on.
-            val unclearLaunch = SpeechGate.launches(intent) && !SpeechGate.mayLaunch(quality)
+            // is asked again instead of acted on. Answering Ampli's own question is a little
+            // more forgiving ([SpeechGate.MIN_CONF_LAUNCH_FOLLOW_UP]).
+            val lenient = followUp || (spokeLine && mode == ListenMode.Free)
+            val unclearLaunch = SpeechGate.launches(intent) && !SpeechGate.mayLaunch(quality, lenient)
             val unclearPlace = intent is VoiceIntent.Unknown && (expect == Expect.Open || expect == Expect.Destination) &&
-                !SpeechGate.destinationOk(VoiceIntents.destinationFrom(text, parserLang), quality)
+                !SpeechGate.destinationOk(VoiceIntents.destinationFrom(text, parserLang), quality, lenient)
             if (unclearLaunch || unclearPlace) {
                 misses++
                 if (misses >= 2) return
@@ -318,8 +374,57 @@ class VoiceAssistant(private val app: DriveApp) {
             acted = true
             // A new question clears the last answer card; "aur" after a volume change keeps it.
             if (intent !is VoiceIntent.Volume && expect != Expect.MoreVolume) _state.update { it.copy(answer = null) }
-            expect = handle(intent, text, expect, res, lang, parserLang) ?: return
+            val before = linesSaid
+            val next = handle(intent, text, expect, res, lang, parserLang)
+            // Whatever the reply was, if Ampli's last line asks something ("…कित चालणा सै?"),
+            // keep listening for the answer instead of ending the session.
+            expect = next ?: if (linesSaid > before && FollowUp.expectsAnswer(lastLine)) Expect.Open else return
         }
+    }
+
+    /**
+     * One listen inside the session: waits until Ampli's own line (clip, system TTS or the
+     * bundled voice) has really finished, then, once the recogniser and microphone are ready,
+     * the listen chime and "Sun raha hoon…" on screen, then up to ~10 s of listening.
+     */
+    private suspend fun listenTurn(lang: String, mode: ListenMode, onPartial: (String) -> Unit): Listener.Result {
+        waitUntilQuiet()
+        linesAtListen = linesSaid
+        _state.update { it.copy(heard = "") }
+        val r = listener.listen(lang, onPartial = onPartial, mode = mode, beforeStart = {
+            speaker.earcon()
+            _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
+            VoiceDebugLog.add("listening ($mode)")
+        })
+        VoiceDebugLog.add("listen result: ${if (r is Listener.Result.Heard) "heard \"${r.text}\"" else r.toString()} via ${listener.lastEngine.label}")
+        return r
+    }
+
+    /** The "Heard: …" line under the transcript, for what [result] was. */
+    private fun showHeard(result: Listener.Result, res: Context) {
+        val line = when (result) {
+            is Listener.Result.Heard -> res.getString(R.string.voice_suna, result.text)
+            Listener.Result.Unclear -> res.getString(R.string.voice_suna_unclear)
+            Listener.Result.Silence -> {
+                val raw = listener.lastRaw()
+                when {
+                    listener.lastMicDead() -> res.getString(R.string.voice_suna_mic_silent)
+                    raw == null -> res.getString(R.string.voice_suna_nothing)
+                    raw == SpeechGate.UNK -> res.getString(R.string.voice_suna_unclear)
+                    else -> res.getString(R.string.voice_suna_unsure, raw)
+                }
+            }
+            Listener.Result.Unavailable -> return
+        }
+        _state.update { it.copy(suna = line) }
+    }
+
+    /** Ampli is saying [text]: the overlay shows it, and the follow-up logic remembers it. */
+    private fun speaking(text: String) {
+        VoiceDebugLog.add("say: $text")
+        lastLine = text
+        linesSaid++
+        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = text) }
     }
 
     /** Acts on one utterance. Returns what to listen for next, or null when the session is done. */
@@ -583,7 +688,7 @@ class VoiceAssistant(private val app: DriveApp) {
      * recorded yet: the short recorded acknowledgement of [standIn] plays (the card has the answer).
      */
     private suspend fun speakAnswer(text: String, lang: String, clips: List<String>, standIn: HaryanviLines.Event? = HaryanviLines.Event.CommandDone) {
-        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = text) }
+        speaking(text)
         val tts = app.voicePlayer.ttsAvailable()
         val spoken = Spoken(text, lang, clips)
         when {
@@ -1071,6 +1176,18 @@ class VoiceAssistant(private val app: DriveApp) {
     /** Music keys by voice, with the desi acknowledgement when that style is on. */
     private suspend fun transport(action: VoiceActions.Transport, ack: HaryanviLines.Event) {
         val ok = VoiceActions.transport(app, action)
+        VoiceDebugLog.add("music $action → ${VoiceActions.lastTransportTarget} ${if (ok) "sent" else "FAILED"}")
+        if (action == VoiceActions.Transport.Play && (!ok || VoiceActions.lastTransportTarget.startsWith("media key"))) {
+            // A bare media key with no player behind it does nothing at all: say so instead of
+            // leaving the driver waiting for music that never comes.
+            kotlinx.coroutines.delay(PLAY_CHECK_MS)
+            if (!VoiceActions.isPlaying(app)) {
+                VoiceDebugLog.add("music: nothing started playing")
+                val lang = language()
+                say(localized(lang), lang, R.string.voice_no_player)
+                return
+            }
+        }
         if (!ok) return
         val desi = app.desi.line(ack) ?: return
         // Let the player start (or stop) first, so the line plays over ducked music.
@@ -1079,7 +1196,7 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun speakDesi(desi: Spoken) {
-        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = desi.text) }
+        speaking(desi.text)
         app.voicePlayer.say(desi)
     }
 
@@ -1113,9 +1230,7 @@ class VoiceAssistant(private val app: DriveApp) {
 
     /** One free-speech listen inside the session (beep first); null on silence. */
     private suspend fun hearOnce(lang: String): String? {
-        speaker.earcon()
-        _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
-        val r = listener.listen(lang, onPartial = { p: String -> _state.update { it.copy(heard = p) } }, mode = ListenMode.Replies)
+        val r = listenTurn(lang, ListenMode.FollowUp) { p: String -> _state.update { it.copy(heard = p) } }
         return (r as? Listener.Result.Heard)?.text?.also { t -> _state.update { it.copy(heard = t, phase = VoiceUiState.Phase.Working) } }
     }
 
@@ -1126,7 +1241,7 @@ class VoiceAssistant(private val app: DriveApp) {
     private suspend fun styled(res: Context, lang: String, event: HaryanviLines.Event, standard: String, vararg args: Any) {
         val desi = app.desi.line(event, *args)
         if (desi == null) {
-            _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = standard) }
+            speaking(standard)
             // Without a TTS engine the recorded line for the same moment plays instead.
             app.voicePlayer.sayPlain(standard, lang, event, *args)
             return
@@ -1135,7 +1250,7 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun say(@Suppress("UNUSED_PARAMETER") res: Context, lang: String, text: String) {
-        _state.update { it.copy(phase = VoiceUiState.Phase.Speaking, reply = text) }
+        speaking(text)
         speaker.say(text, lang)
     }
 
@@ -1155,6 +1270,12 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private companion object {
         const val MAX_TURNS = 4
+
+        /** How long an error stays on screen before the overlay closes. */
+        const val ERROR_SHOW_MS = 3_000L
+
+        /** How long after "play" with no player in sight before Ampli says nothing is playing. */
+        const val PLAY_CHECK_MS = 2_000L
         const val ACK_DELAY_MS = 600L
 
         /** Longest wait for Ampli's own line to finish before a follow-up listen. */
@@ -1162,7 +1283,7 @@ class VoiceAssistant(private val app: DriveApp) {
         const val QUIET_POLL_MS = 100L
 
         /** Pause after Ampli's line before the beep, so its tail (and the car's echo) is not recorded. */
-        const val SETTLE_MS = 250L
+        const val SETTLE_MS = 350L
 
         /** The answer card stays at least this long. */
         const val ANSWER_HOLD_MS = 6_000L

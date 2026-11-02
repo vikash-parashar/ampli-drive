@@ -216,15 +216,59 @@ class VoicePlayer(private val app: DriveApp) {
             exo.setMediaItems(uris.map { MediaItem.fromUri(it) })
             exo.prepare()
             exo.play()
-            // Clips are a few seconds each; never wait forever.
-            val ok = withTimeoutOrNull(5_000L + uris.size * 8_000L) { done.await() } ?: false
-            return if (ok) Result.Played else Result.Failed
+            return awaitEnd(exo, uris.size, done)
         } finally {
             if (player === exo) player = null
             if (playing === done) playing = null
             exo.release()
             audio?.abandonAudioFocusRequest(duckFocus)
         }
+    }
+
+    /**
+     * Waits for STATE_ENDED. If it never comes, the line counts as heard once its known length
+     * (the clips' durations, read from the timeline after prepare) plus a little grace has passed
+     * ([SpeechCompletion.clipDeadlineMs]), so a lost callback never keeps the follow-up microphone
+     * shut. While the length is unknown the old per-clip allowance applies, and running out of it
+     * counts as a failure (the TTS says the line instead, as before).
+     */
+    private suspend fun awaitEnd(exo: ExoPlayer, clipCount: Int, done: CompletableDeferred<Boolean>): Result {
+        val start = android.os.SystemClock.elapsedRealtime()
+        // The known-length deadline counts from when sound actually started, so a slow start
+        // (decoder warm-up on a weak unit) never cuts the end of the line.
+        var playingSince: Long? = null
+        while (true) {
+            val finished = withTimeoutOrNull(POLL_MS) { done.await() }
+            if (finished != null) return if (finished) Result.Played else Result.Failed
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (playingSince == null && exo.isPlaying) playingSince = now
+            val known = totalDurationMs(exo)
+            val since = playingSince
+            if (known != null && since != null) {
+                if (now - since >= SpeechCompletion.clipDeadlineMs(known, clipCount)) return Result.Played
+            } else if (now - start >= SpeechCompletion.clipDeadlineMs(null, clipCount)) {
+                return Result.Failed
+            }
+        }
+    }
+
+    /** The whole line's length once every clip's duration is known, else null. */
+    private fun totalDurationMs(exo: ExoPlayer): Long? = try {
+        val timeline = exo.currentTimeline
+        if (timeline.isEmpty) {
+            null
+        } else {
+            val window = androidx.media3.common.Timeline.Window()
+            var total = 0L
+            var all = true
+            for (i in 0 until timeline.windowCount) {
+                val d = timeline.getWindow(i, window).durationMs
+                if (d == C.TIME_UNSET || d <= 0) all = false else total += d
+            }
+            if (all && total > 0) total else null
+        }
+    } catch (_: Exception) {
+        null
     }
 
     private fun stopPlayer() {
@@ -265,5 +309,6 @@ class VoicePlayer(private val app: DriveApp) {
 
     private companion object {
         const val TAG = "VoicePlayer"
+        const val POLL_MS = 100L
     }
 }

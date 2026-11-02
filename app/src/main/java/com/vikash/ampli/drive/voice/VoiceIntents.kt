@@ -316,13 +316,13 @@ object VoiceIntents {
     private val UP = listOf(
         "up", "increase", "raise", "louder", "higher", "more", "badhao", "badha do", "badhaao", "badhai", "tez",
         "tej", "tez karo", "zyada", "jyada", "unchi", "oonchi", "upar", "बढ़ाओ", "बढ़ा दो", "बढ़ाइए", "बढ़ा", "बढाओ", "बढा दो",
-        "तेज़", "तेज", "ज़्यादा", "ज्यादा", "ऊंची", "ऊँची", "ऊपर", "बधा", "बढ़ा दे", "बधा दे",
+        "तेज़", "तेज", "ज़्यादा", "ज्यादा", "ऊंची", "ऊँची", "ऊपर", "बधा", "बढ़ा दे", "बधा दे", "अप",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val DOWN = listOf(
         "down", "decrease", "lower", "reduce", "less", "softer", "quieter", "kam", "kam karo", "kam kar do", "dheemi",
         "dheema", "dheere", "halki", "neeche", "niche", "कम", "कम करो", "कम कर दो", "धीमी", "धीमा", "धीरे", "हल्की",
-        "नीचे", "घटाओ", "ghatao", "थोड़ी कम",
+        "नीचे", "घटाओ", "ghatao", "थोड़ी कम", "डाउन",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val FULL = listOf(
@@ -874,21 +874,21 @@ object VoiceIntents {
         ),
         play = listOf(
             "बजाओ", "बजा दो", "चलाओ", "चला दो", "सुनाओ", "लगाओ", "प्ले करो", "प्ले", "bajao", "baja do",
-            "chalao", "chala do", "sunao", "lagao", "play karo",
+            "chalao", "chala do", "sunao", "lagao", "play karo", "सुना दो", "suna do",
         ),
         resume = listOf("गाना चालू करो", "फिर से चलाओ", "gaana chalu karo", "music chalu karo", "म्यूजिक चालू करो"),
-        music = listOf("गाना", "गाने", "म्यूजिक", "म्यूज़िक", "संगीत", "gana", "gaana", "gane", "gaane", "sangeet"),
+        music = listOf("गाना", "गाने", "म्यूजिक", "म्यूज़िक", "संगीत", "gana", "gaana", "gane", "gaane", "sangeet", "सॉन्ग", "सोंग"),
         local = listOf("स्टोरेज", "यूएसबी", "पेन ड्राइव", "पेनड्राइव", "मेमोरी", "memory"),
         bluetooth = listOf("ब्लूटूथ", "फ़ोन", "फोन", "मोबाइल"),
         camera = listOf("कैमरा", "कैमरे", "kamera"),
         pause = listOf(
             "गाना बंद", "गाना रोको", "म्यूजिक बंद", "म्यूज़िक बंद", "संगीत बंद", "gana band", "gaana band",
             "music band", "gana roko", "gaana roko", "music roko", "गाना रोक दो", "gaana rok do", "pause karo", "पॉज़",
-            "पॉज", "पॉज़ करो", "गाने बंद",
+            "पॉज", "पॉज़ करो", "गाने बंद", "gaane band", "gane band", "song band", "song roko", "सॉन्ग बंद",
         ),
         next = listOf(
             "अगला गाना", "अगला", "agla gana", "agla gaana", "agla", "अगले वाला", "aagla", "आगला", "gaana badlo", "gana badlo",
-            "गाना बदलो", "गाना बदल दो", "dusra gaana", "दूसरा गाना",
+            "गाना बदलो", "गाना बदल दो", "dusra gaana", "दूसरा गाना", "नेक्स्ट", "नेक्स्ट सॉन्ग",
         ),
         previous = listOf(
             "पिछला गाना", "पिछला", "pichla gana", "pichhla gaana", "pichla", "pichhla", "पिछले वाला", "पहले वाला गाना",
@@ -910,7 +910,7 @@ object VoiceIntents {
         greeting = listOf("नमस्ते", "नमस्कार", "हैलो", "हेलो", "कैसे हो", "namaskar", "kaise ho"),
         fillers = listOf(
             "मुझे", "मेरे", "मेरा", "मेरी", "को", "पर", "में", "तक", "से", "के", "की", "का", "ज़रा", "जरा",
-            "प्लीज़", "प्लीज", "वाला", "वाली", "वाले", "है", "करो", "mujhe", "mere", "mera", "meri", "ko",
+            "प्लीज़", "प्लीज", "वाला", "वाली", "वाले", "है", "करो", "कोई", "koi", "mujhe", "mere", "mera", "meri", "ko",
             "par", "mein", "me", "tak", "se", "ke", "ki", "ka", "zara", "jara", "wala", "wali", "hai", "karo",
         ),
         placeFillers = listOf("पास", "नज़दीकी", "नजदीकी", "सबसे", "paas", "nazdeeki", "sabse"),

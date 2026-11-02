@@ -54,6 +54,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.Listener
 import com.vikash.ampli.drive.voice.RecognizerFallback
 import com.vikash.ampli.drive.voice.SystemRecognizerHealth
+import com.vikash.ampli.drive.voice.VoiceDebugLog
 import com.vikash.ampli.drive.voice.VoiceEngine
 import com.vikash.ampli.drive.voice.VoiceLocales
 import com.vikash.ampli.drive.voice.VoiceService
@@ -81,6 +82,14 @@ private fun DiagSection(title: String, content: @Composable () -> Unit) {
             content()
         }
     }
+}
+
+/** A TTS engine's name as the driver knows it ("eSpeak NG"), from its package. */
+private fun engineLabel(context: android.content.Context, pkg: String): String = try {
+    val pm = context.packageManager
+    pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString().ifBlank { pkg }
+} catch (_: Exception) {
+    pkg
 }
 
 /** One fact. [ok] null = neutral (no icon colour). */
@@ -260,6 +269,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     VoiceLocales.parserLanguage(language),
                     sysWorks,
                     app.hindiModel.removedByUser(),
+                    unmetered = com.vikash.ampli.drive.voice.VoskCommandListener.unmetered(app),
                 )
                 DiagRow(
                     "Hindi offline model (commands)",
@@ -275,7 +285,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         is WakeModel.State.Failed -> "FAILED: ${m.message}"
                     } + (app.hindiModel.loadError?.let { " · load error: $it" } ?: ""),
                     if (hindi == WakeModel.State.Ready) true else if (hindiLanguage && !sysPresent) false else null,
-                    action = if (hindiLanguage && (hindi == WakeModel.State.Missing || hindi is WakeModel.State.Failed)) {
+                    action = if ((hindiLanguage || !sysWorks) && (hindi == WakeModel.State.Missing || hindi is WakeModel.State.Failed)) {
                         stringResource(R.string.vcheck_download)
                     } else {
                         null
@@ -284,8 +294,24 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 )
             }
             DiagSection("Speech recognition") {
-                DiagRow("System recognizer present", yes(sysPresent), sysPresent)
-                DiagRow(
+                val hindiReady = hindiLanguage && app.hindiModel.isInstalled()
+                val offlineReady = model == WakeModel.State.Ready || hindiReady
+                // With Ampli's offline listening ready, Android's own speech service is optional:
+                // Google's app registers none on Android 8.1, and that is fine, not a failure.
+                val optional = offlineReady && !sysWorks
+                if (offlineReady) {
+                    DiagRow(
+                        "Listening",
+                        if (sysWorks) "Ampli offline listening: ready (backup to the Android speech service)" else "Ampli offline listening: ready (Google not needed)",
+                        true,
+                    )
+                }
+                if (optional && !sysPresent) {
+                    DiagRow("Android speech service", "not available on this unit (optional)", null)
+                } else {
+                    DiagRow("System recognizer present", yes(sysPresent), if (optional) null else sysPresent)
+                }
+                if (sysPresent) DiagRow(
                     "System recognizer working",
                     when {
                         !sysPresent -> "no (none installed)"
@@ -294,14 +320,14 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         sysDeadTurns > 0 -> "no response last turn"
                         else -> "yes (or not tried yet)"
                     },
-                    if (!sysPresent) null else sysWorks && sysDeadTurns == 0,
+                    if (!sysPresent || optional) null else sysWorks && sysDeadTurns == 0,
                 )
                 DiagRow("Last turn served by", lastEngine.label, if (lastEngine == VoiceEngine.None) null else true)
-                DiagRow("SpeechRecognizer available", yes(sysRecognizer), sysRecognizer)
-                DiagRow("Recognizer setting", recognizerSetting ?: "(none)", null)
-                DiagRow("Recognition services", services.joinToString(", ").ifEmpty { "(none installed)" }, services.isNotEmpty())
-                val hindiReady = hindiLanguage && app.hindiModel.isInstalled()
-                val offlineReady = model == WakeModel.State.Ready || hindiReady
+                if (!(optional && !sysPresent)) {
+                    DiagRow("SpeechRecognizer available", yes(sysRecognizer), if (optional) null else sysRecognizer)
+                    DiagRow("Recognizer setting", recognizerSetting ?: "(none)", null)
+                    DiagRow("Recognition services", services.joinToString(", ").ifEmpty { "(none installed)" }, if (optional) null else services.isNotEmpty())
+                }
                 val systemUsable = sysWorks
                 val offlineName = if (hindiReady) "offline Hindi model" else "offline English model (with Hinglish)"
                 DiagRow(
@@ -316,22 +342,38 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 )
             }
             DiagSection("Text to speech") {
+                // Which engine speaks now, first and in green; a missing Google engine is not a fault.
+                var usedFor by remember { mutableStateOf<BundledTts.Engine?>(null) }
+                val bundledStateTop by app.speaker.bundled.files.state.collectAsStateWithLifecycle()
+                LaunchedEffect(bundledStateTop, language, tick) { usedFor = app.speaker.engineFor(language) }
+                val systemName = remember(tts?.defaultEngine) { tts?.defaultEngine?.let { engineLabel(context, it) } }
+                val speaks = usedFor != null && usedFor != BundledTts.Engine.None
+                DiagRow(
+                    "Speaking with",
+                    when (usedFor) {
+                        null -> "checking…"
+                        BundledTts.Engine.System -> systemName ?: "system TTS engine"
+                        BundledTts.Engine.Bundled -> "Ampli voice"
+                        BundledTts.Engine.None -> "recorded Ampli lines only"
+                    },
+                    usedFor?.let { it != BundledTts.Engine.None },
+                )
                 if (tts == null) {
                     DiagRow("Engine", "starting…", null)
                 } else {
                     DiagRow(
                         "Engines installed",
                         tts.engines.joinToString(", ").ifEmpty { "(none)" },
-                        tts.engines.isNotEmpty(),
-                        action = if (tts.engines.isEmpty() || !tts.ready) stringResource(R.string.vcheck_get_tts) else null,
+                        if (speaks) null else tts.engines.isNotEmpty(),
+                        action = if (!speaks && (tts.engines.isEmpty() || !tts.ready)) stringResource(R.string.vcheck_get_tts) else null,
                         onAction = { openPlayStore(context, "com.google.android.tts") },
                     )
-                    DiagRow("Default engine", tts.defaultEngine ?: "(none)", tts.ready)
+                    DiagRow("Default engine", tts.defaultEngine ?: "(none)", if (speaks) null else tts.ready)
                     DiagRow(
                         "Hindi voice (hi-IN)",
                         langText(tts.hindi),
-                        tts.hindi >= TextToSpeech.LANG_AVAILABLE,
-                        action = if (tts.ready && tts.hindi < TextToSpeech.LANG_AVAILABLE) stringResource(R.string.vcheck_tts_settings) else null,
+                        if (tts.hindi >= TextToSpeech.LANG_AVAILABLE) true else if (speaks) null else false,
+                        action = if (!speaks && tts.ready && tts.hindi < TextToSpeech.LANG_AVAILABLE) stringResource(R.string.vcheck_tts_settings) else null,
                         onAction = {
                             try {
                                 context.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -340,7 +382,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                             }
                         },
                     )
-                    DiagRow("English voice (en-IN)", langText(tts.english), tts.english >= TextToSpeech.LANG_AVAILABLE)
+                    DiagRow("English voice (en-IN)", langText(tts.english), if (tts.english >= TextToSpeech.LANG_AVAILABLE) true else if (speaks) null else false)
                 }
                 // Ampli's own offline voice engine (shipped with the app; speaks when the unit has none).
                 val bundledFiles = app.speaker.bundled.files
@@ -356,18 +398,6 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         null
                     },
                     onAction = { bundledFiles.ensure() },
-                )
-                var usedFor by remember { mutableStateOf<BundledTts.Engine?>(null) }
-                LaunchedEffect(bundledState, language, tick) { usedFor = app.speaker.engineFor(language) }
-                DiagRow(
-                    "Used for speech",
-                    when (usedFor) {
-                        null -> "checking…"
-                        BundledTts.Engine.System -> "system TTS engine"
-                        BundledTts.Engine.Bundled -> "Ampli voice engine"
-                        BundledTts.Engine.None -> "NONE: recorded lines only"
-                    },
-                    usedFor?.let { it != BundledTts.Engine.None },
                 )
             }
             DiagSection("Tests") {
@@ -400,6 +430,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                             heard = when (result) {
                                 is Listener.Result.Heard -> "Heard: \"${result.text}\" (${testListener.lastEngine.label})"
                                 Listener.Result.Silence -> "Nothing heard (${testListener.lastEngine.label})"
+                                Listener.Result.Unclear -> "Heard speech, no phrase matched (${testListener.lastEngine.label})"
                                 Listener.Result.Unavailable -> "No recognizer available"
                             }
                             listening = false
@@ -411,9 +442,65 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 voiceTest?.let { DiagRow("Ampli voice test", it, if (it.contains("NOT")) false else null) }
                 Text(stringResource(R.string.vcheck_listen_hint), color = LocalDriveTheme.current.muted, fontSize = dims.t(2.1f, min = 12f))
             }
+            VoiceLogSection()
         }
     }
 }
+
+/**
+ * The last voice events ([VoiceDebugLog]): wake, Ampli speaking, the microphone, what the
+ * recogniser returned and what Ampli did with it. Copy or Share sends it to us as plain text.
+ */
+@Composable
+private fun VoiceLogSection() {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val entries by VoiceDebugLog.flow.collectAsStateWithLifecycle()
+    DiagSection("Voice log (last ${VoiceDebugLog.MAX} events)") {
+        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            BigButton(text = "Copy", onClick = {
+                val text = voiceLogReport(context)
+                try {
+                    val cm = context.getSystemService(android.content.ClipboardManager::class.java)
+                    cm?.setPrimaryClip(android.content.ClipData.newPlainText("Ampli voice log", text))
+                    android.widget.Toast.makeText(context, "Voice log copied", android.widget.Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                }
+            }, primary = false)
+            BigButton(text = "Share", onClick = {
+                try {
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_SUBJECT, "Ampli voice log")
+                        .putExtra(Intent.EXTRA_TEXT, voiceLogReport(context))
+                    context.startActivity(Intent.createChooser(send, "Share voice log").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                } catch (_: Exception) {
+                    android.widget.Toast.makeText(context, "No app to share with: use Copy", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }, primary = false)
+            BigButton(text = "Clear", onClick = { VoiceDebugLog.clear() }, primary = false)
+        }
+        if (entries.isEmpty()) {
+            Text("Nothing yet. Say \"Hey Ampli\" and answer, then come back here.", color = theme.muted, fontSize = dims.t(2.1f, min = 12f))
+        } else {
+            Text(
+                VoiceDebugLog.text(entries.reversed()),
+                color = theme.text,
+                fontFamily = FontFamily.Monospace,
+                fontSize = dims.t(1.9f, min = 11f),
+                lineHeight = dims.t(2.6f, min = 15f),
+            )
+        }
+    }
+}
+
+/** The shared text: app version, device and Android version, then the log oldest first. */
+private fun voiceLogReport(context: Context): String =
+    "Ampli ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · ${Build.MANUFACTURER} ${Build.MODEL} · " +
+        "Android ${Build.VERSION.RELEASE} · ${Build.HARDWARE}\n" +
+        "system recognizer: ${if (SpeechRecognizer.isRecognitionAvailable(context)) "present" else "none"}\n\n" +
+        VoiceDebugLog.text()
 
 /** Settings › About › Diagnostics. */
 @Composable

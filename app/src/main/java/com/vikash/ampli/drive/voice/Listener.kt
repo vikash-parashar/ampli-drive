@@ -50,6 +50,12 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
          */
         data class Heard(val text: String, val offline: Boolean = false, val quality: SpeechQuality? = null) : Result
         data object Silence : Result
+
+        /**
+         * Speech was heard but matched no phrase (offline follow-up only): a place name, or a word
+         * outside the grammar. The session asks "where to?" and listens freely for it.
+         */
+        data object Unclear : Result
         data object Unavailable : Result
     }
 
@@ -63,6 +69,15 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
     /** Which engine served the last [listen] of this listener. */
     var lastEngine: VoiceEngine = VoiceEngine.None
         private set
+
+    /** Why the last [listen] was Unavailable (offline model or microphone), or null. */
+    fun lastError(): String? = offline?.lastError
+
+    /** What the offline model last heard, even when it was thrown away as noise ("[unk]" alone). */
+    fun lastRaw(): String? = if (lastEngine.offline) offline?.lastRaw else null
+
+    /** The microphone gave only digital silence in the last offline listen. */
+    fun lastMicDead(): Boolean = lastEngine.offline && offline?.lastMicDead == true
 
     /**
      * True when the next [listen] goes to the offline model: there is no system recogniser, or
@@ -89,16 +104,31 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
         onPartial: (String) -> Unit,
         commandsOnly: Boolean = true,
         mode: ListenMode = if (commandsOnly) ListenMode.Commands else ListenMode.Free,
+        beforeStart: suspend () -> Unit = {},
     ): Result {
         audio?.requestAudioFocus(listenFocus)
+        // The chime and "Sun raha hoon…" once, when the first engine is about to record.
+        var started = false
+        val chime: suspend () -> Unit = {
+            if (!started) {
+                started = true
+                beforeStart()
+            }
+        }
         try {
             lastEngine = VoiceEngine.None
             val vosk = offline
             val offlineReady = vosk != null && vosk.isReady()
             // A system recogniser that showed no sign of life lately: straight to the offline model.
-            if (vosk != null && RecognizerFallback.straightOffline(systemAvailable(), SystemRecognizerHealth.deadTurns(appContext), offlineReady)) {
-                val r = listenOffline(vosk, mode, onPartial)
+            val straight = vosk != null && RecognizerFallback.straightOffline(systemAvailable(), SystemRecognizerHealth.deadTurns(appContext), offlineReady)
+            VoiceDebugLog.add(
+                "recognizer: system ${if (systemAvailable()) "present" else "none"}, dead turns ${SystemRecognizerHealth.deadTurns(appContext)}, " +
+                    "offline ${if (offlineReady) "ready" else "NOT ready"} → ${if (straight) "offline" else "system first"}",
+            )
+            if (vosk != null && straight) {
+                val r = listenOffline(vosk, mode, onPartial, chime)
                 if (r != Result.Unavailable) return r
+                VoiceDebugLog.add("offline listen unavailable: ${vosk.lastError}")
                 // The offline model would not load: give the system recogniser its turn after all.
             }
             val tags = VoiceLocales.recognition(appLanguage)
@@ -114,6 +144,7 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
             var turn: SystemAttempt? = null
             var systemResult: Result? = null
             for ((device, tag) in attempts) {
+                chime()
                 val r = once(device, tag, onPartial)
                 val kind = classify(r)
                 // The turn counts as alive once any attempt showed life.
@@ -127,7 +158,10 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
                 }
                 // EngineFailed without an offline model: try the next engine or language.
             }
-            turn?.let { SystemRecognizerHealth.record(appContext, it) }
+            turn?.let {
+                SystemRecognizerHealth.record(appContext, it)
+                VoiceDebugLog.add("system recognizer turn: $it")
+            }
             systemResult?.let {
                 lastEngine = VoiceEngine.System
                 SystemRecognizerHealth.served(VoiceEngine.System)
@@ -135,15 +169,15 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
             }
             // No recogniser, every attempt failed (no Google app, no network), or a stub that
             // never heard anything: offline Vosk in the same turn.
-            if (vosk != null && offlineReady) return listenOffline(vosk, mode, onPartial)
+            if (vosk != null && offlineReady) return listenOffline(vosk, mode, onPartial, chime)
             return Result.Unavailable
         } finally {
             audio?.abandonAudioFocusRequest(listenFocus)
         }
     }
 
-    private suspend fun listenOffline(vosk: VoskCommandListener, mode: ListenMode, onPartial: (String) -> Unit): Result {
-        val r = vosk.listen(mode, onPartial)
+    private suspend fun listenOffline(vosk: VoskCommandListener, mode: ListenMode, onPartial: (String) -> Unit, beforeStart: suspend () -> Unit): Result {
+        val r = vosk.listen(mode, onPartial, beforeStart)
         if (r != Result.Unavailable) {
             lastEngine = vosk.lastEngine
             SystemRecognizerHealth.served(vosk.lastEngine)

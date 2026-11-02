@@ -50,6 +50,19 @@ object VoskCommands {
         "kya haal hai", "ke haal sai", "tum kaun ho", "chutkula sunao", "kya bol sakta hoon",
         "screen band karo", "screen off karo", "display band karo",
         "radd karo",
+        // How drivers really ask for music, the music keys and the volume when answering Ampli.
+        "gana sunao", "gaana sunao", "gaane sunao", "gane sunao", "gaana suna do", "gana suna do",
+        "gaana lagao", "gana lagao", "gaane lagao", "gaana chala do", "gana chala do", "gaane chalao",
+        "gaana baja do", "gana bajao", "gaane bajao", "koi gaana chalao", "koi gaana sunao", "koi gana lagao",
+        "song chalao", "song lagao", "song sunao", "song bajao", "song chala do",
+        "music sunao", "music lagao", "music bajao", "music chala do", "music suna do",
+        "bhajan sunao", "bhajan chalao", "bhajan lagao", "bhajan bajao",
+        "gaana band kar", "gaana band kar do", "gana band karo", "gaane band karo", "gaana rok do",
+        "music band kar do", "music roko", "song band karo", "song roko",
+        "agla chalao", "agla gaana chalao", "agla song", "agla laga do", "next gaana", "agla gana lagao",
+        "pichla chalao", "pichla song", "pichla gaana chalao",
+        "awaaz badha do", "awaz badha do", "awaaz tez kar do", "awaaz kam kar do", "awaaz dheemi karo",
+        "volume badha do", "volume kam kar do",
     )
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
@@ -86,6 +99,19 @@ object VoskCommands {
         "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
         // Screen off.
         "स्क्रीन बंद करो", "स्क्रीन ऑफ करो",
+        // How drivers really ask for music, the music keys and the volume when answering Ampli.
+        "गाना सुनाओ", "गाने सुनाओ", "गाना सुना दो", "गाने सुना दो", "गाना लगाओ", "गाने लगाओ",
+        "गाना चला दो", "गाने चलाओ", "गाना बजा दो", "गाने बजाओ", "कोई गाना चलाओ", "कोई गाना सुनाओ", "कोई गाना लगाओ",
+        "म्यूजिक चलाओ", "म्यूजिक बजाओ", "म्यूजिक लगाओ", "म्यूजिक सुनाओ", "सॉन्ग चलाओ", "सॉन्ग लगाओ",
+        "भजन सुनाओ", "भजन चलाओ", "भजन लगाओ", "भजन बजाओ",
+        "गाना बंद कर", "गाना बंद कर दो", "गाने बंद करो", "गाना रोक दो", "म्यूजिक बंद करो", "म्यूजिक बंद कर दो",
+        "अगला चलाओ", "अगला गाना चलाओ", "अगला लगाओ", "अगला गाना लगाओ", "पिछला चलाओ", "पिछला गाना चलाओ",
+        "आवाज बढ़ा दो", "आवाज कम कर दो", "आवाज तेज करो", "आवाज तेज कर दो", "आवाज धीमी करो",
+        "वॉल्यूम बढ़ाओ", "वॉल्यूम कम करो", "वॉल्यूम बढ़ा दो",
+        // English said by drivers whose app is in English but whose unit hears them through the
+        // Hindi model (offline-only units answer Ampli with it): as the Hindi model writes them.
+        "प्ले म्यूजिक", "म्यूजिक प्ले करो", "गाना प्ले करो", "प्ले करो", "नेक्स्ट सॉन्ग", "नेक्स्ट", "स्टॉप",
+        "पॉज़ करो", "वॉल्यूम अप", "वॉल्यूम डाउन", "कैंसल", "हेलो",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
@@ -129,6 +155,20 @@ object VoskCommands {
 
     fun grammarJson(hindi: Boolean = false): String = json(phrases(hindi) + "[unk]")
 
+    /**
+     * The grammar after Ampli has said something ([ListenMode.FollowUp]): every command phrase
+     * plus the short answers ([REPLIES]) and small-talk replies ([FollowUp.CHAT]). The answer
+     * grammar alone would turn "gaana chalao" or "ghar chalo" into "[unk]"; the command grammar
+     * alone would do the same to "haan", "nahi" or "badhiya".
+     */
+    fun followUpPhrases(hindi: Boolean = false): List<String> =
+        (phrases(hindi) + replyPhrases(hindi) + (if (hindi) FollowUp.HINDI_CHAT else FollowUp.CHAT)).distinct()
+
+    fun followUpGrammarJson(hindi: Boolean = false): String = json(followUpPhrases(hindi) + "[unk]")
+
+    /** A grammar of [phrases] plus "[unk]", for phrases adapted to a model ([HinglishSpelling]). */
+    fun grammarOf(phrases: List<String>): String = json(phrases + "[unk]")
+
     private fun json(list: List<String>): String =
         list.joinToString(",", "[", "]") { phrase ->
             "\"" + phrase.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
@@ -136,4 +176,98 @@ object VoskCommands {
 
     /** Drops Vosk's "[unk]" tokens and extra spaces. */
     fun clean(text: String): String = text.replace("[unk]", " ").replace(Regex("\\s+"), " ").trim()
+}
+
+/**
+ * Roman Hindi spellings the English model may know (unit-tested). In grammar mode Vosk silently
+ * drops every word its vocabulary lacks: with vosk-model-small-en-in-0.4 alone (no Hindi model),
+ * a phrase like "gaana chalao" whose words are all missing vanishes from the grammar, and the
+ * driver's "gaana chalao" can only come out as "[unk]". [adapt] swaps each missing word for the
+ * first spelling of it the model does know ("gaana" → "gana"), and [restore] turns what was heard
+ * back into the phrase [VoiceIntents] parses.
+ */
+object HinglishSpelling {
+    val VARIANTS: Map<String, List<String>> = mapOf(
+        "gaana" to listOf("gana", "ganna", "gaane", "gane", "ghana"),
+        "gana" to listOf("gaana", "ganna", "ghana"),
+        "chalao" to listOf("chalaao", "chalaw", "chala", "challa"),
+        "chalo" to listOf("challo", "chalow", "chaalo"),
+        "chal" to listOf("chaal", "chull"),
+        "bajao" to listOf("bajaao", "bajaw", "baja"),
+        "haan" to listOf("han", "haa", "hann"),
+        "han" to listOf("haan", "hann"),
+        "nahi" to listOf("nahin", "nahee", "nai"),
+        "nahin" to listOf("nahi", "nahee"),
+        "badhiya" to listOf("badiya", "badhia", "badia", "bariya"),
+        "theek" to listOf("thik", "theak", "teek", "tik"),
+        "karo" to listOf("kro", "caro", "karoo"),
+        "kholo" to listOf("kolo", "khollo", "cholo"),
+        "awaaz" to listOf("awaz", "awaj", "avaaz"),
+        "awaz" to listOf("awaaz", "awaj"),
+        "badhao" to listOf("badhaao", "badao", "barhao"),
+        "ghar" to listOf("gar", "ghur"),
+        "agla" to listOf("agala", "aagla"),
+        "pichla" to listOf("pichhla", "pichala"),
+        "roko" to listOf("rokko", "roco"),
+        "ruko" to listOf("rukko", "ruco"),
+        "band" to listOf("bund", "bandh"),
+        "bas" to listOf("bus", "buss"),
+        "sunao" to listOf("sunaao", "sunaw"),
+        "batao" to listOf("bataao", "bataw"),
+        "kahan" to listOf("kahaan", "kaha", "kahaa"),
+        "hai" to listOf("hay", "hey", "hae"),
+        "mast" to listOf("must", "musth"),
+        "radd" to listOf("rad", "rudd"),
+        "madad" to listOf("madat", "maddad"),
+        "rasta" to listOf("raasta", "rastaa"),
+        "dikhao" to listOf("dikhaao", "dikao"),
+        "le" to listOf("lay", "lae"),
+        "suna" to listOf("soona", "sunna", "sunaa"),
+        "lagao" to listOf("lagaao", "lagau", "lagaw"),
+        "laga" to listOf("lagaa", "lagga"),
+        "gaane" to listOf("gane", "gaaney", "ganey"),
+        "gane" to listOf("gaane", "ganey"),
+        "bhajan" to listOf("bhajjan", "bajan", "bhajans"),
+        "koi" to listOf("koee", "koy", "koyi"),
+        "badha" to listOf("badhaa", "barha", "bada"),
+        "kar" to listOf("karr", "kur"),
+        "dheemi" to listOf("dheemee", "dhimi", "deemi"),
+        "rok" to listOf("roak", "roke"),
+        "tez" to listOf("tej", "taze"),
+    )
+
+    /** The grammar to give the model, and the spellings to turn back ([restore]). */
+    data class Adapted(val phrases: List<String>, val back: Map<String, String>)
+
+    /**
+     * [phrases] with every word [known] lacks replaced by its first known variant. A variant that
+     * is itself a word of another phrase is never used (turning it back would change that
+     * phrase). Words with no known variant stay as they are (Vosk drops them, as before).
+     */
+    fun adapt(phrases: List<String>, known: (String) -> Boolean): Adapted {
+        val own = phrases.flatMap { it.split(' ') }.filter { it.isNotBlank() }.toSet()
+        val back = HashMap<String, String>()
+        val out = phrases.map { phrase ->
+            phrase.split(' ').joinToString(" ") { word ->
+                if (word.isBlank() || known(word)) {
+                    word
+                } else {
+                    val v = VARIANTS[word]?.firstOrNull { it !in own && (back[it] == null || back[it] == word) && known(it) }
+                    if (v == null) {
+                        word
+                    } else {
+                        back[v] = word
+                        v
+                    }
+                }
+            }
+        }.distinct()
+        return Adapted(out, back)
+    }
+
+    /** What was heard, with the swapped spellings turned back into the grammar's own words. */
+    fun restore(text: String, back: Map<String, String>): String {
+        if (back.isEmpty() || text.isEmpty()) return text
+        return text.split(' ').joinToString(" ") { back[it] ?: it }
+    }
 }

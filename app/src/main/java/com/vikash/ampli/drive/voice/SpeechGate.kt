@@ -20,6 +20,13 @@ enum class ListenMode {
 
     /** Free speech: a place name after "kahan chalna hai?", or a dictated message. */
     Free,
+
+    /**
+     * Right after Ampli said something in a session (the greeting, "हाँ भाई, बोल।", a question):
+     * every command phrase plus the short answers and small-talk replies, with gentler
+     * thresholds, because the driver is answering Ampli rather than talking over the radio.
+     */
+    FollowUp,
 }
 
 /**
@@ -42,6 +49,18 @@ object SpeechGate {
 
     /** Lowest average confidence for free speech (a place name, a dictated message). */
     const val MIN_CONF_FREE = 0.55
+
+    /**
+     * Lowest average confidence for an answer to Ampli's own question ([ListenMode.FollowUp]).
+     * Lower than [MIN_CONF_COMMAND]: the small model is less sure of a Haryanvi-accented "haan"
+     * or "badhiya", and right after a question the driver is talking to Ampli. The wake word's
+     * own strictness ([WakeSensitivity]) is unchanged.
+     */
+    const val MIN_CONF_FOLLOW_UP = 0.45
+
+    /** [MIN_CONF_LAUNCH] / [MIN_CONF_LAUNCH_ONE_WORD] for an answer to Ampli's question. */
+    const val MIN_CONF_LAUNCH_FOLLOW_UP = 0.6
+    const val MIN_CONF_LAUNCH_ONE_WORD_FOLLOW_UP = 0.7
 
     /** An intent that opens an app or starts a route: at least two clear words at this confidence. */
     const val MIN_CONF_LAUNCH = 0.75
@@ -83,6 +102,8 @@ object SpeechGate {
             ListenMode.Replies -> q.meanConf >= MIN_CONF_REPLY
             ListenMode.Free -> q.meanConf >= MIN_CONF_FREE &&
                 words.any { it.word != UNK && it.word.lowercase() !in FILLERS }
+            // An answer may have a breath or "arre" around it, but not be mostly unknown sound.
+            ListenMode.FollowUp -> q.unknown <= q.known + 1 && q.meanConf >= MIN_CONF_FOLLOW_UP
         }
     }
 
@@ -105,13 +126,13 @@ object SpeechGate {
      * more words at [MIN_CONF_LAUNCH] (or one at [MIN_CONF_LAUNCH_ONE_WORD]). Null quality (the
      * system recogniser) always may.
      */
-    fun mayLaunch(quality: SpeechQuality?): Boolean {
+    fun mayLaunch(quality: SpeechQuality?, followUp: Boolean = false): Boolean {
         if (quality == null) return true
         if (quality.unknown > 0 || quality.known == 0) return false
         return if (quality.known >= 2) {
-            quality.meanConf >= MIN_CONF_LAUNCH
+            quality.meanConf >= if (followUp) MIN_CONF_LAUNCH_FOLLOW_UP else MIN_CONF_LAUNCH
         } else {
-            quality.meanConf >= MIN_CONF_LAUNCH_ONE_WORD
+            quality.meanConf >= if (followUp) MIN_CONF_LAUNCH_ONE_WORD_FOLLOW_UP else MIN_CONF_LAUNCH_ONE_WORD
         }
     }
 
@@ -119,10 +140,10 @@ object SpeechGate {
      * A place name heard freely after "kahan chalna hai?" that may start a search (and so a route
      * in Google Maps): a few letters at least, and said clearly when the offline model heard it.
      */
-    fun destinationOk(destination: String, quality: SpeechQuality?): Boolean {
+    fun destinationOk(destination: String, quality: SpeechQuality?, followUp: Boolean = false): Boolean {
         if (destination.count { it.isLetterOrDigit() } < 3) return false
         if (quality == null) return true
-        return quality.known >= 1 && quality.meanConf >= MIN_CONF_LAUNCH
+        return quality.known >= 1 && quality.meanConf >= if (followUp) MIN_CONF_LAUNCH_FOLLOW_UP else MIN_CONF_LAUNCH
     }
 
     /** True while the wake word should still rest after a command ran at [lastActionAt]. */

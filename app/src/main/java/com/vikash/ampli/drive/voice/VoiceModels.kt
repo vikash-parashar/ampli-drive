@@ -39,6 +39,7 @@ class VoiceModels(private val app: DriveApp) {
     fun allReady(): Boolean {
         val w = want()
         return (!w.english || app.wakeModel.isInstalled()) && (!w.hindi || app.hindiModel.isInstalled()) &&
+            (app.hindiModel.isInstalled() || !VoskCommandListener.hindiWantedOffline(app)) &&
             app.speaker.bundled.files.allInstalled()
     }
 
@@ -72,6 +73,9 @@ class VoiceModels(private val app: DriveApp) {
         val hi = app.hindiModel
         if (w.hindi && !hi.isInstalled()) {
             hi.ensure(automatic = true, ignoreBackoff = networkBack && VoiceModelPlan.retryOnNetwork(hi.failures()))
+        } else if (!hi.isInstalled()) {
+            // Offline-only unit on Wi-Fi: Hindi whatever the app language (drivers answer in Hindi).
+            VoskCommandListener.ensureHindiModel(app)
         }
     }
 
@@ -84,7 +88,7 @@ class VoiceModels(private val app: DriveApp) {
             if (!en.busy) {
                 val w = want()
                 val hi = app.hindiModel
-                if (w.hindi && !hi.isInstalled()) hi.ensure(automatic = true)
+                if (w.hindi && !hi.isInstalled()) hi.ensure(automatic = true) else VoskCommandListener.ensureHindiModel(app)
             }
         }
     }

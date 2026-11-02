@@ -200,6 +200,13 @@
     <string name="voice_notification_title">“Hey Ampli” सुन रहे हैं</string>
     <string name="voice_notification_text">सेटिंग्स, वॉइस में बंद करें</string>
     <string name="voice_channel">Hey Ampli वेक वर्ड</string>
+    <string name="voice_suna">सुना: “%1$s”</string>
+    <string name="voice_suna_unsure">सुना (पक्का नहीं): “%1$s”</string>
+    <string name="voice_suna_unclear">कुछ सुना, समझ नहीं आया</string>
+    <string name="voice_suna_nothing">कुछ नहीं सुना</string>
+    <string name="voice_suna_mic_silent">माइक से कोई आवाज़ नहीं आई। सेटिंग्स, वॉइस, चेक वॉइस देखें।</string>
+    <string name="voice_suna_error">सुन नहीं पा रहे: %1$s</string>
+    <string name="voice_no_player">कोई गाना शुरू नहीं हुआ। एक बार Ampli MP3 या कोई म्यूज़िक ऐप खोलें, फिर बोलें।</string>
     <string name="voice_listening">सुन रहे हैं…</string>
     <string name="voice_working">एक पल…</string>
     <string name="voice_cancel">रद्द करें</string>

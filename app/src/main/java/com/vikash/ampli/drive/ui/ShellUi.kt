@@ -379,7 +379,6 @@ internal fun QuickControlsPanel(
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modifier: Modifier, onLongClick: (() -> Unit)? = null) {
-    val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     // Tiles pop in one after another as the panel lands (already in place in lite mode).
     val still = com.vikash.ampli.drive.prefs.LiteMode.enabled
@@ -390,29 +389,28 @@ private fun QuickTileView(tile: QuickTile, index: Int, onClick: () -> Unit, modi
         enter.animateTo(1f, spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow))
     }
     val shape = RoundedCornerShape(20.dp)
-    Column(
-        modifier
+    val onFill = tile.on
+    val fg = if (onFill) theme.onAccent else theme.text
+    // The shared tile layout (AlignedTile.kt): every tile the same height, icon and text in line.
+    AlignedTileContent(
+        icon = tile.icon,
+        title = tile.label,
+        sub = tile.state,
+        fg = fg,
+        iconTint = if (onFill) theme.onAccent else theme.accentSoft,
+        subColor = if (onFill) theme.onAccent.copy(alpha = 0.85f) else theme.muted,
+        modifier = modifier
             .graphicsLayer {
                 alpha = enter.value.coerceIn(0f, 1f)
                 scaleX = 0.85f + 0.15f * enter.value
                 scaleY = 0.85f + 0.15f * enter.value
             }
-            .heightIn(min = 112.dp)
+            .height(TileMetrics.minHeight(112.dp))
             .clip(shape)
             .background(if (tile.on) Brush.linearGradient(listOf(theme.accent, theme.accent2)) else Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)))
             .border(if (theme.borderWidth > 1.dp) theme.borderWidth else 1.dp, if (tile.on) theme.accent.copy(alpha = 0.6f) else theme.border, shape)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(dims.d(1.8f)),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        val onFill = tile.on
-        val fg = if (onFill) theme.onAccent else theme.text
-        Icon(tile.icon, contentDescription = null, tint = if (onFill) theme.onAccent else theme.accentSoft, modifier = Modifier.size(32.dp))
-        Text(tile.label, color = fg, fontSize = dims.t(2.5f, min = 15f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (tile.state != null) {
-            Text(tile.state, color = if (onFill) theme.onAccent.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.1f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-    }
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+    )
 }
 
 // ------------------------------------------------------------------------ phone link
