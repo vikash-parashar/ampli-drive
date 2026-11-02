@@ -400,6 +400,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                             heard = when (result) {
                                 is Listener.Result.Heard -> "Heard: \"${result.text}\" (${testListener.lastEngine.label})"
                                 Listener.Result.Silence -> "Nothing heard (${testListener.lastEngine.label})"
+                                Listener.Result.Unclear -> "Heard speech, no phrase matched (${testListener.lastEngine.label})"
                                 Listener.Result.Unavailable -> "No recognizer available"
                             }
                             listening = false

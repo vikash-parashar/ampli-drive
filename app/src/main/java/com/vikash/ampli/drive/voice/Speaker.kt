@@ -186,13 +186,41 @@ class Speaker(context: Context, val bundled: AmpliVoice = AmpliVoice(context)) {
         }
         try {
             val params = Bundle().apply { putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1f) }
+            // The utterance id goes in both places: some engines (older eSpeak builds among them)
+            // only report onDone for an id they find in the params bundle.
+            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
             if (engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, id) != TextToSpeech.SUCCESS) return false
-            // Roughly 12 characters a second; never wait forever if the engine stays silent.
-            withTimeoutOrNull(4_000L + text.length * 120L) { done.await() }
+            awaitTtsEnd(engine, text.length, done)
             return true
         } finally {
             synchronized(pending) { pending.remove(id) }
             audio?.abandonAudioFocusRequest(duckFocus)
+        }
+    }
+
+    /**
+     * Waits for onDone; if it never comes (an engine that drops the callback), the engine's own
+     * isSpeaking() and a deadline from the text length decide ([SpeechCompletion.ttsFinished]), so
+     * the follow-up microphone opens soon after the voice really stops.
+     */
+    private suspend fun awaitTtsEnd(engine: TextToSpeech, chars: Int, done: CompletableDeferred<Unit>) {
+        val start = android.os.SystemClock.elapsedRealtime()
+        var sawSpeaking = false
+        var quietSince = start
+        while (!done.isCompleted) {
+            withTimeoutOrNull(POLL_MS) { done.await() } ?: Unit
+            if (done.isCompleted) return
+            val now = android.os.SystemClock.elapsedRealtime()
+            val speaking = try {
+                engine.isSpeaking
+            } catch (_: Exception) {
+                false
+            }
+            if (speaking) {
+                sawSpeaking = true
+                quietSince = now
+            }
+            if (SpeechCompletion.ttsFinished(now - start, chars, sawSpeaking, now - quietSince)) return
         }
     }
 
@@ -260,6 +288,7 @@ class Speaker(context: Context, val bundled: AmpliVoice = AmpliVoice(context)) {
     private companion object {
         const val INIT_TIMEOUT_MS = 5_000L
         const val BOOT_RETRY_MS = 5_000L
+        const val POLL_MS = 100L
     }
 }
 
