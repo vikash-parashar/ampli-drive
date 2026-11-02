@@ -275,7 +275,7 @@ class VoiceAssistant(private val app: DriveApp) {
             val onPartial = { partial: String -> _state.update { it.copy(heard = partial) } }
             var result = listenTurn(lang, mode, onPartial)
             if (listener.lastEngine.offline) VoskCommandListener.ensureHindiModel(app)
-            if (expect == Expect.Open && listener.lastEngine.offline && result != Listener.Result.Silence &&
+            if (expect == Expect.Open && listener.lastEngine.offline && result != Listener.Result.Silence && result != Listener.Result.Unavailable &&
                 RecognizerFallback.offlineNeedsWhereTo((result as? Listener.Result.Heard)?.text, parserLang) &&
                 (result as? Listener.Result.Heard)?.let { FollowUp.reply(it.text) == FollowUp.Reply.Other } != false
             ) {
