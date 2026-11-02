@@ -60,26 +60,48 @@ jobs:
           OPENCHARGEMAP_KEY: ${{ secrets.OPENCHARGEMAP_KEY }}
         run: python3 scripts/fetch_fuel.py
 
-      # Bundled voice engine: show the licence each voice carries inside its file (the flitevox
-      # "copyright" field) and check the download is reachable. Informational; never fails the build.
+      # Bundled voice engine: show the licence each candidate voice carries inside its file (the
+      # flitevox "copyright" field). Informational; never fails the build. festvox.org is HTTP only.
       - name: Bundled voice licences
         continue-on-error: true
-        timeout-minutes: 3
+        timeout-minutes: 4
         shell: bash
         run: |
           set +e +o pipefail
-          for base in https://festvox.org http://festvox.org https://www.festvox.org http://www.festvox.org; do
-            out=$(curl -sS -o /dev/null -I --max-time 30 -w '%{http_code} %{redirect_url} %{remote_ip}' "$base/flite/packed/flite-2.1/voices/cmu_us_axb.flitevox" 2>&1)
-            echo "::notice title=Voice host $base::$out"
+          for name in cmu_indic_hin_ab cmu_us_axb cmu_us_aup cmu_us_ksp cmu_us_slp cmu_us_gka cmu_us_ahw cmu_us_eey cmu_us_ljm cmu_us_fem cmu_us_slt; do
+            head=$(curl -fsL --max-time 60 -r 0-65535 "http://festvox.org/flite/packed/flite-2.1/voices/$name.flitevox" | tr -c '[:print:]\n' '\n' | grep -a -E -A16 '^(variant|copyright)$' | head -40 | tr '\n' ' ' | tr -s ' ' | cut -c1-500)
+            echo "::notice title=Voice licence $name::${head:-could not read the header}"
           done
-          for name in cmu_indic_hin_ab.flitevox cmu_us_axb.flitevox; do
-            head=$(curl -fsL --max-time 60 -r 0-65535 "http://festvox.org/flite/packed/flite-2.1/voices/$name" | tr -c '[:print:]\n' '\n' | grep -a -A14 '^copyright$' | head -16 | tr '\n' ' ' | tr -s ' ')
-            if [ -n "$head" ]; then
-              echo "::notice title=Voice licence $name::$head"
-            else
-              echo "::warning title=Voice licence $name::could not read the copyright field from festvox.org"
-            fi
-          done
+
+      # The app downloads the voices over HTTPS from this repository's tts-voices-1 release
+      # (TtsVoiceSpec.url); festvox.org itself has no HTTPS. Fills the release once, from
+      # festvox.org, after checking each file's SHA-512. Never fails the build.
+      - name: Mirror bundled voices
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=tts-voices-1
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --prerelease --title "Ampli voice engine voices (data, not an app build)" \
+              --notes "Unmodified CMU Flite voices (festvox.org, CMU's free licence; see app/src/main/assets/licenses/flite.txt) that Ampli Car Hub downloads on sideloaded installs. Play installs carry them in the voicemodels asset pack."
+          fi
+          have=$(gh release view "$tag" --json assets --jq '.assets[].name')
+          mkdir -p "$RUNNER_TEMP/voices"
+          while read -r name sha; do
+            if grep -qx "$name" <<<"$have"; then echo "$name: already mirrored"; continue; fi
+            f="$RUNNER_TEMP/voices/$name"
+            curl -fL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 30 -o "$f" "http://festvox.org/flite/packed/flite-2.1/voices/$name"
+            echo "$sha  $f" | sha512sum -c --quiet -
+            gh release upload "$tag" "$f"
+            echo "::notice title=Mirrored voice::$name"
+          done <<'LIST'
+          cmu_indic_hin_ab.flitevox c84a8a2e76ff237a9ab3678acddc8874e20be6693d3f00d08354537dc0ce7938059227024e89d9cd06aa1b16817a8d4c0b3872eae67c8980970226899bf0ed17
+          LIST
 
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
@@ -268,9 +290,11 @@ jobs:
               continue
             fi
             rm -f "$f"
+            curl -fL --retry 3 --retry-delay 10 --retry-all-errors --connect-timeout 30 \
+              -o "$f.part" "https://github.com/${{ github.repository }}/releases/download/tts-voices-1/$name" ||
             curl -fL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 30 \
-              -o "$f.part" "https://festvox.org/flite/packed/flite-2.1/voices/$name" || {
-              echo "::error title=Bundled voices::Could not download $name from festvox.org"
+              -o "$f.part" "http://festvox.org/flite/packed/flite-2.1/voices/$name" || {
+              echo "::error title=Bundled voices::Could not download $name"
               exit 1
             }
             echo "$sha  $f.part" | sha512sum -c --quiet - || { echo "::error title=Bundled voices::$name does not match its SHA-512"; exit 1; }

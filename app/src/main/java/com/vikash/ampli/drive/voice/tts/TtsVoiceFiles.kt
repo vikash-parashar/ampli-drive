@@ -46,8 +46,12 @@ enum class TtsVoiceSpec(val fileName: String, val language: String, val bytes: L
     /** Where the Play install-time asset pack (module :voicemodels) puts this voice. */
     val assetPath: String get() = "tts/$fileName"
 
-    /** Download for installs without the asset pack (sideloaded test APKs). */
-    val url: String get() = "https://festvox.org/flite/packed/flite-2.1/voices/$fileName"
+    /**
+     * Download for installs without the asset pack (sideloaded test APKs): the unmodified
+     * festvox.org file, mirrored over HTTPS in this app's GitHub release "tts-voices-1" by CI
+     * (festvox.org itself serves plain HTTP only).
+     */
+    val url: String get() = "https://github.com/vikash-parashar/ampli-drive/releases/download/tts-voices-1/$fileName"
 }
 
 /**
