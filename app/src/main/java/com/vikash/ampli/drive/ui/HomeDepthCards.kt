@@ -174,8 +174,8 @@ private class Embers {
  * Speed: a neon dial 0..220 km/h (ticks every 20, a 270° sweep), lit up to the current speed with
  * embers rising off the lit arc. Embers, glow and breathing grow with speed; parked, only a slow,
  * faint breathing glow. Over the road's limit everything turns red. In the middle the huge number
- * and "km/h"; below it the road's limit sign (hidden when unknown) and the FASTag balance (hidden
- * when none). One Canvas, a fixed ember pool and pre-drawn glow sprites: no allocation per frame;
+ * and "km/h"; below it the road's limit sign (hidden when unknown); the FASTag balance as a pill at
+ * the top right (hidden when none). One Canvas, a fixed ember pool and pre-drawn glow sprites: no allocation per frame;
  * 30 fps when parked, nothing at all while the screen is off.
  */
 @Composable
@@ -221,7 +221,9 @@ internal fun GaugeSpeedCard(ui: HomeUi, shape: Shape, modifier: Modifier = Modif
     val ink = theme.text
     val unit = stringResource(R.string.speed_unit)
     val speedText = (ui.speed ?: 0).toString()
-    Canvas(modifier.clip(shape).background(Color(0xFF060A12))) {
+    val dims = LocalDims.current
+    Box(modifier.clip(shape).background(Color(0xFF060A12))) {
+    Canvas(Modifier.fillMaxSize()) {
         frame.longValue // redraw on every animation frame
         val w = size.width
         val h = size.height
@@ -295,29 +297,49 @@ internal fun GaugeSpeedCard(ui: HomeUi, shape: Shape, modifier: Modifier = Modif
             text.textSize = radius * 0.12f
             text.color = ink.copy(alpha = 0.6f).toArgb()
             nc.drawText(unit, cx, cy + radius * 0.34f, text)
-            // The road's limit sign and the FASTag balance, side by side below.
-            val sy = cy + radius * 0.66f
-            val sr = radius * 0.17f
-            val sx = if (fastag != null) cx - radius * 0.32f else cx
+            // The road's limit sign, centred under km/h (hidden when the limit is unknown).
             if (limit != null) {
-                drawCircle(Color.White, sr, Offset(sx, sy))
-                drawCircle(LimitRing, sr * 0.88f, Offset(sx, sy), style = Stroke(sr * 0.25f))
+                val sy = cy + radius * 0.68f
+                val sr = radius * 0.17f
+                drawCircle(Color.White, sr, Offset(cx, sy))
+                drawCircle(LimitRing, sr * 0.88f, Offset(cx, sy), style = Stroke(sr * 0.25f))
                 text.textSize = sr * 0.85f
                 text.color = 0xFF111111.toInt()
-                nc.drawText(limit.toString(), sx, sy + sr * 0.3f, text)
-            }
-            if (fastag != null) {
-                text.textAlign = android.graphics.Paint.Align.LEFT
-                val fx = if (limit != null) cx + radius * 0.05f else cx - radius * 0.25f
-                text.textSize = radius * 0.11f
-                text.color = ink.copy(alpha = 0.9f).toArgb()
-                nc.drawText("FASTag", fx, sy - radius * 0.04f, text)
-                text.textSize = radius * 0.14f
-                text.color = NeonMint.toArgb()
-                nc.drawText(fastag, fx, sy + radius * 0.13f, text)
-                text.textAlign = android.graphics.Paint.Align.CENTER
+                nc.drawText(limit.toString(), cx, sy + sr * 0.3f, text)
             }
         }
+    }
+    // FASTag balance: a pill at the top right that opens the FASTag screen (hidden without one).
+    if (fastag != null) {
+        TollPill(fastag, ui.onFastag, Modifier.align(Alignment.TopEnd).padding(dims.d(1.6f)))
+    }
+    }
+}
+
+/** "₹1,240" with a generic toll-tag mark (not any official logo) on a dark, mint-edged pill. */
+@Composable
+private fun TollPill(balance: String, onClick: () -> Unit, modifier: Modifier) {
+    val dims = LocalDims.current
+    Row(
+        modifier
+            .heightIn(min = 48.dp)
+            .clip(RoundedCornerShape(50))
+            .background(Color(0xD9171C33))
+            .border(1.dp, NeonMint.copy(alpha = 0.45f), RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+            .padding(horizontal = dims.d(1.6f)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
+    ) {
+        Canvas(Modifier.size(dims.d(3.6f), dims.d(2.6f))) {
+            val sw = 1.6.dp.toPx()
+            val w = size.width
+            val h = size.height
+            drawRoundRect(NeonMint, topLeft = Offset(sw / 2, sw / 2), size = Size(w - sw, h - sw), cornerRadius = CornerRadius(h * 0.25f), style = Stroke(sw))
+            drawArc(NeonMint, 200f, 140f, false, Offset(w * 0.18f, h * 0.28f), Size(w * 0.4f, h * 0.55f), style = Stroke(sw, cap = StrokeCap.Round))
+            drawCircle(NeonMint, h * 0.11f, Offset(w * 0.74f, h * 0.55f))
+        }
+        Text(balance, color = Color(0xFFF2F5FA), fontWeight = FontWeight.Bold, fontSize = dims.t(2.6f, min = 15f), maxLines = 1)
     }
 }
 
