@@ -9,8 +9,8 @@ import org.junit.Test
 class ThemeDefaultsTest {
 
     @Test
-    fun exactlyFourThemes() {
-        assertEquals(listOf("map_first", "big_glance", "bento_grid", "road_sign"), ThemeDefaults.IDS)
+    fun fiveThemes() {
+        assertEquals(listOf("map_first", "big_glance", "bento_grid", "road_sign", "calm"), ThemeDefaults.IDS)
     }
 
     @Test

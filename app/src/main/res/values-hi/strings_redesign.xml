@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_dim_title">सूरज ढलने पर स्क्रीन धीमी करो</string>
+    <string name="theme_dim_hint">शाम को Map First अपने आप रात वाले रंगों में बदलता है; यह रोशनी भी कम कर देता है</string>
+    <string name="home_say_hey_ampli">बोलो “Hey Ampli”</string>
+    <string name="home_end_route">रास्ता बंद करो</string>
+    <string name="action_ok">ठीक है</string>
+
+    <string name="fastag_taken">कटे</string>
+    <string name="fastag_left">बैलेंस बचा</string>
+    <string name="fastag_todays_tolls">आज के टोल देखो</string>
+    <string name="fastag_voice_toll">टोल कटा, %1$s रुपये। बैलेंस %2$s रुपये।</string>
+    <string name="fastag_voice_toll_no_balance">टोल कटा, %1$s रुपये।</string>
+    <string name="fastag_voice_low">FASTag बैलेंस कम है, %1$s रुपये। रिचार्ज कर लीजिए।</string>
+    <string name="fastag_voice_recharge">%1$s रुपये का रिचार्ज हुआ, बैलेंस %2$s रुपये।</string>
+    <string name="fastag_voice_recharge_no_balance">%1$s रुपये का FASTag रिचार्ज हुआ।</string>
+
+    <string name="android_settings">Android सेटिंग्स</string>
+    <string name="android_settings_hint">फ़ोन जैसी सेटिंग्स</string>
+    <string name="car_settings">कार सेटिंग्स</string>
+    <string name="vendor_car_settings_hint">गाड़ी की अपनी सेटिंग्स</string>
+    <string name="settings_hint_system">Ampli की सेटिंग्स · Android और गाड़ी की सेटिंग्स भी यहीं से</string>
+    <string name="apps_clean">गाड़ी स्लो? ऐप्स साफ़ करो</string>
+
+    <string name="cleaner_title">गाड़ी स्लो? ऐप्स साफ़ करो</string>
+    <string name="cleaner_memory">RAM %2$s में से %1$s भरी · स्टोरेज %3$s खाली</string>
+    <string name="cleaner_clear_memory">मेमोरी साफ़ करो</string>
+    <string name="cleaner_heaviest">सबसे भारी ऐप्स पहले</string>
+    <string name="cleaner_access_title">असली साइज़ और आख़िरी इस्तेमाल दिखाओ</string>
+    <string name="cleaner_access_steps">“इजाज़त दो” दबाओ, Ampli Car Hub चुनो, “Usage access” चालू करो और वापस आओ। तब तक साइज़ सिर्फ़ ऐप फ़ाइल का (~) है।</string>
+    <string name="cleaner_access_allow">इजाज़त दो</string>
+    <string name="cleaner_stop">बंद करो</string>
+    <string name="cleaner_remove">हटाओ</string>
+    <string name="cleaner_system">सिस्टम ऐप: सिर्फ़ बंद हो सकता है</string>
+    <string name="cleaner_last_unknown">आख़िरी इस्तेमाल पता नहीं</string>
+    <string name="cleaner_used_today">आज खोला</string>
+    <string name="cleaner_used_yesterday">कल खोला था</string>
+    <string name="cleaner_not_opened">%1$d दिन से नहीं खोला</string>
+    <string name="cleaner_open">खोलो</string>
+    <string name="cleaner_auto">ऑटो बटन पे लगाओ</string>
+    <string name="cleaner_hide">ऐप्स से छुपाओ</string>
+    <string name="cleaner_unhide">ऐप्स में फिर दिखाओ</string>
+    <string name="cleaner_app_info">बंद करो (App info)</string>
+    <string name="cleaner_uninstall">हटाओ (uninstall)</string>
+    <string name="cleaner_sheet_hint">“हटाओ” दबाने पे Android एक बार पूछेगा, वहाँ OK दबाओ। सिस्टम ऐप्स के लिए “बंद करो” आता है।</string>
+</resources>

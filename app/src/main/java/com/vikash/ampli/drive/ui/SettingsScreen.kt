@@ -62,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -121,6 +122,7 @@ fun SettingsScreen(
     val emergency by app.emergency.profile.collectAsStateWithLifecycle()
     val keepScreenOn by app.prefs.keepScreenOn.collectAsStateWithLifecycle()
     val themeChoice by app.prefs.theme.collectAsStateWithLifecycle()
+    val dimAtNight by app.prefs.dimAtNight.collectAsStateWithLifecycle()
     val pro by app.prefs.pro.collectAsStateWithLifecycle()
     val savedLanguage by app.prefs.language.collectAsStateWithLifecycle()
     val price by app.billing.price.collectAsStateWithLifecycle()
@@ -148,7 +150,9 @@ fun SettingsScreen(
         modifier = Modifier.fillMaxSize().padding(dims.d(2.4f)),
         verticalArrangement = Arrangement.spacedBy(dims.d(2f)),
     ) {
-        ScreenHeader(title = stringResource(R.string.settings_title), hint = null, onBack = onBack)
+        ScreenHeader(title = stringResource(R.string.settings_title), hint = stringResource(R.string.settings_hint_system), onBack = onBack)
+        // Android's own settings and the head unit's car settings, right from here.
+        SystemSettingsRow(modifier = Modifier.fillMaxWidth().height(dims.d(10f)), outlined = true)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,6 +168,8 @@ fun SettingsScreen(
                 isPro = pro.isPro,
                 onChange = app.prefs::setTheme,
                 onLocked = { showProSheet = true },
+                dimAtNight = dimAtNight,
+                onDimAtNight = app.prefs::setDimAtNight,
             )
             if (BuildConfig.TEST_BUILD) {
                 ToggleRow(
@@ -551,10 +557,12 @@ internal fun ThemedSwitch(checked: Boolean, onChange: (Boolean) -> Unit) = Theme
 @Composable
 internal fun ThemedSwitch(checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val theme = LocalDriveTheme.current
+    // Drawn 80 x 44 like the design (the Material switch is 52 x 32), with room around it.
     Switch(
         checked = checked,
         onCheckedChange = onChange,
         enabled = enabled,
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp).scale(1.4f),
         colors = SwitchDefaults.colors(
             checkedThumbColor = theme.onAccent,
             checkedTrackColor = theme.accent,
@@ -622,6 +630,9 @@ internal fun ThemePicker(
     isPro: Boolean,
     onChange: (ThemeChoice) -> Unit,
     onLocked: () -> Unit,
+    /** "Dim the screen after sunset"; null hides the switch (previews). */
+    dimAtNight: Boolean? = null,
+    onDimAtNight: (Boolean) -> Unit = {},
 ) {
     val dims = LocalDims.current
     val active = LocalDriveTheme.current
@@ -638,7 +649,7 @@ internal fun ThemePicker(
                 Box(Modifier.weight(1f)) { CardTitle(stringResource(R.string.theme_title), null) }
             }
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val columns = if (maxWidth < 760.dp) 2 else 4
+                val columns = if (maxWidth < 760.dp) 3 else 5
                 Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     for (row in DriveThemes.all.chunked(columns)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -678,6 +689,22 @@ internal fun ThemePicker(
                     Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.theme_locked), tint = active.muted, modifier = Modifier.size(24.dp))
                 }
                 ThemedSwitch(autoNightOn, enabled = isPro) { onChange(choice.copy(autoNight = it)) }
+            }
+            // Map First turns to its night colours at sunset on its own; this dims the screen too.
+            if (dimAtNight != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = MinTouch)
+                        .clickable { onDimAtNight(!dimAtNight) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+                ) {
+                    Box(Modifier.weight(1f)) {
+                        CardTitle(stringResource(R.string.theme_dim_title), stringResource(R.string.theme_dim_hint))
+                    }
+                    ThemedSwitch(dimAtNight, onDimAtNight)
+                }
             }
         }
     }
@@ -795,17 +822,18 @@ private fun ThemeSwatch(t: DriveTheme, modifier: Modifier) {
                 box(0.77f, 0.8f, 0.19f, 0.15f, sos)
             }
             HomeStyle.MapFirst -> {
-                drawRect(Color(0xFFE8E2D4))
-                drawRect(Color(0xFFF7F3EA), Offset(0f, h * 0.4f), Size(w, h * 0.06f))
-                drawRect(Color(0xFFF7F3EA), Offset(w * 0.48f, 0f), Size(w * 0.05f, h))
-                drawRect(t.accent, Offset(0f, h * 0.415f), Size(w * 0.5f, h * 0.03f))
-                drawRect(t.accent, Offset(w * 0.49f, h * 0.43f), Size(w * 0.03f, h * 0.57f))
-                box(0.03f, 0.05f, 0.34f, 0.2f, t.surface)
-                box(0.82f, 0.15f, 0.15f, 0.24f, t.surface, 0.08f)
-                box(0.03f, 0.74f, 0.37f, 0.21f, t.surface)
-                box(0.63f, 0.8f, 0.09f, 0.15f, t.surface)
-                box(0.74f, 0.75f, 0.13f, 0.21f, t.accent, 0.07f)
-                box(0.885f, 0.8f, 0.09f, 0.15f, sos)
+                // The frame of the Main board: top bar, map card, speed and music cards, dock.
+                box(0.30f, 0.025f, 0.40f, 0.075f, t.surface, 0.035f, edge = t.border)
+                box(0.74f, 0.025f, 0.23f, 0.075f, t.surface, edge = t.border)
+                box(0.03f, 0.13f, 0.60f, 0.65f, t.mapBase, edge = t.border)
+                drawRect(t.accent, Offset(w * 0.32f, h * 0.45f), Size(w * 0.025f, h * 0.33f))
+                drawRect(t.accent, Offset(w * 0.32f, h * 0.45f), Size(w * 0.25f, h * 0.035f))
+                box(0.055f, 0.17f, 0.28f, 0.13f, t.banner)
+                box(0.65f, 0.13f, 0.32f, 0.27f, t.surface, edge = t.border)
+                box(0.65f, 0.42f, 0.32f, 0.36f, t.surface, edge = t.border)
+                box(0.76f, 0.64f, 0.10f, 0.09f, t.accent, 0.045f)
+                for (i in 0 until 5) box(0.03f + i * 0.158f, 0.82f, 0.145f, 0.14f, t.surface, edge = t.border)
+                box(0.82f, 0.82f, 0.15f, 0.14f, sos)
             }
             HomeStyle.Bento -> {
                 box(0.03f, 0.04f, 0.3f, 0.6f, t.ink, edge = t.border)

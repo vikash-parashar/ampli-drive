@@ -13,7 +13,7 @@ class ThemeAccessTest {
     @Test
     fun onlyMapFirstIsFree() {
         assertEquals(setOf(ThemeDefaults.MAP_FIRST), ThemeAccess.FREE_IDS)
-        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN)) {
+        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN, ThemeDefaults.CALM)) {
             assertFalse("$id should be Pro", ThemeAccess.isFree(id))
         }
     }
@@ -21,7 +21,7 @@ class ThemeAccessTest {
     @Test
     fun proThemesAreLockedWithoutPro() {
         assertFalse(ThemeAccess.locked(ThemeDefaults.MAP_FIRST, isPro = false))
-        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN)) {
+        for (id in listOf(ThemeDefaults.BIG_GLANCE, ThemeDefaults.BENTO, ThemeDefaults.ROAD_SIGN, ThemeDefaults.CALM)) {
             assertTrue(ThemeAccess.locked(id, isPro = false))
             assertFalse(ThemeAccess.locked(id, isPro = true))
         }

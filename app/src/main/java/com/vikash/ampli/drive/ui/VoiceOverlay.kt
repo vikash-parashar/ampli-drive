@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.voice.Place
 import com.vikash.ampli.drive.voice.VoiceUiState
@@ -60,7 +61,7 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.55f))
+            .background(Color(0xC7080A14))
             // Swallow taps on the scrim; Cancel is the way out.
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
         contentAlignment = Alignment.BottomCenter,
@@ -69,17 +70,26 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dims.d(2.4f))
-                .themedCard(theme, theme.cardShape(dims), fill = Brush.linearGradient(listOf(fill, fill)), blur = false)
-                .padding(dims.d(2.6f)),
+                .padding(dims.d(3f))
+                .themedCard(theme, theme.cardShape(dims, 1.33f), fill = Brush.linearGradient(listOf(fill, fill)), border = theme.accent, blur = false)
+                .border(2.dp, theme.accent, theme.cardShape(dims, 1.33f))
+                .padding(horizontal = dims.d(5f), vertical = dims.d(4f)),
             verticalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f)),
+                horizontalArrangement = Arrangement.spacedBy(dims.d(5f)),
             ) {
                 MicPulse(state.phase)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(0.6f))) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1.5f))) {
+                    Text(
+                        stringResource(R.string.voice_button).uppercase(Locale.ROOT),
+                        color = theme.accentSoft,
+                        fontSize = dims.t(2.25f, min = 16f),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.12.em,
+                        maxLines = 1,
+                    )
                     val heading = when {
                         state.phase == Phase.Listening && state.heard.isEmpty() -> stringResource(R.string.voice_listening)
                         state.heard.isNotEmpty() -> "“${state.heard}”"
@@ -88,8 +98,9 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                     Text(
                         heading,
                         color = theme.text,
-                        fontSize = dims.t(3.6f, min = 20f),
+                        fontSize = dims.t(6f, min = 26f),
                         fontWeight = FontWeight.SemiBold,
+                        lineHeight = dims.t(7.2f, min = 32f),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -97,18 +108,23 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                         Text(
                             state.reply,
                             color = theme.muted,
-                            fontSize = dims.t(2.8f, min = 16f),
+                            fontSize = dims.t(3f, min = 20f),
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
-                BigButton(
-                    text = stringResource(R.string.voice_cancel),
-                    onClick = onCancel,
-                    icon = Icons.Filled.Close,
-                    primary = false,
-                )
+                // "Ruko": a big round outlined key.
+                Column(
+                    Modifier
+                        .size(maxOf(dims.d(15f), MinTouch))
+                        .themedTap(CircleShape, Color.Transparent, border = theme.muted, borderWidth = 2.dp, onClick = onCancel),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(Icons.Filled.Close, contentDescription = null, tint = theme.text, modifier = Modifier.size(dims.d(4f)))
+                    Text(stringResource(R.string.voice_cancel), color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(2.75f, min = 18f), maxLines = 1)
+                }
             }
             state.answer?.let { VoiceAnswerCard(it) }
             if (state.options.isNotEmpty()) {
@@ -127,7 +143,7 @@ private fun MicPulse(phase: Phase) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val listening = phase == Phase.Listening
-    val size = maxOf(dims.d(11f), 72.dp)
+    val size = maxOf(dims.d(17f), 72.dp)
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(size * 1.25f)) {
         if (listening) {
             // Only while listening (the overlay stays still while Ampli works or speaks), and

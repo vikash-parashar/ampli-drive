@@ -50,20 +50,66 @@ object QuickActions {
         false
     }
 
-    /** One step up or down (no system volume panel: the rail shows its own). Either key un-mutes. */
+    /**
+     * One step up or down, the way the unit's own hardware keys do it:
+     * adjustSuggestedStreamVolume with the default stream and the system volume panel. Many head
+     * units (TS7 and other FYT-style units) route the car's amplifier volume through that path
+     * and ignore setStreamVolume(STREAM_MUSIC). When the reading did not move and the unit is
+     * rooted, `input keyevent 24 / 25` is sent instead (off the main thread), and remembered so
+     * later taps go straight there.
+     */
     fun stepVolume(context: Context, delta: Int): RailVolume.Level? {
         val am = context.getSystemService(AudioManager::class.java) ?: return null
+        if (delta == 0) return volume(context)
+        val up = delta > 0
+        if (preferRootKeys) {
+            rootKey(if (up) KEY_VOLUME_UP else KEY_VOLUME_DOWN)
+            return volume(context)?.let { RailVolume.step(it, delta) }
+        }
         return try {
-            val cur = volume(context) ?: return null
-            if (cur.muted) unmute(context)
-            val next = RailVolume.step(volume(context) ?: cur, delta)
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, next.level, 0)
-            volume(context)
+            val before = volume(context)
+            am.adjustSuggestedStreamVolume(
+                if (up) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER,
+                AudioManager.USE_DEFAULT_STREAM_TYPE,
+                AudioManager.FLAG_SHOW_UI,
+            )
+            val after = volume(context)
+            val atEdge = before != null && ((up && before.level >= before.max) || (!up && before.level <= 0))
+            if (before != null && after != null && after.level == before.level && after.muted == before.muted && !atEdge && PowerControl.rooted()) {
+                preferRootKeys = true
+                rootKey(if (up) KEY_VOLUME_UP else KEY_VOLUME_DOWN)
+                return RailVolume.step(before, delta)
+            }
+            after
         } catch (_: SecurityException) {
             // Do Not Disturb can refuse volume changes.
             null
         } catch (_: Exception) {
             null
+        }
+    }
+
+    /** The adjust path did nothing on this unit once and root works: use the key events. */
+    @Volatile private var preferRootKeys = false
+
+    private const val KEY_VOLUME_UP = 24
+    private const val KEY_VOLUME_DOWN = 25
+    private const val KEY_VOLUME_MUTE = 164
+
+    /** One `su -c input keyevent N` at a time, off the main thread; held-key repeats queue up to two. */
+    private val rootKeys = java.util.concurrent.ThreadPoolExecutor(
+        1, 1, 30L, java.util.concurrent.TimeUnit.SECONDS,
+        java.util.concurrent.ArrayBlockingQueue(2),
+        java.util.concurrent.ThreadPoolExecutor.DiscardPolicy(),
+    ).apply { allowCoreThreadTimeOut(true) }
+
+    private fun rootKey(code: Int) {
+        rootKeys.execute {
+            try {
+                val p = Runtime.getRuntime().exec(arrayOf("su", "-c", "input keyevent $code"))
+                if (!p.waitFor(3, java.util.concurrent.TimeUnit.SECONDS)) p.destroy()
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -79,9 +125,26 @@ object QuickActions {
         }
     }
 
-    /** Mute toggle. Returns the level afterwards. */
+    /**
+     * Mute toggle, as the hardware mute key does it (ADJUST_TOGGLE_MUTE on the default stream).
+     * When nothing changed: `input keyevent 164` on a rooted unit, else the old mute / un-mute.
+     * Returns the level afterwards.
+     */
     fun toggleMute(context: Context): RailVolume.Level? {
         val cur = volume(context) ?: return null
+        val am = context.getSystemService(AudioManager::class.java) ?: return null
+        if (!mutedByZero) {
+            try {
+                am.adjustSuggestedStreamVolume(AudioManager.ADJUST_TOGGLE_MUTE, AudioManager.USE_DEFAULT_STREAM_TYPE, AudioManager.FLAG_SHOW_UI)
+            } catch (_: Exception) {
+            }
+            val after = volume(context)
+            if (after != null && after.muted != cur.muted) return after
+            if (PowerControl.rooted()) {
+                rootKey(KEY_VOLUME_MUTE)
+                return cur.copy(muted = !cur.muted)
+            }
+        }
         if (cur.muted) unmute(context) else mute(context)
         return volume(context)
     }

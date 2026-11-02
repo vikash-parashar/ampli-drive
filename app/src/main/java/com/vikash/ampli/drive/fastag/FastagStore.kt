@@ -47,6 +47,11 @@ class FastagStore(context: Context) {
     /** New toll debits as they arrive, for the 6-second card on the home screen. */
     val arrivals: SharedFlow<TollEvent> = _arrivals.asSharedFlow()
 
+    private val _spoken = MutableSharedFlow<TollEvent>(extraBufferCapacity = 8)
+
+    /** New toll debits and recharges as they arrive, for the spoken announcement (every voice style). */
+    val spoken: SharedFlow<TollEvent> = _spoken.asSharedFlow()
+
     private val _enabled = MutableStateFlow(sp.getBoolean(KEY_ENABLED, true))
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()
 
@@ -68,6 +73,11 @@ class FastagStore(context: Context) {
 
     /** Toll SMS are parsed only when the feature is on and the disclosure was accepted. */
     val readsSms: Boolean get() = _enabled.value && _smsConsent.value
+
+    /** The FASTag SMS question was offered once (FASTag screen); asked again only from the switch. */
+    var smsOffered: Boolean
+        get() = sp.getBoolean(KEY_SMS_OFFERED, false)
+        set(value) { sp.edit().putBoolean(KEY_SMS_OFFERED, value).apply() }
 
     fun setSmsConsent(value: Boolean) {
         sp.edit().putBoolean(KEY_SMS_CONSENT, value).apply()
@@ -171,6 +181,9 @@ class FastagStore(context: Context) {
         _events.value = updated
         save(updated)
         if (announce && event.kind == FastagKind.Debit && !event.passTrip) _arrivals.tryEmit(event)
+        if (announce && !event.passTrip && event.amount != null && (event.kind == FastagKind.Debit || event.kind == FastagKind.Recharge)) {
+            _spoken.tryEmit(event)
+        }
         return true
     }
 
@@ -232,6 +245,7 @@ class FastagStore(context: Context) {
         private const val KEY_LOW = "low_balance"
         private const val KEY_URL = "recharge_url"
         private const val KEY_SMS_CONSENT = "sms_consent"
+        private const val KEY_SMS_OFFERED = "sms_offered"
         private const val KEY_PASS = "annual_pass"
 
         /** Newest event that carries a balance. */

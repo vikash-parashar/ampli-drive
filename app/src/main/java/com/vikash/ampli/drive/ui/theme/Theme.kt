@@ -16,6 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /** Ampli brand colors, shared with the Ampli music player. */
 object Ampli {
@@ -61,6 +62,8 @@ private fun schemeFor(t: DriveTheme): ColorScheme {
         outline = t.muted,
         outlineVariant = t.border,
         error = t.warning,
+        inverseSurface = t.banner,
+        inverseOnSurface = t.onBanner,
     )
 }
 
@@ -72,8 +75,9 @@ private fun shapesFor(t: DriveTheme): Shapes = if (t.radius <= 0f) {
     )
 } else {
     Shapes(
-        extraSmall = RoundedCornerShape(10.dp), small = RoundedCornerShape(14.dp), medium = RoundedCornerShape(18.dp),
-        large = RoundedCornerShape(22.dp), extraLarge = RoundedCornerShape(28.dp),
+        // Design system: chips 12, buttons 20, cards 24.
+        extraSmall = RoundedCornerShape(12.dp), small = RoundedCornerShape(12.dp), medium = RoundedCornerShape(20.dp),
+        large = RoundedCornerShape(24.dp), extraLarge = RoundedCornerShape(28.dp),
     )
 }
 
@@ -89,13 +93,14 @@ private fun typographyFor(t: DriveTheme): Typography {
             headlineLarge = headlineLarge.withFont(f),
             headlineMedium = headlineMedium.withFont(f),
             headlineSmall = headlineSmall.copy(fontFamily = f, fontWeight = FontWeight.Bold),
-            titleLarge = titleLarge.copy(fontFamily = f, fontWeight = FontWeight.Bold),
-            titleMedium = titleMedium.copy(fontFamily = f, fontWeight = FontWeight.SemiBold),
-            titleSmall = titleSmall.withFont(f),
-            bodyLarge = bodyLarge.withFont(f),
-            bodyMedium = bodyMedium.withFont(f),
+            // Read in one glance: titles 26-28, body 20-24, nothing a driver reads under 18.
+            titleLarge = titleLarge.copy(fontFamily = f, fontWeight = FontWeight.Bold, fontSize = 28.sp, lineHeight = 34.sp),
+            titleMedium = titleMedium.copy(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
+            titleSmall = titleSmall.copy(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 26.sp),
+            bodyLarge = bodyLarge.copy(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = 20.sp, lineHeight = 28.sp),
+            bodyMedium = bodyMedium.copy(fontFamily = f, fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 25.sp),
             bodySmall = bodySmall.withFont(f),
-            labelLarge = labelLarge.withFont(f),
+            labelLarge = labelLarge.copy(fontFamily = f, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 26.sp),
             labelMedium = labelMedium.withFont(f),
             labelSmall = labelSmall.withFont(f),
         )

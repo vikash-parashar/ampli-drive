@@ -69,6 +69,13 @@
     <!-- Dashcam (Pro, off by default): video only, saved on the unit. Asked for from its switch. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <!-- Apps › "Saaf karo": app sizes and when each was last used. The driver allows it in
+         Settings › Usage access (the screen guides them); without it, APK sizes only. -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- Apps › "Hatao": Android's own "Uninstall this app?" prompt. -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
     <!-- The head unit has GPS but may lack some of these; none are required to install. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -83,6 +90,20 @@
 
     <!-- Package visibility (Android 11+): apps the launcher lists or opens. -->
     <queries>
+        <!-- "Car settings": the head unit's own car-settings app, which may have no launcher icon. -->
+        <package android:name="com.syu.carsettings" />
+        <package android:name="com.syu.settings" />
+        <package android:name="com.syu.setting" />
+        <package android:name="com.fyt.settings" />
+        <package android:name="com.fyt.carsettings" />
+        <package android:name="com.fyt.car.settings" />
+        <package android:name="com.ts.carsettings" />
+        <package android:name="com.ts.settings" />
+        <package android:name="com.microntek.carsettings" />
+        <package android:name="com.android.carsettings" />
+        <package android:name="com.yf.carsettings" />
+        <package android:name="com.car.settings" />
+        <package android:name="com.carsettings" />
         <!-- All-apps grid. -->
         <intent>
             <action android:name="android.intent.action.MAIN" />

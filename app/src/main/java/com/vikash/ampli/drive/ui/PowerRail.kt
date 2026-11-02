@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
@@ -95,22 +96,34 @@ import java.util.Locale
  * no animation: one redraw per tap on an Android 8.1 unit.
  */
 
-/** The rail's width: 96 px at 1280x800. */
-internal const val RAIL_UNITS = 12f
+/** The rail's width: 104 px at 1280x800 (design board "Rail"). */
+internal const val RAIL_UNITS = 13f
 
-/** Amber of a muted Mute key (the same in every theme, like the SOS red). */
-private val MutedAmber = Color(0xFFF59E0B)
-private val MutedInk = Color(0xFF111111)
+/** Ink on the amber Mute key (the same in every theme, like the SOS red). */
+private val MutedInk = Color(0xFF1A1206)
 
-/** The rail's colours for one theme. */
-private class RailColors(val bg: Color, val fg: Color, val muted: Color, val on: Color, val onFg: Color, val edge: Color?)
+/** The rail's colours for one theme: strip, key fill, ink, active key and the muted amber. */
+private class RailColors(
+    val bg: Color,
+    val key: Color,
+    val fg: Color,
+    val muted: Color,
+    val on: Color,
+    val onFg: Color,
+    val edge: Color?,
+    val amber: Color,
+)
 
-private fun railColors(theme: DriveTheme): RailColors = when (theme.style) {
-    HomeStyle.MapFirst -> RailColors(Color(0xF017222A), Color(0xFFF1F5F9), Color(0xFFF1F5F9).copy(alpha = 0.66f), theme.accent, theme.onAccent, null)
-    HomeStyle.BigGlance -> RailColors(Color(0xFF0B0B0E), Color(0xFFF5F5F5), Color(0xFFF5F5F5).copy(alpha = 0.62f), theme.accent, theme.onAccent, null)
-    HomeStyle.Bento -> RailColors(theme.background, theme.text, theme.muted, theme.ink, theme.onInk, theme.border)
-    HomeStyle.RoadSign -> RailColors(theme.ink, theme.onInk, theme.onInk.copy(alpha = 0.7f), theme.onInk, theme.ink, null)
-}
+private fun railColors(theme: DriveTheme): RailColors = RailColors(
+    bg = theme.rail,
+    key = theme.railKey,
+    fg = theme.railInk,
+    muted = theme.railInk.copy(alpha = 0.72f),
+    on = theme.banner,
+    onFg = theme.onBanner,
+    edge = if (theme.cardStyle == com.vikash.ampli.drive.ui.theme.CardStyle.Brutal) null else theme.border,
+    amber = theme.warning,
+)
 
 /**
  * Home with the rail on its left. [content] (the Home layout) and everything in [overlays] sit
@@ -205,11 +218,12 @@ private fun PowerRail(
     }
     val muted = volume.level?.muted == true
     var m = modifier.background(c.bg)
-    if (c.edge != null) m = m.drawRightEdge(c.edge, 3.dp)
+    if (c.edge != null) m = m.drawRightEdge(c.edge, 2.dp)
+    // 80 x 88 keys, 8 px apart, 24 px from the top and bottom (design board "Rail").
     Column(
-        m.padding(horizontal = dims.d(0.9f), vertical = dims.d(1f)),
+        m.padding(horizontal = dims.d(1.5f), vertical = dims.d(2f)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dims.d(0.4f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(1f)),
     ) {
         RailKey(Icons.AutoMirrored.Filled.ArrowBack, R.string.rail_back, c, onClick = onBack)
         RailKey(Icons.Filled.Home, R.string.rail_home, c, active = !controlsOpen, onClick = onHome)
@@ -219,18 +233,17 @@ private fun PowerRail(
             // Long press: Android's recent apps through the helper, else the app drawer.
             onLongClick = { if (!PowerHelperService.recents()) onOpenApps() },
         )
-        Box(Modifier.padding(vertical = dims.d(0.5f)).width(dims.d(7f)).height(1.dp).background(c.muted.copy(alpha = 0.4f)))
         VolumeKey(Icons.AutoMirrored.Filled.VolumeUp, R.string.rail_vol_up, c) { volume.show(QuickActions.stepVolume(context, 1)) }
         VolumeKey(Icons.AutoMirrored.Filled.VolumeDown, R.string.rail_vol_down, c) { volume.show(QuickActions.stepVolume(context, -1)) }
         RailKey(
             Icons.AutoMirrored.Filled.VolumeOff, R.string.rail_mute, c,
-            fill = if (muted) MutedAmber else null,
+            fill = if (muted) c.amber else null,
             fillFg = MutedInk,
             description = stringResource(if (muted) R.string.rail_unmute else R.string.rail_mute),
             onClick = { volume.show(QuickActions.toggleMute(context)) },
         )
         Spacer(Modifier.weight(1f))
-        RailKey(Icons.Filled.Tune, R.string.rail_controls, c, active = controlsOpen, outlined = true, onClick = onControls)
+        RailKey(Icons.Filled.Tune, R.string.rail_controls, c, active = controlsOpen, onClick = onControls)
     }
 }
 
@@ -258,14 +271,14 @@ private fun RailKey(
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
     val shape = theme.buttonShape(dims)
-    val bg = fill ?: if (active) c.on else Color.Transparent
+    val bg = fill ?: if (active) c.on else c.key
     val fg = when {
         fill != null -> fillFg
         active -> c.onFg
         else -> c.fg
     }
     val edge = if (outlined && !active) c.muted.copy(alpha = 0.5f) else null
-    var m = Modifier.fillMaxWidth().height(dims.d(10.6f)).clip(shape).background(bg, shape)
+    var m = Modifier.fillMaxWidth().height(dims.d(11f)).clip(shape).background(bg, shape)
     if (edge != null) m = m.border(1.5.dp, edge, shape)
     val tapLong by rememberUpdatedState(onLongClick)
     val tap by rememberUpdatedState(onClick)
@@ -295,9 +308,9 @@ private fun VolumeKey(icon: ImageVector, @StringRes label: Int, c: RailColors, s
     val text = stringResource(label)
     val m = Modifier
         .fillMaxWidth()
-        .height(dims.d(10.6f))
+        .height(dims.d(11f))
         .clip(shape)
-        .background(if (pressed) c.fg.copy(alpha = 0.16f) else Color.Transparent, shape)
+        .background(if (pressed) c.on else c.key, shape)
         .semantics {
             role = Role.Button
             contentDescription = text
@@ -321,7 +334,7 @@ private fun VolumeKey(icon: ImageVector, @StringRes label: Int, c: RailColors, s
                 pressed = false
             })
         }
-    KeyFace(icon, label, c.fg, c.muted, m)
+    KeyFace(icon, label, if (pressed) c.onFg else c.fg, if (pressed) c.onFg else c.muted, m)
 }
 
 /** Icon, the label in the app's language and, when that is not English, the English word under it. */
@@ -329,12 +342,13 @@ private fun VolumeKey(icon: ImageVector, @StringRes label: Int, c: RailColors, s
 private fun KeyFace(icon: ImageVector, @StringRes label: Int, fg: Color, sub: Color, modifier: Modifier) {
     val dims = LocalDims.current
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4.4f)))
+        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4f)))
         Text(
-            stringResource(label),
+            stringResource(label).uppercase(),
             color = fg,
-            fontSize = dims.t(2.3f, min = 12f),
+            fontSize = dims.t(2f, min = 13f),
             fontWeight = FontWeight.Bold,
+            letterSpacing = 0.06.em,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
@@ -375,7 +389,7 @@ private fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
             Icon(
                 if (level.muted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                 contentDescription = null,
-                tint = if (level.muted) MutedAmber else fg,
+                tint = if (level.muted) theme.warning else fg,
                 modifier = Modifier.size(dims.d(3.6f)),
             )
             Text(stringResource(R.string.rail_volume_title), color = fg, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold)
@@ -383,7 +397,7 @@ private fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
             Spacer(Modifier.weight(1f))
             Text(
                 if (level.muted) stringResource(R.string.rail_muted) else "${level.level}/${level.max}",
-                color = if (level.muted) MutedAmber else fg,
+                color = if (level.muted) theme.warning else fg,
                 style = theme.numberStyle(fg),
                 fontSize = dims.t(3.6f, min = 19f),
                 maxLines = 1,
@@ -423,10 +437,11 @@ private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen:
             false
         }
     }
-    val dark = theme.style == HomeStyle.MapFirst || theme.style == HomeStyle.BigGlance
-    val bg = if (dark) Color(0xF017222A) else theme.surface
-    val fg = if (dark) Color(0xFFF1F5F9) else theme.text
-    val edge = if (dark) null else theme.border
+    // Map First's own top bar (clock, Hey Ampli, FASTag) takes the pull-down there.
+    if (theme.style == HomeStyle.MapFirst) return
+    val bg = theme.surface
+    val fg = theme.text
+    val edge = theme.border
     val h = dims.d(6.5f)
     val open by rememberUpdatedState(onOpen)
     val label = stringResource(R.string.strip_open)
