@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -168,8 +167,10 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                 value = withContext(Dispatchers.IO) { com.vikash.ampli.drive.system.SystemSettings.carSettings(context) }
             }
             val s = status
+            // Tall enough for icon, title and sub-line at this screen size and font scale.
+            val tileRow = TileMetrics.minHeight(dims.d(13f))
             val wifiOn = s?.wifiOn == true || s?.wifiConnected == true
-            Row(Modifier.fillMaxWidth().height(dims.d(13f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            Row(Modifier.fillMaxWidth().height(tileRow), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
                 val tile = Modifier.weight(1f).fillMaxHeight()
                 PanelTile(
                     Icons.Filled.Wifi, R.string.qp_wifi,
@@ -205,7 +206,7 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth().height(dims.d(13f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            Row(Modifier.fillMaxWidth().height(tileRow), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
                 val tile = Modifier.weight(1f).fillMaxHeight()
                 PanelTile(Icons.Filled.Equalizer, R.string.qp_eq, sub = s?.eqApp, modifier = tile, onLongClick = { pickEq = true }) {
                     Shell.open(context, Shell.Control.Equalizer)
@@ -352,21 +353,16 @@ private fun PanelTile(
     val dims = LocalDims.current
     val shape = theme.buttonShape(dims)
     val fg = if (on) theme.onAccent else theme.text
-    Column(
-        modifier
-            .themedTap(shape, if (on) theme.accent else theme.surface, border = if (on) null else theme.border, borderWidth = 2.dp, onLongClick = onLongClick, onClick = onClick)
-            .padding(horizontal = dims.d(3f), vertical = dims.d(1.75f)),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Icon(icon, contentDescription = null, tint = if (on) theme.onAccent else theme.accentSoft, modifier = Modifier.size(dims.d(3.5f)))
-        Column {
-            Text(stringResource(label), color = fg, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            val second = sub ?: englishLine(label)
-            if (second != null) {
-                Text(second, color = if (on) fg.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.25f, min = 14f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
+    // One shared layout for every tile (AlignedTile.kt): same padding, icon box and text lines.
+    AlignedTileContent(
+        icon = icon,
+        title = stringResource(label),
+        sub = sub ?: englishLine(label),
+        fg = fg,
+        iconTint = if (on) theme.onAccent else theme.accentSoft,
+        subColor = if (on) fg.copy(alpha = 0.85f) else theme.muted,
+        modifier = modifier.themedTap(shape, if (on) theme.accent else theme.surface, border = if (on) null else theme.border, borderWidth = 2.dp, onLongClick = onLongClick, onClick = onClick),
+    )
 }
 
 /**
@@ -429,11 +425,15 @@ private fun PillSlider(
         ) {
             val onFill = fraction > 0.3f
             val fg = if (onFill) theme.onAccent else theme.text
-            Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(3.6f)))
-            Text(stringResource(label), color = fg, fontSize = dims.t(2.4f, min = 14f), fontWeight = FontWeight.Bold, maxLines = 1)
-            englishLine(label)?.let { Text(it, color = fg.copy(alpha = 0.8f), fontSize = dims.t(1.7f, min = 10f), maxLines = 1) }
-            Spacer(Modifier.weight(1f))
-            Text(value, color = if (fraction > 0.85f) theme.onAccent else theme.text, style = theme.numberStyle(theme.text), fontSize = dims.t(3.2f, min = 18f), maxLines = 1)
+            Box(Modifier.size(TileMetrics.ICON), contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(TileMetrics.ICON))
+            }
+            // Label and its English line as one block, centred on the bar's middle.
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                Text(stringResource(label), color = fg, style = TileMetrics.tight(dims.t(2.4f, min = 14f)), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                englishLine(label)?.let { Text(it, color = fg.copy(alpha = 0.8f), style = TileMetrics.tight(dims.t(1.7f, min = 10f)), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+            Text(value, color = if (fraction > 0.85f) theme.onAccent else theme.text, style = theme.numberStyle(theme.text).merge(TileMetrics.tight(dims.t(3.2f, min = 18f))), maxLines = 1)
         }
     }
 }
@@ -442,19 +442,13 @@ private fun PillSlider(
 private fun PowerRowKey(icon: ImageVector, @StringRes label: Int, modifier: Modifier, onClick: () -> Unit) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
-    val fill = theme.surfaceHigh
-    val ink = theme.text
-    Row(
-        modifier
-            .themedTap(theme.buttonShape(dims), fill, border = theme.border, borderWidth = 2.dp, onClick = onClick)
-            .padding(horizontal = dims.d(2.5f)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f), Alignment.CenterHorizontally),
-    ) {
-        Icon(icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(4f)))
-        Column {
-            Text(stringResource(label), color = ink, fontSize = dims.t(3.25f, min = 18f), fontWeight = FontWeight.Bold, maxLines = 1)
-            englishLine(label)?.let { Text(it, color = ink.copy(alpha = 0.75f), fontSize = dims.t(2f, min = 13f), maxLines = 1) }
-        }
-    }
+    // Icon and text centred both ways (AlignedTile.kt).
+    CenteredKeyContent(
+        icon = icon,
+        title = stringResource(label),
+        sub = englishLine(label),
+        fg = theme.text,
+        iconTint = theme.accentSoft,
+        modifier = modifier.themedTap(theme.buttonShape(dims), theme.surfaceHigh, border = theme.border, borderWidth = 2.dp, onClick = onClick),
+    )
 }

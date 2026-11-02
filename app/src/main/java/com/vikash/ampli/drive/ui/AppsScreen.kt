@@ -271,7 +271,7 @@ private fun MoreAppsTile(locked: Boolean, onClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         Icon(if (locked) Icons.Filled.Lock else Icons.Filled.Apps, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(44.dp))
-        Text(stringResource(R.string.shell_more_apps), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.shell_more_apps), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -292,7 +292,7 @@ private fun StoreTile(onClick: () -> Unit) {
     ) {
         // Soft themes: the saffron icon is too faint on the light base (under 3:1), so it takes the accent.
         Icon(Icons.Filled.Storefront, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(44.dp))
-        Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.store_title), fontSize = dims.t(2.2f), color = theme.text, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 

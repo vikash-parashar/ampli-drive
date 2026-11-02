@@ -281,7 +281,12 @@ internal fun PowerRail(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(dims.d(RailSpec.GAP_UNITS)),
     ) {
-        RailKey(Icons.AutoMirrored.Filled.ArrowBack, R.string.rail_back, c, onClick = onBack)
+        // Back stands out in SOS red with a white icon and label (darker while pressed).
+        RailKey(
+            Icons.AutoMirrored.Filled.ArrowBack, R.string.rail_back, c,
+            fill = BackRed, fillFg = Color.White, fillPressed = BackRedPressed,
+            onClick = onBack,
+        )
         RailKey(Icons.Filled.Home, R.string.rail_home, c, active = homeActive && !controlsOpen, onClick = onHome)
         RailKey(
             Icons.Filled.Apps, R.string.rail_apps, c,
@@ -307,6 +312,10 @@ internal fun PowerRail(
     }
 }
 
+/** The Back key's fill: the app's SOS red (#D7263D), and a little darker while pressed. */
+private val BackRed = Color(0xFFD7263D)
+private val BackRedPressed = Color(0xFFB01D31)
+
 /** "android.media.VOLUME_CHANGED_ACTION": sent by every Android since 4.x, though not in the SDK. */
 private const val VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION"
 
@@ -324,6 +333,8 @@ private fun RailKey(
     outlined: Boolean = false,
     fill: Color? = null,
     fillFg: Color = c.onFg,
+    /** [fill] while the finger is down (only keys that set it track the press). */
+    fillPressed: Color? = null,
     description: String? = null,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
@@ -331,7 +342,8 @@ private fun RailKey(
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
     val shape = theme.buttonShape(dims)
-    val bg = fill ?: if (active) c.on else c.key
+    var pressed by remember { mutableStateOf(false) }
+    val bg = (if (pressed && fillPressed != null) fillPressed else fill) ?: if (active) c.on else c.key
     val fg = when {
         fill != null -> fillFg
         active -> c.onFg
@@ -350,6 +362,11 @@ private fun RailKey(
         }
         .pointerInput(Unit) {
             detectTapGestures(
+                onPress = {
+                    pressed = true
+                    tryAwaitRelease()
+                    pressed = false
+                },
                 onLongPress = if (onLongClick != null) { _ -> tapLong?.invoke() } else null,
                 onTap = { tap() },
             )
