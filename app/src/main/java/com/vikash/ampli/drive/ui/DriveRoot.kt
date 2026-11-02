@@ -219,6 +219,8 @@ fun DriveRoot(
                                             settingsFocusVoice = true
                                             onNavigate(Screen.Settings)
                                         })
+                                        // No speech engine on this unit: once, "Bolne ka engine nahi hai · Install karo".
+                                        TtsMissingStrip(app = app, onOpen = { onNavigate(Screen.VoiceCheck) })
                                         DefaultHomeBannerHost(app = app, resumeTick = resumeTick)
                                     },
                                 )

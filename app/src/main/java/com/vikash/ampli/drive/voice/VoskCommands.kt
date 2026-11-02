@@ -90,12 +90,47 @@ object VoskCommands {
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
 
+    /**
+     * Short answers to Ampli's questions (incoming call "uthaun?", "suna doon?", "bhej doon?",
+     * restart "pakka?"), for the English model. A small grammar of its own, so a "haan" said over
+     * a ringtone or music is picked out instead of being transcribed as some English word. Each
+     * phrase must mean something to [com.vikash.ampli.drive.calls.VoiceReplies] (unit-tested);
+     * words the model lacks are dropped by Vosk, so English twins are listed too.
+     */
+    val REPLIES = listOf(
+        // Yes / pick up.
+        "haan", "han", "haan ji", "ji haan", "yes", "yeah", "ok", "okay", "theek hai",
+        "utha lo", "uthao", "utha le", "answer", "pick up", "accept",
+        // No / later.
+        "na", "naa", "nahi", "nahin", "no", "nope", "baad mein", "abhi nahi", "rehne de", "reject", "decline", "later",
+        "kaat de", "mat utha",
+        // Messages.
+        "suna de", "sunao", "suna do", "padh de", "read", "read it", "skip", "chhod de",
+        "jawab de", "jawab bhej", "reply", "bhej de", "bhej do", "send", "send it", "mat bhej", "galat",
+        // Stop / cancel (the restart question, the screen-off countdown).
+        "cancel", "cancel karo", "radd karo", "ruko", "band karo", "stop",
+    )
+
+    /** [REPLIES] for the Hindi model, in Devanagari. */
+    val HINDI_REPLIES = listOf(
+        "हाँ", "हां", "हाँ जी", "जी हाँ", "ठीक है", "उठा लो", "उठाओ", "उठा ले", "ओके",
+        "ना", "नहीं", "बाद में", "अभी नहीं", "रहने दे", "काट दे", "मत उठा",
+        "सुना दे", "सुनाओ", "पढ़ दे", "छोड़ दे", "जवाब दे", "जवाब भेज", "भेज दे", "भेज दो", "मत भेज", "गलत",
+        "रद्द करो", "रुको", "बंद करो", "कैंसल",
+    )
+
+    fun replyPhrases(hindi: Boolean = false): List<String> = (if (hindi) HINDI_REPLIES else REPLIES).distinct()
+
+    fun replyGrammarJson(hindi: Boolean = false): String = json(replyPhrases(hindi) + "[unk]")
+
     /** Every phrase the grammar for that model holds, without "[unk]" (no duplicates). */
     fun phrases(hindi: Boolean = false): List<String> =
         (if (hindi) HINDI_COMMANDS + HINDI_CHOICES + HINDI_FOLLOW_UPS else COMMANDS + HINGLISH_COMMANDS + CHOICES + FOLLOW_UPS).distinct()
 
-    fun grammarJson(hindi: Boolean = false): String =
-        (phrases(hindi) + "[unk]").joinToString(",", "[", "]") { phrase ->
+    fun grammarJson(hindi: Boolean = false): String = json(phrases(hindi) + "[unk]")
+
+    private fun json(list: List<String>): String =
+        list.joinToString(",", "[", "]") { phrase ->
             "\"" + phrase.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
         }
 

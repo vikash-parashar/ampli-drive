@@ -97,12 +97,24 @@ class VoiceAssistant(private val app: DriveApp) {
     /** The last volume change, for a follow-up "aur" / "more". */
     private var lastVolume = VoiceIntent.VolumeAction.Show
 
+    /**
+     * When the last session that ran a command ended (elapsedRealtime; 0 = never). The wake word
+     * rests for [SpeechGate.ACTION_COOLDOWN_MS] after it ([SpeechGate.coolingDown]).
+     */
+    @Volatile var lastActionAt: Long = 0L
+        private set
+
+    /** This session acted on something (a command, a search). */
+    private var acted = false
+
     /** Starts a session unless one is running. */
     fun start() {
         if (job?.isActive == true) return
-        releaseWakeMic?.invoke()
+        // Busy first, so nothing reopens the wake-word mic between its release and our listen.
         _busy.value = true
+        releaseWakeMic?.invoke()
         _state.value = VoiceUiState(active = true, phase = VoiceUiState.Phase.Working)
+        acted = false
         job = scope.launch {
             try {
                 session()
@@ -113,6 +125,7 @@ class VoiceAssistant(private val app: DriveApp) {
             } finally {
                 listener.cancel()
                 app.voicePlayer.stop()
+                if (acted) lastActionAt = android.os.SystemClock.elapsedRealtime()
                 _state.value = VoiceUiState()
                 _busy.value = false
             }
@@ -124,8 +137,10 @@ class VoiceAssistant(private val app: DriveApp) {
      * the wake word lets go of the mic meanwhile, as during a session.
      */
     suspend fun <T> withMic(block: suspend () -> T): T {
-        releaseWakeMic?.invoke()
+        // Busy first: VoiceService reads it before reopening its mic, so a playback change posted
+        // in between cannot take the microphone back while we record.
         _busy.value = true
+        releaseWakeMic?.invoke()
         try {
             return block()
         } finally {
@@ -138,18 +153,37 @@ class VoiceAssistant(private val app: DriveApp) {
      * or a dictated reply). The wake word lets go of the mic meanwhile, a beep
      * says "speak now", and the recogniser listens once. Null when nothing was heard, a session
      * is running, the microphone isn't allowed or there is no recogniser.
+     *
+     * [mode]: [ListenMode.Replies] (the default) for "haan / na / suna de" answers, which the
+     * offline model hears through a small answer grammar; [ListenMode.Free] for a dictated
+     * message. The microphone opens only once Ampli has finished speaking (with no speech
+     * engine the question is only on screen, and listening starts straight away).
      */
-    suspend fun listenOnce(): String? {
+    suspend fun listenOnce(mode: ListenMode = ListenMode.Replies): String? {
         if (job?.isActive == true) return null
         if (app.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return null
         if (!listener.isAvailable()) return null
         return withMic {
+            waitUntilQuiet()
             speaker.earcon()
-            when (val r = listener.listen(language(), onPartial = {}, commandsOnly = false)) {
+            when (val r = listener.listen(language(), onPartial = {}, mode = mode)) {
                 is Listener.Result.Heard -> r.text
                 else -> null
             }
         }
+    }
+
+    /**
+     * Waits (up to [QUIET_WAIT_MS]) until neither the recorded voice nor the TTS engine is still
+     * playing, then a short pause so the end of Ampli's own line is not recorded as the answer.
+     */
+    private suspend fun waitUntilQuiet() {
+        var waited = 0L
+        while ((app.voicePlayer.isPlaying() || speaker.isSpeaking()) && waited < QUIET_WAIT_MS) {
+            kotlinx.coroutines.delay(QUIET_POLL_MS)
+            waited += QUIET_POLL_MS
+        }
+        kotlinx.coroutines.delay(SETTLE_MS)
     }
 
     /** True when [listenOnce] can work: a recogniser (or the offline model) and the mic. */
@@ -267,8 +301,22 @@ class VoiceAssistant(private val app: DriveApp) {
                 }
                 is Listener.Result.Heard -> result.text
             }
+            val quality = (result as? Listener.Result.Heard)?.quality
             _state.update { it.copy(heard = text, phase = VoiceUiState.Phase.Working) }
             val intent = VoiceIntents.parse(text, parserLang, expectingChoice = expect == Expect.Choice)
+            // Opening an app, starting a route or a place search needs a clear result: music or
+            // talk forced onto "bluetooth kholo" / "ghar chalo", or a place name made of noise,
+            // is asked again instead of acted on.
+            val unclearLaunch = SpeechGate.launches(intent) && !SpeechGate.mayLaunch(quality)
+            val unclearPlace = intent is VoiceIntent.Unknown && (expect == Expect.Open || expect == Expect.Destination) &&
+                !SpeechGate.destinationOk(VoiceIntents.destinationFrom(text, parserLang), quality)
+            if (unclearLaunch || unclearPlace) {
+                misses++
+                if (misses >= 2) return
+                styled(res, lang, HaryanviLines.Event.DidntCatch, res.getString(R.string.voice_didnt_catch))
+                return@repeat
+            }
+            acted = true
             // A new question clears the last answer card; "aur" after a volume change keeps it.
             if (intent !is VoiceIntent.Volume && expect != Expect.MoreVolume) _state.update { it.copy(answer = null) }
             expect = handle(intent, text, expect, res, lang, parserLang) ?: return
@@ -1090,7 +1138,7 @@ class VoiceAssistant(private val app: DriveApp) {
     private suspend fun hearOnce(lang: String): String? {
         speaker.earcon()
         _state.update { it.copy(phase = VoiceUiState.Phase.Listening, heard = "") }
-        val r = listener.listen(lang, onPartial = { p: String -> _state.update { it.copy(heard = p) } }, commandsOnly = false)
+        val r = listener.listen(lang, onPartial = { p: String -> _state.update { it.copy(heard = p) } }, mode = ListenMode.Replies)
         return (r as? Listener.Result.Heard)?.text?.also { t -> _state.update { it.copy(heard = t, phase = VoiceUiState.Phase.Working) } }
     }
 
@@ -1131,6 +1179,13 @@ class VoiceAssistant(private val app: DriveApp) {
     private companion object {
         const val MAX_TURNS = 4
         const val ACK_DELAY_MS = 600L
+
+        /** Longest wait for Ampli's own line to finish before a follow-up listen. */
+        const val QUIET_WAIT_MS = 8_000L
+        const val QUIET_POLL_MS = 100L
+
+        /** Pause after Ampli's line before the beep, so its tail (and the car's echo) is not recorded. */
+        const val SETTLE_MS = 250L
 
         /** The answer card stays at least this long. */
         const val ANSWER_HOLD_MS = 6_000L
