@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">ਨਕਸ਼ਾ ਖੋਲ੍ਹ ਰਹੇ ਹਾਂ।</string>
     <string name="voice_bt_settings_opening">ਬਲੂਟੁੱਥ ਸੈਟਿੰਗ ਖੋਲ੍ਹ ਰਹੇ ਹਾਂ।</string>
     <string name="voice_commands_opening">ਇਹ ਸਭ ਤੁਸੀਂ ਬੋਲ ਸਕਦੇ ਹੋ।</string>
-    <string name="voice_brightness_value">ਰੌਸ਼ਨੀ %1$d%%</string>
+    <string name="voice_brightness_value">ਰੌਸ਼ਨੀ %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ਨੂੰ ਸਿਸਟਮ ਸੈਟਿੰਗ ਬਦਲਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ, ਫਿਰ ਦੁਬਾਰਾ ਬੋਲੋ।</string>
     <string name="voice_brightness_entry">ਬੋਲ ਕੇ ਰੌਸ਼ਨੀ ਬਦਲੋ (“ਸਿਸਟਮ ਸੈਟਿੰਗ ਬਦਲੋ” ਇਜਾਜ਼ਤ ਚਾਹੀਦੀ)</string>
     <string name="voice_commands_entry">ਮੈਂ ਕੀ ਬੋਲ ਸਕਦਾ ਹਾਂ? ਸਾਰੀਆਂ ਵੌਇਸ ਕਮਾਂਡਾਂ</string>

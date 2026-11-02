@@ -29,14 +29,10 @@ import java.util.Locale
 import kotlin.coroutines.resume
 
 /**
- * The quick panel's Screenshot tile. Android 9+ with the Ampli power helper on: Android's own
- * screenshot. Android 8.x (and 9 without the helper): Android's "start capturing?" prompt, then
- * one frame from a virtual display, saved as a PNG in Pictures/Ampli. Nothing leaves the unit.
+ * The quick panel's Screenshot tile (Android 8 and 9 only): Android's "start capturing?" prompt,
+ * then one frame from a virtual display, saved as a PNG in Pictures/Ampli. Nothing leaves the unit.
  */
 object ScreenShot {
-
-    /** Android's own screenshot through the helper (Android 9+). */
-    fun viaHelper(): Boolean = PowerHelperService.screenshot()
 
     /** The one-frame capture needs no foreground service only below Android 10. */
     val projectionWorks: Boolean get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q

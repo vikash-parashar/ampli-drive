@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">ನಕ್ಷೆ ತೆರೆಯುತ್ತಿದ್ದೇನೆ.</string>
     <string name="voice_bt_settings_opening">ಬ್ಲೂಟೂತ್ ಸೆಟ್ಟಿಂಗ್ ತೆರೆಯುತ್ತಿದ್ದೇನೆ.</string>
     <string name="voice_commands_opening">ನೀವು ಹೇಳಬಹುದಾದ ಎಲ್ಲವೂ ಇಲ್ಲಿದೆ.</string>
-    <string name="voice_brightness_value">ಬೆಳಕು %1$d%%</string>
+    <string name="voice_brightness_value">ಬೆಳಕು %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ಗೆ ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್ ಬದಲಿಸುವ ಅನುಮತಿ ನೀಡಿ, ನಂತರ ಮತ್ತೆ ಕೇಳಿ.</string>
     <string name="voice_brightness_entry">ಮಾತಿನಿಂದ ಬೆಳಕು ಬದಲಿಸಿ (“ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್ ಬದಲಿಸಿ” ಅನುಮತಿ ಬೇಕು)</string>
     <string name="voice_commands_entry">ನಾನು ಏನು ಹೇಳಬಹುದು? ಎಲ್ಲಾ ಧ್ವನಿ ಆಜ್ಞೆಗಳು</string>

@@ -71,11 +71,11 @@ enum class Screen {
 /** App languages written in Devanagari: their words use the Hind font. */
 private val DEVANAGARI = setOf("hi", "mr", "ne", "mai", "bho", "kok", "sa", "bgc", "doi")
 
-/** This window's backlight after sunset (0..1). */
-private const val NIGHT_DIM = 0.35f
-
-/** Car Hub dimmed the window for the night (so sunrise undoes only its own change). */
+/** Car Hub dimmed the screen for the night (so sunrise undoes only its own change). */
 private var nightDimmed = false
+
+/** The brightness step before the sunset dim, put back at sunrise (null: Car Hub's window only). */
+private var nightRestoreStep: Int? = null
 
 @Composable
 fun DriveRoot(
@@ -113,18 +113,35 @@ fun DriveRoot(
     val theme = remember(resolved, language) {
         if (language in DEVANAGARI) resolved.copy(font = com.vikash.ampli.drive.ui.theme.FontChoice.Hind) else resolved
     }
-    // After sunset the screen dims by itself (Settings › Theme can turn that off). Only this
-    // window's backlight changes, and only what Car Hub set itself is undone at sunrise.
+    // After sunset the screen dims by itself (Settings › Theme can turn that off) to brightness
+    // step 2 of 6, through the same path as the quick panel's Brightness control (never a
+    // near-black window value). Sunrise puts back the step from before, unless the driver chose
+    // another step during the night.
     val dimAtNight by app.prefs.dimAtNight.collectAsStateWithLifecycle()
     val dimView = LocalView.current
     LaunchedEffect(night, dimAtNight) {
         val activity = dimView.context as? Activity ?: return@LaunchedEffect
+        val steps = com.vikash.ampli.drive.system.BrightnessSteps
+        val quick = com.vikash.ampli.drive.system.QuickActions
         if (night && dimAtNight) {
-            com.vikash.ampli.drive.system.QuickActions.setWindowBrightness(activity, NIGHT_DIM)
-            nightDimmed = true
+            if (!nightDimmed) {
+                val before = quick.brightnessStep(activity)
+                if (before == null || before > steps.NIGHT_STEP) {
+                    nightRestoreStep = before
+                    quick.setBrightnessStep(activity, activity, steps.NIGHT_STEP)
+                    nightDimmed = true
+                }
+            }
         } else if (nightDimmed) {
-            com.vikash.ampli.drive.system.QuickActions.setWindowBrightness(activity, null)
+            val back = nightRestoreStep
+            val now = quick.brightnessStep(activity)
+            if (back != null && (now == null || now == steps.NIGHT_STEP)) {
+                quick.setBrightnessStep(activity, activity, back)
+            } else {
+                quick.setWindowBrightness(activity, null)
+            }
             nightDimmed = false
+            nightRestoreStep = null
         }
     }
     // Where Back goes from the emergency profile (opened from Settings or the Help panel).

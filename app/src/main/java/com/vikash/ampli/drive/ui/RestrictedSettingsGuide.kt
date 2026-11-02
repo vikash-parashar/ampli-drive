@@ -104,7 +104,7 @@ internal fun RestrictedSettingsGuide(
     onOpenAppInfo: () -> Unit,
     onOpenAccess: () -> Unit,
     onClose: () -> Unit,
-    /** The same guide for another restricted switch (the Ampli power helper's Accessibility page). */
+    /** The words of the guide (notification access). */
     copy: RestrictedCopy = RestrictedCopy.Notifications,
 ) {
     val dims = LocalDims.current
@@ -214,7 +214,7 @@ internal fun RestrictedSettingsGuide(
     }
 }
 
-/** The words of the guide: notification access, or the power helper's Accessibility switch. */
+/** The words of the guide for a restricted switch (notification access). */
 internal class RestrictedCopy(
     val title: Int,
     val hint: Int,
@@ -231,15 +231,6 @@ internal class RestrictedCopy(
             R.string.restricted_before_title, R.string.restricted_before_hint,
             restrictedSteps(), R.string.restricted_menu_missing, R.string.restricted_open_access,
             Icons.Filled.NotificationsActive,
-        )
-
-        /** "Ampli power helper" is an accessibility service: Android 13+ restricts it the same way. */
-        val PowerHelper = RestrictedCopy(
-            R.string.power_guide_title, R.string.power_guide_hint,
-            R.string.power_guide_title, R.string.power_guide_hint,
-            listOf(R.string.power_guide_step_try, R.string.restricted_step_1, R.string.restricted_step_2, R.string.power_guide_step_3),
-            R.string.power_guide_menu_missing, R.string.power_guide_open,
-            Icons.Filled.Shield,
         )
     }
 }

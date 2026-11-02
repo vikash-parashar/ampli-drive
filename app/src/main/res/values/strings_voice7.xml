@@ -44,7 +44,7 @@
     <string name="voice_maps_opening">Opening the map.</string>
     <string name="voice_bt_settings_opening">Opening Bluetooth settings.</string>
     <string name="voice_commands_opening">Here is everything you can say.</string>
-    <string name="voice_brightness_value">Brightness %1$d%%</string>
+    <string name="voice_brightness_value">Brightness %1$d/%2$d</string>
     <string name="voice_brightness_permission">Allow Car Hub to change system settings, then ask again.</string>
     <string name="voice_brightness_entry">Brightness by voice (needs “Modify system settings”)</string>
     <string name="voice_commands_entry">What can I say? Every voice command</string>

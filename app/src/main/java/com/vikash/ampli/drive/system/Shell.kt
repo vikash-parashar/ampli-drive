@@ -189,10 +189,14 @@ object Shell {
         val wifiConnected: Boolean,
         /** Only when Android tells us (location allowed); null otherwise. */
         val ssid: String?,
-        val brightnessPct: Int?,
+        /** Brightness step 1..6 ([BrightnessSteps]), the way the unit's own quick app counts it. */
+        val brightnessStep: Int?,
         val volumePct: Int?,
         /** The vendor EQ app's name, when the unit has one. */
         val eqApp: String? = null,
+        /** Music volume in the unit's own steps ("12/30"), when Android reports them. */
+        val volumeLevel: Int? = null,
+        val volumeMax: Int? = null,
     )
 
     @Suppress("DEPRECATION")
@@ -211,19 +215,13 @@ object Shell {
         } catch (_: Exception) {
             null
         }
-        val brightness = try {
-            Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS) * 100 / 255
-        } catch (_: Exception) {
-            null
-        }
-        val volume = try {
-            val am = context.getSystemService(AudioManager::class.java)
-            am?.let { it.getStreamVolume(AudioManager.STREAM_MUSIC) * 100 / it.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1) }
-        } catch (_: Exception) {
-            null
-        }
+        val brightness = ScreenBrightness.step(context)
+        val am = try { context.getSystemService(AudioManager::class.java) } catch (_: Exception) { null }
+        val level = try { am?.getStreamVolume(AudioManager.STREAM_MUSIC) } catch (_: Exception) { null }
+        val max = try { am?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.takeIf { it > 0 } } catch (_: Exception) { null }
+        val volume = if (level != null && max != null) level * 100 / max else null
         val eq = try { equalizer(context)?.second } catch (_: Exception) { null }
-        return Status(wifiOn, connected, ssid, brightness?.coerceIn(0, 100), volume, eq)
+        return Status(wifiOn, connected, ssid, brightness, volume, eq, volumeLevel = level?.takeIf { max != null }, volumeMax = max)
     }
 
     // ------------------------------------------------------------------ Ampli app drawer

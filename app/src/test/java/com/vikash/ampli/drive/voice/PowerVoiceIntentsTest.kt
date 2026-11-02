@@ -6,7 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** "Ampli, screen band karo / restart karo / power off karo" and what must stay something else. */
+/** "Ampli, screen band karo", no Restart / Power off, and what must stay something else. */
 class PowerVoiceIntentsTest {
 
     private fun power(text: String, lang: String = "hi"): PowerAction? = (VoiceIntents.parse(text, lang) as? VoiceIntent.Power)?.action
@@ -23,21 +23,17 @@ class PowerVoiceIntentsTest {
     }
 
     @Test
-    fun restart() {
-        for (p in listOf("restart karo", "Ampli, restart karo", "restart", "reboot", "रीस्टार्ट करो", "रिस्टार्ट कर दो")) {
-            assertEquals(p, PowerAction.Restart, power(p))
-            assertEquals(p, PowerAction.Restart, power(p, "en"))
-        }
-    }
-
-    @Test
-    fun powerOff() {
+    fun restartAndPowerOffAreGone() {
+        // Removed on purpose: these do nothing, and never turn into Screen off, mute or stop.
         for (p in listOf(
+            "restart karo", "Ampli, restart karo", "restart", "reboot", "रीस्टार्ट करो", "रिस्टार्ट कर दो",
             "power off karo", "Ampli, power off karo", "power off", "shut down", "gaadi ki screen band karo",
             "पावर ऑफ करो", "गाड़ी की स्क्रीन बंद करो",
         )) {
-            assertEquals(p, PowerAction.PowerOff, power(p))
-            assertEquals(p, PowerAction.PowerOff, power(p, "en"))
+            for (lang in listOf("hi", "en")) {
+                val intent = VoiceIntents.parse(p, lang)
+                assertTrue("$p ($lang) -> $intent", intent is VoiceIntent.Unknown)
+            }
         }
     }
 
@@ -62,19 +58,20 @@ class PowerVoiceIntentsTest {
     }
 
     @Test
-    fun grammarsHoldThePowerPhrases() {
+    fun grammarsHoldScreenOffButNotRestartOrPowerOff() {
         val en = VoskCommands.phrases(hindi = false)
-        for (p in listOf("screen band karo", "restart karo", "power off karo", "screen off", "restart", "power off", "radd karo")) {
-            assertTrue(p, p in en)
-        }
+        for (p in listOf("screen band karo", "screen off", "radd karo")) assertTrue(p, p in en)
+        for (p in listOf("restart karo", "power off karo", "restart", "reboot", "power off", "shut down")) assertFalse(p, p in en)
         val hi = VoskCommands.phrases(hindi = true)
-        for (p in listOf("स्क्रीन बंद करो", "रीस्टार्ट करो", "पावर ऑफ करो")) assertTrue(p, p in hi)
+        assertTrue("स्क्रीन बंद करो" in hi)
+        for (p in listOf("रीस्टार्ट करो", "पावर ऑफ करो")) assertFalse(p, p in hi)
     }
 
     @Test
-    fun catalogShowsThePowerCommands() {
+    fun catalogShowsScreenOffOnly() {
         val all = VoiceCommandCatalog.GROUPS.flatMap { g -> g.items.flatMap { it.examples } }
         val actions = all.mapNotNull { (VoiceIntents.parse(it, "hi") as? VoiceIntent.Power)?.action }.toSet()
-        assertEquals(PowerAction.entries.toSet(), actions)
+        assertEquals(setOf(PowerAction.ScreenOff), actions)
+        assertFalse(all.any { it.contains("restart", ignoreCase = true) || it.contains("power off", ignoreCase = true) })
     }
 }

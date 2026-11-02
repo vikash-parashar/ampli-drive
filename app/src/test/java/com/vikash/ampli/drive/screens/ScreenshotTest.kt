@@ -180,7 +180,7 @@ class ScreenshotTest {
             Box(Modifier.fillMaxSize()) {
                 DriveRoot(app = app, screen = Screen.Home, resumeTick = 0, onNavigate = {}, onRequestPermissions = {})
                 Frame(backdrop = false) {
-                    val status = Shell.Status(wifiOn = true, wifiConnected = true, ssid = "Swift-Hotspot", brightnessPct = 70, volumePct = 45)
+                    val status = Shell.Status(wifiOn = true, wifiConnected = true, ssid = "Swift-Hotspot", brightnessStep = 4, volumePct = 45)
                     QuickControlsPanel(
                         visible = true,
                         tiles = quickTiles(status, btSupported = true, btOn = true, btDevice = "Vikash's Pixel"),

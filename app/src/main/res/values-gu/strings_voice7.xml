@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">નકશો ખોલી રહ્યા છીએ.</string>
     <string name="voice_bt_settings_opening">બ્લૂટૂથ સેટિંગ્સ ખોલી રહ્યા છીએ.</string>
     <string name="voice_commands_opening">આ રહ્યું બધું જે તમે બોલી શકો.</string>
-    <string name="voice_brightness_value">ચમક %1$d%%</string>
+    <string name="voice_brightness_value">ચમક %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ને સિસ્ટમ સેટિંગ્સ બદલવાની પરવાનગી આપો, પછી ફરી બોલો.</string>
     <string name="voice_brightness_entry">બોલીને ચમક બદલો (“સિસ્ટમ સેટિંગ્સ બદલો” પરવાનગી જોઈએ)</string>
     <string name="voice_commands_entry">હું શું બોલી શકું? બધા વૉઇસ કમાન્ડ</string>

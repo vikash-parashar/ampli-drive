@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">മാപ്പ് തുറക്കുന്നു.</string>
     <string name="voice_bt_settings_opening">ബ്ലൂടൂത്ത് ക്രമീകരണം തുറക്കുന്നു.</string>
     <string name="voice_commands_opening">നിങ്ങൾക്ക് പറയാവുന്നതെല്ലാം ഇതാ.</string>
-    <string name="voice_brightness_value">വെളിച്ചം %1$d%%</string>
+    <string name="voice_brightness_value">വെളിച്ചം %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ന് സിസ്റ്റം ക്രമീകരണം മാറ്റാൻ അനുമതി നൽകൂ, പിന്നെ വീണ്ടും ചോദിക്കൂ.</string>
     <string name="voice_brightness_entry">സംസാരിച്ച് വെളിച്ചം മാറ്റൂ (“സിസ്റ്റം ക്രമീകരണം മാറ്റുക” അനുമതി വേണം)</string>
     <string name="voice_commands_entry">എനിക്ക് എന്ത് പറയാം? എല്ലാ വോയ്സ് കമാൻഡുകളും</string>

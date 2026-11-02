@@ -247,30 +247,20 @@ object QuickActions {
 
     // ---------------------------------------------------------------- brightness
 
-    /** Brightness in percent: the system setting, or this window's own level when set. */
-    fun brightnessPercent(context: Context, window: Int?): Int? = window ?: try {
-        BrightnessMath.percent(Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS))
-    } catch (_: Exception) {
-        null
-    }
+    /** Brightness as a step 1..6 ([BrightnessSteps]): the system setting, or null when unknown. */
+    fun brightnessStep(context: Context): Int? = ScreenBrightness.step(context)
 
     /**
-     * Sets brightness to [percent]. With "Modify system settings" allowed, the system level (auto
-     * brightness off); otherwise only Car Hub's window. Returns true when the system level changed.
+     * Sets brightness to [step] of six. With "Modify system settings" allowed, the system level
+     * (manual mode first) and Car Hub's window follows the system again; otherwise only Car Hub's
+     * window, at the same table value, never below step 1. True when the system level changed.
      */
-    fun setBrightness(activity: Activity?, context: Context, percent: Int): Boolean {
-        val p = percent.coerceIn(1, 100)
-        if (ScreenBrightness.allowed(context)) {
-            try {
-                val cr = context.contentResolver
-                Settings.System.putInt(cr, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL)
-                Settings.System.putInt(cr, Settings.System.SCREEN_BRIGHTNESS, (p * BrightnessMath.MAX / 100).coerceAtLeast(BrightnessMath.MIN))
-                setWindowBrightness(activity, null)
-                return true
-            } catch (_: Exception) {
-            }
+    fun setBrightnessStep(activity: Activity?, context: Context, step: Int): Boolean {
+        if (ScreenBrightness.setStep(context, step)) {
+            setWindowBrightness(activity, null)
+            return true
         }
-        setWindowBrightness(activity, p / 100f)
+        setWindowBrightness(activity, BrightnessSteps.windowValue(step))
         return false
     }
 

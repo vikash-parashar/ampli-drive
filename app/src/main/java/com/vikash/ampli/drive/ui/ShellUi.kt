@@ -275,8 +275,8 @@ internal fun quickTiles(status: Shell.Status, btSupported: Boolean, btOn: Boolea
         QuickTile(Shell.Control.Wifi, Icons.Filled.Wifi, stringResource(R.string.shell_wifi), wifiState ?: openSettings, status.wifiOn == true || status.wifiConnected),
         QuickTile(Shell.Control.Hotspot, Icons.Filled.WifiTethering, stringResource(R.string.shell_hotspot), openSettings, false),
         QuickTile(Shell.Control.Equalizer, Icons.Filled.Equalizer, stringResource(R.string.shell_equalizer), status.eqApp ?: openSettings, false),
-        QuickTile(Shell.Control.Brightness, Icons.Filled.BrightnessMedium, stringResource(R.string.shell_brightness), status.brightnessPct?.let { "$it%" } ?: openSettings, false),
-        QuickTile(Shell.Control.Volume, Icons.Filled.VolumeUp, stringResource(R.string.shell_volume), status.volumePct?.let { "$it%" } ?: openSettings, false),
+        QuickTile(Shell.Control.Brightness, Icons.Filled.BrightnessMedium, stringResource(R.string.shell_brightness), status.brightnessStep?.let { "$it/${com.vikash.ampli.drive.system.BrightnessSteps.COUNT}" } ?: openSettings, false),
+        QuickTile(Shell.Control.Volume, Icons.Filled.VolumeUp, stringResource(R.string.shell_volume), volumeLabel(status) ?: openSettings, false),
         QuickTile(Shell.Control.Display, Icons.Filled.Tv, stringResource(R.string.shell_display), openSettings, false),
         QuickTile(Shell.Control.Sound, Icons.Filled.Settings, stringResource(R.string.shell_sound), openSettings, false),
     )
@@ -665,4 +665,12 @@ private fun Knob(turn: Float, sweep: Float, modifier: Modifier) {
             drawLine(TileTop, start = c, end = Offset(c.x, c.y - r * 0.78f), strokeWidth = r * 0.2f, cap = StrokeCap.Round)
         }
     }
+}
+
+/** Volume in the unit's own steps ("12/30") when Android gives both numbers, else a percent. */
+private fun volumeLabel(status: Shell.Status): String? {
+    val level = status.volumeLevel
+    val max = status.volumeMax
+    if (level != null && max != null && max > 0) return "$level/$max"
+    return status.volumePct?.let { "$it%" }
 }

@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">মানচিত্ৰ খুলিছোঁ।</string>
     <string name="voice_bt_settings_opening">ব্লুটুথ ছেটিং খুলিছোঁ।</string>
     <string name="voice_commands_opening">আপুনি ক\'ব পৰা সকলো ইয়াত আছে।</string>
-    <string name="voice_brightness_value">পোহৰ %1$d%%</string>
+    <string name="voice_brightness_value">পোহৰ %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ক ছিষ্টেম ছেটিং সলনি কৰাৰ অনুমতি দিয়ক, তাৰ পিছত আকৌ কওক।</string>
     <string name="voice_brightness_entry">কৈ পোহৰ সলনি কৰক (“ছিষ্টেম ছেটিং সলনি” অনুমতি লাগে)</string>
     <string name="voice_commands_entry">মই কি ক\'ব পাৰোঁ? সকলো ভইচ কমাণ্ড</string>

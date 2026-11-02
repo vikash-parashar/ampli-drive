@@ -36,7 +36,7 @@ import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -78,7 +78,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.system.PowerControl
-import com.vikash.ampli.drive.system.PowerHelperService
 import com.vikash.ampli.drive.system.QuickActions
 import com.vikash.ampli.drive.system.RailVolume
 import com.vikash.ampli.drive.system.VolumeHold
@@ -230,8 +229,6 @@ private fun PowerRail(
         RailKey(
             Icons.Filled.Apps, R.string.rail_apps, c,
             onClick = onOpenApps,
-            // Long press: Android's recent apps through the helper, else the app drawer.
-            onLongClick = { if (!PowerHelperService.recents()) onOpenApps() },
         )
         VolumeKey(Icons.AutoMirrored.Filled.VolumeUp, R.string.rail_vol_up, c) { volume.show(QuickActions.stepVolume(context, 1)) }
         VolumeKey(Icons.AutoMirrored.Filled.VolumeDown, R.string.rail_vol_down, c) { volume.show(QuickActions.stepVolume(context, -1)) }
@@ -420,7 +417,7 @@ private fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
 
 /**
  * The pill at the top centre (Wi-Fi, Bluetooth, a grab bar and ⌄): tap or pull down for the quick
- * panel. The round ⏻ beside it opens the Power sheet (Settings › Power can hide it).
+ * panel. The round moon key beside it opens the Power sheet (Screen off, Screensaver) (Settings › Power can hide it).
  */
 @Composable
 private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen: () -> Unit, modifier: Modifier) {
@@ -485,7 +482,7 @@ private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen:
                     .themedTap(CircleShape, bg, border = edge, borderWidth = 2.dp, onClick = { PowerControl.openSheet() }),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.PowerSettingsNew, contentDescription = stringResource(R.string.power_title), tint = fg, modifier = Modifier.size(dims.d(3.2f)))
+                Icon(Icons.Filled.DarkMode, contentDescription = stringResource(R.string.power_title), tint = fg, modifier = Modifier.size(dims.d(3.2f)))
             }
         }
     }

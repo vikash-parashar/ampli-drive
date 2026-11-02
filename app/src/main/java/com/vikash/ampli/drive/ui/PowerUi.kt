@@ -2,7 +2,6 @@ package com.vikash.ampli.drive.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -21,34 +20,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -59,88 +46,46 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.R
-import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.PowerAction
 import com.vikash.ampli.drive.system.PowerControl
-import com.vikash.ampli.drive.system.PowerHelperService
 import com.vikash.ampli.drive.system.PowerUi
 import com.vikash.ampli.drive.system.QuickActions
-import com.vikash.ampli.drive.system.RestrictedSettings
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import kotlinx.coroutines.delay
 import java.text.DateFormat
 import java.util.Date
 
 /**
- * Everything [PowerControl] shows: the Power sheet, the one-time helper card (or the root note),
- * the voice question, the countdown, "Tap Restart here", and the black Screen off cover and the
- * clock screensaver. Cards sit right of Home's rail ([inset]); the cover takes the whole screen.
+ * Everything [PowerControl] shows: the Power sheet (Screen off, Screensaver), the voice
+ * screen-off countdown, and the black Screen off cover and the clock screensaver. Cards sit right
+ * of Home's rail ([inset]); the cover takes the whole screen.
  */
 @Composable
-fun PowerHost(resumeTick: Int, inset: Dp) {
+fun PowerHost(@Suppress("UNUSED_PARAMETER") resumeTick: Int, inset: Dp) {
     val ui by PowerControl.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    // Android 13+ sideload: the helper's switch is "restricted"; show how to allow it.
-    var guide by remember { mutableStateOf(false) }
-    LaunchedEffect(resumeTick) {
-        guide = PowerControl.waitingForHelper && !PowerHelperService.enabled(context) && RestrictedSettings.mayBlock(context)
-    }
     if (ui != PowerUi.None) BackHandler(enabled = true) { if (ui == PowerUi.ScreenOff || ui == PowerUi.Screensaver) PowerControl.wake() else PowerControl.close() }
     when (val s = ui) {
         PowerUi.None -> Unit
         PowerUi.ScreenOff -> BlackCover(clock = false)
         PowerUi.Screensaver -> BlackCover(clock = true)
         else -> Box(Modifier.fillMaxSize().padding(start = inset)) {
-            Scrim(dim = s !is PowerUi.Pointer) { if (s is PowerUi.Sheet || s is PowerUi.Failed) PowerControl.close() }
+            Scrim(dim = true) { if (s is PowerUi.Sheet) PowerControl.close() }
             when (s) {
                 PowerUi.Sheet -> PowerSheet()
-                is PowerUi.Setup -> if (s.rooted) RootNotice() else HelperSetup()
-                is PowerUi.Confirm -> AskCard(
-                    title = if (s.action == PowerAction.Restart) R.string.power_ask_restart else R.string.power_ask_off,
-                    hint = R.string.power_ask_hint,
-                    yes = R.string.power_yes,
-                    no = R.string.power_no,
-                    onYes = { PowerControl.request(context, s.action) },
-                    onNo = { PowerControl.close() },
-                )
-                is PowerUi.Countdown -> if (s.voice) {
-                    AskCard(
-                        titleText = stringResource(countingRes(s.action), s.left),
-                        sub = if (s.action == PowerAction.ScreenOff) R.string.power_screen_music else null,
-                        hint = R.string.power_counting_hint_voice,
-                        yes = R.string.power_cancel,
-                        no = R.string.power_now,
-                        onYes = { PowerControl.close() },
-                        onNo = { PowerControl.now(context) },
-                    )
-                } else {
-                    CountdownCard(s)
-                }
-                is PowerUi.Working -> MessageCard(
-                    icon = actionIcon(s.action),
-                    title = if (s.action == PowerAction.Restart) R.string.power_working_restart else R.string.power_working_off,
-                    body = null,
-                    onClose = null,
-                )
-                is PowerUi.Pointer -> PointerHint(s.action)
-                is PowerUi.Failed -> MessageCard(
-                    icon = actionIcon(s.action),
-                    title = R.string.power_failed_title,
-                    body = R.string.power_failed_body,
-                    onClose = { PowerControl.close() },
+                is PowerUi.Countdown -> AskCard(
+                    titleText = stringResource(R.string.power_counting_screen, s.left),
+                    sub = R.string.power_screen_music,
+                    hint = R.string.power_counting_hint_voice,
+                    yes = R.string.power_cancel,
+                    no = R.string.power_now,
+                    onYes = { PowerControl.close() },
+                    onNo = { PowerControl.now(context) },
                 )
                 else -> Unit
             }
         }
     }
-    RestrictedSettingsGuide(
-        visible = guide && ui is PowerUi.Setup,
-        before = false,
-        onOpenAppInfo = { Launchers.openAppDetails(context) },
-        onOpenAccess = { PowerHelperService.openSettings(context) },
-        onClose = { guide = false },
-        copy = RestrictedCopy.PowerHelper,
-    )
 }
 
 @Composable
@@ -153,22 +98,10 @@ private fun Scrim(dim: Boolean, onTap: () -> Unit) {
     )
 }
 
-private fun countingRes(action: PowerAction): Int = when (action) {
-    PowerAction.ScreenOff -> R.string.power_counting_screen
-    PowerAction.Restart -> R.string.power_counting_restart
-    PowerAction.PowerOff -> R.string.power_counting_off
-}
-
-private fun actionIcon(action: PowerAction): ImageVector = when (action) {
-    PowerAction.ScreenOff -> Icons.Filled.DarkMode
-    PowerAction.Restart -> Icons.Filled.RestartAlt
-    PowerAction.PowerOff -> Icons.Filled.PowerSettingsNew
-}
-
-private fun actionLabel(action: PowerAction): Int = when (action) {
-    PowerAction.ScreenOff -> R.string.power_screen_off
-    PowerAction.Restart -> R.string.power_restart
-    PowerAction.PowerOff -> R.string.power_off
+/** The Power sheet's keys: Screen off and the clock screensaver. */
+private enum class SheetKey(val icon: ImageVector, @StringRes val label: Int) {
+    ScreenOff(Icons.Filled.DarkMode, R.string.power_screen_off),
+    Screensaver(Icons.Filled.Tv, R.string.qp_screensaver),
 }
 
 /** The card every power screen sits in: opaque, theme border, no blur. */
@@ -238,112 +171,35 @@ private fun androidx.compose.foundation.layout.BoxScope.PowerSheet() {
             CloseKey { PowerControl.close() }
         }
         Row(Modifier.fillMaxWidth().height(dims.d(18f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1.8f))) {
-            for (action in PowerAction.values()) {
+            for (key in SheetKey.values()) {
                 Column(
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .themedTap(theme.cardShape(dims, 0.6f), theme.surfaceHigh, border = theme.border) { PowerControl.request(context, action) },
+                        .themedTap(theme.cardShape(dims, 0.6f), theme.surfaceHigh, border = theme.border) {
+                            when (key) {
+                                SheetKey.ScreenOff -> PowerControl.request(context, PowerAction.ScreenOff)
+                                SheetKey.Screensaver -> PowerControl.screensaver()
+                            }
+                        },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Icon(actionIcon(action), contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(5.4f)))
-                    Text(stringResource(actionLabel(action)), color = theme.text, fontSize = dims.t(3.2f, min = 18f), fontWeight = FontWeight.Bold)
-                    englishLine(actionLabel(action))?.let { Text(it, color = theme.muted, fontSize = dims.t(2.1f, min = 12f)) }
+                    Icon(key.icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(5.4f)))
+                    Text(stringResource(key.label), color = theme.text, fontSize = dims.t(3.2f, min = 18f), fontWeight = FontWeight.Bold)
+                    englishLine(key.label)?.let { Text(it, color = theme.muted, fontSize = dims.t(2.1f, min = 12f)) }
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.power_wait_note), color = theme.text, fontSize = dims.t(2f, min = 12f))
-                englishLine(R.string.power_wait_note)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.5f, min = 10f)) }
-            }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             BiKey(R.string.power_cancel, primary = false, modifier = Modifier.width(dims.d(31f))) { PowerControl.close() }
-        }
-    }
-}
-
-// ------------------------------------------------------------------------ one-time cards
-
-@Composable
-private fun androidx.compose.foundation.layout.BoxScope.HelperSetup() {
-    val theme = LocalDriveTheme.current
-    val dims = LocalDims.current
-    val context = LocalContext.current
-    // On a 1024x600 head unit the whole card is taller than the screen: it scrolls, and the two
-    // keys come right after the explanation so they are never cut off below the bottom edge.
-    PowerCard(
-        Modifier
-            .align(Alignment.Center)
-            .padding(horizontal = dims.d(11f), vertical = dims.d(2f))
-            .widthIn(max = 1000.dp)
-            .verticalScroll(rememberScrollState()),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            Box(Modifier.size(dims.d(10.5f)).background(theme.accent, theme.buttonShape(dims)), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.PowerSettingsNew, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(5.4f)))
-            }
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.power_setup_title), color = theme.text, fontSize = dims.t(3.6f, min = 19f), fontWeight = FontWeight.Bold)
-                englishLine(R.string.power_setup_title)?.let { Text(it, color = theme.muted, fontSize = dims.t(2.2f, min = 12f)) }
-            }
-        }
-        Column {
-            Text(stringResource(R.string.disclosure_power_body), color = theme.text, fontSize = dims.t(2.6f, min = 15f))
-            englishLine(R.string.disclosure_power_body)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.9f, min = 11f)) }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            BiKey(R.string.power_setup_turn_on, primary = true, modifier = Modifier.weight(1.4f)) { PowerControl.setupContinue(context) }
-            BiKey(R.string.power_setup_later, primary = false, modifier = Modifier.weight(1f)) { PowerControl.close() }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
-            listOf(R.string.power_setup_step1, R.string.power_setup_step2, R.string.power_setup_step3).forEachIndexed { i, step ->
-                Row(
-                    Modifier.weight(1f).themedSurface(theme, theme.cardShape(dims, 0.4f), theme.surfaceHigh, border = theme.border).padding(dims.d(1.4f)),
-                    horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
-                ) {
-                    Box(Modifier.size(dims.d(3.6f)).background(theme.accent, CircleShape), contentAlignment = Alignment.Center) {
-                        Text("${i + 1}", color = theme.onAccent, fontSize = dims.t(2f, min = 12f), fontWeight = FontWeight.Bold)
-                    }
-                    Column {
-                        Text(stringResource(step), color = theme.text, fontSize = dims.t(2.2f, min = 13f), fontWeight = FontWeight.SemiBold)
-                        englishLine(step)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.7f, min = 10f)) }
-                    }
-                }
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
-            Icon(Icons.Filled.Shield, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(3.2f)))
-            Column {
-                Text(stringResource(R.string.disclosure_power_private), color = theme.text, fontSize = dims.t(2f, min = 12f))
-                englishLine(R.string.disclosure_power_private)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.5f, min = 10f)) }
-            }
-        }
-    }
-}
-
-/** Rooted unit, first time: Restart and Power off will act directly (after the countdown). */
-@Composable
-private fun androidx.compose.foundation.layout.BoxScope.RootNotice() {
-    val dims = LocalDims.current
-    val theme = LocalDriveTheme.current
-    val context = LocalContext.current
-    PowerCard(Modifier.align(Alignment.Center).padding(horizontal = dims.d(14f)).widthIn(max = 900.dp)) {
-        BiTitle(R.string.power_root_title, 3.6f, 19f)
-        Column {
-            Text(stringResource(R.string.power_root_body), color = theme.text, fontSize = dims.t(2.5f, min = 14f))
-            englishLine(R.string.power_root_body)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.9f, min = 11f)) }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            BiKey(R.string.power_root_ok, primary = true, modifier = Modifier.weight(1.4f)) { PowerControl.setupContinue(context) }
-            BiKey(R.string.power_cancel, primary = false, modifier = Modifier.weight(1f)) { PowerControl.close() }
         }
     }
 }
 
 // ------------------------------------------------------------------------ voice card and countdown
 
-/** The "AMPLI" card: a question (or the voice countdown), what to say, and two keys. */
+/** The "AMPLI" card: the voice screen-off countdown, what to say, and two keys. */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.AskCard(
     @StringRes hint: Int,
@@ -369,85 +225,6 @@ private fun androidx.compose.foundation.layout.BoxScope.AskCard(
             BiKey(yes, primary = true, modifier = Modifier.weight(1f), onClick = onYes)
             BiKey(no, primary = false, modifier = Modifier.weight(1f), onClick = onNo)
         }
-    }
-}
-
-/** Restart / Power off in N s: a ring, a big Cancel and "Now". */
-@Composable
-private fun androidx.compose.foundation.layout.BoxScope.CountdownCard(s: PowerUi.Countdown) {
-    val theme = LocalDriveTheme.current
-    val dims = LocalDims.current
-    val context = LocalContext.current
-    PowerCard(Modifier.align(Alignment.Center).padding(horizontal = dims.d(18f)).widthIn(max = 900.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(3f))) {
-            Box(Modifier.size(dims.d(25f)), contentAlignment = Alignment.Center) {
-                val fraction = if (s.total > 0) s.left.toFloat() / s.total else 0f
-                val track = theme.surfaceHigh
-                val accent = theme.accent
-                Canvas(Modifier.fillMaxSize()) {
-                    val w = size.minDimension * 0.08f
-                    drawArc(track, 0f, 360f, false, style = Stroke(w))
-                    drawArc(accent, -90f, 360f * fraction, false, style = Stroke(w, cap = StrokeCap.Round))
-                }
-                Text("${s.left}", style = theme.numberStyle(theme.text), fontSize = dims.t(10f, min = 48f))
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(1f))) {
-                Text(stringResource(countingRes(s.action), s.left), color = theme.text, fontSize = dims.t(4f, min = 21f), fontWeight = FontWeight.Bold)
-                Text(
-                    stringResource(if (s.rooted) R.string.power_countdown_root else R.string.power_countdown_menu),
-                    color = theme.muted,
-                    fontSize = dims.t(2.2f, min = 13f),
-                )
-            }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            BiKey(R.string.power_cancel, primary = true, modifier = Modifier.weight(1.6f).heightIn(min = dims.d(14.5f))) { PowerControl.close() }
-            BiKey(R.string.power_now, primary = false, modifier = Modifier.weight(1f).heightIn(min = dims.d(14.5f))) { PowerControl.now(context) }
-        }
-    }
-}
-
-@Composable
-private fun androidx.compose.foundation.layout.BoxScope.MessageCard(icon: ImageVector, @StringRes title: Int, @StringRes body: Int?, onClose: (() -> Unit)?) {
-    val theme = LocalDriveTheme.current
-    val dims = LocalDims.current
-    PowerCard(Modifier.align(Alignment.Center).padding(horizontal = dims.d(18f)).widthIn(max = 860.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            Icon(icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(6f)))
-            BiTitle(title, 3.6f, 19f, Modifier.weight(1f))
-            if (onClose != null) CloseKey(onClose)
-        }
-        body?.let { Text(stringResource(it), color = theme.text, fontSize = dims.t(2.5f, min = 14f)) }
-    }
-}
-
-/** Android's power menu is open in the middle: "Tap Restart here" points at it from the right. */
-@Composable
-private fun androidx.compose.foundation.layout.BoxScope.PointerHint(action: PowerAction) {
-    val theme = LocalDriveTheme.current
-    val dims = LocalDims.current
-    Row(
-        Modifier
-            .align(Alignment.CenterEnd)
-            .padding(end = dims.d(3f))
-            .widthIn(max = dims.d(40f))
-            .themedSurface(theme, theme.cardShape(dims, 0.6f), theme.accent, border = theme.border)
-            .clickable { PowerControl.close() }
-            .padding(dims.d(2.2f)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f)),
-    ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(5f)))
-        Column {
-            Text(
-                stringResource(if (action == PowerAction.Restart) R.string.power_pointer_restart else R.string.power_pointer_off),
-                color = theme.onAccent,
-                fontSize = dims.t(3f, min = 17f),
-                fontWeight = FontWeight.Bold,
-            )
-            Text(stringResource(R.string.power_pointer_body), color = theme.onAccent.copy(alpha = 0.85f), fontSize = dims.t(2f, min = 12f))
-        }
-        Icon(Icons.Filled.TouchApp, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(4f)))
     }
 }
 

@@ -18,7 +18,6 @@ import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.PowerAction
 import com.vikash.ampli.drive.system.PowerControl
 import com.vikash.ampli.drive.system.PowerPlan
-import com.vikash.ampli.drive.system.PowerUi
 import com.vikash.ampli.drive.calls.VoiceReplies
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -757,7 +756,7 @@ class VoiceAssistant(private val app: DriveApp) {
         holdAnswer(System.currentTimeMillis() - ANSWER_HOLD_MS / 2)
     }
 
-    /** "Brightness up / down": the system setting, once Car Hub may change it. */
+    /** "Brightness up / down": one of the six steps of the system setting, once Car Hub may change it. */
     private suspend fun brightness(up: Boolean?, res: Context, lang: String) {
         val shownAt = System.currentTimeMillis()
         val title = res.getString(R.string.voice_answer_brightness)
@@ -767,7 +766,7 @@ class VoiceAssistant(private val app: DriveApp) {
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_brightness_permission)))
             speakAnswer(res.getString(R.string.voice_brightness_permission), lang, emptyList(), standIn = null)
         } else {
-            val value = res.getString(R.string.voice_brightness_value, r)
+            val value = res.getString(R.string.voice_brightness_value, r, com.vikash.ampli.drive.system.BrightnessSteps.COUNT)
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Brightness, title, value))
             if (up != null) speakAnswer(value, lang, emptyList())
         }
@@ -1088,43 +1087,21 @@ class VoiceAssistant(private val app: DriveApp) {
 
     /**
      * "Screen band karo": the screen-off countdown shows and Ampli listens once for "radd karo".
-     * "Restart karo" / "power off karo": Ampli asks first (the card has Yes / No keys too) and
-     * acts only on a clear yes; Restart and Power off then still count down with Cancel.
+     * (Car Hub has no Restart or Power off.)
      */
     private suspend fun power(action: PowerAction, res: Context, lang: String, parserLang: String) {
         if (!MainActivity.inFront) bringLauncherForward(null)
-        if (action == PowerAction.ScreenOff) {
-            say(res, lang, R.string.power_say_screen_off)
-            PowerControl.request(app, PowerAction.ScreenOff, voiceSeconds = PowerPlan.VOICE_SCREEN_OFF_S)
-            val heard = hearOnce(lang) ?: return
-            if (powerCancel(heard, parserLang) && PowerControl.busy) {
-                PowerControl.close()
-                styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
-            }
-            return
-        }
-        PowerControl.confirm(action)
-        say(res, lang, if (action == PowerAction.Restart) R.string.power_ask_restart else R.string.power_ask_off)
-        repeat(2) { turn ->
-            // A tap on Yes / No answered already.
-            if (PowerControl.state.value !is PowerUi.Confirm) return
-            val heard = hearOnce(lang)
-            if (PowerControl.state.value !is PowerUi.Confirm) return
-            when {
-                heard == null -> Unit
-                powerCancel(heard, parserLang) -> {
+        when (action) {
+            PowerAction.ScreenOff -> {
+                say(res, lang, R.string.power_say_screen_off)
+                PowerControl.request(app, PowerAction.ScreenOff, voiceSeconds = PowerPlan.VOICE_SCREEN_OFF_S)
+                val heard = hearOnce(lang) ?: return
+                if (powerCancel(heard, parserLang) && PowerControl.busy) {
                     PowerControl.close()
                     styled(res, lang, HaryanviLines.Event.Cancelled, res.getString(R.string.voice_cancelled))
-                    return
-                }
-                VoiceReplies.yesNo(heard) == VoiceReplies.YesNo.Yes -> {
-                    PowerControl.request(app, action)
-                    return
                 }
             }
-            if (turn == 0) say(res, lang, R.string.power_ask_hint)
         }
-        // Still unanswered: the card stays with its Yes / No keys and nothing happens by itself.
     }
 
     /** "Nahin", "radd karo", "ruko", "cancel". */

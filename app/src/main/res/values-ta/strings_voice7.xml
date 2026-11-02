@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">வரைபடத்தைத் திறக்கிறேன்.</string>
     <string name="voice_bt_settings_opening">புளூடூத் அமைப்புகளைத் திறக்கிறேன்.</string>
     <string name="voice_commands_opening">நீங்கள் சொல்லக்கூடிய அனைத்தும் இதோ.</string>
-    <string name="voice_brightness_value">வெளிச்சம் %1$d%%</string>
+    <string name="voice_brightness_value">வெளிச்சம் %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub க்கு கணினி அமைப்புகளை மாற்ற அனுமதி கொடுங்கள், பிறகு மீண்டும் சொல்லுங்கள்.</string>
     <string name="voice_brightness_entry">குரலால் வெளிச்சம் மாற்ற (“கணினி அமைப்புகளை மாற்று” அனுமதி தேவை)</string>
     <string name="voice_commands_entry">நான் என்ன சொல்லலாம்? எல்லா குரல் கட்டளைகளும்</string>

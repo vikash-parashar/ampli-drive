@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">नक्शा खोल रे सां।</string>
     <string name="voice_bt_settings_opening">ब्लूटूथ सेटिंग खोल रे सां।</string>
     <string name="voice_commands_opening">ले, सारी बात जो तू बोल सकै।</string>
-    <string name="voice_brightness_value">रोशनी %1$d%%</string>
+    <string name="voice_brightness_value">रोशनी %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub नै सिस्टम सेटिंग बदलण की इजाजत दे दे, फेर दोबारा बोल।</string>
     <string name="voice_brightness_entry">बोल कै रोशनी बदल (“सिस्टम सेटिंग बदलो” की इजाजत चाहिए)</string>
     <string name="voice_commands_entry">मैं के के बोल सकूं? सारी वॉइस कमांड</string>

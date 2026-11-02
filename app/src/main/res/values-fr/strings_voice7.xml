@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">J\'ouvre la carte.</string>
     <string name="voice_bt_settings_opening">J\'ouvre les paramètres Bluetooth.</string>
     <string name="voice_commands_opening">Voici tout ce que vous pouvez dire.</string>
-    <string name="voice_brightness_value">Luminosité %1$d%%</string>
+    <string name="voice_brightness_value">Luminosité %1$d/%2$d</string>
     <string name="voice_brightness_permission">Autorisez Car Hub à modifier les paramètres système, puis redemandez.</string>
     <string name="voice_brightness_entry">Luminosité à la voix (« Modifier les paramètres système » requis)</string>
     <string name="voice_commands_entry">Que puis-je dire ? Toutes les commandes vocales</string>

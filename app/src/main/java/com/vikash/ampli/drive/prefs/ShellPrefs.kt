@@ -89,12 +89,7 @@ class ShellPrefs(context: Context) {
         _lockScreenOff.value = value
     }
 
-    /** The rooted unit's "restarts directly" note was shown once. */
-    var rootNoticeSeen: Boolean
-        get() = sp.getBoolean(KEY_ROOT_NOTICE, false)
-        set(value) = sp.edit().putBoolean(KEY_ROOT_NOTICE, value).apply()
-
-    /** Brightness slider: Android's "Modify system settings" page was opened once already. */
+    /** Brightness control: Android's "Modify system settings" page was opened once already. */
     var askedWriteSettings: Boolean
         get() = sp.getBoolean(KEY_ASKED_WRITE_SETTINGS, false)
         set(value) = sp.edit().putBoolean(KEY_ASKED_WRITE_SETTINGS, value).apply()
@@ -144,7 +139,6 @@ class ShellPrefs(context: Context) {
         private const val KEY_GREET_BANNER = "greet_home_banner_shown"
         private const val KEY_STRIP_POWER = "strip_power"
         private const val KEY_LOCK_SCREEN_OFF = "lock_screen_off"
-        private const val KEY_ROOT_NOTICE = "root_notice_seen"
         private const val KEY_ASKED_WRITE_SETTINGS = "asked_write_settings"
         private const val KEY_ASKED_STORAGE = "asked_storage"
 
