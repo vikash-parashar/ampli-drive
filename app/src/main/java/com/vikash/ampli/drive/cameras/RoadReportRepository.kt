@@ -58,6 +58,15 @@ class RoadReportRepository(context: Context) {
         synchronized(lock) { save(_reports.value.filterNot { it.id == id }) }
     }
 
+    /** "Police hat gayi", "camera nahi hai": removes those reports near the car; how many. */
+    fun removeNear(kinds: Set<ReportKind>, lat: Double, lon: Double, now: Long = System.currentTimeMillis()): Int {
+        synchronized(lock) {
+            val gone = RoadReports.near(RoadReports.live(_reports.value, now), kinds, lat, lon).map { it.id }.toSet()
+            if (gone.isNotEmpty()) save(_reports.value.filterNot { it.id in gone })
+            return gone.size
+        }
+    }
+
     private fun save(list: List<RoadReport>) {
         _reports.value = list
         val arr = JSONArray()

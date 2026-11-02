@@ -23,6 +23,9 @@ object VoskCommands {
         "police ahead", "accident ahead", "traffic jam ahead", "mobile camera ahead",
         // Screen off by voice.
         "screen off", "turn off the screen",
+        // Camera and police reports, pump queues, fuel diary, challan counter, break, hotspot.
+        "camera here", "no camera here", "police gone", "long queue at cng", "no queue at the pump",
+        "petrol filled", "how much did i save", "remind me later", "connect hotspot",
     )
 
     /**
@@ -50,6 +53,17 @@ object VoskCommands {
         "kya haal hai", "ke haal sai", "tum kaun ho", "chutkula sunao", "kya bol sakta hoon",
         "screen band karo", "screen off karo", "display band karo",
         "radd karo",
+        // Police / camera reports by voice (direction-aware, they expire), and taking them back.
+        "police hai", "aage police hai", "naka hai", "aage naka hai", "naka laga hai",
+        "camera hai", "aage camera hai", "camera laga hai", "camera nahi hai", "police hat gayi", "naka hat gaya",
+        "jam khul gaya",
+        // Pump queues ("CNG pe line lambi hai") and the petrol diary ("1000 ka petrol").
+        "cng pe line lambi hai", "cng par lambi line hai", "line lambi hai", "pump khali hai", "cng khali hai",
+        "line nahi hai", "petrol bharwaya", "petrol dalwaya", "cng bharwayi", "diesel bharwaya",
+        "five hundred ka petrol", "one thousand ka petrol", "two thousand ka petrol", "five hundred ki cng",
+        "twenty litre", "thirty litre", "forty litre", "fifty litre",
+        "kitna challan bachaya", "break baad mein", "hotspot jodo", "phone ka internet chalao",
+        "gaadi kahan khadi hai",
         // How drivers really ask for music, the music keys and the volume when answering Ampli.
         "gana sunao", "gaana sunao", "gaane sunao", "gane sunao", "gaana suna do", "gana suna do",
         "gaana lagao", "gana lagao", "gaane lagao", "gaana chala do", "gana chala do", "gaane chalao",
@@ -99,6 +113,15 @@ object VoskCommands {
         "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
         // Screen off.
         "स्क्रीन बंद करो", "स्क्रीन ऑफ करो",
+        // Police / camera reports and taking them back.
+        "पुलिस है", "आगे पुलिस है", "नाका है", "आगे नाका है", "नाका लगा है",
+        "कैमरा है", "आगे कैमरा है", "कैमरा लगा है", "कैमरा नहीं है", "पुलिस हट गई", "नाका हट गया", "जाम खुल गया",
+        // Pump queues and the petrol diary.
+        "सीएनजी पे लंबी लाइन है", "लाइन लंबी है", "पंप खाली है", "सीएनजी खाली है", "लाइन नहीं है",
+        "पेट्रोल भरवाया", "पेट्रोल डलवाया", "सीएनजी भरवाई", "डीजल भरवाया",
+        "हजार का पेट्रोल", "पांच सौ का पेट्रोल", "दो हजार का पेट्रोल", "पांच सौ की सीएनजी",
+        "बीस लीटर", "तीस लीटर", "चालीस लीटर", "पचास लीटर",
+        "कितना चालान बचाया", "ब्रेक बाद में", "हॉटस्पॉट जोड़ो", "गाड़ी कहाँ खड़ी है",
         // How drivers really ask for music, the music keys and the volume when answering Ampli.
         "गाना सुनाओ", "गाने सुनाओ", "गाना सुना दो", "गाने सुना दो", "गाना लगाओ", "गाने लगाओ",
         "गाना चला दो", "गाने चलाओ", "गाना बजा दो", "गाने बजाओ", "कोई गाना चलाओ", "कोई गाना सुनाओ", "कोई गाना लगाओ",
@@ -234,6 +257,17 @@ object HinglishSpelling {
         "dheemi" to listOf("dheemee", "dhimi", "deemi"),
         "rok" to listOf("roak", "roke"),
         "tez" to listOf("tej", "taze"),
+        "lambi" to listOf("lumbi", "lambhi", "lamby"),
+        "khali" to listOf("khaali", "kali", "khalee"),
+        "bharwaya" to listOf("bharvaya", "barwaya", "bharwaaya"),
+        "dalwaya" to listOf("dalvaya", "dalwaaya"),
+        "bharwayi" to listOf("bharvayi", "bharwai"),
+        "naka" to listOf("nakka", "naaka"),
+        "bachaya" to listOf("bachaaya", "bachya"),
+        "challan" to listOf("chalan", "chaalan"),
+        "jodo" to listOf("jodho", "jordo"),
+        "khadi" to listOf("khari", "khaadi"),
+        "gaadi" to listOf("gadi", "gaari", "gari"),
     )
 
     /** The grammar to give the model, and the spellings to turn back ([restore]). */

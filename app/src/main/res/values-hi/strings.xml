@@ -307,7 +307,7 @@
     <string name="parked_at">%1$s पर पार्क की</string>
     <string name="parked_ago">सेव किया: %1$s</string>
     <string name="parked_pill_away">कार %1$s दूर</string>
-    <string name="parked_pill_since">%1$s से पार्क</string>
+    <string name="parked_pill_since">गाड़ी यहाँ खड़ी है · %1$s से</string>
     <string name="parked_share">शेयर करें</string>
     <string name="parked_share_text">मेरी कार यहाँ पार्क है (%1$s से):</string>
     <string name="parked_open_maps">वहाँ पैदल जाएँ</string>
@@ -317,7 +317,7 @@
     <string name="parked_how">गाड़ी रुकने या स्क्रीन बंद होने पर GPS से सेव होता है। सटीकता GPS सिग्नल पर निर्भर है।</string>
     <string name="break_title">आराम का समय</string>
     <string name="break_body">आप %1$s घंटे से गाड़ी चला रहे हैं। थोड़ा आराम कर लें।</string>
-    <string name="break_voice">आप %1$s घंटे से गाड़ी चला रहे हैं। कृपया थोड़ा आराम कर लें।</string>
+    <string name="break_voice">आप %1$s घंटे से गाड़ी चला रहे हैं। चलिए, एक कप चाय हो जाए, थोड़ा आराम करके फिर चलते हैं।</string>
     <string name="break_driving_for">%1$s से ड्राइव</string>
     <string name="break_find_dhaba">ढाबा खोजें</string>
     <string name="break_find_fuel">पेट्रोल पंप</string>

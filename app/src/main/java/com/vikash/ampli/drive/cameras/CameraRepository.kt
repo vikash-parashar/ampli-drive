@@ -132,13 +132,48 @@ class CameraRepository(context: Context) {
         return cam
     }
 
+    /**
+     * "Camera nahi hai" / "no camera here": the driver's own cameras within [radiusM] of the car
+     * are deleted, and map cameras there are hidden on this unit (the camera was removed or the
+     * data is wrong). Returns how many were removed or hidden.
+     */
+    fun removeNear(lat: Double, lon: Double, radiusM: Double = RoadReports.GONE_RADIUS_M): Int {
+        val near = index.near(lat, lon, radiusM).filter {
+            it.type != SpeedCamera.TYPE_AVERAGE && CameraGeometry.distanceM(lat, lon, it.lat, it.lon) <= radiusM
+        }
+        if (near.isEmpty()) return 0
+        synchronized(lock) {
+            val mineIds = near.filter { it.userReported }.map { it.id }.toSet()
+            if (mineIds.isNotEmpty()) {
+                val arr = readReportsJson()
+                val kept = JSONArray()
+                for (i in 0 until arr.length()) {
+                    val o = arr.optJSONObject(i) ?: continue
+                    if (o.optString("id") !in mineIds) kept.put(o)
+                }
+                reportsPrefs.edit().putString(KEY_REPORTS, kept.toString()).apply()
+            }
+            val hide = near.filterNot { it.userReported }.map { it.id }
+            if (hide.isNotEmpty()) {
+                val all = hiddenIds() + hide
+                reportsPrefs.edit().putString(KEY_HIDDEN, all.joinToString("\n")).apply()
+            }
+        }
+        scope.launch { rebuild() }
+        return near.size
+    }
+
+    private fun hiddenIds(): Set<String> =
+        (reportsPrefs.getString(KEY_HIDDEN, "") ?: "").split('\n').filter { it.isNotEmpty() }.toSet()
+
     private fun rebuild() {
         synchronized(lock) {
             val first = bundled == null
             val osm = bundled ?: loadBundled().also { bundled = it }
             if (first) zones = loadZones()
             val mine = loadReports()
-            index = CameraIndex(osm + mine)
+            val hidden = hiddenIds()
+            index = CameraIndex((if (hidden.isEmpty()) osm else osm.filterNot { it.id in hidden }) + mine)
             _stats.value = CameraStats(
                 osm.size, mine.size, dataDate, ready = true,
                 redLight = osm.count { it.type == SpeedCamera.TYPE_RED_LIGHT },
@@ -218,6 +253,7 @@ class CameraRepository(context: Context) {
         const val ZONES_ASSET = "speed_zones.json"
         const val REPORTS_FILE = "camera_reports"
         const val KEY_REPORTS = "reports"
+        const val KEY_HIDDEN = "hidden_osm"
         const val VOICE_RANGE_M = 20_000.0
         const val VOICE_CONE_DEG = 45.0
     }

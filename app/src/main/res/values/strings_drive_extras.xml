@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Drive extras: road reports by voice, pump queues, challan counter, offline map,
+     resume on start, phone hotspot, fuel diary. -->
+<resources>
+    <string name="voice_cmds_diary">Diary, savings and hotspot</string>
+
+    <!-- Road reports -->
+    <string name="x_camera_saved">Camera saved here. It stays until you say “no camera here”.</string>
+    <string name="x_gone_camera">Done, camera removed from here.</string>
+    <string name="x_gone_police">Done, police check removed.</string>
+    <string name="x_gone_jam">Done, the jam is marked clear.</string>
+    <string name="x_gone_nothing">Nothing was reported near here.</string>
+
+    <!-- Pump queues -->
+    <string name="x_queue_saved_long">Noted: long queue at %1$s.</string>
+    <string name="x_queue_saved_short">Noted: no queue at %1$s.</string>
+    <string name="x_queue_no_pump">No pump within 400 metres. Say it when you are at the pump.</string>
+    <string name="x_queue_long">Long queue · %1$d min ago</string>
+    <string name="x_queue_short">No queue · %1$d min ago</string>
+    <string name="x_side_same">Ahead, your side</string>
+    <string name="x_side_other">Ahead, other side</string>
+    <string name="x_side_behind">Behind you</string>
+
+    <!-- Fuel diary -->
+    <string name="x_fuel_ask">How much? Say the rupees or the litres.</string>
+    <string name="x_fuel_saved">Saved: %1$s, about %2$s litres.</string>
+    <string name="x_fuel_not_saved">Didn’t get the amount. Add it in Expenses.</string>
+    <string name="x_diary_title">Fuel diary</string>
+    <string name="x_diary_hint">Say “petrol filled 1000” after every fill. Mileage is worked out from the GPS kilometres between fills.</string>
+    <string name="x_diary_month">This month: %1$s</string>
+    <string name="x_diary_kmpl">Last fill: %1$s km per litre</string>
+    <string name="x_diary_assume">A fill said by voice counts as a full tank. When only rupees are said, litres use %1$s per litre (your last price).</string>
+
+    <!-- Challan counter -->
+    <string name="x_challan_title">Challans avoided</string>
+    <string name="x_challan_count">%1$d slow-downs after a warning</string>
+    <string name="x_challan_amount">About %1$s – %2$s saved</string>
+    <string name="x_challan_km">That is about %1$d km of driving (at %2$s per km)</string>
+    <string name="x_challan_assume">Counted when you slow to the limit within 20 seconds of a camera or limit warning. Fine assumed: ₹1,000 – ₹2,000 for a car (overspeeding, LMV). Kept on this unit only.</string>
+    <string name="x_challan_answer">You slowed down %1$d times after a warning. That is about %2$s to %3$s in fines avoided.</string>
+    <string name="x_challan_none">Nothing counted yet. Slow down after a camera warning and it adds up here.</string>
+
+    <!-- Break reminder -->
+    <string name="x_break_snoozed">Okay, I will remind you a little later.</string>
+
+    <!-- Phone hotspot -->
+    <string name="x_hotspot_title">Phone hotspot</string>
+    <string name="x_hotspot_hint">The unit has no SIM. Pick your phone’s hotspot once (connect to it in Wi-Fi settings first) and Car Hub joins it when the phone is near.</string>
+    <string name="x_hotspot_android10">This Android version doesn’t let apps join Wi-Fi. Use Wi-Fi settings.</string>
+    <string name="x_hotspot_auto">Join automatically</string>
+    <string name="x_hotspot_auto_hint">When the phone connects over Bluetooth or the hotspot appears</string>
+    <string name="x_hotspot_pick">Hotspot network</string>
+    <string name="x_hotspot_no_saved">No saved Wi-Fi yet. Connect to the phone hotspot once in Wi-Fi settings.</string>
+    <string name="x_hotspot_phone">Phone (Bluetooth)</string>
+    <string name="x_hotspot_any_phone">Any phone</string>
+    <string name="x_hotspot_status">On Wi-Fi: %1$s</string>
+    <string name="x_hotspot_connect">Connect now</string>
+    <string name="x_wifi_settings">Wi-Fi settings</string>
+    <string name="x_hotspot_joining">Joining %1$s.</string>
+    <string name="x_hotspot_none">Pick your phone hotspot in Settings first. Opening Wi-Fi settings.</string>
+    <string name="x_hotspot_unsupported">Opening Wi-Fi settings. Pick your phone hotspot there.</string>
+
+    <!-- Resume on start -->
+    <string name="x_resume_title">When the car starts</string>
+    <string name="x_resume_music">Resume music</string>
+    <string name="x_resume_music_hint">Plays the music app you used last</string>
+    <string name="x_resume_route">Resume unfinished route</string>
+    <string name="x_resume_route_hint">Within 6 hours, if you have not arrived yet</string>
+    <string name="x_route_resumed">Continuing to %1$s.</string>
+
+    <!-- Offline map -->
+    <string name="x_offline_title">Offline map</string>
+    <string name="x_offline_hint">Keeps the map of one region on the unit, so it works without internet. Downloads only on Wi-Fi.</string>
+    <string name="x_offline_size">Needs about %1$d MB · %2$d MB free</string>
+    <string name="x_offline_ready">%1$s ready · %2$d MB</string>
+    <string name="x_offline_progress">Downloading… %1$d%%</string>
+    <string name="x_offline_paused">Paused at %1$d%%</string>
+    <string name="x_offline_needs_wifi">Connect to Wi-Fi to download (not on mobile data).</string>
+    <string name="x_offline_no_space">Not enough space: needs about %1$d MB plus room to spare.</string>
+    <string name="x_offline_failed">Download failed: %1$s</string>
+    <string name="x_offline_pause">Pause</string>
+    <string name="x_offline_resume">Resume</string>
+    <string name="x_offline_download">Download</string>
+    <string name="x_offline_delete">Delete</string>
+    <string name="x_offline_licence" translatable="false">Map data © OpenStreetMap contributors (ODbL) · OpenMapTiles · OpenFreeMap</string>
+    <string name="x_region_haryana_ncr">Haryana + Delhi NCR</string>
+    <string name="x_region_delhi_ncr">Delhi NCR</string>
+    <string name="x_region_tricity">Chandigarh tricity</string>
+    <string name="x_region_around">40 km around me</string>
+</resources>

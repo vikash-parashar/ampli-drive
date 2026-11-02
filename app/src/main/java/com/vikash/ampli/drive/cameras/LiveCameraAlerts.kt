@@ -29,6 +29,10 @@ import java.util.Locale
 class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
     private val engine = CameraAlertEngine()
     private val zoneTracker = ZoneTracker()
+
+    /** Challan-bachat counter: over-speed warnings the driver obeyed. */
+    private val challan = ChallanSaver()
+    private var zoneWasOver = false
     private val scope = MainScope()
     private var speech: Job? = null
 
@@ -109,12 +113,22 @@ class LiveCameraAlerts(private val app: DriveApp) : CameraAlerts {
         }
         // The speed pane turns red when the speed is above this limit.
         _limit.value = target?.camera?.maxspeed ?: zone?.zone?.maxspeed
+        // Challan-bachat: a "slow down" (camera) or the car going over inside an average-speed
+        // zone, followed by the car at the limit within 20 s, counts as one challan saved.
+        val zoneOverNow = zone != null && zone.phase == ZoneTracker.Phase.Inside && zone.overLimit
+        val warned = result.events.any { it is CameraAlertEngine.Event.SlowDown } || (zoneOverNow && !zoneWasOver)
+        zoneWasOver = zoneOverNow
+        if (challan.onSample(now, fix.speedKmh, target?.camera?.id ?: zone?.zone?.id, _limit.value, warned)) {
+            app.extras.addChallanSaved()
+        }
         if (result.events.isNotEmpty() || zoneEvents.isNotEmpty()) speak(result.events, zoneEvents)
     }
 
     override fun reset() {
         engine.reset()
         zoneTracker.reset()
+        challan.reset()
+        zoneWasOver = false
         _current.value = null
         _limit.value = null
     }
