@@ -67,8 +67,13 @@ jobs:
         timeout-minutes: 3
         shell: bash
         run: |
+          set +e +o pipefail
+          for base in https://festvox.org http://festvox.org https://www.festvox.org http://www.festvox.org; do
+            out=$(curl -sS -o /dev/null -I --max-time 30 -w '%{http_code} %{redirect_url} %{remote_ip}' "$base/flite/packed/flite-2.1/voices/cmu_us_axb.flitevox" 2>&1)
+            echo "::notice title=Voice host $base::$out"
+          done
           for name in cmu_indic_hin_ab.flitevox cmu_us_axb.flitevox; do
-            head=$(curl -fsL --max-time 60 -r 0-65535 "https://festvox.org/flite/packed/flite-2.1/voices/$name" | tr -c '[:print:]\n' '\n' | grep -a -A14 '^copyright$' | head -16 | tr '\n' ' ' | tr -s ' ')
+            head=$(curl -fsL --max-time 60 -r 0-65535 "http://festvox.org/flite/packed/flite-2.1/voices/$name" | tr -c '[:print:]\n' '\n' | grep -a -A14 '^copyright$' | head -16 | tr '\n' ' ' | tr -s ' ')
             if [ -n "$head" ]; then
               echo "::notice title=Voice licence $name::$head"
             else

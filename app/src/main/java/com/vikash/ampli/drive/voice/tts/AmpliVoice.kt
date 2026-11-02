@@ -86,6 +86,15 @@ class AmpliVoice(context: Context) {
                 // Let the last of it play out.
                 val t = out
                 if (t != null) {
+                    // A streaming track may hold back sound until its buffer has filled once:
+                    // a buffer of silence after the speech pushes every real sample out.
+                    val pad = ShortArray(WRITE_SAMPLES)
+                    var padded = 0
+                    while (padded < t.bufferSizeInFrames && generation == my) {
+                        val w = t.write(pad, 0, pad.size)
+                        if (w <= 0) break
+                        padded += w
+                    }
                     val rate = t.sampleRate.coerceAtLeast(1)
                     var waited = 0L
                     val limit = written * 1000 / rate + 1_000
