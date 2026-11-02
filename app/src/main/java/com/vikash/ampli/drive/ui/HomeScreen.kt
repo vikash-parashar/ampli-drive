@@ -213,6 +213,8 @@ fun HomeScreen(
         }
     }
 
+    // The locality under the car for the map card ("Bahadurgarh"), looked up when it moves ~1 km.
+    val placeName = localityName(gpsState.value.location)
     val alert = homeAlert(app, onRequestPermissions, onOpenFastag, onOpenCar)
     val ui = HomeUi(
         speed = speed,
@@ -239,6 +241,9 @@ fun HomeScreen(
         onPhone = { phoneCard = true },
         onPhoneLong = { AppChooser.ask(AppRole.Phone) },
         onFuel = { onOpenScreen(Screen.Fuel) },
+        place = placeName,
+        destination = nav.destination?.name?.takeIf { nav.visible },
+        hasFix = !locationPrompt,
     )
     // Pull down from the top row, like a phone's quick settings.
     val pullDown = Modifier.pointerInput(Unit) {
@@ -255,11 +260,36 @@ fun HomeScreen(
         )
     }
 
+    // The live map: Map First's full-screen map and Big Glance's map card (the car's position).
+    val homeMap: @Composable () -> Unit = {
+        val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
+        val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
+        MapPane(
+            gps = gpsState.value,
+            onOpenNavigation = openNav,
+            onRequestPermissions = onRequestPermissions,
+            modifier = Modifier.fillMaxSize(),
+            showTurn = false,
+            parked = parkedSpot?.let { it.lat to it.lon },
+            textureMode = textureMode,
+            onNoFrames = {
+                // Nothing drawn: try the other surface type once per app run.
+                if (!mapModeFlipped) {
+                    mapModeFlipped = true
+                    app.prefs.setMapTextureMode(!textureMode)
+                }
+            },
+            nav = nav,
+            onOpenNav = onOpenNavScreen,
+            fullBleed = true,
+        )
+    }
+
     Column(Modifier.fillMaxSize()) {
         banner()
         Box(Modifier.fillMaxWidth().weight(1f)) {
             when (theme.style) {
-                HomeStyle.BigGlance -> BigGlanceHome(ui, pullDown)
+                HomeStyle.BigGlance -> BigGlanceHome(ui, pullDown, if (heavyReady) homeMap else null)
                 HomeStyle.Bento -> BentoHome(ui, pullDown)
                 HomeStyle.RoadSign -> RoadSignHome(ui, pullDown)
                 HomeStyle.MapFirst -> MapFirstHome(
@@ -268,29 +298,7 @@ fun HomeScreen(
                     // Office and favourites under the turn card while not navigating (Home is the card's own key).
                     places = { if (!nav.visible && ui.turn == null) SavedPlaceChips(app = app, skipHome = true) },
                 ) {
-                    if (heavyReady) {
-                        val parkedSpot by app.car.store.parked.collectAsStateWithLifecycle()
-                        val textureMode by app.prefs.mapTextureMode.collectAsStateWithLifecycle()
-                        MapPane(
-                            gps = gpsState.value,
-                            onOpenNavigation = openNav,
-                            onRequestPermissions = onRequestPermissions,
-                            modifier = Modifier.fillMaxSize(),
-                            showTurn = false,
-                            parked = parkedSpot?.let { it.lat to it.lon },
-                            textureMode = textureMode,
-                            onNoFrames = {
-                                // Nothing drawn: try the other surface type once per app run.
-                                if (!mapModeFlipped) {
-                                    mapModeFlipped = true
-                                    app.prefs.setMapTextureMode(!textureMode)
-                                }
-                            },
-                            nav = nav,
-                            onOpenNav = onOpenNavScreen,
-                            fullBleed = true,
-                        )
-                    }
+                    if (heavyReady) homeMap()
                 }
             }
             if (theme.style == HomeStyle.MapFirst) {
@@ -364,7 +372,38 @@ internal class HomeUi(
     val onPhone: () -> Unit = {},
     val onPhoneLong: () -> Unit = {},
     val onFuel: () -> Unit = {},
+    /** The locality or street under the car (Android's geocoder), for the map card. */
+    val place: String? = null,
+    /** Car Hub's trip destination while navigating. */
+    val destination: String? = null,
+    /** A location fix exists (the map card draws the name and the car's dot). */
+    val hasFix: Boolean = false,
 )
+
+/**
+ * The place under [location] from Android's geocoder, off the main thread, refreshed when the
+ * car has moved about a kilometre. Null without a geocoder (many head units), offline, or before
+ * the first fix; the map card then shows only the map and the car.
+ */
+@Composable
+private fun localityName(location: android.location.Location?): String? {
+    val context = LocalContext.current
+    val cell = location?.let { (it.latitude * 100).roundToInt() to (it.longitude * 100).roundToInt() }
+    val name by produceState<String?>(null, cell) {
+        val loc = location ?: return@produceState
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                if (!android.location.Geocoder.isPresent()) return@withContext null
+                @Suppress("DEPRECATION")
+                val a = android.location.Geocoder(context, Locale.getDefault()).getFromLocation(loc.latitude, loc.longitude, 1)?.firstOrNull()
+                a?.subLocality ?: a?.locality ?: a?.thoroughfare ?: a?.subAdminArea
+            } catch (_: Exception) {
+                null
+            }
+        } ?: value
+    }
+    return name
+}
 
 /** Map First's trip bar: arrival time, "18 km · 26 min" and End route. */
 internal class TripUi(val eta: String, val left: String, val onEnd: () -> Unit)
@@ -421,6 +460,12 @@ internal class MusicUi(
     val onNext: () -> Unit,
     val onPrevious: () -> Unit,
     val onOpen: () -> Unit,
+    /** "Ampli MP3", "Bluetooth · OnePlus 13s", or the playing app's name; null for none. */
+    val sourceLine: String? = null,
+    /** The playing app's icon (Ampli MP3's logo), for the card's badge. */
+    val sourceIcon: ImageBitmap? = null,
+    /** Phone audio over Bluetooth (the unit's BT music app, or the phone itself). */
+    val bluetooth: Boolean = false,
 )
 
 @Composable
@@ -432,11 +477,21 @@ private fun musicUi(app: DriveApp): MusicUi {
     val phoneName = app.phoneBt.connectedPhone(devices)?.name ?: bt.connectedName
     val np = state.nowPlaying
     val art = remember(np?.art) { np?.art?.asImageBitmap() }
+    // Where the sound comes from: Ampli MP3's icon, a phone over Bluetooth, or the app's own icon.
+    val btSource = np != null && com.vikash.ampli.drive.media.MediaSources.isBluetooth(np.packageName)
+    val sourceIcon = remember(np?.packageName) { np?.packageName?.let { com.vikash.ampli.drive.media.MediaSources.icon(context, it) } }
     val openMusic = { Launchers.openMusic(context); Unit }
     return when {
         np != null -> MusicUi(
-            title = np.title ?: stringResource(R.string.music_unknown_track),
+            title = np.title ?: np.sourceLabel ?: stringResource(R.string.music_unknown_track),
             artist = np.artist,
+            sourceLine = when {
+                btSource -> listOfNotNull("Bluetooth", phoneName).joinToString(" · ")
+                np.packageName == com.vikash.ampli.drive.media.MediaHub.AMPLI_PACKAGE -> "Ampli MP3"
+                else -> np.sourceLabel
+            },
+            sourceIcon = if (btSource) null else sourceIcon,
+            bluetooth = btSource,
             playing = np.isPlaying,
             art = art,
             controls = true,
@@ -643,7 +698,7 @@ internal fun LimitBadge(limitKmh: Int?, size: Dp, modifier: Modifier = Modifier,
 }
 
 @Composable
-private fun TurnArrow(turn: TurnUi?, color: Color, modifier: Modifier) {
+internal fun TurnArrow(turn: TurnUi?, color: Color, modifier: Modifier) {
     when {
         turn?.step != null -> ManeuverArrow(turn.step, color, modifier)
         turn?.arrow != null -> Image(turn.arrow, contentDescription = null, colorFilter = ColorFilter.tint(color), modifier = modifier)
@@ -767,14 +822,13 @@ private fun DockKey(
     val theme = LocalDriveTheme.current
     val inner = @Composable {
         Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(maxOf(dims.d(4.6f), 28.dp)))
-        Text(
+        // Never cut ("HEY AMP…"): the label shrinks to fit its key instead.
+        FitText(
             theme.label(label),
             color = content,
             fontFamily = theme.font.family,
             fontWeight = FontWeight.Bold,
             fontSize = dims.t(textSize, min = 22f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
             letterSpacing = if (theme.upperLabels) 0.04.em else androidx.compose.ui.unit.TextUnit.Unspecified,
         )
     }
@@ -856,7 +910,7 @@ private fun playLabel(playing: Boolean) = stringResource(if (playing) R.string.m
 
 /** Style 3: three giant tiles on true black; Hey Ampli, More and SOS below. */
 @Composable
-private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
+private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier, map: (@Composable () -> Unit)?) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val gap = dims.d(2.2f)
@@ -878,67 +932,12 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
             CaptionLine(ui.caption, Modifier.weight(1f))
         }
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
-            // Speed.
-            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(if (ui.over) theme.danger else theme.surface).padding(dims.d(3.4f))) {
-                val fg = if (ui.over) theme.onDanger else theme.text
-                TileLabel(stringResource(R.string.speed_label), if (ui.over) theme.onDanger else theme.muted, 2.8f)
-                if (ui.limit != null) LimitBadge(ui.limit, dims.d(11f), Modifier.align(Alignment.TopEnd).offset(y = -dims.d(1f)), dark = true)
-                BoxWithConstraints(Modifier.fillMaxSize().padding(top = dims.d(5f), bottom = dims.d(4.4f)), contentAlignment = Alignment.CenterStart) {
-                    SpeedNumber(ui.speed, fg, fitSize(maxWidth, maxHeight, 2, 0.5f, 1.05f))
-                }
-                Text(
-                    speedFoot(ui),
-                    color = if (ui.over) theme.onDanger else theme.muted,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = dims.t(3f, min = 18f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.align(Alignment.BottomStart),
-                )
-            }
-            // Next turn.
-            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(theme.surface).clickable(onClick = ui.onNav).padding(dims.d(3.4f))) {
-                TileLabel(stringResource(R.string.home_next_turn), theme.muted, 2.8f)
-                val t = ui.turn
-                if (t == null) {
-                    Column(Modifier.align(Alignment.CenterStart), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                        Icon(Icons.Filled.Navigation, contentDescription = null, tint = theme.accent, modifier = Modifier.size(dims.d(12f)))
-                        Text(stringResource(R.string.nav_search_title), color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(4.6f, min = 24f))
-                    }
-                } else {
-                    TurnArrow(t, theme.accent, Modifier.padding(top = dims.d(5.4f)).size(dims.d(18f)))
-                    Column(Modifier.align(Alignment.BottomStart)) {
-                        Text(t.distance, style = theme.numberStyle(theme.text), fontSize = dims.t(13f, min = 40f), maxLines = 1)
-                        t.text?.let { Text(it, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    }
-                }
-            }
-            // Playing.
-            Box(Modifier.weight(1f).fillMaxHeight().clip(tile).background(theme.surface).clickable(onClick = ui.music.onOpen).padding(dims.d(3.4f))) {
-                TileLabel(stringResource(R.string.home_playing), theme.muted, 2.8f)
-                if (ui.music.controls) {
-                    MusicKey(
-                        if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        playLabel(ui.music.playing),
-                        ui.music.onPlayPause,
-                        dims.d(11f),
-                        Color.Transparent,
-                        theme.accent,
-                        theme.accent,
-                        modifier = Modifier.align(Alignment.TopEnd),
-                    )
-                }
-                // Still bars: a picture of music, not an animation.
-                Row(Modifier.align(Alignment.CenterStart).padding(bottom = dims.d(6f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1f)), verticalAlignment = Alignment.Bottom) {
-                    for (h in listOf(5f, 10f, 7f, 12f, 4f, 9f, 6f)) {
-                        Box(Modifier.width(dims.d(1.8f)).height(dims.d(h)).clip(RoundedTop).background(theme.surfaceHigh.copy(alpha = 1f)))
-                    }
-                }
-                Column(Modifier.align(Alignment.BottomStart)) {
-                    Text(ui.music.title, color = theme.text, fontWeight = FontWeight.ExtraBold, fontFamily = theme.font.family, fontSize = dims.t(5f, min = 24f), maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = dims.t(5.4f, min = 26f))
-                    ui.music.artist?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                }
-            }
+            // Speed: the neon dial with embers (HomeDepthCards); a little wider so it reads well.
+            GaugeSpeedCard(ui, tile, Modifier.weight(1.2f).fillMaxHeight())
+            // Map: streets, the place name, the car's dot on top.
+            DepthMapCard(ui, tile, map, Modifier.weight(1f).fillMaxHeight())
+            // Playing: source badge, the title's first words under the disc, bars.
+            DepthMusicCard(ui, tile, Modifier.weight(1f).fillMaxHeight())
         }
         Row(Modifier.fillMaxWidth().height(maxOf(dims.d(15f), MinTouch)), horizontalArrangement = Arrangement.spacedBy(gap)) {
             val keyShape = theme.cardShape(dims, 0.8f)
@@ -952,7 +951,6 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier) {
     }
 }
 
-private val RoundedTop = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
 
 /** Big Glance's top line: a dot and Ampli's last line. */
 @Composable

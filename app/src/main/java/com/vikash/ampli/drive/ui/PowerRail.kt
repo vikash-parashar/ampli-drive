@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wifi
@@ -56,6 +58,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -88,13 +91,35 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 /*
- * Home's left rail (Back, Home, Apps, Vol +, Vol −, Mute, Controls) for head units without
- * buttons, the volume popup and the top strip that pulls down the quick panel. Flat fills only,
- * no animation: one redraw per tap on an Android 8.1 unit.
+ * Car Hub's control rail (Back, Home, Apps, Play/Pause, Vol +, Vol −, Mute, Controls) for head
+ * units without buttons, the volume popup and the top strip that pulls down the quick panel.
+ * India drives on the left, so the driver sits on the right: the rail is on the screen's right
+ * edge, on every Car Hub screen (DriveRoot puts it beside whatever screen is showing). Flat fills
+ * only, no animation on the keys: one redraw per tap on an Android 8.1 unit.
  */
 
 /** The rail's width: 104 px at 1280x800 (design board "Rail"). */
 internal const val RAIL_UNITS = 13f
+
+/** The rail's keys from top to bottom, and how they fit a screen's height. Pure, so it is unit-tested. */
+internal object RailSpec {
+    enum class Key { Back, Home, Apps, PlayPause, VolUp, VolDown, Mute, Controls }
+
+    val ORDER: List<Key> = Key.values().toList()
+
+    /** Key height, gap and top/bottom padding, in Dims units (1 unit = 1% of the screen height). */
+    const val KEY_UNITS = 10.5f
+    const val GAP_UNITS = 0.8f
+    const val PAD_UNITS = 1.5f
+    const val SIDE_UNITS = 1.5f
+
+    /** Height the keys, gaps and padding take, in units; the rest is the gap above Controls. */
+    fun usedUnits(keys: Int = ORDER.size): Float = 2 * PAD_UNITS + keys * KEY_UNITS + (keys - 1) * GAP_UNITS
+
+    /** A key's height and width in px on a screen [heightPx] tall. */
+    fun keyHeightPx(heightPx: Int): Float = heightPx * KEY_UNITS / 100f
+    fun keyWidthPx(heightPx: Int): Float = heightPx * (RAIL_UNITS - 2 * SIDE_UNITS) / 100f
+}
 
 /** Ink on the amber Mute key (the same in every theme, like the SOS red). */
 private val MutedInk = Color(0xFF1A1206)
@@ -122,47 +147,6 @@ private fun railColors(theme: DriveTheme): RailColors = RailColors(
     amber = theme.warning,
 )
 
-/**
- * Home with the rail on its left. [content] (the Home layout) and everything in [overlays] sit
- * right of the rail, so the rail stays usable while the quick panel or the power cards are up.
- */
-@Composable
-fun HomeShell(
-    app: DriveApp,
-    resumeTick: Int,
-    quickOpen: Boolean,
-    onQuick: (Boolean) -> Unit,
-    onBack: () -> Unit,
-    onOpenApps: () -> Unit,
-    onOpenSettings: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    val dims = LocalDims.current
-    val volume = remember { RailVolumeState() }
-    Row(Modifier.fillMaxSize()) {
-        PowerRail(
-            app = app,
-            resumeTick = resumeTick,
-            volume = volume,
-            controlsOpen = quickOpen,
-            onBack = onBack,
-            onHome = {
-                onQuick(false)
-                if (PowerControl.state.value == com.vikash.ampli.drive.system.PowerUi.Sheet) PowerControl.close()
-            },
-            onOpenApps = onOpenApps,
-            onControls = { onQuick(!quickOpen) },
-            modifier = Modifier.width(dims.d(RAIL_UNITS)).fillMaxHeight(),
-        )
-        Box(Modifier.weight(1f).fillMaxHeight()) {
-            content()
-            TopStrip(app = app, resumeTick = resumeTick, quickOpen = quickOpen, onOpen = { onQuick(true) }, modifier = Modifier.align(Alignment.TopCenter))
-            ControlsPanel(app = app, open = quickOpen, onClose = { onQuick(false) }, onOpenSettings = onOpenSettings)
-            VolumePopup(volume, Modifier.align(Alignment.TopStart).padding(start = dims.d(1.2f), top = dims.d(34f)))
-        }
-    }
-}
-
 /** The rail's own copy of the music volume, and when the popup was last asked for. */
 internal class RailVolumeState {
     var level by mutableStateOf<RailVolume.Level?>(null)
@@ -174,11 +158,83 @@ internal class RailVolumeState {
     }
 }
 
+/**
+ * The quick panel's pull-down, on every Car Hub screen: a thin glowing line at the top centre
+ * (it pulses three times when a screen opens, then rests) and a drag zone along the top edge.
+ * Pull down anywhere along the top, or tap the line, for the quick panel. Hidden while it is open.
+ */
 @Composable
-private fun PowerRail(
+internal fun TopHandle(open: Boolean, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    if (open) return
+    val theme = LocalDriveTheme.current
+    val dims = LocalDims.current
+    val glow = theme.accent
+    val pulse = remember { androidx.compose.animation.core.Animatable(1f) }
+    LaunchedEffect(Unit) {
+        repeat(3) {
+            pulse.animateTo(0.35f, androidx.compose.animation.core.tween(700))
+            pulse.animateTo(1f, androidx.compose.animation.core.tween(700))
+        }
+    }
+    val tap by rememberUpdatedState(onOpen)
+    val label = stringResource(R.string.strip_open)
+    val pullDown = Modifier.pointerInput(Unit) {
+        var pulled = 0f
+        detectVerticalDragGestures(
+            onDragStart = { pulled = 0f },
+            onVerticalDrag = { _, dy ->
+                pulled += dy
+                if (pulled > 24.dp.toPx()) {
+                    pulled = Float.NEGATIVE_INFINITY
+                    tap()
+                }
+            },
+        )
+    }
+    Box(modifier.fillMaxWidth()) {
+        // The top edge: drags only (taps go through to the screen's own header).
+        Box(Modifier.fillMaxWidth().height(dims.d(2.4f)).then(pullDown))
+        // The handle: a bigger target for a tap or a pull.
+        Box(
+            Modifier
+                .align(Alignment.TopCenter)
+                .width(dims.d(22f))
+                .height(maxOf(dims.d(5.5f), 40.dp))
+                .semantics {
+                    role = Role.Button
+                    contentDescription = label
+                    onClick { tap(); true }
+                }
+                .pointerInput(Unit) { detectTapGestures(onTap = { tap() }) }
+                .then(pullDown),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            Box(
+                Modifier
+                    .padding(top = dims.d(0.8f))
+                    .width(dims.d(15f))
+                    .height(dims.d(1.6f))
+                    .graphicsLayer { alpha = pulse.value },
+                contentAlignment = Alignment.Center,
+            ) {
+                // A soft halo (no blur on Android 8.1: a wider, faint pill) and the line.
+                Box(Modifier.fillMaxSize().background(glow.copy(alpha = 0.22f), RoundedCornerShape(50)))
+                Box(Modifier.width(dims.d(12f)).height(dims.d(0.7f)).background(glow, RoundedCornerShape(50)))
+            }
+        }
+    }
+}
+
+/**
+ * The rail itself, on the right edge. [homeActive]: Home is the screen showing (its key is lit
+ * unless the quick panel is up).
+ */
+@Composable
+internal fun PowerRail(
     app: DriveApp,
     resumeTick: Int,
     volume: RailVolumeState,
+    homeActive: Boolean,
     controlsOpen: Boolean,
     onBack: () -> Unit,
     onHome: () -> Unit,
@@ -214,19 +270,28 @@ private fun PowerRail(
         }
     }
     val muted = volume.level?.muted == true
+    // Play / Pause follows the session the music card shows (Ampli MP3, BT music, a USB player...).
+    val media by app.mediaHub.state.collectAsStateWithLifecycle()
+    val playing = media.nowPlaying?.isPlaying == true
     var m = modifier.background(c.bg)
-    if (c.edge != null) m = m.drawRightEdge(c.edge, 2.dp)
-    // 80 x 88 keys, 8 px apart, 24 px from the top and bottom (design board "Rail").
+    if (c.edge != null) m = m.drawLeftEdge(c.edge, 2.dp)
+    // Eight 80 x 84 keys, 6 px apart, 12 px from the top and bottom at 1280x800 (RailSpec).
     Column(
-        m.padding(horizontal = dims.d(1.5f), vertical = dims.d(2f)),
+        m.padding(horizontal = dims.d(RailSpec.SIDE_UNITS), vertical = dims.d(RailSpec.PAD_UNITS)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dims.d(1f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(RailSpec.GAP_UNITS)),
     ) {
         RailKey(Icons.AutoMirrored.Filled.ArrowBack, R.string.rail_back, c, onClick = onBack)
-        RailKey(Icons.Filled.Home, R.string.rail_home, c, active = !controlsOpen, onClick = onHome)
+        RailKey(Icons.Filled.Home, R.string.rail_home, c, active = homeActive && !controlsOpen, onClick = onHome)
         RailKey(
             Icons.Filled.Apps, R.string.rail_apps, c,
             onClick = onOpenApps,
+        )
+        RailKey(
+            if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+            if (playing) R.string.rail_pause else R.string.rail_play,
+            c,
+            onClick = { if (!app.mediaHub.togglePlayback()) QuickActions.mediaPlayPause(context) },
         )
         VolumeKey(Icons.AutoMirrored.Filled.VolumeUp, R.string.rail_vol_up, c) { volume.show(QuickActions.stepVolume(context, 1)) }
         VolumeKey(Icons.AutoMirrored.Filled.VolumeDown, R.string.rail_vol_down, c) { volume.show(QuickActions.stepVolume(context, -1)) }
@@ -245,9 +310,9 @@ private fun PowerRail(
 /** "android.media.VOLUME_CHANGED_ACTION": sent by every Android since 4.x, though not in the SDK. */
 private const val VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION"
 
-private fun Modifier.drawRightEdge(color: Color, width: Dp): Modifier = drawBehind {
-    val w = width.toPx()
-    drawRect(color, topLeft = Offset(size.width - w, 0f), size = Size(w, size.height))
+/** The hairline between the screen and the rail (the rail sits on the right). */
+private fun Modifier.drawLeftEdge(color: Color, width: Dp): Modifier = drawBehind {
+    drawRect(color, topLeft = Offset.Zero, size = Size(width.toPx(), size.height))
 }
 
 @Composable
@@ -273,7 +338,7 @@ private fun RailKey(
         else -> c.fg
     }
     val edge = if (outlined && !active) c.muted.copy(alpha = 0.5f) else null
-    var m = Modifier.fillMaxWidth().height(dims.d(11f)).clip(shape).background(bg, shape)
+    var m = Modifier.fillMaxWidth().height(dims.d(RailSpec.KEY_UNITS)).clip(shape).background(bg, shape)
     if (edge != null) m = m.border(1.5.dp, edge, shape)
     val tapLong by rememberUpdatedState(onLongClick)
     val tap by rememberUpdatedState(onClick)
@@ -303,7 +368,7 @@ private fun VolumeKey(icon: ImageVector, @StringRes label: Int, c: RailColors, s
     val text = stringResource(label)
     val m = Modifier
         .fillMaxWidth()
-        .height(dims.d(11f))
+        .height(dims.d(RailSpec.KEY_UNITS))
         .clip(shape)
         .background(if (pressed) c.on else c.key, shape)
         .semantics {
@@ -336,18 +401,10 @@ private fun VolumeKey(icon: ImageVector, @StringRes label: Int, c: RailColors, s
 @Composable
 private fun KeyFace(icon: ImageVector, @StringRes label: Int, fg: Color, sub: Color, modifier: Modifier) {
     val dims = LocalDims.current
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(4f)))
-        Text(
-            stringResource(label).uppercase(),
-            color = fg,
-            fontSize = dims.t(2f, min = 13f),
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.06.em,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
+    Column(modifier.padding(horizontal = 2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dims.d(0.3f), Alignment.CenterVertically)) {
+        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(3.6f)))
+        // The whole word, always ("CONTROLS" shrinks to fit the 80 px key instead of "CONTRO…").
+        FitText(stringResource(label).uppercase(), color = fg, fontSize = dims.t(2f, min = 13f), letterSpacing = 0.04.em)
         englishLine(label)?.let {
             Text(it, color = sub, fontSize = dims.t(1.5f, min = 9f), maxLines = 1, overflow = TextOverflow.Clip, textAlign = TextAlign.Center)
         }
@@ -358,7 +415,7 @@ private fun KeyFace(icon: ImageVector, @StringRes label: Int, fg: Color, sub: Co
 
 /** "आवाज़ 9/15" with a segmented bar, beside the volume keys; hides 1.6 s after the last change. */
 @Composable
-private fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
+internal fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
     val at = state.shownAt
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(at) {

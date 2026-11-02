@@ -24,6 +24,22 @@ import kotlinx.coroutines.withContext
  */
 object QuickActions {
 
+    // ---------------------------------------------------------------- play / pause (rail)
+
+    /**
+     * The rail's Play/Pause when Car Hub sees no media session (no notification access): a
+     * KEYCODE_MEDIA_PLAY_PAUSE press, which Android hands to the last app that played.
+     */
+    fun mediaPlayPause(context: Context) {
+        try {
+            val am = context.getSystemService(AudioManager::class.java) ?: return
+            val code = android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+            am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, code))
+            am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, code))
+        } catch (_: Exception) {
+        }
+    }
+
     // ---------------------------------------------------------------- volume (rail + slider)
 
     /** Music volume now; null when Android gives none. */

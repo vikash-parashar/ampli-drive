@@ -3,7 +3,12 @@ package com.vikash.ampli.drive.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.safeDrawingPadding
 import android.app.Activity
 import androidx.compose.runtime.Composable
@@ -158,10 +163,11 @@ fun DriveRoot(
     val crashAt by app.car.crashAt.collectAsStateWithLifecycle()
     // Keyed on the screen too: anything that leaves the countdown while it runs comes back to it.
     LaunchedEffect(crashAt, screen) { if (crashAt != null && screen != Screen.Crash) onNavigate(Screen.Crash) }
-    // The top-edge quick strip stays off on Home (own pull-down) and on the crash / SOS screens.
+    // The overlay quick strip stays off while Car Hub is in front: every screen has its own
+    // pull-down handle (and the crash / SOS screens never get the overlay).
     LaunchedEffect(screen) {
         com.vikash.ampli.drive.overlay.QuickStripGate.hubScreenBlocks.value =
-            screen == Screen.Home || screen == Screen.Crash || screen == Screen.Sos
+            true
     }
 
     // Dark status-bar icons on the light themes.
@@ -192,21 +198,16 @@ fun DriveRoot(
                     compact = maxWidth / maxHeight < 1.72f,
                 )
                 CompositionLocalProvider(LocalDims provides dims) {
+                  val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                  val railVolume = remember { RailVolumeState() }
+                  val voice by app.voice.state.collectAsStateWithLifecycle()
+                  // Every screen sits left of the control rail; the rail is on the driver's (right) side.
+                  Row(Modifier.fillMaxSize()) {
+                   Box(Modifier.weight(1f).fillMaxHeight()) {
                     when (screen) {
                         Screen.Home -> {
                             // A home screen has nowhere to go back to.
                             BackHandler(enabled = true) {}
-                            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-                            // The left rail (Back, Home, Apps, volume, Controls) for units without keys.
-                            HomeShell(
-                                app = app,
-                                resumeTick = resumeTick,
-                                quickOpen = showQuick,
-                                onQuick = { showQuick = it },
-                                onBack = { backDispatcher?.onBackPressed() },
-                                onOpenApps = { onNavigate(Screen.Apps) },
-                                onOpenSettings = { onNavigate(Screen.Settings) },
-                            ) {
                                 HomeScreen(
                                     app = app,
                                     resumeTick = resumeTick,
@@ -241,9 +242,8 @@ fun DriveRoot(
                                         DefaultHomeBannerHost(app = app, resumeTick = resumeTick)
                                     },
                                 )
-                                // The FASTag toll pop-up over Home (right of the rail).
+                                // The FASTag toll pop-up over Home (left of the rail).
                                 TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
-                            }
                             CarAlertHost(app = app)
                         }
                         Screen.Apps -> {
@@ -399,6 +399,11 @@ fun DriveRoot(
                             EmergencyProfileScreen(app = app, onBack = { onNavigate(emergencyReturn) })
                         }
                     }
+                    // The glowing pull-down handle along the top (every screen), the quick panel (it
+                    // or the rail's Controls key) and the volume popup beside the rail's volume keys.
+                    TopHandle(open = showQuick, onOpen = { showQuick = true }, modifier = Modifier.align(Alignment.TopCenter))
+                    ControlsPanel(app = app, open = showQuick, onClose = { showQuick = false }, onOpenSettings = { onNavigate(Screen.Settings) })
+                    VolumePopup(railVolume, Modifier.align(Alignment.TopEnd).padding(end = dims.d(1.2f), top = dims.d(42f)))
                     if (showPro) ProUnlockSheet(app = app, onDismiss = { showPro = false })
                     // "Which app is your music / phone app?" asked by the dock, Help panel or voice.
                     val chooser by AppChooser.request.collectAsStateWithLifecycle()
@@ -438,8 +443,7 @@ fun DriveRoot(
                     }
                     // Quick controls, pulled down from Home's status row.
                     if (showQuick) BackHandler(enabled = true) { showQuick = false }
-                    LaunchedEffect(screen) { if (screen != Screen.Home) showQuick = false }
-                    // (The quick panel itself is part of Home's rail shell.)
+                    LaunchedEffect(screen) { showQuick = false }
                     // Android 13+: notification access still off after "Allow access" (sideloaded
                     // APK, restricted settings): show how to allow it.
                     RestrictedSettingsGuideHost(resumeTick = resumeTick)
@@ -463,12 +467,32 @@ fun DriveRoot(
                     }
                     // Settings opened from the Home dock returns to Home.
                     LaunchedEffect(screen) { if (screen == Screen.Home) settingsReturn = Screen.Home }
-                    // Power sheet, countdowns, the helper card and the Screen off cover.
-                    PowerHost(resumeTick = resumeTick, inset = if (screen == Screen.Home) dims.d(RAIL_UNITS) else 0.dp)
-                    // "Hey Ampli" sheet over whichever screen is showing.
-                    val voice by app.voice.state.collectAsStateWithLifecycle()
-                    if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
+                    // "Hey Ampli" sheet over whichever screen is showing (the rail stays usable).
                     VoiceOverlay(state = voice, onCancel = app.voice::cancel, onChoose = app.voice::choose)
+                   }
+                   PowerRail(
+                       app = app,
+                       resumeTick = resumeTick,
+                       volume = railVolume,
+                       homeActive = screen == Screen.Home,
+                       controlsOpen = showQuick,
+                       onBack = { backDispatcher?.onBackPressed() },
+                       onHome = {
+                           showQuick = false
+                           if (com.vikash.ampli.drive.system.PowerControl.state.value == com.vikash.ampli.drive.system.PowerUi.Sheet) {
+                               com.vikash.ampli.drive.system.PowerControl.close()
+                           }
+                           // The crash countdown keeps running: Home would only bring it back (and restart it).
+                           if (screen != Screen.Home && screen != Screen.Crash) onNavigate(Screen.Home)
+                       },
+                       onOpenApps = { if (screen != Screen.Apps) onNavigate(Screen.Apps) },
+                       onControls = { showQuick = !showQuick },
+                       modifier = Modifier.width(dims.d(RAIL_UNITS)).fillMaxHeight(),
+                   )
+                  }
+                    // Power sheet, countdowns and the Screen off cover, over the whole screen (rail too).
+                    PowerHost(resumeTick = resumeTick, inset = 0.dp)
+                    if (voice.active) BackHandler(enabled = true) { app.voice.cancel() }
                     // After boot / ignition: the Ampli startup animation over everything.
                     BootSplashHost()
                 }

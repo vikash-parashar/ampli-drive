@@ -42,10 +42,13 @@ class BhajanPlanTest {
     fun dayOfWeekPicksItsBhajan() {
         assertEquals("hanuman_short", (decide(day = DayOfWeek.TUESDAY) as BhajanDecision.Play).bhajan.id)
         assertEquals("shanidev_aarti", (decide(day = DayOfWeek.SATURDAY) as BhajanDecision.Play).bhajan.id)
-        // Monday isn't chosen by default.
-        assertEquals(BhajanDecision.Skip(BhajanDecision.Reason.NotToday), decide(day = DayOfWeek.MONDAY))
+        // Every day has its deity: Monday plays by default too.
+        assertTrue(decide(day = DayOfWeek.MONDAY) is BhajanDecision.Play)
+        // Days the driver left out are skipped.
+        val tueSat = on.copy(days = setOf(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY))
+        assertEquals(BhajanDecision.Skip(BhajanDecision.Reason.NotToday), decide(s = tueSat, day = DayOfWeek.MONDAY))
         // Every morning: any day, before noon.
-        val morning = on.copy(everyMorning = true)
+        val morning = tueSat.copy(everyMorning = true)
         assertEquals("ram_naam_dhun", (decide(s = morning, day = DayOfWeek.MONDAY, hour = 7) as BhajanDecision.Play).bhajan.id)
         assertEquals(BhajanDecision.Skip(BhajanDecision.Reason.NotToday), decide(s = morning, day = DayOfWeek.MONDAY, hour = 18))
     }
@@ -105,5 +108,34 @@ class BhajanPlanTest {
         assertEquals("bhajan/x.mp3", list.last().file)
         assertEquals("ok_one", BhajanPlan.pickFor(on, list, DayOfWeek.TUESDAY, isPro = true)!!.id)
         assertTrue(BhajanPlan.parse("not json").isEmpty())
+    }
+
+    @Test
+    fun eachDayHasItsDeity() {
+        assertEquals(Deity.Shiv, Deity.of(DayOfWeek.MONDAY))
+        assertEquals(Deity.Hanuman, Deity.of(DayOfWeek.TUESDAY))
+        assertEquals(Deity.Ganesh, Deity.of(DayOfWeek.WEDNESDAY))
+        assertEquals(Deity.Vishnu, Deity.of(DayOfWeek.THURSDAY))
+        assertEquals(Deity.Durga, Deity.of(DayOfWeek.FRIDAY))
+        assertEquals(Deity.Shani, Deity.of(DayOfWeek.SATURDAY))
+        assertEquals(Deity.Surya, Deity.of(DayOfWeek.SUNDAY))
+        assertEquals(7, DayOfWeek.values().map { Deity.of(it) }.toSet().size)
+    }
+
+    @Test
+    fun localSongsAreFoundByDeity() {
+        val songs = listOf(
+            LocalTrack(1, "Tu Cheez Lajawab", "Sapna", null, "a.mp3", 200_000),
+            LocalTrack(2, "Om Namah Shivay", "Hariharan", null, "b.mp3", 300_000),
+            LocalTrack(3, "हनुमान चालीसा", "Gulshan Kumar", null, "c.mp3", 600_000),
+            LocalTrack(4, "Track 07", null, "Bholenath Bhajan", "d.mp3", 240_000),
+            LocalTrack(5, "Shiv ringtone", null, null, "e.mp3", 12_000),
+        )
+        val shiv = setOf(2L, 4L)
+        for (seed in 0L..5L) assertTrue(BhajanPlan.pickLocal(Deity.Shiv, songs, seed)!!.id in shiv)
+        assertEquals(3L, BhajanPlan.pickLocal(Deity.Hanuman, songs, 0)!!.id)
+        // Saturday: no Shani song, so Hanuman.
+        assertEquals(3L, BhajanPlan.pickLocal(Deity.Shani, songs, 0)!!.id)
+        assertNull(BhajanPlan.pickLocal(Deity.Surya, songs, 0))
     }
 }

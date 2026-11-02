@@ -34,6 +34,8 @@ data class NowPlaying(
     val positionUpdatedAt: Long,
     val playbackSpeed: Float,
     val isPlaying: Boolean,
+    /** The player's name ("Ampli"), shown when the session gives no title. */
+    val sourceLabel: String? = null,
 ) {
     /** Best estimate of the current position, advancing while playing. */
     fun positionAt(nowElapsed: Long = SystemClock.elapsedRealtime()): Long {
@@ -144,6 +146,20 @@ class MediaHub(context: Context) {
         if (playing) c.transportControls.pause() else c.transportControls.play()
     }
 
+    /**
+     * Play / pause on the session the music card shows (the rail's Play/Pause key). False when
+     * there is no session to control (no notification access, nothing has played yet).
+     */
+    fun togglePlayback(): Boolean {
+        val c = selected ?: return false
+        return try {
+            if (isPlaying(c)) c.transportControls.pause() else c.transportControls.play()
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     fun next() {
         selected?.transportControls?.skipToNext()
     }
@@ -161,6 +177,22 @@ class MediaHub(context: Context) {
         return try {
             val c = msm.getActiveSessions(listenerComponent).firstOrNull { it.packageName == pkg } ?: return false
             c.transportControls.play()
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Asks [pkg]'s media session to find and play [query] (Ampli MP3 searches the driver's own
+     * songs). False when it has no session or refuses. Works while the launcher is hidden.
+     */
+    fun playFromSearch(pkg: String, query: String): Boolean {
+        if (!hasAccess() || msm == null) return false
+        return try {
+            val c = msm.getActiveSessions(listenerComponent).firstOrNull { it.packageName == pkg } ?: return false
+            if (((c.playbackState?.actions ?: 0L) and PlaybackState.ACTION_PLAY_FROM_SEARCH) == 0L) return false
+            c.transportControls.playFromSearch(query, android.os.Bundle())
             true
         } catch (_: Exception) {
             false
@@ -214,9 +246,14 @@ class MediaHub(context: Context) {
 
     private fun publish() {
         val list = controllers
-        val chosen = list.firstOrNull { it.packageName == pinnedPackage }
-            ?: list.firstOrNull { isPlaying(it) }
-            ?: list.firstOrNull()
+        val last = (appContext as? DriveApp)?.prefs?.lastMediaPackage
+        val pick = MediaPick.choose(
+            list.map { MediaPick.Candidate(it.packageName, isPlaying(it), titleOf(it.metadata) != null) },
+            pinned = pinnedPackage,
+            preferred = listOfNotNull(last, AMPLI_PACKAGE),
+            self = appContext.packageName,
+        )
+        val chosen = pick?.let { list.getOrNull(it) }
         selected = chosen
         // Remembered for the Music button, so it reopens the last player after a restart.
         chosen?.packageName?.takeIf { it != appContext.packageName }?.let { pkg ->
@@ -236,20 +273,40 @@ class MediaHub(context: Context) {
         val ps = c.playbackState
         return NowPlaying(
             packageName = c.packageName,
-            title = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
-                ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE),
-            artist = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
-                ?: md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)
-                ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE),
+            title = titleOf(md),
+            artist = blankToNull(md?.getString(MediaMetadata.METADATA_KEY_ARTIST))
+                ?: blankToNull(md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST))
+                ?: blankToNull(md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE))
+                ?: safeDescription(md)?.subtitle?.toString()?.let { blankToNull(it) },
             album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM),
             art = artFrom(md),
             durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L,
             positionMs = ps?.position ?: 0L,
             positionUpdatedAt = ps?.lastPositionUpdateTime ?: 0L,
             playbackSpeed = ps?.playbackSpeed?.takeIf { it > 0f } ?: 1f,
-            isPlaying = ps?.state == PlaybackState.STATE_PLAYING,
+            isPlaying = playingState(ps?.state),
+            sourceLabel = labelFor(c.packageName),
         )
     }
+
+    /**
+     * The track's name: TITLE, then DISPLAY_TITLE, then the description Android builds from the
+     * metadata (players that only fill that, or put the name in a compat key). Blank counts as none.
+     */
+    private fun titleOf(md: MediaMetadata?): String? {
+        md ?: return null
+        return blankToNull(md.getString(MediaMetadata.METADATA_KEY_TITLE))
+            ?: blankToNull(md.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE))
+            ?: safeDescription(md)?.title?.toString()?.let { blankToNull(it) }
+    }
+
+    private fun safeDescription(md: MediaMetadata?) = try {
+        md?.description
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun blankToNull(s: String?): String? = s?.trim()?.takeIf { it.isNotEmpty() }
 
     /** Album art, scaled down once so a 3000 px cover doesn't sit in memory on a 2 GB unit. */
     private fun artFrom(md: MediaMetadata?): Bitmap? {
@@ -285,8 +342,7 @@ class MediaHub(context: Context) {
         callbacks.clear()
     }
 
-    private fun isPlaying(c: MediaController): Boolean =
-        c.playbackState?.state == PlaybackState.STATE_PLAYING
+    private fun isPlaying(c: MediaController): Boolean = playingState(c.playbackState?.state)
 
     private fun labelFor(pkg: String): String {
         KNOWN_LABELS[pkg]?.let { return it }
@@ -299,6 +355,9 @@ class MediaHub(context: Context) {
     }
 
     companion object {
+        /** A session counts as playing (card's bars move, rail shows Pause) only in STATE_PLAYING. */
+        fun playingState(state: Int?): Boolean = state == PlaybackState.STATE_PLAYING
+
         const val AMPLI_PACKAGE = "com.vikash.ampli"
         private const val MAX_ART_PX = 512
         private val KNOWN_LABELS = mapOf(AMPLI_PACKAGE to "Ampli")

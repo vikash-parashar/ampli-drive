@@ -102,14 +102,95 @@ class BhajanPlayer(private val app: DriveApp) {
             isPro = app.prefs.pro.value.isPro,
             exists = ::exists,
         )
-        if (decision !is BhajanDecision.Play) {
+        val noBundled = decision is BhajanDecision.Skip &&
+            (decision.reason == BhajanDecision.Reason.FileMissing || decision.reason == BhajanDecision.Reason.NoBhajans)
+        if (decision !is BhajanDecision.Play && !noBundled) {
             Log.d(TAG, "no bhajan: $decision")
             return
         }
-        // Never over a call or a Hey Ampli session.
+        // Never over a call, a Hey Ampli session, or music the driver already has playing.
         if (app.speaker.inCall() || app.voice.busy.value) return
+        if (audio?.isMusicActive == true) {
+            Log.d(TAG, "music already playing: no bhajan")
+            return
+        }
         sp.edit().putLong(KEY_LAST_DAY, now.toEpochDay()).apply()
-        play(decision.bhajan, decision.volume, now.dayOfWeek, showCard)
+        if (decision is BhajanDecision.Play) {
+            play(decision.bhajan, decision.volume, now.dayOfWeek, showCard)
+            return
+        }
+        // No Ampli recording in this build (none is bundled yet): the day's deity from the
+        // driver's own songs, then Ampli MP3's search, else say how to add one.
+        val deity = Deity.of(now.dayOfWeek)
+        val volume = _settings.value.volume.coerceIn(0.1f, 1f)
+        val local = findLocal(deity, now.toEpochDay())
+        if (local != null) {
+            playLocal(deity, local, volume, now.dayOfWeek, showCard)
+            return
+        }
+        if (app.mediaHub.playFromSearch(com.vikash.ampli.drive.media.MediaHub.AMPLI_PACKAGE, deity.nameEn + " bhajan")) {
+            Log.d(TAG, "asked Ampli MP3 for ${deity.nameEn}")
+            return
+        }
+        try {
+            app.speaker.say(app.getString(com.vikash.ampli.drive.R.string.bhajan_none_found, app.getString(deityName(deity))), app.prefs.language.value)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun deityName(d: Deity): Int = when (d) {
+        Deity.Shiv -> com.vikash.ampli.drive.R.string.deity_shiv
+        Deity.Hanuman -> com.vikash.ampli.drive.R.string.deity_hanuman
+        Deity.Ganesh -> com.vikash.ampli.drive.R.string.deity_ganesh
+        Deity.Vishnu -> com.vikash.ampli.drive.R.string.deity_vishnu
+        Deity.Durga -> com.vikash.ampli.drive.R.string.deity_durga
+        Deity.Shani -> com.vikash.ampli.drive.R.string.deity_shani
+        Deity.Surya -> com.vikash.ampli.drive.R.string.deity_surya
+    }
+
+    /**
+     * The driver's own songs (MediaStore; needs the storage / audio permission Car Hub asks for
+     * the music features). Nothing is downloaded or streamed. Off the main thread.
+     */
+    private suspend fun findLocal(deity: Deity, seed: Long): LocalTrack? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val perm = if (android.os.Build.VERSION.SDK_INT >= 33) android.Manifest.permission.READ_MEDIA_AUDIO else android.Manifest.permission.READ_EXTERNAL_STORAGE
+        if (app.checkSelfPermission(perm) != android.content.pm.PackageManager.PERMISSION_GRANTED) return@withContext null
+        val tracks = ArrayList<LocalTrack>()
+        try {
+            val cols = arrayOf(
+                android.provider.MediaStore.Audio.Media._ID,
+                android.provider.MediaStore.Audio.Media.TITLE,
+                android.provider.MediaStore.Audio.Media.ARTIST,
+                android.provider.MediaStore.Audio.Media.ALBUM,
+                android.provider.MediaStore.Audio.Media.DISPLAY_NAME,
+                android.provider.MediaStore.Audio.Media.DURATION,
+            )
+            app.contentResolver.query(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cols, null, null, null)?.use { c ->
+                while (c.moveToNext() && tracks.size < MAX_SCAN) {
+                    tracks += LocalTrack(c.getLong(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4), c.getLong(5))
+                }
+            }
+        } catch (_: Exception) {
+        }
+        BhajanPlan.pickLocal(deity, tracks, seed)
+    }
+
+    private suspend fun playLocal(deity: Deity, t: LocalTrack, volume: Float, day: DayOfWeek, showCard: Boolean) {
+        val uri = android.content.ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, t.id)
+        val shown = Bhajan(
+            id = "local_${t.id}",
+            title = t.title ?: deity.nameEn,
+            titleHi = t.title ?: deity.nameHi,
+            greeting = deity.greeting,
+            file = "",
+            seconds = (minOf(if (t.durationMs > 0) t.durationMs else LOCAL_MAX_MS, LOCAL_MAX_MS) / 1000).toInt(),
+            free = true,
+            days = setOf(day),
+            original = false,
+        )
+        playSource(shown, volume, day, showCard, LOCAL_MAX_MS) { mp -> mp.setDataSource(app, uri) }
     }
 
     /** The settings sheet's "Play": the chosen bhajan once (Pro ones need Pro). */
@@ -118,14 +199,18 @@ class BhajanPlayer(private val app: DriveApp) {
         scope.launch { play(b, _settings.value.volume, LocalDate.now().dayOfWeek, showCard = false) }
     }
 
-    private suspend fun play(b: Bhajan, volume: Float, day: DayOfWeek, showCard: Boolean) {
+    private suspend fun play(b: Bhajan, volume: Float, day: DayOfWeek, showCard: Boolean) =
+        playSource(b, volume, day, showCard, BhajanPlan.MAX_MS) { mp ->
+            app.assets.openFd(b.file).use { mp.setDataSource(it.fileDescriptor, it.startOffset, it.length) }
+        }
+
+    private suspend fun playSource(b: Bhajan, volume: Float, day: DayOfWeek, showCard: Boolean, maxMs: Long, source: (MediaPlayer) -> Unit) {
         stop()
         val signal = CompletableDeferred<Unit>()
         done = signal
         val mp = try {
-            val fd = app.assets.openFd(b.file)
             MediaPlayer().apply {
-                fd.use { setDataSource(it.fileDescriptor, it.startOffset, it.length) }
+                source(this)
                 setAudioAttributes(ATTRS)
                 setVolume(volume, volume)
                 setOnCompletionListener { signal.complete(Unit) }
@@ -149,7 +234,7 @@ class BhajanPlayer(private val app: DriveApp) {
         }
         try {
             mp.start()
-            withTimeoutOrNull(BhajanPlan.MAX_MS) { signal.await() }
+            withTimeoutOrNull(maxMs) { signal.await() }
         } finally {
             stop()
         }
@@ -182,6 +267,12 @@ class BhajanPlayer(private val app: DriveApp) {
         const val KEY_CHOICE = "choice"
         const val KEY_VOLUME = "volume"
         const val KEY_LAST_DAY = "last_day"
+
+        /** A song of the driver's own plays at most this long at a car start. */
+        const val LOCAL_MAX_MS = 10 * 60_000L
+
+        /** Songs looked at in MediaStore (a big library on a slow unit). */
+        const val MAX_SCAN = 5_000
 
         val ATTRS: AudioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_MEDIA)

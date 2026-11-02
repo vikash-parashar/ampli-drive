@@ -38,7 +38,8 @@ data class BhajanSettings(
     val volume: Float = DEFAULT_VOLUME,
 ) {
     companion object {
-        val DEFAULT_DAYS: Set<DayOfWeek> = setOf(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY)
+        /** Every day has its deity ([Deity]), so once switched on it plays every day. */
+        val DEFAULT_DAYS: Set<DayOfWeek> = DayOfWeek.values().toSet()
         const val DEFAULT_VOLUME = 0.55f
     }
 }
@@ -50,6 +51,43 @@ sealed interface BhajanDecision {
 
     enum class Reason { Off, NotToday, AlreadyPlayed, NoBhajans, FileMissing }
 }
+
+/**
+ * The day's deity: Monday Shiv, Tuesday Hanuman, Wednesday Ganesh, Thursday Vishnu / Brihaspati,
+ * Friday Durga / Santoshi Mata, Saturday Shani Dev (and Hanuman), Sunday Surya Dev. [keywords]
+ * find the driver's own songs for that deity (titles, artists, albums, file names; Latin and
+ * Devanagari). [also]: a second set tried when nothing matches the first (Saturday: Hanuman).
+ */
+enum class Deity(
+    val day: DayOfWeek,
+    val greeting: String,
+    val nameEn: String,
+    val nameHi: String,
+    val keywords: List<String>,
+    val also: List<String> = emptyList(),
+) {
+    Shiv(DayOfWeek.MONDAY, "हर हर महादेव!", "Shiv ji", "शिव जी",
+        listOf("shiv", "mahadev", "bhole", "bholenath", "shankar", "shambhu", "शिव", "महादेव", "भोले", "शंकर", "शंभू")),
+    Hanuman(DayOfWeek.TUESDAY, "जय बजरंगबली!", "Hanuman ji", "हनुमान जी",
+        listOf("hanuman", "bajrang", "balaji", "chalisa", "हनुमान", "बजरंग", "बालाजी", "चालीसा")),
+    Ganesh(DayOfWeek.WEDNESDAY, "गणपति बप्पा मोरया!", "Ganesh ji", "गणेश जी",
+        listOf("ganesh", "ganpati", "ganapati", "vinayak", "गणेश", "गणपति", "विनायक")),
+    Vishnu(DayOfWeek.THURSDAY, "ॐ नमो नारायणाय!", "Vishnu ji", "विष्णु जी",
+        listOf("vishnu", "brihaspati", "brahaspati", "narayan", "satyanarayan", "jagdish", "विष्णु", "बृहस्पति", "नारायण", "जगदीश")),
+    Durga(DayOfWeek.FRIDAY, "जय माता दी!", "Durga Maa", "दुर्गा माँ",
+        listOf("durga", "santoshi", "ambe", "sherawali", "vaishno", "mata rani", "दुर्गा", "संतोषी", "अम्बे", "शेरावाली", "माता")),
+    Shani(DayOfWeek.SATURDAY, "जय शनिदेव!", "Shani Dev", "शनिदेव",
+        listOf("shani", "शनि"), also = listOf("hanuman", "bajrang", "balaji", "chalisa", "हनुमान", "बजरंग", "बालाजी")),
+    Surya(DayOfWeek.SUNDAY, "जय सूर्य देव!", "Surya Dev", "सूर्य देव",
+        listOf("surya", "suraj", "aditya", "सूर्य", "सूरज", "आदित्य"));
+
+    companion object {
+        fun of(day: DayOfWeek): Deity = values().first { it.day == day }
+    }
+}
+
+/** One song in the driver's own music (MediaStore). */
+data class LocalTrack(val id: Long, val title: String?, val artist: String?, val album: String?, val fileName: String?, val durationMs: Long)
 
 /** Which bhajan (if any) plays after the welcome. Pure, unit-tested. */
 object BhajanPlan {
@@ -93,6 +131,27 @@ object BhajanPlan {
             ?: usable.first()
         if (isPro || chosen.free) return chosen
         return usable.firstOrNull { it.free }
+    }
+
+    /** True when [text] names [deity] (case-insensitive, Latin or Devanagari). */
+    fun matches(keywords: List<String>, text: String?): Boolean {
+        val t = text?.lowercase() ?: return false
+        return keywords.any { t.contains(it) }
+    }
+
+    /**
+     * A song for [deity] from the driver's own music: one whose title, album, artist or file name
+     * names the deity ([Deity.keywords], then [Deity.also]). [seed] varies the pick from day to
+     * day. Too-short clips (ringtones, under 30 s) are left out. Null when nothing matches.
+     */
+    fun pickLocal(deity: Deity, tracks: List<LocalTrack>, seed: Long): LocalTrack? {
+        val usable = tracks.filter { it.durationMs <= 0 || it.durationMs >= 30_000 }
+        for (keys in listOf(deity.keywords, deity.also)) {
+            if (keys.isEmpty()) continue
+            val hits = usable.filter { t -> listOf(t.title, t.album, t.artist, t.fileName).any { matches(keys, it) } }
+            if (hits.isNotEmpty()) return hits.sortedBy { it.id }[(Math.floorMod(seed, hits.size.toLong())).toInt()]
+        }
+        return null
     }
 
     /** True when [b] needs Pro (the settings sheet shows a lock). */

@@ -4,9 +4,11 @@
     <string name="rail_home">होम</string>
     <string name="rail_apps">ऐप्स</string>
     <string name="rail_vol_up">आवाज़ +</string>
-    <string name="rail_vol_down">आवाज़ −</string>
+    <string name="rail_vol_down">आवाज़ -</string>
     <string name="rail_mute">म्यूट</string>
     <string name="rail_unmute">आवाज़ चालू</string>
+    <string name="rail_play">चलाओ</string>
+    <string name="rail_pause">रोको</string>
     <string name="rail_controls">कंट्रोल</string>
     <string name="rail_volume_title">आवाज़</string>
     <string name="rail_muted">म्यूट</string>

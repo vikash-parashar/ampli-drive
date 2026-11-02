@@ -23,7 +23,8 @@
     <string name="auto_button_hint">Long-press your phone-link app to put it on this button</string>
     <string name="map_allow_text">Allow location to see the map and your speed</string>
     <string name="map_allow_button">Allow location</string>
-    <string name="map_waiting_fix">Waiting for a GPS fix…</string>
+    <string name="map_waiting_fix">Finding location…</string>
+    <string name="map_you_are_here">You are here</string>
     <string name="map_location_off">Turn on location to see the map</string>
     <string name="map_open_google_maps">Open Google Maps</string>
     <string name="map_tap_to_navigate">Tap to navigate</string>
@@ -697,6 +698,7 @@
     <string name="nav_fail_title">Couldn\'t start navigation</string>
     <string name="nav_fail_network">No internet, so the route to %1$s couldn\'t load.</string>
     <string name="nav_fail_no_route">No road route found to %1$s.</string>
+    <string name="nav_fail_unreachable">Couldn\'t reach the route server for %1$s. The internet is on; try again, or open it in Google Maps.</string>
     <string name="nav_fail_busy">The route server is busy right now.</string>
     <string name="nav_fail_server">The route server didn\'t answer properly.</string>
     <string name="nav_fail_no_location">No GPS fix yet, so the route can\'t start. Wait a moment and try again.</string>

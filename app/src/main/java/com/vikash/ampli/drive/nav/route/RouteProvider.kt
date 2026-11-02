@@ -23,6 +23,13 @@ sealed class RouteResult {
 
         /** Anything else the server said, or a body we couldn't read. */
         Server,
+
+        /**
+         * The route server could not be reached although the internet itself works: a TLS
+         * handshake it refused (an old Android's certificates or protocols), a host that answers
+         * nothing. Never shown as "no internet".
+         */
+        Unreachable,
     }
 }
 
@@ -60,12 +67,22 @@ class OsrmRouteProvider(
     override fun route(from: LatLon, to: LatLon, bearing: Float?): RouteResult {
         // Release builds never fall back to a public server: no URL, no route.
         if (base.isEmpty()) return RouteResult.Failed(RouteResult.Reason.Server, "Routing server not configured")
+        var last: RouteResult = RouteResult.Failed(RouteResult.Reason.Server, null)
+        for (server in serversFor(base)) {
+            last = routeOn(server, from, to, bearing)
+            // A route, or "no road there" (the next server would say the same): done.
+            if (last is RouteResult.Ok || (last as RouteResult.Failed).reason == RouteResult.Reason.NoRoute) return last
+        }
+        return last
+    }
+
+    private fun routeOn(server: String, from: LatLon, to: LatLon, bearing: Float?): RouteResult {
         // Try the richest request first. Some OSRM builds reject the maxspeed annotation or a
         // bearing that doesn't fit the nearest road with HTTP 400; then ask again with less.
         val attempts = buildList {
-            if (bearing != null) add(url(from, to, bearing, limits = true))
-            add(url(from, to, null, limits = true))
-            add(url(from, to, null, limits = false))
+            if (bearing != null) add(url(from, to, bearing, limits = true, server = server))
+            add(url(from, to, null, limits = true, server = server))
+            add(url(from, to, null, limits = false, server = server))
         }
         var last: RouteResult = RouteResult.Failed(RouteResult.Reason.Server, null)
         for (u in attempts) {
@@ -77,8 +94,8 @@ class OsrmRouteProvider(
         return last
     }
 
-    fun url(from: LatLon, to: LatLon, bearing: Float?, limits: Boolean): String = buildString {
-        append(base)
+    fun url(from: LatLon, to: LatLon, bearing: Float?, limits: Boolean, server: String = base): String = buildString {
+        append(server)
         append("/route/v1/driving/")
         append(String.format(Locale.US, "%.6f,%.6f;%.6f,%.6f", from.lon, from.lat, to.lon, to.lat))
         append("?overview=full&geometries=geojson&steps=true")
@@ -90,7 +107,7 @@ class OsrmRouteProvider(
         val conn = try {
             URL(u).openConnection() as HttpURLConnection
         } catch (e: IOException) {
-            return RouteResult.Failed(RouteResult.Reason.Network, e.message)
+            return RouteResult.Failed(classify(e), e.message)
         }
         return try {
             conn.connectTimeout = timeoutMs
@@ -111,7 +128,7 @@ class OsrmRouteProvider(
                 }
             }
         } catch (e: IOException) {
-            RouteResult.Failed(RouteResult.Reason.Network, "${e.javaClass.simpleName}: ${e.message}")
+            RouteResult.Failed(classify(e), "${e.javaClass.simpleName}: ${e.message}")
         } finally {
             conn.disconnect()
         }
@@ -120,5 +137,32 @@ class OsrmRouteProvider(
     companion object {
         /** The OSRM project's public demo server: testing only, never for production. */
         const val DEMO_URL = "https://router.project-osrm.org"
+
+        /**
+         * FOSSGIS's public OSRM (car profile, same API), the second server for TEST builds only,
+         * when the demo server can't be reached or is busy. Fair use, no SLA: like [DEMO_URL] it is
+         * never used by a release build (those have their own server and no fallback).
+         */
+        const val FOSSGIS_URL = "https://routing.openstreetmap.de/routed-car"
+
+        /** The servers tried in order: our own server alone, or the demo server then FOSSGIS's. */
+        fun serversFor(primary: String): List<String> {
+            val p = primary.trim().trimEnd('/')
+            if (p.isEmpty()) return emptyList()
+            return if (p == DEMO_URL) listOf(DEMO_URL, FOSSGIS_URL) else listOf(p)
+        }
+
+        /**
+         * What a failed request means. Only "this name doesn't resolve" and "nothing answers" are
+         * network trouble; a TLS handshake the server refused is that server's problem, and a
+         * timeout is a slow server. (The navigator also checks the unit is online before it
+         * says "no internet".)
+         */
+        fun classify(e: IOException): RouteResult.Reason = when (e) {
+            is javax.net.ssl.SSLException -> RouteResult.Reason.Unreachable
+            is java.net.SocketTimeoutException -> RouteResult.Reason.Busy
+            is java.net.UnknownHostException, is java.net.ConnectException, is java.net.NoRouteToHostException -> RouteResult.Reason.Network
+            else -> RouteResult.Reason.Network
+        }
     }
 }
