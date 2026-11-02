@@ -7,3 +7,6 @@
 -keep class * implements com.sun.jna.** { *; }
 -keep class org.vosk.** { *; }
 -dontwarn java.awt.**
+
+# Ampli voice engine (libamplitts): JNI binds FliteNative's native methods by class and method name.
+-keep class com.vikash.ampli.drive.voice.tts.FliteNative { native <methods>; }

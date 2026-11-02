@@ -133,6 +133,15 @@ android {
         }
     }
 
+    // Ampli's bundled voice engine: CMU Flite (app/src/main/cpp/flite, BSD-style licence) plus a
+    // small JNI layer, built for the two ARM ABIs above (~1 MB each). The voice (~31 MB) is not
+    // in the APK: it rides in the :voicemodels asset pack or is downloaded (TtsVoiceFiles).
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -145,7 +154,8 @@ android {
         buildConfig = true
     }
 
-    // Both offline speech models ride in an install-time asset pack, so a Play install has them
+    // Both offline speech models (and the bundled voice engine's voices, assets/tts) ride in an
+    // install-time asset pack, so a Play install has them
     // on the first start without any download (WakeModel unpacks assets/vosk/<model>.zip). Asset
     // packs go only into the app bundle (bundleRelease): assembleDebug APKs carry no models and
     // download them by themselves on first start (VoiceModels), so the test APK stays small.

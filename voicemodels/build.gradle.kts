@@ -1,5 +1,6 @@
 // Play Asset Delivery install-time pack: the offline Vosk speech models (Apache-2.0,
-// alphacephei.com), installed with the app from Play so voice works on first start with no
+// alphacephei.com) and the bundled voice engine's Flite voices (assets/tts/*.flitevox, CMU's
+// BSD-style licence, festvox.org), installed with the app from Play so voice works on first start with no
 // download. CI (.github/workflows/build-apk.yml) puts the two zips in src/main/assets/vosk/
 // before building; they are never committed (.gitignore). Without them (local builds) the pack
 // holds only README.txt and the app downloads the models itself on first start.

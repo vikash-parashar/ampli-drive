@@ -619,6 +619,7 @@
     <string name="vcheck_get_tts">Get speech engine</string>
     <string name="vcheck_tts_settings">Voice settings</string>
     <string name="vcheck_say_test">Say test</string>
+    <string name="vcheck_ampli_voice_test">Ampli voice test</string>
     <string name="vcheck_listen_test">Listen test</string>
     <string name="vcheck_listening">Listening…</string>
     <string name="vcheck_listen_hint">Tap Listen test and say \"next song\" or \"navigate\".</string>

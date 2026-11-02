@@ -607,6 +607,7 @@
     <string name="vcheck_get_tts">स्पीच इंजन लें</string>
     <string name="vcheck_tts_settings">आवाज़ सेटिंग्स</string>
     <string name="vcheck_say_test">बोलकर जाँचें</string>
+    <string name="vcheck_ampli_voice_test">Ampli आवाज़ जाँचें</string>
     <string name="vcheck_listen_test">सुनकर जाँचें</string>
     <string name="vcheck_listening">सुन रहा है…</string>
     <string name="vcheck_listen_hint">सुनकर जाँचें दबाएँ और \"next song\" या \"navigate\" बोलें।</string>

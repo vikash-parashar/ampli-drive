@@ -59,6 +59,8 @@ import com.vikash.ampli.drive.voice.VoiceLocales
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.VoskCommandListener
 import com.vikash.ampli.drive.voice.WakeModel
+import com.vikash.ampli.drive.voice.tts.BundledTts
+import com.vikash.ampli.drive.voice.tts.TtsVoiceFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -121,6 +123,22 @@ private data class TtsInfo(
     val hindi: Int,
     val english: Int,
 )
+
+/** Check voice's line for Ampli's bundled engine: "ready (Hindi, English)", progress or the problem. */
+private fun ampliVoiceText(state: TtsVoiceFiles.State, usable: Set<String>, installed: Set<String>): String {
+    val names = listOfNotNull(
+        "Hindi".takeIf { BundledTts.HINDI in installed },
+        "English".takeIf { BundledTts.ENGLISH in installed },
+    ).joinToString(", ")
+    return when {
+        installed.isNotEmpty() && usable.isEmpty() -> "voice files in place but the engine did not load ($names)"
+        state is TtsVoiceFiles.State.Working -> "getting ready ${state.percent}%" + if (names.isNotEmpty()) " · ready: $names" else ""
+        state is TtsVoiceFiles.State.Failed -> "FAILED: ${state.message}" + if (names.isNotEmpty()) " · ready: $names" else ""
+        usable.isNotEmpty() && state is TtsVoiceFiles.State.Ready -> "ready ($names)"
+        usable.isNotEmpty() -> "ready ($names), rest not downloaded yet"
+        else -> "not downloaded yet: downloads by itself (needs internet)"
+    }
+}
 
 private fun langText(code: Int): String = when {
     code >= TextToSpeech.LANG_COUNTRY_AVAILABLE -> "yes"
@@ -209,6 +227,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
     }
     val services = remember(tick) { recognitionServices(context) }
     var heard by remember { mutableStateOf<String?>(null) }
+    var voiceTest by remember { mutableStateOf<String?>(null) }
     var listening by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize().padding(dims.d(2.4f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -323,6 +342,33 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     )
                     DiagRow("English voice (en-IN)", langText(tts.english), tts.english >= TextToSpeech.LANG_AVAILABLE)
                 }
+                // Ampli's own offline voice engine (shipped with the app; speaks when the unit has none).
+                val bundledFiles = app.speaker.bundled.files
+                val bundledState by bundledFiles.state.collectAsStateWithLifecycle()
+                val bundledLanguages = remember(bundledState, tick) { app.speaker.bundled.languages() }
+                DiagRow(
+                    "Ampli voice engine",
+                    ampliVoiceText(bundledState, bundledLanguages, bundledFiles.installedLanguages()),
+                    bundledLanguages.isNotEmpty(),
+                    action = if (bundledState is TtsVoiceFiles.State.Missing || bundledState is TtsVoiceFiles.State.Failed) {
+                        stringResource(R.string.vcheck_download)
+                    } else {
+                        null
+                    },
+                    onAction = { bundledFiles.ensure() },
+                )
+                var usedFor by remember { mutableStateOf<BundledTts.Engine?>(null) }
+                LaunchedEffect(bundledState, language, tick) { usedFor = app.speaker.engineFor(language) }
+                DiagRow(
+                    "Used for speech",
+                    when (usedFor) {
+                        null -> "checking…"
+                        BundledTts.Engine.System -> "system TTS engine"
+                        BundledTts.Engine.Bundled -> "Ampli voice engine"
+                        BundledTts.Engine.None -> "NONE: recorded lines only"
+                    },
+                    usedFor?.let { it != BundledTts.Engine.None },
+                )
             }
             DiagSection("Tests") {
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
@@ -332,6 +378,16 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                             app.speaker.say("नमस्ते, यह एम्पली कार हब की आवाज़ है।", "hi")
                         }
                     })
+                    // The bundled engine itself, also on units whose own TTS would take the test above.
+                    BigButton(text = stringResource(R.string.vcheck_ampli_voice_test), onClick = {
+                        scope.launch {
+                            voiceTest = "speaking…"
+                            val hi = app.speaker.sayBundled("नमस्ते, यह एम्पली की अपनी आवाज़ है। टोल एक सौ पैंतीस रुपये।", "hi")
+                            val en = app.speaker.sayBundled("Hello, this is Ampli's own voice.", "en-IN")
+                            voiceTest = "Hindi: ${if (hi) "spoken" else "NOT spoken"} · English: ${if (en) "spoken" else "NOT spoken"}"
+                            tick++
+                        }
+                    }, primary = false)
                     BigButton(text = if (listening) stringResource(R.string.vcheck_listening) else stringResource(R.string.vcheck_listen_test), onClick = {
                         if (listening) return@BigButton
                         listening = true
@@ -352,6 +408,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     }, primary = false)
                 }
                 heard?.let { DiagRow("Listen test", it, it.startsWith("Heard")) }
+                voiceTest?.let { DiagRow("Ampli voice test", it, if (it.contains("NOT")) false else null) }
                 Text(stringResource(R.string.vcheck_listen_hint), color = LocalDriveTheme.current.muted, fontSize = dims.t(2.1f, min = 12f))
             }
         }

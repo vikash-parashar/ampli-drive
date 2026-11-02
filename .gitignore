@@ -17,3 +17,5 @@
 /voicemodels/build/
 # Offline speech models: downloaded by CI into the Play asset pack, never committed.
 /voicemodels/src/main/assets/vosk/*.zip
+# Bundled voice engine voices: downloaded by CI into the Play asset pack, never committed.
+/voicemodels/src/main/assets/tts/*.flitevox
