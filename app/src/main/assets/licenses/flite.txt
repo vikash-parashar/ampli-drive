@@ -5,15 +5,14 @@ Technologies Institute, Carnegie Mellon University (https://github.com/festvox/f
 commit 6c9f20dc915b17f5619340069889db0aa007fcdc). The Flite source files are used unmodified;
 the JNI glue that connects them to the app (app/src/main/cpp/ampli_tts.c) is Ampli's own code.
 
-Voices (used unmodified, downloaded from http://festvox.org/flite/packed/flite-2.1/voices/):
-  cmu_indic_hin_ab.flitevox  Hindi, CMU Indic speech database speaker "ab"
-  cmu_us_axb.flitevox        Indian English, CMU speaker "axb"
-Each voice file carries Carnegie Mellon University's licence (the same free licence as Flite,
-reproduced below) in its "copyright" field:
+Voice (used unmodified, from http://festvox.org/flite/packed/flite-2.1/voices/):
+  cmu_indic_hin_ab.flitevox  Hindi (also reads English), CMU Indic speech database speaker "ab"
+The voice file carries Carnegie Mellon University's licence (the same free licence as Flite)
+in its "copyright" field, reproduced here:
 
                   Language Technologies Institute
                      Carnegie Mellon University
-                      Copyright (c) (years as given in each voice file)
+                       Copyright (c) 2009-2017
                         All Rights Reserved.
 
   Permission is hereby granted, free of charge, to use and distribute this data, software and

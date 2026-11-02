@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           set +e +o pipefail
-          for name in cmu_indic_hin_ab cmu_us_axb cmu_us_aup cmu_us_ksp cmu_us_slp cmu_us_gka cmu_us_ahw cmu_us_eey cmu_us_ljm cmu_us_fem cmu_us_slt; do
+          for name in cmu_indic_hin_ab; do
             head=$(curl -fsL --max-time 60 -r 0-65535 "http://festvox.org/flite/packed/flite-2.1/voices/$name.flitevox" | tr -c '[:print:]\n' '\n' | grep -a -E -A16 '^(variant|copyright)$' | head -40 | tr '\n' ' ' | tr -s ' ' | cut -c1-500)
             echo "::notice title=Voice licence $name::${head:-could not read the header}"
           done
@@ -275,7 +275,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: voicemodels/src/main/assets/tts/*.flitevox
-          key: flitevox-cmu_indic_hin_ab-cmu_us_axb-v1
+          key: flitevox-cmu_indic_hin_ab-v1
 
       - name: Fetch bundled voices
         shell: bash
@@ -301,7 +301,6 @@ jobs:
             mv "$f.part" "$f"
           done <<'LIST'
           cmu_indic_hin_ab.flitevox c84a8a2e76ff237a9ab3678acddc8874e20be6693d3f00d08354537dc0ce7938059227024e89d9cd06aa1b16817a8d4c0b3872eae67c8980970226899bf0ed17
-          cmu_us_axb.flitevox c680841b5cc3792a9cb4e4c8c5abdb4604986fc5b590865f513d1cb45f868d8072ade5502ac609a4ef930b219ab2db3abe804a82883441f143f5641a6b93107a
           LIST
           ls -l "$dir"
 

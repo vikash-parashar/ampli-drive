@@ -54,7 +54,7 @@ class VoiceModels(private val app: DriveApp) {
      */
     @Synchronized
     fun ensureAll(networkBack: Boolean = false) {
-        // Ampli's own voice (~38 MB, copy or download) runs beside the models: on units without
+        // Ampli's own voice (~31 MB, copy or download) runs beside the models: on units without
         // a TTS engine it is what speaks names and numbers that have no recording.
         val voices = app.speaker.bundled.files
         if (!voices.allInstalled()) {

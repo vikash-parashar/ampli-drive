@@ -134,8 +134,8 @@ android {
     }
 
     // Ampli's bundled voice engine: CMU Flite (app/src/main/cpp/flite, BSD-style licence) plus a
-    // small JNI layer, built for the two ARM ABIs above (~1 MB each). The voices (~38 MB) are
-    // not in the APK: they ride in the :voicemodels asset pack or are downloaded (TtsVoiceFiles).
+    // small JNI layer, built for the two ARM ABIs above (~1 MB each). The voice (~31 MB) is not
+    // in the APK: it rides in the :voicemodels asset pack or is downloaded (TtsVoiceFiles).
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")

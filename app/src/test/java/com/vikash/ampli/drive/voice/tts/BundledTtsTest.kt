@@ -104,7 +104,7 @@ class BundledTtsTest {
 
     @Test
     fun voiceSpecsAreConsistent() {
-        assertEquals(setOf("hi", "en"), TtsVoiceSpec.entries.map { it.language }.toSet())
+        assertEquals(setOf("hi", "en"), TtsVoiceSpec.entries.flatMap { it.languages }.toSet())
         TtsVoiceSpec.entries.forEach {
             assertEquals(128, it.sha512.length)
             assertTrue(it.sha512.all { c -> c in '0'..'9' || c in 'a'..'f' })

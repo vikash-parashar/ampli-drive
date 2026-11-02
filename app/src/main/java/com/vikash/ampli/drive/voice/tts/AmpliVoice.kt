@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 /**
  * Ampli's own offline voice engine, shipped inside the app so units without any text-to-speech
  * engine (the TS7) still hear names, numbers and titles that have no recording. It runs CMU
- * Flite (native, app/src/main/cpp) with a Hindi and an Indian English voice ([TtsVoiceFiles])
+ * Flite (native, app/src/main/cpp) with CMU's Hindi voice, which also reads English ([TtsVoiceFiles]),
  * and plays the samples itself through an AudioTrack. [com.vikash.ampli.drive.voice.Speaker]
  * decides when to use it ([BundledTts.pick]); callers never talk to it directly.
  *
@@ -25,7 +25,7 @@ class AmpliVoice(context: Context) {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val synthThread = Dispatchers.IO.limitedParallelism(1)
 
-    /** The one voice kept in memory (~30-60 MB for Hindi), swapped when the language changes. */
+    /** The one voice kept in memory (~50-70 MB for the Hindi voice). */
     private var loaded: TtsVoiceSpec? = null
     private var handle = 0L
 
@@ -54,7 +54,7 @@ class AmpliVoice(context: Context) {
     suspend fun speak(text: String, parserLanguage: String, attributes: AudioAttributes, stretch: Float = 1f): Boolean {
         if (text.isBlank()) return false
         val lang = BundledTts.voiceFor(text, parserLanguage, languages()) ?: return false
-        val spec = TtsVoiceSpec.entries.first { it.language == lang }
+        val spec = TtsVoiceSpec.entries.firstOrNull { lang in it.languages && files.isInstalled(it) } ?: return false
         val my = ++generation
         return withContext(synthThread) {
             val voice = voiceHandle(spec)
