@@ -56,6 +56,12 @@ android {
         buildConfigField("String", "WEATHER_API_KEY", "\"${env("WEATHER_API_KEY")}\"")
         // Our own map style (e.g. PMTiles on S3/CloudFront) tried when the theme's style fails.
         buildConfigField("String", "MAP_FALLBACK_STYLE_URL", "\"${env("MAP_FALLBACK_STYLE_URL")}\"")
+        // Sharing police / camera / pump-queue reports between drivers (sync/ReportSync.kt). There is
+        // no such server yet: empty (the default) keeps every report on the unit that made it.
+        buildConfigField("String", "REPORT_SYNC_URL", "\"${env("REPORT_SYNC_URL")}\"")
+        // Settings › Offline map: a style whose tiles may be downloaded for offline use. Empty = the
+        // map's own OpenFreeMap style (see docs/offline-map.md); never tile.openstreetmap.org.
+        buildConfigField("String", "OFFLINE_MAP_STYLE_URL", "\"${env("OFFLINE_MAP_STYLE_URL")}\"")
         // Small JSON on our own server that can move the servers above without an update (RemoteConfig).
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"${env("REMOTE_CONFIG_URL")}\"")
         // Pro launch offer line ("Launch price ₹1,499, later ₹2,500"). Set LAUNCH_OFFER=false when it ends.

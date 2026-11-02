@@ -650,6 +650,35 @@ class VoiceAssistant(private val app: DriveApp) {
                 styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_bt_settings_opening))
                 return null
             }
+            VoiceIntent.CameraHere -> {
+                cameraHere(res, lang)
+                return null
+            }
+            is VoiceIntent.ReportGone -> {
+                reportGone(intent.what, res, lang)
+                return null
+            }
+            is VoiceIntent.PumpQueue -> {
+                pumpQueue(intent.long, intent.filter, res, lang)
+                return null
+            }
+            is VoiceIntent.LogFuel -> {
+                logFuel(intent.rupees, intent.litres, intent.fuel, res, lang)
+                return null
+            }
+            VoiceIntent.ChallanSaved -> {
+                challanAnswer(res, lang)
+                return null
+            }
+            VoiceIntent.SnoozeBreak -> {
+                app.car.snoozeBreak()
+                styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.x_break_snoozed))
+                return null
+            }
+            VoiceIntent.ConnectHotspot -> {
+                connectHotspot(res, lang)
+                return null
+            }
             VoiceIntent.WhatCanISay -> {
                 bringLauncherForward(MainActivity.VOICE_COMMANDS)
                 styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_commands_opening))
@@ -1052,6 +1081,174 @@ class VoiceAssistant(private val app: DriveApp) {
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, text))
         styled(res, lang, HaryanviLines.Event.ReportSaved, text)
         holdAnswer(shownAt)
+    }
+
+    // ------------------------------------------------------------------- Drive diary (nine features)
+
+    /** Where the car is now, or says "no location" and returns null. */
+    private suspend fun hereOrSay(res: Context, lang: String, title: String): android.location.Location? {
+        val here = app.speedTracker.state.value.location
+        if (here == null) {
+            val shownAt = System.currentTimeMillis()
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
+            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            holdAnswer(shownAt)
+        }
+        return here
+    }
+
+    /** Sends a report to the shared server when the build has one (off by default: no server). */
+    private fun share(kind: String, here: android.location.Location, stationId: Int? = null) {
+        val sync = app.reportSync
+        if (!sync.enabled) return
+        val r = com.vikash.ampli.drive.sync.SharedReport(
+            kind, here.latitude, here.longitude, if (here.hasBearing()) here.bearing.toDouble() else null, System.currentTimeMillis(), stationId,
+        )
+        scope.launch { sync.push(r) }
+    }
+
+    /** "Yahan camera hai": a fixed camera here, kept until "camera nahi hai". Free, not Pro. */
+    private suspend fun cameraHere(res: Context, lang: String) {
+        val title = res.getString(R.string.voice_report_title)
+        val gps = app.speedTracker.state.value
+        val here = hereOrSay(res, lang, title) ?: return
+        val shownAt = System.currentTimeMillis()
+        app.cameras.report(here, gps.speedKmh)
+        share("camera", here)
+        val text = res.getString(R.string.x_camera_saved)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, res.getString(R.string.radar_item_fixed), text))
+        styled(res, lang, HaryanviLines.Event.ReportSaved, text)
+        holdAnswer(shownAt)
+    }
+
+    /** "Camera nahi hai" / "police chali gayi" / "jam khul gaya": removes reports near here. */
+    private suspend fun reportGone(what: VoiceIntent.Gone, res: Context, lang: String) {
+        val title = res.getString(R.string.voice_report_title)
+        val here = hereOrSay(res, lang, title) ?: return
+        val shownAt = System.currentTimeMillis()
+        val lat = here.latitude
+        val lon = here.longitude
+        val removed = when (what) {
+            VoiceIntent.Gone.Camera ->
+                app.cameras.removeNear(lat, lon) +
+                    app.roadReports.removeNear(setOf(com.vikash.ampli.drive.cameras.ReportKind.MobileCamera), lat, lon)
+            VoiceIntent.Gone.Police -> app.roadReports.removeNear(
+                setOf(com.vikash.ampli.drive.cameras.ReportKind.Police, com.vikash.ampli.drive.cameras.ReportKind.MobileCamera), lat, lon,
+            )
+            VoiceIntent.Gone.Jam -> app.roadReports.removeNear(setOf(com.vikash.ampli.drive.cameras.ReportKind.Jam), lat, lon)
+        }
+        if (removed > 0) share(if (what == VoiceIntent.Gone.Camera) "camera_gone" else what.name.lowercase() + "_gone", here)
+        val text = res.getString(
+            when {
+                removed == 0 -> R.string.x_gone_nothing
+                what == VoiceIntent.Gone.Camera -> R.string.x_gone_camera
+                what == VoiceIntent.Gone.Police -> R.string.x_gone_police
+                else -> R.string.x_gone_jam
+            },
+        )
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, "", text))
+        speakAnswer(text, lang, emptyList())
+        holdAnswer(shownAt)
+    }
+
+    /** "CNG pe line lambi hai": a queue note on the pump the car is at (within 400 m). */
+    private suspend fun pumpQueue(long: Boolean, filter: com.vikash.ampli.drive.fuel.FuelFilter, res: Context, lang: String) {
+        val title = res.getString(R.string.voice_fuel_title)
+        val here = hereOrSay(res, lang, title) ?: return
+        val shownAt = System.currentTimeMillis()
+        val hits = app.fuel.nearby(here.latitude, here.longitude, filter, limit = 5)
+        val pump = com.vikash.ampli.drive.fuel.PumpQueues.pumpAt(hits)
+        if (pump == null) {
+            val text = res.getString(R.string.x_queue_no_pump)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", text))
+            speakAnswer(text, lang, emptyList(), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        app.pumpQueues.add(pump.station.id, long, filter)
+        share(if (long) "queue_long" else "queue_short", here, pump.station.id)
+        val name = com.vikash.ampli.drive.ui.stationName(res, pump.station)
+        val text = res.getString(if (long) R.string.x_queue_saved_long else R.string.x_queue_saved_short, name)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Fuel, title, name, text))
+        styled(res, lang, HaryanviLines.Event.ReportSaved, text)
+        holdAnswer(shownAt)
+    }
+
+    /** "Petrol bharwaya 1000 ka": a fill in the mileage diary. Asks "kitne ka?" when no amount. */
+    private suspend fun logFuel(rupees: Double?, litres: Double?, said: com.vikash.ampli.drive.car.FuelType?, res: Context, lang: String) {
+        val title = res.getString(R.string.x_diary_title)
+        var r = rupees
+        var l = litres
+        if (r == null && l == null) {
+            say(res, lang, R.string.x_fuel_ask)
+            val heard = listenTurn(lang, ListenMode.Free) { p: String -> _state.update { it.copy(heard = p) } }
+            showHeard(heard, res)
+            val amount = (heard as? Listener.Result.Heard)?.text?.let { SpokenNumbers.amount(it) }
+            if (amount != null) {
+                if (amount.unit == SpokenNumbers.Unit.Rupees) r = amount.value else l = amount.value
+            }
+        }
+        val shownAt = System.currentTimeMillis()
+        val store = app.car.store
+        val fills = store.fills.value
+        val fuel = com.vikash.ampli.drive.car.FuelDiary.fuelFor(said, fills)
+        val fill = com.vikash.ampli.drive.car.FuelDiary.fill(r, l, fuel, fills, store.odometerKm.value, System.currentTimeMillis())
+        if (fill == null) {
+            val text = res.getString(R.string.x_fuel_not_saved)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", text))
+            speakAnswer(text, lang, emptyList(), standIn = null)
+            holdAnswer(shownAt)
+            return
+        }
+        store.addFill(fill)
+        val locale = res.resources.configuration.locales[0]
+        val litresText = String.format(locale, "%.1f", fill.litres)
+        val money = com.vikash.ampli.drive.ui.rupees(fill.rupees)
+        val text = res.getString(R.string.x_fuel_saved, money, litresText)
+        val kmpl = com.vikash.ampli.drive.car.FuelDiary.lastKmPerLitre(store.fills.value, fuel)
+        val detail = kmpl?.let { res.getString(R.string.x_diary_kmpl, String.format(locale, "%.1f", it)) } ?: text
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Fuel, title, money, detail))
+        styled(res, lang, HaryanviLines.Event.CommandDone, text)
+        holdAnswer(shownAt)
+    }
+
+    /** "Kitna challan bachaya?": slow-downs after a camera or limit warning, as ₹ (assumed fines). */
+    private suspend fun challanAnswer(res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val n = app.extras.challanCount.value
+        val title = res.getString(R.string.x_challan_title)
+        if (n <= 0) {
+            val text = res.getString(R.string.x_challan_none)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, title, "0", text))
+            speakAnswer(text, lang, emptyList())
+            holdAnswer(shownAt)
+            return
+        }
+        val low = com.vikash.ampli.drive.ui.rupees(com.vikash.ampli.drive.cameras.ChallanSaver.savedLow(n).toDouble())
+        val high = com.vikash.ampli.drive.ui.rupees(com.vikash.ampli.drive.cameras.ChallanSaver.savedHigh(n).toDouble())
+        val text = res.getString(R.string.x_challan_answer, n, low, high)
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, title, "$low – $high", res.getString(R.string.x_challan_assume)))
+        speakAnswer(text, lang, emptyList())
+        holdAnswer(shownAt)
+    }
+
+    /** "Hotspot jodo": joins the phone hotspot chosen in Settings (Android 8 / 9), else Wi-Fi settings. */
+    private suspend fun connectHotspot(res: Context, lang: String) {
+        val ssid = app.extras.hotspotSsid.value
+        when {
+            !app.hotspot.supported -> {
+                com.vikash.ampli.drive.system.QuickActions.openWifiSettings(app)
+                say(res, lang, R.string.x_hotspot_unsupported)
+            }
+            ssid == null -> {
+                com.vikash.ampli.drive.system.QuickActions.openWifiSettings(app)
+                say(res, lang, R.string.x_hotspot_none)
+            }
+            else -> {
+                app.hotspot.connectNow()
+                say(res, lang, res.getString(R.string.x_hotspot_joining, ssid))
+            }
+        }
     }
 
     private suspend fun nextCamera(res: Context, lang: String) {

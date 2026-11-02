@@ -31,6 +31,10 @@ jobs:
       MAP_FALLBACK_STYLE_URL: ${{ vars.MAP_FALLBACK_STYLE_URL }}
       # Pro launch-offer line in the Pro sheet. Empty = on; set to false when the offer ends.
       LAUNCH_OFFER: ${{ vars.LAUNCH_OFFER }}
+      # Report sharing server (none yet). Empty = reports stay on each unit.
+      REPORT_SYNC_URL: ${{ vars.REPORT_SYNC_URL }}
+      # Offline-map style allowed for download. Empty = the map's own OpenFreeMap style.
+      OFFLINE_MAP_STYLE_URL: ${{ vars.OFFLINE_MAP_STYLE_URL }}
     steps:
       - uses: actions/checkout@v4
 

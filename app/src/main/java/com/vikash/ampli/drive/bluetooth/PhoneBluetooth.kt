@@ -148,6 +148,13 @@ class PhoneBluetooth(private val app: DriveApp) {
         } ?: return
         val before = acl.put(addr, connected)
         if (before == connected) return
+        // Settings › Phone hotspot: the paired phone arriving means "join its hotspot".
+        if (connected) {
+            try {
+                app.hotspot.onBluetoothConnected(device)
+            } catch (_: Exception) {
+            }
+        }
         scope.launch {
             refresh()
             if (connected) autoPlay(device!!)

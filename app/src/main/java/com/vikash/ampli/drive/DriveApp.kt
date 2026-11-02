@@ -124,6 +124,21 @@ class DriveApp : Application() {
     /** 2 GB or less: Home draws first and the map and music card follow (DeviceClass). */
     val lowEnd: Boolean by lazy { com.vikash.ampli.drive.prefs.DeviceClass.isLowEnd(this) }
 
+    /** Resume on start, phone hotspot, offline map region, challan counter (Settings › Drive extras). */
+    val extras: com.vikash.ampli.drive.prefs.DriveExtrasPrefs by lazy { com.vikash.ampli.drive.prefs.DriveExtrasPrefs(this) }
+
+    /** "CNG pe line lambi hai": pump queue reports on this unit. */
+    val pumpQueues: com.vikash.ampli.drive.fuel.PumpQueueRepository by lazy { com.vikash.ampli.drive.fuel.PumpQueueRepository(this) }
+
+    /** Sharing reports between drivers: off unless the build sets REPORT_SYNC_URL (no server yet). */
+    val reportSync: com.vikash.ampli.drive.sync.ReportSync by lazy { com.vikash.ampli.drive.sync.ReportSync.forBuild() }
+
+    /** Joins the phone's hotspot when the phone or its Wi-Fi shows up. */
+    val hotspot: com.vikash.ampli.drive.system.HotspotLink by lazy { com.vikash.ampli.drive.system.HotspotLink(this) }
+
+    /** Settings › Offline map: one region of the map kept on the unit. */
+    val offlineMap: com.vikash.ampli.drive.map.OfflineMapManager by lazy { com.vikash.ampli.drive.map.OfflineMapManager(this) }
+
     /** Settings › Help & feedback: reports to the Ampli owner server, or email without one. */
     val feedback: FeedbackRepository by lazy { FeedbackRepository(this) }
 
@@ -147,6 +162,13 @@ class DriveApp : Application() {
         // MainActivity already opens in it. A per-app language set in system Settings wins.
         prefs.takeFirstRunLanguage()?.let { tag ->
             if (AppLanguages.current(this, "").isEmpty()) AppLanguages.apply(this, tag)
+        }
+        // Phone hotspot: listens for the phone (Bluetooth) and Wi-Fi scans; idle until one is chosen.
+        if (android.os.Build.FINGERPRINT != "robolectric") {
+            try {
+                hotspot.start()
+            } catch (_: Exception) {
+            }
         }
     }
 

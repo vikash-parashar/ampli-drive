@@ -1,6 +1,7 @@
 package com.vikash.ampli.drive.voice
 
 import com.vikash.ampli.drive.cameras.ReportKind
+import com.vikash.ampli.drive.car.FuelType
 import com.vikash.ampli.drive.fuel.FuelFilter
 import com.vikash.ampli.drive.nav.SavedKind
 import com.vikash.ampli.drive.system.PowerAction
@@ -23,6 +24,32 @@ sealed interface VoiceIntent {
 
     /** "Police aage hai", "accident ahead", "आगे जाम है": a road report at the car's spot (Pro). */
     data class ReportRoad(val kind: ReportKind) : VoiceIntent
+
+    /** "Camera hai", "aage camera hai", "कैमरा लगा है": a permanent camera at the car's spot. */
+    data object CameraHere : VoiceIntent
+
+    /** "Camera nahi hai", "police hat gayi", "jam khul gaya": clears those reports near the car. */
+    data class ReportGone(val what: Gone) : VoiceIntent
+
+    enum class Gone { Camera, Police, Jam }
+
+    /** "CNG pe line lambi hai" ([long]) / "pump khali hai": the queue at the nearest pump. */
+    data class PumpQueue(val long: Boolean, val filter: FuelFilter) : VoiceIntent
+
+    /**
+     * "Petrol bharwaya 1000 ka", "1000 ka petrol", "pachaas litre": a fill for the mileage diary.
+     * All null amounts: the assistant asks "kitne ka?".
+     */
+    data class LogFuel(val rupees: Double?, val litres: Double?, val fuel: FuelType?) : VoiceIntent
+
+    /** "Kitna challan bachaya": the challan-bachat counter. */
+    data object ChallanSaved : VoiceIntent
+
+    /** "Break baad mein", "remind me later": snoozes the break reminder. */
+    data object SnoozeBreak : VoiceIntent
+
+    /** "Hotspot jodo", "phone ka internet chalao": joins the saved phone hotspot now. */
+    data object ConnectHotspot : VoiceIntent
 
     /** Song from USB / SD / internal storage. Also plain "play <song>". */
     data class PlayLocal(val query: String) : VoiceIntent
@@ -129,6 +156,8 @@ object VoiceIntents {
         val playWord = kw.play.any { has(t, it) }
         if (!playWord) volume(t)?.let { return it }
         if (trimFillers(t, STOP_FILLERS) in STOP_EXACT) return VoiceIntent.Stop
+        // Before "cancel" ("line nahi hai", "camera nahi hai") and the road reports.
+        driveDiary(t)?.let { return it }
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
         // "Accident ahead" is a road report; "accident", "help me", "ambulance" alone stay SOS.
         if (!playWord && REPORT_ACCIDENT.any { has(t, it) } && AHEAD.any { has(t, it) } && SOS_STRONG.none { has(t, it) }) {
@@ -139,6 +168,7 @@ object VoiceIntents {
         if (REPORT.any { has(t, it) }) return VoiceIntent.ReportProblem
         if (!playWord) {
             roadReport(t, kw)?.let { return it }
+            cameraHere(t)?.let { return it }
             fuel(t)?.let { return it }
         }
         if (WHAT_CAN_I_SAY.any { has(t, it) }) return VoiceIntent.WhatCanISay
@@ -497,6 +527,187 @@ object VoiceIntents {
             REPORT_POLICE.any { has(t, it) } -> VoiceIntent.ReportRoad(ReportKind.Police)
             else -> null
         }
+    }
+
+
+    // ------------------------------------------------------- Reports, pump queues, fuel diary
+
+    /**
+     * The driver telling Ampli something about the road or the car, checked before "cancel" and
+     * the road reports: "camera nahi hai" / "police hat gayi" (clear a report), "CNG pe line
+     * lambi hai" (pump queue), "1000 ka petrol bharwaya" (fuel diary), "kitna challan bachaya",
+     * "break baad mein", "hotspot jodo". Null for anything else.
+     */
+    private fun driveDiary(t: String): VoiceIntent? {
+        if (HOTSPOT.any { has(t, it) } && OFF_WORDS.none { has(t, it) }) return VoiceIntent.ConnectHotspot
+        if (CHALLAN_SAVED.any { has(t, it) }) return VoiceIntent.ChallanSaved
+        if (BREAK_WORDS.any { has(t, it) } && LATER.any { has(t, it) }) return VoiceIntent.SnoozeBreak
+        if (SNOOZE_EXACT.any { has(t, it) }) return VoiceIntent.SnoozeBreak
+        reportGone(t)?.let { return it }
+        pumpQueue(t)?.let { return it }
+        logFuel(t)?.let { return it }
+        return null
+    }
+
+    private fun reportGone(t: String): VoiceIntent? {
+        if (GONE.none { has(t, it) } || QUESTION.any { has(t, it) }) return null
+        return when {
+            CAMERA_WORDS.any { has(t, it) } -> VoiceIntent.ReportGone(VoiceIntent.Gone.Camera)
+            POLICE_WORDS.any { has(t, it) } -> VoiceIntent.ReportGone(VoiceIntent.Gone.Police)
+            REPORT_JAM.any { has(t, it) } -> VoiceIntent.ReportGone(VoiceIntent.Gone.Jam)
+            else -> null
+        }
+    }
+
+    private fun pumpQueue(t: String): VoiceIntent? {
+        if (QUESTION.any { has(t, it) }) return null
+        val filter = when {
+            FUEL_CNG.any { has(t, it) } -> FuelFilter.Cng
+            FUEL_DIESEL.any { has(t, it) } -> FuelFilter.Diesel
+            FUEL_PETROL.any { has(t, it) } -> FuelFilter.Petrol
+            else -> FuelFilter.All
+        }
+        val pumpWord = filter != FuelFilter.All || PUMP_WORDS.any { has(t, it) }
+        return when {
+            // "Lambi line hai" at a pump; "aage lambi line hai" is traffic, not a pump queue.
+            QUEUE_LONG.any { has(t, it) } && (pumpWord || (QUEUE_NOUN.any { has(t, it) } && AHEAD.none { has(t, it) })) ->
+                VoiceIntent.PumpQueue(true, filter)
+            QUEUE_SHORT.any { has(t, it) } && pumpWord -> VoiceIntent.PumpQueue(false, filter)
+            QUEUE_NONE.any { has(t, it) } -> VoiceIntent.PumpQueue(false, filter)
+            else -> null
+        }
+    }
+
+    private fun logFuel(t: String): VoiceIntent? {
+        if (QUESTION.any { has(t, it) } || FUEL_NOT.any { has(t, it) }) return null
+        val fuel = when {
+            FUEL_CNG.any { has(t, it) } -> FuelType.Cng
+            FUEL_DIESEL.any { has(t, it) } -> FuelType.Diesel
+            FUEL_PETROL.any { has(t, it) } || TEL.any { has(t, it) } -> FuelType.Petrol
+            else -> null
+        }
+        val filled = FILLED.any { has(t, it) }
+        val amount = SpokenNumbers.amount(t)
+        val words = t.split(' ').size
+        val byVolume = amount != null && amount.unit != SpokenNumbers.Unit.Rupees
+        val byMoney = amount != null && amount.unit == SpokenNumbers.Unit.Rupees && (MONEY_TAIL.any { has(t, it) } || filled)
+        val ok = when {
+            filled && (fuel != null || amount != null) -> true
+            byMoney && fuel != null -> true
+            byVolume && (fuel != null || words <= 4) -> true
+            else -> false
+        }
+        if (!ok) return null
+        return VoiceIntent.LogFuel(
+            rupees = amount?.takeIf { it.unit == SpokenNumbers.Unit.Rupees }?.value,
+            litres = amount?.takeIf { it.unit != SpokenNumbers.Unit.Rupees }?.value,
+            fuel = fuel ?: if (amount?.unit == SpokenNumbers.Unit.Kilos) FuelType.Cng else null,
+        )
+    }
+
+    /**
+     * "Camera hai", "aage camera hai", "यहाँ कैमरा लगा है": a statement about a camera here. A
+     * question ("camera kitni door hai", "agla camera") stays [VoiceIntent.NextCamera].
+     */
+    private fun cameraHere(t: String): VoiceIntent? {
+        if (CAMERA_WORDS.none { has(t, it) }) return null
+        if (CAMERA_CUE.none { has(t, it) }) return null
+        if (QUESTION.any { has(t, it) } || CAMERA_ASK.any { has(t, it) } || REPORT_NOT.any { has(t, it) }) return null
+        return VoiceIntent.CameraHere
+    }
+
+    private fun forms(vararg list: String): List<String> = list.flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val CAMERA_WORDS by lazy {
+        forms("camera", "cameras", "speed camera", "कैमरा", "कैमरे", "स्पीड कैमरा", "kamera")
+    }
+
+    private val CAMERA_CUE by lazy {
+        forms(
+            "hai", "है", "sai", "सै", "laga hai", "laga", "लगा", "lagi", "लगी", "aage", "आगे", "yahan", "yaha", "यहाँ",
+            "यहां", "here", "ahead", "there is", "there s", "report", "रिपोर्ट", "mark",
+        )
+    }
+
+    private val CAMERA_ASK by lazy {
+        forms(
+            "next", "agla", "agle", "अगला", "अगले", "kitni", "kitne", "कितनी", "कितने", "door", "dur", "दूर", "how far",
+            "nearest", "any", "koi", "कोई",
+        )
+    }
+
+    private val QUESTION by lazy {
+        forms("kya", "क्या", "kahan", "kaha", "कहाँ", "कहां", "kitna", "कितना", "is there", "kaisa", "kaisi", "कैसा", "कैसी")
+    }
+
+    private val GONE by lazy {
+        forms(
+            "nahi hai", "nahin hai", "nahi", "nahin", "hat gaya", "hat gayi", "hat gai", "hat gyi", "hata do", "hatao",
+            "chali gayi", "chala gaya", "chale gaye", "khul gaya", "khul gya", "no longer", "gone", "not there", "removed",
+            "no camera", "no police", "cleared", "नहीं है", "नहीं", "नही", "हट गया", "हट गई", "हट गयी", "हटा दो", "हटाओ",
+            "चली गई", "चला गया", "चले गए", "खुल गया", "ना सै", "कोन्या",
+        )
+    }
+
+    private val POLICE_WORDS by lazy { forms("police", "पुलिस", "naka", "नाका", "checking", "चेकिंग") }
+
+    private val PUMP_WORDS by lazy { forms("pump", "पंप", "station", "स्टेशन", "fuel", "petrol pump") }
+
+    private val QUEUE_NOUN by lazy { forms("line", "लाइन", "queue", "कतार", "lane") }
+
+    private val QUEUE_LONG by lazy {
+        forms(
+            "line lambi", "lambi line", "lamba line", "lambi lain", "badi line", "bahut line", "bheed", "bhid", "bheer",
+            "rush", "long queue", "long line", "big queue", "crowded", "लंबी लाइन", "लाइन लंबी", "लम्बी लाइन",
+            "लाइन लम्बी", "बड़ी लाइन", "भीड़", "भीड", "भीड़ है",
+        )
+    }
+
+    private val QUEUE_SHORT by lazy {
+        forms("khali", "khaali", "khali hai", "empty", "free hai", "खाली", "खाली है", "chhoti line", "छोटी लाइन", "short line", "short queue")
+    }
+
+    private val QUEUE_NONE by lazy {
+        forms("line nahi", "line nahin", "koi line nahi", "no queue", "no line", "लाइन नहीं", "कोई लाइन नहीं")
+    }
+
+    private val OFF_WORDS by lazy { forms("band", "बंद", "off", "ऑफ", "disconnect", "hatao") }
+
+    private val TEL by lazy { forms("tel", "तेल") }
+
+    private val FILLED by lazy {
+        forms(
+            "bharwaya", "bharwa liya", "bharwai", "bharwayi", "bharvaya", "bharwaaya", "bharaya", "dalwaya", "dalwa liya",
+            "dalwayi", "dalwai", "dalvaya", "bhara", "bhar liya", "bharwa li", "filled", "fill kiya", "fill karwaya",
+            "got petrol", "tank full", "tanki full", "full tank karwaya", "भरवाया", "भरवा लिया", "भरवाई", "भरवा ली", "डलवाया",
+            "डलवाई", "डलवा लिया", "भरा", "भर लिया", "टंकी फुल", "टैंक फुल",
+        )
+    }
+
+    private val MONEY_TAIL by lazy {
+        forms("ka", "ki", "ke", "का", "की", "के", "rupaye", "rupay", "rupees", "rupee", "rs", "रुपये", "रुपए", "रुपया", "worth")
+    }
+
+    private val CHALLAN_SAVED by lazy {
+        forms(
+            "challan bachaya", "challan bacha", "challan bachat", "kitna challan", "challan kitna bacha", "challan saved",
+            "fines saved", "how much did i save", "चालान बचाया", "कितना चालान", "चालान बचत", "चालान कितना बचा",
+        )
+    }
+
+    private val BREAK_WORDS by lazy { forms("break", "ब्रेक", "chai", "चाय", "aaram", "आराम", "reminder") }
+
+    private val LATER by lazy {
+        forms("baad mein", "baad me", "bad mein", "later", "snooze", "abhi nahi", "बाद में", "अभी नहीं", "thodi der baad", "थोड़ी देर बाद")
+    }
+
+    private val SNOOZE_EXACT by lazy { forms("snooze", "remind me later", "baad mein yaad dilana", "बाद में याद दिलाना") }
+
+    private val HOTSPOT by lazy {
+        forms(
+            "hotspot", "हॉटस्पॉट", "hot spot", "phone ka internet", "phone ka net", "mobile ka internet", "mobile data jodo",
+            "फोन का इंटरनेट", "फ़ोन का इंटरनेट", "मोबाइल का इंटरनेट",
+        )
     }
 
     private val FUEL_EV = listOf(

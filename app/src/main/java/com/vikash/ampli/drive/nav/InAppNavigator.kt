@@ -140,10 +140,28 @@ class InAppNavigator(private val app: DriveApp) {
     fun start(dest: NavDestination) {
         val point = dest.point ?: return startByName(dest.name)
         reset()
+        remember(dest)
         _state.value = NavSession(phase = NavSession.Phase.Routing, destination = dest)
         _openRequest.value++
         ensureFollowing()
         fetch(dest, point, reroute = false)
+    }
+
+    /** Keeps the trip so it can continue after the car is switched off and on (Settings › When the car starts). */
+    private fun remember(dest: NavDestination) {
+        val lat = dest.lat ?: return
+        val lon = dest.lon ?: return
+        try {
+            app.extras.savedRoute = SavedRoute(dest.name, dest.area, lat, lon, System.currentTimeMillis())
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun forget() {
+        try {
+            app.extras.savedRoute = null
+        } catch (_: Exception) {
+        }
     }
 
     fun start(place: Place) = start(NavDestination.of(place))
@@ -169,6 +187,7 @@ class InAppNavigator(private val app: DriveApp) {
                 return@launch
             }
             val found = NavDestination.of(best)
+            remember(found)
             _state.value = NavSession(phase = NavSession.Phase.Routing, destination = found)
             fetch(found, LatLon(best.lat, best.lon), reroute = false)
         }
@@ -196,6 +215,7 @@ class InAppNavigator(private val app: DriveApp) {
     /** The End button, or arriving. */
     fun stop() {
         reset()
+        forget()
         _state.value = NavSession()
     }
 
@@ -329,6 +349,7 @@ class InAppNavigator(private val app: DriveApp) {
         val p = t.update(LatLon(loc.latitude, loc.longitude))
         if (p.arrived) {
             _state.value = s.copy(phase = NavSession.Phase.Arrived, progress = p, rerouting = false)
+            forget()
             speak(p)
             // "बस आ गे, 100 मीटर पै सुल्टे हाथ…" was said: now the "arrived" line.
             app.navPrompter.onInAppArrived()

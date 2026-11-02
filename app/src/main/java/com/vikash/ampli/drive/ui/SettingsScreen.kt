@@ -278,6 +278,11 @@ fun SettingsScreen(
                 onAction = onOpenEmergency,
             )
             CarSettingsCard(app = app, onOpenCar = onOpenCar, resumeTick = resumeTick)
+            // Drive extras: resume on start, phone hotspot, offline map, challan-bachat.
+            ResumeOnStartCard(app = app)
+            HotspotCard(app = app, resumeTick = resumeTick)
+            OfflineMapCard(app = app)
+            ChallanCard(app = app, costPerKm = com.vikash.ampli.drive.car.Mileage.costPerKm(app.car.store.fills.value, app.car.store.expenses.value))
             SpeedVolumeCard(app = app)
             FastagSettingsCard(app = app, onOpenFastag = onOpenFastag)
             PapersReminderCard(app = app)

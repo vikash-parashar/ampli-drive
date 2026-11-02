@@ -111,13 +111,22 @@ fun FuelScreen(app: DriveApp, onBack: () -> Unit, initialFilter: FuelFilter = Fu
         }
     }
     var hits by remember { mutableStateOf<List<FuelHit>?>(null) }
+    var sides by remember { mutableStateOf<Map<Int, com.vikash.ampli.drive.fuel.PumpSide>>(emptyMap()) }
+    val queueReports by app.pumpQueues.reports.collectAsStateWithLifecycle()
+    val queues = remember(queueReports) { app.pumpQueues.liveByStation() }
     var selected by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) { app.fuel.ensureLoaded() }
     LaunchedEffect(filter, here) {
         if (here == null) return@LaunchedEffect
         // [here] only keys the lookup; distances use the exact fix.
         val loc = gps.value.location ?: return@LaunchedEffect
-        hits = app.fuel.nearby(loc.latitude, loc.longitude, filter)
+        // On the move, pumps ahead on this side of the road first (India keeps left), then the
+        // other carriageway, then behind: no U-turn for the "nearest" pump.
+        val speed = (gps.value.speedKmh ?: 0f).toDouble()
+        val heading = if (loc.hasBearing()) loc.bearing.toDouble() else null
+        val ranked = com.vikash.ampli.drive.fuel.DrivingSide.rank(app.fuel.nearby(loc.latitude, loc.longitude, filter), loc.latitude, loc.longitude, heading, speed)
+        hits = ranked.map { it.first }
+        sides = ranked.associate { it.first.station.id to it.second }
         selected = 0
     }
     val status = when {
@@ -139,6 +148,8 @@ fun FuelScreen(app: DriveApp, onBack: () -> Unit, initialFilter: FuelFilter = Fu
         selected = selected,
         onSelect = { selected = it },
         stats = stats,
+        sides = sides,
+        queues = queues,
         onGo = { hit ->
             val place = Place(stationName(context, hit.station), null, hit.station.lat, hit.station.lon, hit.distanceM / 1000.0)
             if (app.prefs.navApp.value == NavApp.Ampli) {
@@ -199,6 +210,8 @@ fun FuelContent(
     stats: FuelStats,
     onGo: (FuelHit) -> Unit,
     onBack: () -> Unit,
+    sides: Map<Int, com.vikash.ampli.drive.fuel.PumpSide> = emptyMap(),
+    queues: Map<Int, com.vikash.ampli.drive.fuel.QueueReport> = emptyMap(),
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -230,7 +243,7 @@ fun FuelContent(
                                 val list = rememberLazyListState()
                                 LazyColumn(state = list, verticalArrangement = Arrangement.spacedBy(dims.d(1f))) {
                                     itemsIndexed(hits, key = { _, h -> h.station.id }) { i, h ->
-                                        FuelRow(h, filter, i == selected, onClick = { onSelect(i) })
+                                        FuelRow(h, filter, i == selected, onClick = { onSelect(i) }, side = sides[h.station.id], queue = queues[h.station.id])
                                     }
                                 }
                             }
@@ -261,7 +274,14 @@ private fun EmptyNote(text: String) {
 }
 
 @Composable
-private fun FuelRow(hit: FuelHit, filter: FuelFilter, selected: Boolean, onClick: () -> Unit) {
+private fun FuelRow(
+    hit: FuelHit,
+    filter: FuelFilter,
+    selected: Boolean,
+    onClick: () -> Unit,
+    side: com.vikash.ampli.drive.fuel.PumpSide? = null,
+    queue: com.vikash.ampli.drive.fuel.QueueReport? = null,
+) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val s = hit.station
@@ -284,10 +304,50 @@ private fun FuelRow(hit: FuelHit, filter: FuelFilter, selected: Boolean, onClick
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(0.4f))) {
             Text(stationLabel(s), color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(2.5f, min = 15f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             FuelTags(s)
+            PumpNote(side, queue)
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(kmLabel(hit.distanceM), color = theme.text, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(2.5f, min = 15f), maxLines = 1)
             Text(stringResource(R.string.fuel_min, FuelFinder.etaMinutes(hit.distanceM)), color = theme.muted, fontSize = dims.t(2f, min = 12f), maxLines = 1)
+        }
+    }
+}
+
+/** "Ahead, your side" and "Long queue · 12 min ago" (the driver's own report) under a pump. */
+@Composable
+private fun PumpNote(side: com.vikash.ampli.drive.fuel.PumpSide?, queue: com.vikash.ampli.drive.fuel.QueueReport?) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val sideText = when (side) {
+        com.vikash.ampli.drive.fuel.PumpSide.AheadSameSide -> stringResource(R.string.x_side_same)
+        com.vikash.ampli.drive.fuel.PumpSide.AheadOtherSide -> stringResource(R.string.x_side_other)
+        com.vikash.ampli.drive.fuel.PumpSide.Behind -> stringResource(R.string.x_side_behind)
+        else -> null
+    }
+    val now = System.currentTimeMillis()
+    val queueText = queue?.let { q ->
+        stringResource(if (q.long) R.string.x_queue_long else R.string.x_queue_short, q.minutesAgo(now))
+    }
+    if (sideText == null && queueText == null) return
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(0.8f))) {
+        if (queueText != null) {
+            Text(
+                queueText,
+                color = if (queue.long) theme.warning else theme.ok,
+                fontWeight = FontWeight.Bold,
+                fontSize = dims.t(1.9f, min = 12f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (sideText != null) {
+            Text(
+                sideText,
+                color = if (side == com.vikash.ampli.drive.fuel.PumpSide.AheadSameSide) theme.ok else theme.muted,
+                fontSize = dims.t(1.9f, min = 12f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
