@@ -81,12 +81,16 @@ fun TtsMissingStrip(app: DriveApp, onOpen: () -> Unit) {
     val theme = LocalDriveTheme.current
     val moving = isMoving(app)
     val ttsMissing by app.voicePlayer.ttsMissing.collectAsStateWithLifecycle()
+    // Ampli's bundled voice: while it is still being copied or downloaded the card waits, and once
+    // it is ready the unit can speak, so the card goes.
+    val bundled by app.speaker.bundled.files.state.collectAsStateWithLifecycle()
+    val bundledComing = bundled is com.vikash.ampli.drive.voice.tts.TtsVoiceFiles.State.Working
     // ttsMissing is only known once something asked for the engine.
-    LaunchedEffect(Unit) { app.voicePlayer.ttsAvailable() }
+    LaunchedEffect(bundled) { app.voicePlayer.ttsAvailable() }
     val hints = remember { app.getSharedPreferences(HINTS, android.content.Context.MODE_PRIVATE) }
     var showing by remember { mutableStateOf(false) }
-    LaunchedEffect(ttsMissing, moving) {
-        if (!showing && com.vikash.ampli.drive.voice.TtsNotice.showCard(ttsMissing, hints.getBoolean(KEY_TTS_CARD, false), moving)) {
+    LaunchedEffect(ttsMissing, moving, bundledComing) {
+        if (!showing && com.vikash.ampli.drive.voice.TtsNotice.showCard(ttsMissing, hints.getBoolean(KEY_TTS_CARD, false), moving, bundledComing)) {
             showing = true
             hints.edit().putBoolean(KEY_TTS_CARD, true).apply()
         }

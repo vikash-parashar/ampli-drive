@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
  * Gets the offline speech models onto the unit without the driver doing anything: on first start
  * (and every return home) the wanted models ([VoiceModelPlan.wanted]) are unpacked from the Play
  * asset pack or, on sideloaded APKs, downloaded on any network in the background. English goes
- * first (the wake word needs it), then Hindi, one at a time to spare 1-2 GB head units.
+ * first (the wake word needs it), then Hindi, one at a time to spare 1-2 GB head units. The
+ * bundled voice engine's voices ([com.vikash.ampli.drive.voice.tts.TtsVoiceFiles]) come the same way.
  * A network coming back retries a failed fetch straight away instead of waiting out the back-off.
  * A model the driver removed in Settings is left alone.
  */
@@ -34,10 +35,11 @@ class VoiceModels(private val app: DriveApp) {
         )
     }
 
-    /** Every wanted model is installed. */
+    /** Every wanted model is installed (also the bundled voice engine's voices). */
     fun allReady(): Boolean {
         val w = want()
-        return (!w.english || app.wakeModel.isInstalled()) && (!w.hindi || app.hindiModel.isInstalled())
+        return (!w.english || app.wakeModel.isInstalled()) && (!w.hindi || app.hindiModel.isInstalled()) &&
+            app.speaker.bundled.files.allInstalled()
     }
 
     /** First start and every return home: starts what is missing; cheap when all is in place. */
@@ -52,6 +54,12 @@ class VoiceModels(private val app: DriveApp) {
      */
     @Synchronized
     fun ensureAll(networkBack: Boolean = false) {
+        // Ampli's own voice (~38 MB, copy or download) runs beside the models: on units without
+        // a TTS engine it is what speaks names and numbers that have no recording.
+        val voices = app.speaker.bundled.files
+        if (!voices.allInstalled()) {
+            voices.ensure(automatic = true, ignoreBackoff = networkBack && VoiceModelPlan.retryOnNetwork(voices.failures()))
+        }
         val w = want()
         val en = app.wakeModel
         if (w.english && !en.isInstalled()) {

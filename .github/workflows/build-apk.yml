@@ -60,6 +60,22 @@ jobs:
           OPENCHARGEMAP_KEY: ${{ secrets.OPENCHARGEMAP_KEY }}
         run: python3 scripts/fetch_fuel.py
 
+      # Bundled voice engine: show the licence each voice carries inside its file (the flitevox
+      # "copyright" field) and check the download is reachable. Informational; never fails the build.
+      - name: Bundled voice licences
+        continue-on-error: true
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          for name in cmu_indic_hin_ab.flitevox cmu_us_axb.flitevox; do
+            head=$(curl -fsL --max-time 60 -r 0-65535 "https://festvox.org/flite/packed/flite-2.1/voices/$name" | tr -c '[:print:]\n' '\n' | grep -a -A14 '^copyright$' | head -16 | tr '\n' ' ' | tr -s ' ')
+            if [ -n "$head" ]; then
+              echo "::notice title=Voice licence $name::$head"
+            else
+              echo "::warning title=Voice licence $name::could not read the copyright field from festvox.org"
+            fi
+          done
+
       # Also renders the screen previews (ScreenshotTest: Robolectric + Roborazzi, 1024x600, no emulator).
       - name: Unit tests
         shell: bash
@@ -225,6 +241,40 @@ jobs:
           done
           ls -l "$dir"
           sha256sum "$dir"/*.zip
+
+      # The bundled voice engine's Flite voices for the same asset pack (assets/tts), checked
+      # against the SHA-512 in TtsVoiceSpec (TtsVoiceFiles.kt); keep the two lists in step.
+      - name: Cache bundled voices
+        uses: actions/cache@v4
+        with:
+          path: voicemodels/src/main/assets/tts/*.flitevox
+          key: flitevox-cmu_indic_hin_ab-cmu_us_axb-v1
+
+      - name: Fetch bundled voices
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=voicemodels/src/main/assets/tts
+          mkdir -p "$dir"
+          while read -r name sha; do
+            f="$dir/$name"
+            if [ -s "$f" ] && echo "$sha  $f" | sha512sum -c --quiet - 2>/dev/null; then
+              echo "$name: cached"
+              continue
+            fi
+            rm -f "$f"
+            curl -fL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 30 \
+              -o "$f.part" "https://festvox.org/flite/packed/flite-2.1/voices/$name" || {
+              echo "::error title=Bundled voices::Could not download $name from festvox.org"
+              exit 1
+            }
+            echo "$sha  $f.part" | sha512sum -c --quiet - || { echo "::error title=Bundled voices::$name does not match its SHA-512"; exit 1; }
+            mv "$f.part" "$f"
+          done <<'LIST'
+          cmu_indic_hin_ab.flitevox c84a8a2e76ff237a9ab3678acddc8874e20be6693d3f00d08354537dc0ce7938059227024e89d9cd06aa1b16817a8d4c0b3872eae67c8980970226899bf0ed17
+          cmu_us_axb.flitevox c680841b5cc3792a9cb4e4c8c5abdb4604986fc5b590865f513d1cb45f868d8072ade5502ac609a4ef930b219ab2db3abe804a82883441f143f5641a6b93107a
+          LIST
+          ls -l "$dir"
 
       # Play upload key: only when the secret exists (never on pull requests from forks).
       - name: Upload key

@@ -9,6 +9,8 @@ import android.media.ToneGenerator
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import com.vikash.ampli.drive.voice.tts.AmpliVoice
+import com.vikash.ampli.drive.voice.tts.BundledTts
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -16,11 +18,14 @@ import java.util.Locale
 import java.util.UUID
 
 /**
- * Android TextToSpeech in the app language (see [VoiceLocales]), falling back to en-IN.
+ * Speaks text in the app language (see [VoiceLocales]), falling back to en-IN: through the
+ * unit's own Android TextToSpeech when it works and has the language, else through Ampli's
+ * bundled voice engine ([AmpliVoice]: offline Hindi and Indian English, shipped with the app), so
+ * units without any TTS engine (the TS7) still speak. [BundledTts.pick] makes the choice.
  * While Ampli speaks it holds AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK, so music dips instead of stopping.
  * All calls from the main thread.
  */
-class Speaker(context: Context) {
+class Speaker(context: Context, val bundled: AmpliVoice = AmpliVoice(context)) {
     private val appContext = context.applicationContext
     private val audio = appContext.getSystemService(AudioManager::class.java)
     private var tts: TextToSpeech? = null
@@ -76,8 +81,15 @@ class Speaker(context: Context) {
         return engine
     }
 
-    /** True when a TTS engine started and has a voice for [locale] (any country variant counts). */
-    suspend fun hasVoice(locale: Locale): Boolean {
+    /**
+     * True when a voice for [locale] can speak: the unit's TTS engine has one (any country variant
+     * counts), or Ampli's bundled engine does.
+     */
+    suspend fun hasVoice(locale: Locale): Boolean =
+        systemHasVoice(locale) || BundledTts.covers(locale.language, bundled.languages())
+
+    /** The unit's own TTS engine started and has a voice for [locale]. */
+    private suspend fun systemHasVoice(locale: Locale): Boolean {
         val engine = engine(localeFor ?: "") ?: return false
         return try {
             engine.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE
@@ -86,8 +98,8 @@ class Speaker(context: Context) {
         }
     }
 
-    /** True while the TTS engine is talking. */
-    fun isSpeaking(): Boolean = try {
+    /** True while either engine is talking. */
+    fun isSpeaking(): Boolean = bundled.isSpeaking() || try {
         tts?.isSpeaking == true
     } catch (_: Exception) {
         false
@@ -102,8 +114,23 @@ class Speaker(context: Context) {
         true
     }
 
-    /** False when no TTS engine answered; the caller can then keep text on screen longer. */
-    suspend fun isAvailable(): Boolean = engine(localeFor ?: "") != null
+    /** False when nothing can speak (no working TTS engine and no bundled voice yet). */
+    suspend fun isAvailable(): Boolean = bundled.ready() || systemAvailable()
+
+    /** The unit's own TTS engine answered (the bundled engine aside). */
+    suspend fun systemAvailable(): Boolean = engine(localeFor ?: "") != null
+
+    /** Which engine would speak a line in [appLanguage] now (Settings › Voice › Check voice). */
+    suspend fun engineFor(appLanguage: String): BundledTts.Engine {
+        val system = engine(appLanguage)
+        val wanted = VoiceLocales.speech(appLanguage).first()
+        return BundledTts.pick(
+            systemReady = system != null,
+            systemHasLanguage = system != null && systemHasVoice(wanted),
+            bundledHasLanguage = BundledTts.covers(wanted.language, bundled.languages()),
+            bundledReady = bundled.ready(),
+        )
+    }
 
     /**
      * Gets the engine ready right after boot, when the TTS service may still be starting: waits
@@ -139,6 +166,10 @@ class Speaker(context: Context) {
     /** [say] that returns false when nothing could be spoken (no engine, focus refused, speak failed). */
     suspend fun sayChecked(text: String, appLanguage: String, needFocus: Boolean = false): Boolean {
         if (text.isBlank()) return false
+        when (engineFor(appLanguage)) {
+            BundledTts.Engine.Bundled -> return sayBundled(text, appLanguage, needFocus)
+            BundledTts.Engine.None, BundledTts.Engine.System -> Unit
+        }
         val engine = engine(appLanguage) ?: run {
             // No TTS engine on this unit: leave the reply on screen a moment to read, but never
             // so long that a question's answer window (call, message) is lost waiting.
@@ -161,6 +192,21 @@ class Speaker(context: Context) {
             return true
         } finally {
             synchronized(pending) { pending.remove(id) }
+            audio?.abandonAudioFocusRequest(duckFocus)
+        }
+    }
+
+    /**
+     * Says [text] with Ampli's bundled engine whatever the unit has (Check voice's test, and
+     * [sayChecked] when [BundledTts.pick] chose it). False when it could not speak.
+     */
+    suspend fun sayBundled(text: String, appLanguage: String, needFocus: Boolean = false): Boolean {
+        if (text.isBlank() || !bundled.ready()) return false
+        val focus = audio?.requestAudioFocus(duckFocus)
+        if (needFocus && focus == AudioManager.AUDIOFOCUS_REQUEST_FAILED) return false
+        return try {
+            bundled.speak(text, VoiceLocales.parserLanguage(appLanguage), speechAttributes)
+        } finally {
             audio?.abandonAudioFocusRequest(duckFocus)
         }
     }
@@ -193,6 +239,7 @@ class Speaker(context: Context) {
     }
 
     fun stop() {
+        bundled.stop()
         tts?.stop()
         synchronized(pending) {
             pending.values.forEach { it.complete(Unit) }
@@ -228,6 +275,10 @@ object SpeechPacing {
 
 /** Home's one-time "Bolne ka engine nahi hai · Install karo" card (unit-tested). */
 object TtsNotice {
-    /** Show it: no speech engine, never shown on this unit before, and parked. */
-    fun showCard(ttsMissing: Boolean, shownBefore: Boolean, moving: Boolean): Boolean = ttsMissing && !shownBefore && !moving
+    /**
+     * Show it: no speech engine, never shown on this unit before, and parked. Not while Ampli's
+     * bundled voice is still being installed ([bundledComing]): it will speak in a moment.
+     */
+    fun showCard(ttsMissing: Boolean, shownBefore: Boolean, moving: Boolean, bundledComing: Boolean = false): Boolean =
+        ttsMissing && !shownBefore && !moving && !bundledComing
 }

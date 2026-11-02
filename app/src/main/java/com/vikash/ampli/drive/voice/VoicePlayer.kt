@@ -86,8 +86,9 @@ class VoicePlayer(private val app: DriveApp) {
         if (spoken.caption) setLine(spoken.text)
         var v = voice
         // No phone voice on this unit (TS7 and other units without a TTS engine): the recorded
-        // Ampli voice says it instead, rather than nothing at all.
-        if (!v.human && (preferRecorded || !ttsAvailable())) v = fallbackVoice()
+        // Ampli voice says it instead, and only lines without a recording go to Ampli's bundled
+        // voice engine (through the Speaker below).
+        if (!v.human && (preferRecorded || !systemTtsAvailable())) v = fallbackVoice()
         val clips = library.plan(v, spoken)
         if (clips != null && v.folder != null) {
             val uris = clips.map { Uri.parse("asset:///voice/${v.folder}/$it.ogg") }
@@ -111,10 +112,17 @@ class VoicePlayer(private val app: DriveApp) {
     /** True once we found that the unit has no working TTS engine (Settings › Voice says so). */
     val ttsMissing: StateFlow<Boolean> = _ttsMissing.asStateFlow()
 
+    /** Something can speak (the unit's TTS or Ampli's bundled voice); updates [ttsMissing]. */
     suspend fun ttsAvailable(): Boolean {
         val ok = app.speaker.isAvailable()
         _ttsMissing.value = !ok
         return ok
+    }
+
+    /** The unit's own TTS works (also refreshes [ttsMissing]). */
+    private suspend fun systemTtsAvailable(): Boolean {
+        ttsAvailable()
+        return app.speaker.systemAvailable()
     }
 
     /**
