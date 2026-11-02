@@ -26,9 +26,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MusicNote
@@ -71,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
@@ -229,6 +233,12 @@ fun HomeScreen(
         onNav = openNav,
         onMusicApp = { Launchers.openMusic(context) },
         onMusicLong = { AppChooser.ask(AppRole.Music) },
+        fastag = fastagChip(app),
+        onFastag = onOpenFastag,
+        trip = tripUi(app, nav),
+        onPhone = { phoneCard = true },
+        onPhoneLong = { AppChooser.ask(AppRole.Phone) },
+        onFuel = { onOpenScreen(Screen.Fuel) },
     )
     // Pull down from the top row, like a phone's quick settings.
     val pullDown = Modifier.pointerInput(Unit) {
@@ -285,7 +295,8 @@ fun HomeScreen(
             }
             if (theme.style == HomeStyle.MapFirst) {
                 val dims = LocalDims.current
-                ParkedPill(app = app, onClick = onOpenParked, modifier = Modifier.align(Alignment.CenterEnd).padding(end = dims.d(2.6f)))
+                // Over the map card's lower left, clear of the dock and the right-hand cards.
+                ParkedPill(app = app, onClick = onOpenParked, modifier = Modifier.align(Alignment.BottomStart).padding(start = dims.d(5.5f), bottom = dims.d(20.5f)))
             }
         }
     }
@@ -345,7 +356,42 @@ internal class HomeUi(
     val onNav: () -> Unit,
     val onMusicApp: () -> Unit,
     val onMusicLong: () -> Unit,
+    /** FASTag balance for the top bar ("₹855") and whether it is under the alert level. */
+    val fastag: Pair<String, Boolean>? = null,
+    val onFastag: () -> Unit = {},
+    /** The trip bar while Car Hub navigates. */
+    val trip: TripUi? = null,
+    val onPhone: () -> Unit = {},
+    val onPhoneLong: () -> Unit = {},
+    val onFuel: () -> Unit = {},
 )
+
+/** Map First's trip bar: arrival time, "18 km · 26 min" and End route. */
+internal class TripUi(val eta: String, val left: String, val onEnd: () -> Unit)
+
+/** "₹855" and low or not, for Map First's top bar; null when FASTag is off or no balance is known. */
+@Composable
+private fun fastagChip(app: DriveApp): Pair<String, Boolean>? {
+    val on by app.fastag.enabled.collectAsStateWithLifecycle()
+    val events by app.fastag.events.collectAsStateWithLifecycle()
+    val low by app.fastag.lowBalance.collectAsStateWithLifecycle()
+    if (!on) return null
+    val balance = remember(events) { FastagStore.latestBalance(events)?.balance } ?: return null
+    return rupees(kotlin.math.floor(balance)) to (balance < low)
+}
+
+/** The trip bar's text while Car Hub's own navigation runs. */
+@Composable
+private fun tripUi(app: DriveApp, nav: NavSession): TripUi? {
+    val context = LocalContext.current
+    val p = nav.progress ?: return null
+    if (!nav.visible || nav.phase == NavSession.Phase.Arrived) return null
+    val is24h = remember { DateFormat.is24HourFormat(context) }
+    val eta = java.time.LocalTime.now().plusSeconds(p.remainingS.toLong())
+        .format(DateTimeFormatter.ofPattern(if (is24h) "HH:mm" else "h:mm", Locale.getDefault()))
+    val left = navDistance(context, p.remainingM) + " · " + navDuration(context, p.remainingS)
+    return TripUi(eta, left) { app.navigator.stop() }
+}
 
 /** The next manoeuvre: Car Hub's own route, or Google Maps' notification. */
 internal class TurnUi(val distance: String, val text: String?, val step: RouteStep?, val arrow: ImageBitmap?)
@@ -715,11 +761,12 @@ private fun DockKey(
     shadow: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     textSize: Float = 2.8f,
+    iconTint: Color = content,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val inner = @Composable {
-        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(maxOf(dims.d(4.6f), 28.dp)))
+        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(maxOf(dims.d(4.6f), 28.dp)))
         Text(
             theme.label(label),
             color = content,
@@ -967,48 +1014,133 @@ private fun AlertPill(a: AlertUi, modifier: Modifier = Modifier, background: Col
 // ------------------------------------------------------------------------------ Map First
 
 /**
- * Style 4 (default, free): the map fills the screen and solid slate cards float over it: the next
- * turn top left, time and speed top right, music bottom left, the dock bottom right and Ampli's
- * bubble in its own slot above the car. Before there is a location the drawn map stands in, with
- * the "Allow location" card in the middle (MapPane).
+ * Map First (default, free) and Calm, as on the "Main" design board: a fixed frame of top bar
+ * (clock and date, the "Hey Ampli" pill, the FASTag chip), the map card with the turn banner and
+ * the trip bar, the speed card and the music card on the right, and the dock (Go, Music, Phone,
+ * Fuel, More, SOS) along the bottom. Flat fills only: nothing is blurred or shadowed.
  */
 @Composable
 private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, places: @Composable () -> Unit, map: @Composable () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val card = theme.overMap
+    val gap = dims.d(2f)
+    Column(Modifier.fillMaxSize().padding(dims.d(3f)), verticalArrangement = Arrangement.spacedBy(gap)) {
+        MapFirstTopBar(ui, Modifier.fillMaxWidth().height(dims.d(8f)).then(pullDown))
+        Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
+            MapFirstMapCard(ui, places, map, Modifier.weight(1f).fillMaxHeight())
+            Column(Modifier.width(dims.d(49f)).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
+                MapFirstSpeedCard(ui, Modifier.fillMaxWidth().weight(0.42f))
+                MapFirstMusicCard(ui, Modifier.fillMaxWidth().weight(0.58f))
+            }
+        }
+        MapFirstDock(ui, Modifier.fillMaxWidth().height(dims.d(13f)))
+    }
+}
+
+/** Clock and date, the "Hey Ampli" pill and the FASTag balance chip. Pull down here for Controls. */
+@Composable
+private fun MapFirstTopBar(ui: HomeUi, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+        val (time, ampm) = clock()
+        val date = remember(time) {
+            try {
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("EEEE · d MMMM", Locale.getDefault()))
+            } catch (_: Exception) {
+                ""
+            }
+        }
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f))) {
+            Text(time, style = theme.numberStyle(theme.text), fontSize = dims.t(6f, min = 32f), maxLines = 1)
+            Column {
+                ampm?.let { Text(it, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.2f, min = 16f), maxLines = 1) }
+                if (!dims.compact) Text(date, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.5f, min = 16f), maxLines = 1)
+            }
+        }
+        // "Bolo Hey Ampli": the whole pill starts listening; mint edge while Ampli listens.
+        Row(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(CircleShape)
+                .background(theme.surface)
+                .border(2.dp, if (ui.listening) theme.accent else theme.border, CircleShape)
+                .clickable(onClick = ui.onMic)
+                .padding(horizontal = dims.d(3f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f), Alignment.CenterHorizontally),
+        ) {
+            Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(3.5f)))
+            Text(
+                stringResource(R.string.home_say_hey_ampli),
+                color = theme.text,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = dims.t(3f, min = 20f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        ui.fastag?.let { (balance, low) ->
+            val shape = theme.cardShape(dims, 0.67f)
+            Row(
+                Modifier
+                    .fillMaxHeight()
+                    .themedTap(shape, if (low) theme.danger else theme.surface, border = if (low) null else theme.border, borderWidth = 2.dp, onClick = ui.onFastag)
+                    .padding(horizontal = dims.d(2.5f)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(1.25f)),
+            ) {
+                Text(
+                    "FASTAG",
+                    color = if (low) theme.onDanger else theme.muted,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = dims.t(2f, min = 14f),
+                    letterSpacing = 0.08.em,
+                    maxLines = 1,
+                )
+                Text(balance, style = theme.numberStyle(if (low) theme.onDanger else theme.text), fontSize = dims.t(4f, min = 24f), maxLines = 1)
+            }
+        }
+    }
+}
+
+/** The map in a rounded card: the turn banner top left, Ampli's bubble, and the trip bar. */
+@Composable
+private fun MapFirstMapCard(ui: HomeUi, places: @Composable () -> Unit, map: @Composable () -> Unit, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     val shape = theme.cardShape(dims)
-    val pad = dims.d(2.6f)
-    Box(Modifier.fillMaxSize()) {
+    Box(modifier.clip(shape).background(theme.mapBase).border(2.dp, theme.border, shape)) {
         // The drawn map: behind the live map while it loads, and on its own without a location.
         MapPlaceholder(Modifier.fillMaxSize())
         map()
-        // Turn card (or "Where to?" and "Go home"), the alert slot and saved places under it.
-        Column(Modifier.align(Alignment.TopStart).padding(pad).widthIn(max = dims.d(54f)), verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+        Column(
+            Modifier.align(Alignment.TopStart).padding(dims.d(2.5f)).widthIn(max = dims.d(52.5f)),
+            verticalArrangement = Arrangement.spacedBy(dims.d(1.5f)),
+        ) {
+            // Turn banner (Soft Indigo at night, Navy by day), or "Where to?" and "Go home".
             Row(
                 Modifier
                     .heightIn(min = MinTouch)
-                    .clip(shape)
-                    .background(card)
+                    .clip(theme.cardShape(dims, 0.83f))
+                    .background(theme.banner)
                     .clickable(onClick = ui.onNav)
-                    .padding(dims.d(2.2f)),
+                    .padding(horizontal = dims.d(3f), vertical = dims.d(2.25f)),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dims.d(2.4f)),
+                horizontalArrangement = Arrangement.spacedBy(dims.d(2.5f)),
             ) {
-                Box(Modifier.size(dims.d(13.5f)).clip(theme.cardShape(dims, 0.6f)).background(theme.accent), contentAlignment = Alignment.Center) {
-                    TurnArrow(ui.turn, theme.onAccent, Modifier.size(dims.d(8f)))
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
-                    val t = ui.turn
+                val t = ui.turn
+                TurnArrow(t, theme.onBanner, Modifier.size(dims.d(8f)))
+                Column(verticalArrangement = Arrangement.spacedBy(dims.d(0.25f))) {
                     if (t != null) {
-                        Text(t.distance, style = theme.numberStyle(theme.text), fontSize = dims.t(7f, min = 28f), maxLines = 1)
-                        t.text?.let { Text(it, color = theme.muted, fontSize = dims.t(3f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                        Text(t.distance, style = theme.numberStyle(theme.onBanner), fontSize = dims.t(7f, min = 32f), maxLines = 1)
+                        t.text?.let { Text(it, color = theme.onBanner, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 20f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     } else {
-                        // Parked: "Where to?" in full, and one tap home when Home is saved.
                         Text(
                             stringResource(R.string.nav_search_title),
-                            style = theme.numberStyle(theme.text),
-                            fontSize = dims.t(5f, min = 26f),
+                            style = theme.numberStyle(theme.onBanner),
+                            fontSize = dims.t(5f, min = 28f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -1019,110 +1151,169 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, places: @Composable () 
                                     .clip(CircleShape)
                                     .background(theme.accent)
                                     .clickable(onClick = goHome)
-                                    .padding(horizontal = dims.d(2.2f)),
+                                    .padding(horizontal = dims.d(2.5f)),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(dims.d(1f)),
                             ) {
-                                Icon(Icons.Filled.Home, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(maxOf(dims.d(3.6f), 24.dp)))
-                                Text(stringResource(R.string.home_go_home), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.8f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Icon(Icons.Filled.Home, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(maxOf(dims.d(3.5f), 24.dp)))
+                                Text(stringResource(R.string.home_go_home), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.75f, min = 20f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }
                 }
             }
-            // The location card in the middle already says it, with its button.
-            ui.alert?.takeUnless { ui.locationPrompt && it.alert.kind == AlertKind.LocationOff }?.let { AlertPill(it, background = card) }
             places()
         }
-        // Time and speed on the right.
-        Column(Modifier.align(Alignment.TopEnd).padding(pad).then(pullDown), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-            val (time, ampm) = clock()
-            Text(
-                time + (ampm?.let { " $it" } ?: ""),
-                color = theme.text,
-                fontFamily = theme.font.family,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = dims.t(3.6f, min = 22f),
-                modifier = Modifier.clip(CircleShape).background(card).padding(horizontal = dims.d(2.6f), vertical = dims.d(1.2f)),
-            )
-            Box {
-                val size = dims.d(21f)
-                Column(
-                    Modifier.size(size).clip(CircleShape).background(if (ui.over) theme.danger else card),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    SpeedNumber(ui.speed, if (ui.over) theme.onDanger else theme.text, dims.t(9f, min = 36f))
-                    Text(speedFoot(ui, withLimit = false), color = if (ui.over) theme.onDanger else theme.muted, fontSize = dims.t(2.4f, min = 15f), maxLines = 1)
-                }
-                if (ui.limit != null) LimitBadge(ui.limit, dims.d(10f), Modifier.align(Alignment.BottomStart).offset(x = -dims.d(5f), y = dims.d(1f)))
-            }
-        }
-        // Ampli's line: a speech bubble in its own slot above the car, between the music card and the
-        // dock, so it never sits on a control. Only while fresh, and not while the location card shows.
+        // Ampli's line, in its own slot above the trip bar, only while fresh.
         val line = ui.caption
         if (line != null && AmpliLine.bubbleShown(line, ui.locationPrompt)) {
-            AmpliBubble(line, Modifier.align(Alignment.BottomCenter).padding(bottom = dims.d(24f)).widthIn(max = dims.d(44f)))
+            AmpliBubble(line, Modifier.align(Alignment.BottomCenter).padding(bottom = dims.d(if (ui.trip != null) 13f else 3f)).widthIn(max = dims.d(56f)))
         }
-        // Now playing.
-        Row(
-            Modifier
-                .align(Alignment.BottomStart)
-                .padding(pad)
-                .widthIn(max = dims.d(52f))
-                .clip(shape)
-                .background(card)
-                .clickable(onClick = ui.music.onOpen)
-                .padding(dims.d(2f)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dims.d(2.2f)),
-        ) {
-            Box(
-                Modifier.size(dims.d(14f)).clip(theme.cardShape(dims, 0.5f)).background(Brush.linearGradient(listOf(theme.accent, Color(0xFF3A1E9C)))),
-                contentAlignment = Alignment.Center,
+        // Trip bar: arrival time, distance and time left, "End route".
+        ui.trip?.let { trip ->
+            Row(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(dims.d(2.5f))
+                    .fillMaxWidth()
+                    .height(dims.d(10f))
+                    .clip(theme.cardShape(dims, 0.83f))
+                    .background(theme.overMap)
+                    .padding(horizontal = dims.d(3f)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(3f)),
             ) {
+                Text(trip.eta, style = theme.numberStyle(theme.text), fontSize = dims.t(5f, min = 26f), maxLines = 1)
+                Text(trip.left, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.75f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                Box(
+                    Modifier
+                        .heightIn(min = dims.d(7f))
+                        .clip(CircleShape)
+                        .border(2.dp, theme.text, CircleShape)
+                        .clickable(onClick = trip.onEnd)
+                        .padding(horizontal = dims.d(3f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(stringResource(R.string.home_end_route), color = theme.text, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.75f, min = 18f), maxLines = 1)
+                }
+            }
+        }
+    }
+}
+
+/** Speed in Barlow Condensed at 128 px with the limit sign, and the alert strip under it. */
+@Composable
+private fun MapFirstSpeedCard(ui: HomeUi, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = theme.cardShape(dims)
+    val fill = if (ui.over) theme.danger else theme.surface
+    val fg = if (ui.over) theme.onDanger else theme.text
+    BoxWithConstraints(modifier.themedCard(theme, shape, fill = androidx.compose.ui.graphics.SolidColor(fill), border = if (ui.over) theme.danger else theme.border)) {
+        val tall = maxHeight
+        Column(
+            Modifier.fillMaxSize().padding(horizontal = dims.d(3f), vertical = dims.d(2.5f)),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(Modifier.fillMaxWidth().weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
+                    val bySpace = with(LocalDensity.current) { (tall * 0.5f).toSp().value }
+                    SpeedNumber(ui.speed, fg, minOf(dims.uSp * 16f, bySpace).coerceAtLeast(48f).sp)
+                    Text(speedFoot(ui, withLimit = false), color = if (ui.over) theme.onDanger else theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.75f, min = 18f), maxLines = 1, modifier = Modifier.padding(bottom = dims.d(1.5f)))
+                }
+                if (ui.limit != null) LimitBadge(ui.limit, dims.d(12f))
+            }
+            ui.alert?.let { a ->
+                val danger = a.alert.danger
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = dims.d(6f))
+                        .clip(RoundedCornerShape(dims.d(1.5f)))
+                        .background(if (danger && !ui.over) theme.danger else theme.warning.copy(alpha = 0.16f))
+                        .clickable(onClick = a.onClick)
+                        .padding(horizontal = dims.d(2f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dims.d(1.25f)),
+                ) {
+                    val c = when {
+                        danger && !ui.over -> theme.onDanger
+                        ui.over -> theme.onDanger
+                        else -> theme.warning
+                    }
+                    Icon(Icons.Filled.Warning, contentDescription = null, tint = c, modifier = Modifier.size(dims.d(3f)))
+                    Text(a.alert.line, color = c, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.5f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+/** Now playing: art, title, artist, and 80 px keys with the mint play key in the middle. */
+@Composable
+private fun MapFirstMusicCard(ui: HomeUi, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = theme.cardShape(dims)
+    Column(
+        modifier
+            .themedCard(theme, shape, fill = androidx.compose.ui.graphics.SolidColor(theme.surface))
+            .padding(horizontal = dims.d(3f), vertical = dims.d(2.5f)),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = ui.music.onOpen),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+        ) {
+            Box(Modifier.size(dims.d(11f)).clip(RoundedCornerShape(dims.d(2f))).background(theme.surfaceHigh), contentAlignment = Alignment.Center) {
                 val art = ui.music.art
                 if (art != null) {
                     Image(art, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
-                    Icon(Icons.Filled.MusicNote, contentDescription = null, tint = Color.White.copy(alpha = 0.85f), modifier = Modifier.size(dims.d(6f)))
+                    Icon(Icons.Filled.MusicNote, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(5f)))
                 }
             }
-            Column(Modifier.weight(1f, fill = false)) {
-                Text(ui.music.title, color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(3.2f, min = 22f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                ui.music.artist?.let { Text(it, color = theme.muted, fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            }
-            if (ui.music.controls) {
-                MusicKey(if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, playLabel(ui.music.playing), ui.music.onPlayPause, dims.d(8f), Color.White, Color(0xFF1D2A33), null)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dims.d(0.5f))) {
+                Text(ui.music.title, color = theme.text, fontWeight = FontWeight.Bold, fontSize = dims.t(3.5f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                ui.music.artist?.let { Text(it, color = theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.5f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
         }
-        // More, the round Hey Ampli key and SOS.
-        Row(
-            Modifier.align(Alignment.BottomEnd).padding(pad),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(dims.d(1.8f)),
-        ) {
-            val keyShape = theme.cardShape(dims, 0.7f)
-            DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, Modifier.size(dims.d(14f)), keyShape, card, theme.text, textSize = 2.4f)
-            Box(contentAlignment = Alignment.Center) {
-                val size = dims.d(19f)
-                MicRing(ui.listening, theme.accent, Modifier.size(size))
-                Column(
-                    Modifier
-                        .size(size)
-                        .clip(CircleShape)
-                        .background(theme.accent)
-                        .border(dims.d(1f), theme.accent.copy(alpha = 0.35f), CircleShape)
-                        .clickable(onClick = ui.onMic),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(6.4f)))
-                    Text(stringResource(R.string.voice_button), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.3f, min = 15f), maxLines = 1)
-                }
+        if (ui.music.controls) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                val key = dims.d(10f)
+                MusicKey(Icons.Filled.SkipPrevious, stringResource(R.string.music_previous), ui.music.onPrevious, key, theme.surfaceHigh, theme.text, null)
+                MusicKey(
+                    if (ui.music.playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    playLabel(ui.music.playing),
+                    ui.music.onPlayPause,
+                    key,
+                    theme.accent,
+                    theme.onAccent,
+                    null,
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.width(dims.d(14f)),
+                )
+                MusicKey(Icons.Filled.SkipNext, stringResource(R.string.music_next), ui.music.onNext, key, theme.surfaceHigh, theme.text, null)
             }
-            SosKey(ui, Modifier.size(dims.d(14f)), keyShape)
         }
+    }
+}
+
+/** The dock: Go, Music, Phone, Fuel, More and SOS, 104 px tall. */
+@Composable
+private fun MapFirstDock(ui: HomeUi, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val shape = theme.buttonShape(dims)
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+        val key = Modifier.weight(1f).fillMaxHeight()
+        DockKey(stringResource(R.string.dock_navigate), Icons.Filled.Navigation, ui.onNav, key, shape, theme.surface, theme.text, border = theme.border, iconTint = theme.accentSoft, textSize = 3f)
+        DockKey(stringResource(R.string.dock_music), Icons.Filled.MusicNote, ui.onMusicApp, key, shape, theme.surface, theme.text, border = theme.border, onLongClick = ui.onMusicLong, iconTint = theme.accentSoft, textSize = 3f)
+        DockKey(stringResource(R.string.dock_phone), Icons.Filled.Phone, ui.onPhone, key, shape, theme.surface, theme.text, border = theme.border, onLongClick = ui.onPhoneLong, iconTint = theme.accentSoft, textSize = 3f)
+        DockKey(stringResource(R.string.more_fuel), Icons.Filled.LocalGasStation, ui.onFuel, key, shape, theme.surface, theme.text, border = theme.border, iconTint = theme.accentSoft, textSize = 3f)
+        DockKey(stringResource(R.string.more_sheet_title), Icons.Filled.GridView, ui.onMore, key, shape, theme.surface, theme.text, border = theme.border, iconTint = theme.accentSoft, textSize = 3f)
+        SosKey(ui, key, shape)
     }
 }
 
@@ -1131,7 +1322,7 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, places: @Composable () 
 private fun AmpliBubble(line: String, modifier: Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val fill = Color(HomePalettes.MAP_FIRST_BUBBLE)
+    val fill = if (theme.isLight) theme.banner else Color(HomePalettes.MAP_FIRST_BUBBLE)
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
             Modifier
@@ -1139,8 +1330,8 @@ private fun AmpliBubble(line: String, modifier: Modifier) {
                 .background(fill)
                 .padding(horizontal = dims.d(2.6f), vertical = dims.d(1.8f)),
         ) {
-            Text(stringResource(R.string.home_ampli), color = theme.accent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.4f, min = 16f))
-            Text(line, color = Color(HomePalettes.MAP_FIRST_BUBBLE_INK), fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(R.string.home_ampli), color = if (theme.isLight) theme.accent else theme.accentSoft, fontWeight = FontWeight.Bold, fontSize = dims.t(2.4f, min = 16f))
+            Text(line, color = if (theme.isLight) theme.onBanner else Color(HomePalettes.MAP_FIRST_BUBBLE_INK), fontWeight = FontWeight.SemiBold, fontSize = dims.t(3f, min = 22f), maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
         androidx.compose.foundation.Canvas(Modifier.width(dims.d(3.2f)).height(dims.d(1.8f))) {
             val tail = androidx.compose.ui.graphics.Path().apply {
@@ -1236,8 +1427,8 @@ private fun BentoHome(ui: HomeUi, pullDown: Modifier) {
                 ) {
                     Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(7f)))
                     Column {
-                        Text(stringResource(R.string.voice_button), color = Color(0xFFE6EBFF), fontFamily = theme.numberFont.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(5.4f, min = 26f), maxLines = 1)
-                        Text(stringResource(R.string.home_mic_hint), color = Color(0xFFC9D3FF), fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(stringResource(R.string.voice_button), color = theme.onAccent, fontFamily = theme.numberFont.family, fontWeight = FontWeight.ExtraBold, fontSize = dims.t(5.4f, min = 26f), maxLines = 1)
+                        Text(stringResource(R.string.home_mic_hint), color = theme.onAccent.copy(alpha = 0.85f), fontSize = dims.t(2.6f, min = 16f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 MicRing(ui.listening, theme.accent, Modifier.matchParentSize())

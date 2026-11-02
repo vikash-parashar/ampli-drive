@@ -29,7 +29,7 @@ fun DriveTheme.cardShape(dims: Dims, scale: Float = 1f): Shape =
 
 /** Shape for buttons and chips: rounded on rounded themes, square on Road Sign. */
 fun DriveTheme.buttonShape(dims: Dims): Shape =
-    if (radius <= 0f) RectangleShape else RoundedCornerShape(dims.d(radius * 0.6f))
+    if (radius <= 0f) RectangleShape else RoundedCornerShape(dims.d(radius * 5f / 6f))
 
 /** Small labels: upper-case on themes whose design uses caps. */
 fun DriveTheme.label(text: String): String = if (upperLabels) text.uppercase() else text

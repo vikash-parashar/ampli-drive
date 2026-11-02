@@ -14,8 +14,8 @@ data class StoredTheme(
 /**
  * The four home themes and the move to them. Plain Kotlin, unit-tested (ThemeDefaultsTest).
  *
- * Car Hub ships exactly four themes: Map First (the default), Big Glance, Bento Grid and
- * Neo-Brutal Road Sign. Every theme id saved by an earlier build (Crimson Drive, the Soft family,
+ * Car Hub ships five themes: Map First (the default, day and night colours by the sun), Big
+ * Glance, Bento Grid, Neo-Brutal Road Sign and Calm. Every theme id saved by an earlier build (Crimson Drive, the Soft family,
  * Glass, Saffron, Classic…) maps to the default; nothing is written by the move itself.
  */
 object ThemeDefaults {
@@ -24,8 +24,11 @@ object ThemeDefaults {
     const val BENTO = "bento_grid"
     const val ROAD_SIGN = "road_sign"
 
-    /** Every theme this build knows, in picker order. */
-    val IDS: List<String> = listOf(MAP_FIRST, BIG_GLANCE, BENTO, ROAD_SIGN)
+    /** Calm (Pro): the Map First layout in teal-grey and warm gold. */
+    const val CALM = "calm"
+
+    /** Every theme this build knows. */
+    val IDS: List<String> = listOf(MAP_FIRST, BIG_GLANCE, BENTO, ROAD_SIGN, CALM)
 
     /** The default: Map First, "Auto night" off. */
     val DEFAULT = ThemeChoice(id = MAP_FIRST, autoNight = false)

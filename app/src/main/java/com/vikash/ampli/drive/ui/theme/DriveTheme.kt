@@ -21,7 +21,7 @@ import com.vikash.ampli.drive.prefs.ThemeDefaults
  */
 enum class CardStyle { Solid, Glass, Brutal }
 
-/** The four home layouts (Car Hub style studies 3, 4, 6 and 8). */
+/** The four home layouts (Car Hub style studies 3, 4, 6 and 8); Calm uses the Map First layout. */
 enum class HomeStyle { BigGlance, MapFirst, Bento, RoadSign }
 
 /**
@@ -33,7 +33,36 @@ enum class FontChoice(val family: FontFamily) {
     Archivo(FontFamily(Font(R.font.archivo_bold, FontWeight.Bold), Font(R.font.archivo_extrabold, FontWeight.ExtraBold))),
     Sora(FontFamily(Font(R.font.sora_regular, FontWeight.Normal), Font(R.font.sora_semibold, FontWeight.SemiBold), Font(R.font.sora_bold, FontWeight.Bold))),
     Bricolage(FontFamily(Font(R.font.bricolage_semibold, FontWeight.SemiBold), Font(R.font.bricolage_extrabold, FontWeight.ExtraBold))),
-    Barlow(FontFamily(Font(R.font.barlow_condensed_semibold, FontWeight.SemiBold), Font(R.font.barlow_condensed_extrabold, FontWeight.ExtraBold))),
+    /** Barlow Condensed: every big number (speed, distance, rupees, clock). */
+    Barlow(
+        FontFamily(
+            Font(R.font.barlow_condensed_semibold, FontWeight.SemiBold),
+            Font(R.font.barlow_condensed_bold, FontWeight.Bold),
+            Font(R.font.barlow_condensed_extrabold, FontWeight.ExtraBold),
+        ),
+    ),
+
+    /** Barlow: words on every theme. */
+    BarlowSans(
+        FontFamily(
+            Font(R.font.barlow_medium, FontWeight.Medium),
+            Font(R.font.barlow_medium, FontWeight.Normal),
+            Font(R.font.barlow_semibold, FontWeight.SemiBold),
+            Font(R.font.barlow_bold, FontWeight.Bold),
+            Font(R.font.barlow_bold, FontWeight.ExtraBold),
+        ),
+    ),
+
+    /** Hind: words when the app language is written in Devanagari (it carries Latin too). */
+    Hind(
+        FontFamily(
+            Font(R.font.hind_medium, FontWeight.Medium),
+            Font(R.font.hind_medium, FontWeight.Normal),
+            Font(R.font.hind_semibold, FontWeight.SemiBold),
+            Font(R.font.hind_semibold, FontWeight.Bold),
+            Font(R.font.hind_semibold, FontWeight.ExtraBold),
+        ),
+    ),
 
     /** Big Glance's giant numbers. */
     BigShoulders(FontFamily(Font(R.font.big_shoulders_black, FontWeight.Black))),
@@ -124,7 +153,17 @@ data class DriveTheme(
     /** Card behind text over the live map (Map First's slate; solid on Android 8.x). */
     val overMap: Color,
 
-    /** Glow behind big numbers, or null (none of the four themes uses one). */
+    /** Turn banner and the active rail key (Soft Indigo at night, Navy by day, teal on Calm). */
+    val banner: Color = accent,
+    val onBanner: Color = onAccent,
+    /** Map colour behind tiles that are still loading. */
+    val mapBase: Color = background,
+    /** The left rail: its strip, its key fill and the key ink. */
+    val rail: Color = background,
+    val railKey: Color = surface,
+    val railInk: Color = text,
+
+    /** Glow behind big numbers, or null (none of the themes uses one). */
     val glow: Color? = null,
 
     // Emergency red (SOS, crash countdown, low FASTag balance): the same on every theme on purpose,
@@ -177,6 +216,8 @@ private fun theme(
     labelSpacing = labelSpacing, upperLabels = upperLabels,
     map = map, mapTint = c(mapTint), mapPuck = c(p.accent),
     ink = c(p.ink), onInk = c(p.onInk), overMap = overMap,
+    banner = c(p.banner), onBanner = c(p.onBanner), mapBase = c(p.map),
+    rail = c(p.rail), railKey = c(p.railKey), railInk = c(p.railInk),
 )
 
 object DriveThemes {
@@ -184,74 +225,97 @@ object DriveThemes {
     /** Below Android 12 nothing can blur behind a card: Map First's cards go solid there. */
     private val OLD_UNIT = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
 
-    /** Style 4, the default (free): the map fills the screen, slate cards in the corners. */
-    val MapFirst: DriveTheme = HomePalettes.MapFirst.let { p ->
-        val card = c(if (OLD_UNIT) HomePalettes.MAP_FIRST_CARD_SOLID else HomePalettes.MAP_FIRST_CARD)
-        theme(
-            id = ThemeDefaults.MAP_FIRST, name = "Map First", nameRes = R.string.theme_map_first, style = HomeStyle.MapFirst, p = p,
-            radius = 3.75f, cardStyle = CardStyle.Glass, borderWidth = 0.dp,
-            font = FontChoice.Sora, numberFont = FontChoice.Sora, numberWeight = FontWeight.Bold,
-            labelSpacing = 0f, upperLabels = false,
-            map = MapLook.Positron, mapTint = 0x1AE8D9B5,
-            turnBackground = solid(card), turnText = c(p.text), turnMuted = c(p.muted),
-            turnTile = solid(c(p.accent)), turnTileText = c(p.onAccent), turnBorder = Color.Transparent,
-            overMap = card,
-        )
-    }
+    /** Card radius 24 px and buttons 20 px at 800 px tall (1 unit = 8 px). */
+    private const val RADIUS = 3f
 
-    /** Style 3: three giant tiles on true black, for night driving. */
+    private fun mapFirst(p: HomePalette, card: Long, id: String, name: String, @StringRes nameRes: Int, map: MapLook): DriveTheme =
+        theme(
+            id = id, name = name, nameRes = nameRes, style = HomeStyle.MapFirst, p = p,
+            radius = RADIUS, cardStyle = CardStyle.Glass, borderWidth = 2.dp,
+            font = FontChoice.BarlowSans, numberFont = FontChoice.Barlow, numberWeight = FontWeight.Bold,
+            labelSpacing = 0.08f, upperLabels = false,
+            map = map, mapTint = 0x00000000,
+            turnBackground = solid(c(p.banner)), turnText = c(p.onBanner), turnMuted = c(p.onBanner).copy(alpha = 0.82f),
+            turnTile = solid(c(p.onBanner).copy(alpha = 0.14f)), turnTileText = c(p.onBanner), turnBorder = Color.Transparent,
+            overMap = c(card),
+        )
+
+    /** Map First at night (the free default after sunset): Midnight Navy, Sage Mint, Soft Indigo. */
+    val MapFirst: DriveTheme = mapFirst(
+        HomePalettes.Night,
+        if (OLD_UNIT) HomePalettes.MAP_FIRST_CARD_SOLID else HomePalettes.MAP_FIRST_CARD,
+        ThemeDefaults.MAP_FIRST, "Map First", R.string.theme_map_first, MapLook.Dark,
+    )
+
+    /** Map First by day: Seal Blue, Navy and Crimson Pink. Switches to [MapFirst] at sunset. */
+    val MapFirstDay: DriveTheme = mapFirst(
+        HomePalettes.Day, HomePalettes.MAP_FIRST_DAY_CARD,
+        ThemeDefaults.MAP_FIRST, "Map First", R.string.theme_map_first, MapLook.Positron,
+    )
+
+    /** Calm (Pro): the Map First layout in teal-grey and warm gold. */
+    val Calm: DriveTheme = mapFirst(
+        HomePalettes.Calm, HomePalettes.CALM_CARD,
+        ThemeDefaults.CALM, "Calm", R.string.theme_calm, MapLook.Dark,
+    )
+
+    /** Style 3: three giant tiles in the night palette. */
     val BigGlance: DriveTheme = HomePalettes.BigGlance.let { p ->
         theme(
             id = ThemeDefaults.BIG_GLANCE, name = "Big Glance", nameRes = R.string.theme_big_glance, style = HomeStyle.BigGlance, p = p,
-            radius = 5f, cardStyle = CardStyle.Solid, borderWidth = 0.dp,
-            font = FontChoice.Archivo, numberFont = FontChoice.BigShoulders, numberWeight = FontWeight.Black,
-            labelSpacing = 0.16f, upperLabels = true,
-            map = MapLook.Dark, mapTint = 0x1A000000,
-            turnBackground = solid(c(p.surface)), turnText = c(p.text), turnMuted = c(p.muted),
-            turnTile = solid(c(p.surfaceHigh)), turnTileText = c(p.accent), turnBorder = Color.Transparent,
-            overMap = c(0xF2141418),
+            radius = RADIUS, cardStyle = CardStyle.Solid, borderWidth = 2.dp,
+            font = FontChoice.BarlowSans, numberFont = FontChoice.Barlow, numberWeight = FontWeight.Bold,
+            labelSpacing = 0.12f, upperLabels = true,
+            map = MapLook.Dark, mapTint = 0x00000000,
+            turnBackground = solid(c(p.banner)), turnText = c(p.onBanner), turnMuted = c(p.onBanner).copy(alpha = 0.82f),
+            turnTile = solid(c(p.onBanner).copy(alpha = 0.14f)), turnTileText = c(p.onBanner), turnBorder = Color.Transparent,
+            overMap = c(HomePalettes.MAP_FIRST_CARD_SOLID),
         )
     }
 
-    /** Style 6: a magazine grid where tile size equals importance. */
+    /** Style 6: a magazine grid where tile size equals importance, in the day palette. */
     val Bento: DriveTheme = HomePalettes.Bento.let { p ->
         theme(
             id = ThemeDefaults.BENTO, name = "Bento Grid", nameRes = R.string.theme_bento, style = HomeStyle.Bento, p = p,
-            radius = 3.75f, cardStyle = CardStyle.Solid, borderWidth = 3.dp,
-            font = FontChoice.Bricolage, numberFont = FontChoice.Bricolage, numberWeight = FontWeight.ExtraBold,
-            labelSpacing = 0.1f, upperLabels = false,
+            radius = RADIUS, cardStyle = CardStyle.Solid, borderWidth = 2.dp,
+            font = FontChoice.BarlowSans, numberFont = FontChoice.Barlow, numberWeight = FontWeight.Bold,
+            labelSpacing = 0.08f, upperLabels = false,
             map = MapLook.Positron, mapTint = 0x00000000,
-            turnBackground = solid(c(p.accent)), turnText = c(p.onAccent), turnMuted = c(0xFFDCE4FF),
-            turnTile = solid(c(0x33FFFFFF)), turnTileText = c(p.onAccent), turnBorder = Color.Transparent,
-            overMap = c(0xF2FFFFFF),
+            turnBackground = solid(c(p.banner)), turnText = c(p.onBanner), turnMuted = c(p.onBanner).copy(alpha = 0.82f),
+            turnTile = solid(c(p.onBanner).copy(alpha = 0.14f)), turnTileText = c(p.onBanner), turnBorder = Color.Transparent,
+            overMap = c(HomePalettes.MAP_FIRST_DAY_CARD),
         )
     }
 
-    /** Style 8: Indian road-sign language at full volume. */
+    /** Style 8: road-sign language (thick navy lines, hard shadows) on the day palette. */
     val RoadSign: DriveTheme = HomePalettes.RoadSign.let { p ->
         theme(
             id = ThemeDefaults.ROAD_SIGN, name = "Neo-Brutal Road Sign", nameRes = R.string.theme_road_sign, style = HomeStyle.RoadSign, p = p,
             radius = 0f, cardStyle = CardStyle.Brutal, borderWidth = 4.dp,
-            font = FontChoice.Barlow, numberFont = FontChoice.ArchivoBlack, numberWeight = FontWeight.Normal,
+            font = FontChoice.BarlowSans, numberFont = FontChoice.Barlow, numberWeight = FontWeight.ExtraBold,
             labelSpacing = 0.08f, upperLabels = true,
             map = MapLook.Liberty, mapTint = 0x00000000,
-            turnBackground = solid(c(p.accent)), turnText = c(p.onAccent), turnMuted = c(0xFFDCE8F7),
-            turnTile = solid(Color.Transparent), turnTileText = c(p.onAccent), turnBorder = c(p.border),
-            overMap = c(0xFFFFFFFF),
+            turnBackground = solid(c(p.banner)), turnText = c(p.onBanner), turnMuted = c(p.onBanner).copy(alpha = 0.82f),
+            turnTile = solid(Color.Transparent), turnTileText = c(p.onBanner), turnBorder = c(p.border),
+            overMap = c(0xFFFDFEFF),
         )
     }
 
-    /** Picker order: the free default first. */
-    val all: List<DriveTheme> = listOf(MapFirst, BigGlance, Bento, RoadSign)
+    /** Picker order: the free default first, then Calm. */
+    val all: List<DriveTheme> = listOf(MapFirst, Calm, BigGlance, Bento, RoadSign)
 
     fun byId(id: String?): DriveTheme? = all.firstOrNull { it.id == id }
 
     /**
-     * The theme to show now: the driver's choice, Big Glance after sunset when "Auto night" is on
-     * (Pro), and Map First for anything unknown or locked.
+     * The theme to show now: the driver's choice (Map First in its day or night colours by the
+     * sun), Big Glance after sunset when "Auto night" is on (Pro), and Map First for anything
+     * unknown or locked.
      */
-    fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme =
-        byId(ThemeAccess.resolveId(choice, night, isPro)) ?: MapFirst
+    fun resolve(choice: ThemeChoice, night: Boolean, isPro: Boolean): DriveTheme {
+        val id = ThemeAccess.resolveId(choice, night, isPro)
+        if (id == ThemeDefaults.MAP_FIRST) return if (night) MapFirst else MapFirstDay
+        return byId(id) ?: MapFirst
+    }
 }
 
 /** The active theme. Every composable reads colours and shapes from here. */

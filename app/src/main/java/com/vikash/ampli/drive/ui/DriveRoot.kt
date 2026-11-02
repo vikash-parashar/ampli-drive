@@ -63,7 +63,19 @@ enum class Screen {
 
     /** Car hub › Dashcam (Pro; "No camera found" on units without one). */
     Dashcam,
+
+    /** Apps › "Saaf karo": heaviest apps, uninstall, App info, hide. */
+    Cleaner,
 }
+
+/** App languages written in Devanagari: their words use the Hind font. */
+private val DEVANAGARI = setOf("hi", "mr", "ne", "mai", "bho", "kok", "sa", "bgc", "doi")
+
+/** This window's backlight after sunset (0..1). */
+private const val NIGHT_DIM = 0.35f
+
+/** Car Hub dimmed the window for the night (so sunrise undoes only its own change). */
+private var nightDimmed = false
 
 @Composable
 fun DriveRoot(
@@ -95,7 +107,26 @@ fun DriveRoot(
     val night = coarse?.let { SunTimes.isNight(minute, it.first, it.second) }
         ?: SunTimes.isNightByClock(LocalTime.now())
     // Nothing is blurred in any theme: Map First's cards are a tint (solid below Android 9).
-    val theme = DriveThemes.resolve(themeChoice, night, pro.isPro)
+    // Hindi and the other Devanagari languages read in Hind; everything else in Barlow.
+    val language = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+    val resolved = DriveThemes.resolve(themeChoice, night, pro.isPro)
+    val theme = remember(resolved, language) {
+        if (language in DEVANAGARI) resolved.copy(font = com.vikash.ampli.drive.ui.theme.FontChoice.Hind) else resolved
+    }
+    // After sunset the screen dims by itself (Settings › Theme can turn that off). Only this
+    // window's backlight changes, and only what Car Hub set itself is undone at sunrise.
+    val dimAtNight by app.prefs.dimAtNight.collectAsStateWithLifecycle()
+    val dimView = LocalView.current
+    LaunchedEffect(night, dimAtNight) {
+        val activity = dimView.context as? Activity ?: return@LaunchedEffect
+        if (night && dimAtNight) {
+            com.vikash.ampli.drive.system.QuickActions.setWindowBrightness(activity, NIGHT_DIM)
+            nightDimmed = true
+        } else if (nightDimmed) {
+            com.vikash.ampli.drive.system.QuickActions.setWindowBrightness(activity, null)
+            nightDimmed = false
+        }
+    }
     // Where Back goes from the emergency profile (opened from Settings or the Help panel).
     var emergencyReturn by remember { mutableStateOf(Screen.Settings) }
     // Where Back goes from Settings (Home, or the Car hub when opened from there).
@@ -191,12 +222,23 @@ fun DriveRoot(
                                         DefaultHomeBannerHost(app = app, resumeTick = resumeTick)
                                     },
                                 )
+                                // The FASTag toll pop-up over Home (right of the rail).
+                                TollToastHost(app = app, onOpenFastag = { onNavigate(Screen.Fastag) })
                             }
                             CarAlertHost(app = app)
                         }
                         Screen.Apps -> {
                             BackHandler(enabled = true) { onNavigate(Screen.Home) }
-                            AppsScreen(app = app, onBack = { onNavigate(Screen.Home) }, onOpenStore = { onNavigate(Screen.Store) })
+                            AppsScreen(
+                                app = app,
+                                onBack = { onNavigate(Screen.Home) },
+                                onOpenStore = { onNavigate(Screen.Store) },
+                                onOpenCleaner = { onNavigate(Screen.Cleaner) },
+                            )
+                        }
+                        Screen.Cleaner -> {
+                            BackHandler(enabled = true) { onNavigate(Screen.Apps) }
+                            CleanerScreen(app = app, resumeTick = resumeTick, onBack = { onNavigate(Screen.Apps) })
                         }
                         Screen.Settings -> {
                             BackHandler(enabled = true) { onNavigate(settingsReturn) }

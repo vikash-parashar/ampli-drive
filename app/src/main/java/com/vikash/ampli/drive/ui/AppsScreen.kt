@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -25,6 +27,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
@@ -74,7 +79,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
  * apps, "Edit list" turns taps into add / remove. Long-press puts an app on the Phone link button.
  */
 @Composable
-fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) {
+fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}, onOpenCleaner: () -> Unit = {}) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val context = LocalContext.current
@@ -131,6 +136,8 @@ fun AppsScreen(app: DriveApp, onBack: () -> Unit, onOpenStore: () -> Unit = {}) 
                 )
             }
         }
+        // Android settings, Car settings (when the unit has its own) and "Saaf karo".
+        if (!showAll && !editing) SystemSettingsRow(onClean = onOpenCleaner, modifier = Modifier.fillMaxWidth().height(dims.d(12f)))
         if (list == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = theme.accent)
@@ -289,27 +296,124 @@ private fun StoreTile(onClick: () -> Unit) {
     }
 }
 
+/**
+ * Every screen's header (design board "Header"): an 80 px back key, the title at 36 px with its
+ * line under it at 20 px, and an optional outlined action on the right.
+ */
 @Composable
-fun ScreenHeader(title: String, hint: String?, onBack: () -> Unit) {
+fun ScreenHeader(
+    title: String,
+    hint: String?,
+    onBack: () -> Unit,
+    action: String? = null,
+    onAction: (() -> Unit)? = null,
+) {
     val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+        horizontalArrangement = Arrangement.spacedBy(dims.d(2.5f)),
     ) {
         Box(
             modifier = Modifier
-                .size(MinTouch)
-                .themedTap(CircleShape, MaterialTheme.colorScheme.surfaceContainer, onClick = onBack),
+                .size(maxOf(MinTouch, dims.d(10f)))
+                .themedTap(theme.buttonShape(dims), theme.surfaceHigh, onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onSurface)
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.back),
+                tint = theme.text,
+                modifier = Modifier.size(maxOf(28.dp, dims.d(4f))),
+            )
         }
         Column(Modifier.weight(1f)) {
-            Text(title, fontSize = dims.t(4.2f, min = 22f), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Text(
+                title,
+                fontSize = dims.t(4.5f, min = 24f),
+                fontWeight = FontWeight.Bold,
+                color = theme.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             if (hint != null) {
-                Text(hint, fontSize = dims.t(2.3f), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    hint,
+                    fontSize = dims.t(2.5f, min = 16f),
+                    fontWeight = FontWeight.SemiBold,
+                    color = theme.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
+        }
+        if (action != null && onAction != null) {
+            Box(
+                Modifier
+                    .heightIn(min = maxOf(MinTouch, dims.d(9f)))
+                    .themedTap(theme.buttonShape(dims), androidx.compose.ui.graphics.Color.Transparent, border = theme.accentSoft, borderWidth = 2.dp, onClick = onAction)
+                    .padding(horizontal = dims.d(3.5f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(action, color = theme.accentSoft, fontWeight = FontWeight.Bold, fontSize = dims.t(3f, min = 20f), maxLines = 1)
+            }
+        }
+    }
+}
+
+/**
+ * "Android settings" and "Car settings" (hidden when the unit has no car-settings app of its
+ * own), plus the amber "Saaf karo" key to the Cleaner when [onClean] is given.
+ */
+@Composable
+internal fun SystemSettingsRow(modifier: Modifier = Modifier, onClean: (() -> Unit)? = null, outlined: Boolean = false) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val car by produceState<com.vikash.ampli.drive.system.CarSettingsApp?>(null) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { com.vikash.ampli.drive.system.SystemSettings.carSettings(context) }
+    }
+    val shape = theme.buttonShape(dims)
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+        @Composable
+        fun settingsKey(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, fill: androidx.compose.ui.graphics.Color, edge: androidx.compose.ui.graphics.Color, ink: androidx.compose.ui.graphics.Color, onClick: () -> Unit) {
+            Row(
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .themedTap(shape, fill, border = edge, borderWidth = 2.dp, onClick = onClick)
+                    .padding(horizontal = dims.d(2.5f)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f)),
+            ) {
+                Icon(icon, contentDescription = null, tint = if (outlined) ink else theme.accentSoft, modifier = Modifier.size(dims.d(4f)))
+                Text(label, color = ink, fontWeight = FontWeight.Bold, fontSize = dims.t(3f, min = 18f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        val fill = if (outlined) androidx.compose.ui.graphics.Color.Transparent else theme.surface
+        val edge = if (outlined) theme.accentSoft else theme.border
+        val ink = if (outlined) theme.accentSoft else theme.text
+        settingsKey(stringResource(R.string.android_settings), Icons.Filled.Settings, fill, edge, ink) {
+            com.vikash.ampli.drive.system.SystemSettings.openAndroid(context)
+        }
+        car?.let {
+            settingsKey(stringResource(R.string.car_settings), Icons.Filled.DirectionsCar, fill, edge, ink) {
+                if (!com.vikash.ampli.drive.system.SystemSettings.openCar(context)) {
+                    Toast.makeText(context, context.getString(R.string.error_cannot_open_app), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        if (onClean != null) {
+            val amber = theme.warning
+            settingsKey(
+                stringResource(R.string.apps_clean),
+                Icons.Filled.CleaningServices,
+                amber.copy(alpha = 0.14f),
+                amber,
+                if (theme.isLight) theme.text else androidx.compose.ui.graphics.Color(0xFFFFE3B0),
+                onClean,
+            )
         }
     }
 }

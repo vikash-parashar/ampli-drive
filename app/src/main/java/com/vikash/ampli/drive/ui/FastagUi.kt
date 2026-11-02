@@ -49,6 +49,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vikash.ampli.drive.DriveApp
@@ -172,75 +175,112 @@ private fun tollLine(event: TollEvent): String = listOfNotNull(
     event.balance?.let { stringResource(R.string.fastag_balance_value, rupees(it)) },
 ).joinToString(" · ")
 
-/** The 6-second card shown on Home when a toll SMS arrives. Tap opens the FASTag screen. */
+/**
+ * The toll pop-up (design board "Fastag"): what was taken and what is left in big numbers, the
+ * plaza, and "OK" / "Today's tolls". Shown for [TOLL_CARD_MS] when a toll SMS arrives.
+ */
 @Composable
-fun TollToast(event: TollEvent, lowBalance: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun TollToast(event: TollEvent, lowBalance: Int, onClick: () -> Unit, modifier: Modifier = Modifier, onDismiss: () -> Unit = {}) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val isLow = event.balance != null && event.balance < lowBalance
-    val shape = theme.cardShape(dims, scale = 0.8f)
-    Row(
+    val shape = theme.cardShape(dims, scale = 1.15f)
+    Column(
         modifier = modifier
-            .widthIn(max = 720.dp)
-            .heightIn(min = MinTouch)
-            .themedCard(
-                theme,
-                shape,
-                fill = Brush.linearGradient(listOf(theme.surfaceHigh, theme.surfaceHigh)),
-                border = if (isLow) theme.danger else theme.accent,
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = dims.d(3f), vertical = dims.d(1.6f)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(2f)),
+            .widthIn(max = dims.d(110f))
+            .themedCard(theme, shape, fill = Brush.linearGradient(listOf(theme.surface, theme.surface)), border = if (isLow) theme.danger else theme.accent)
+            .border(2.dp, if (isLow) theme.danger else theme.accent, shape)
+            .padding(horizontal = dims.d(4.5f), vertical = dims.d(4f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(3f)),
     ) {
-        Box(
-            Modifier
-                .size(maxOf(dims.d(7f), 40.dp))
-                .clip(CircleShape)
-                .background(if (isLow) theme.danger else theme.accent),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Filled.Toll, contentDescription = null, tint = if (isLow) theme.onDanger else theme.onAccent)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.75f))) {
+            Box(
+                Modifier.clip(RoundedCornerShape(dims.d(1.25f))).background(theme.accent).padding(horizontal = dims.d(1.75f), vertical = dims.d(0.75f)),
+            ) {
+                Text("FASTAG", color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(2.25f, min = 16f), letterSpacing = 0.08.em)
+            }
+            Text(
+                event.plaza?.let { stringResource(R.string.fastag_toll_at, it) } ?: stringResource(R.string.fastag_toll_paid),
+                color = theme.text,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = dims.t(3f, min = 20f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
         }
-        Text(
-            tollLine(event),
-            fontSize = dims.t(3.2f, min = 18f),
-            fontWeight = FontWeight.SemiBold,
-            color = theme.text,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            TollFigure(stringResource(R.string.fastag_taken), event.amount?.let { rupees(it) } ?: "—", theme.text, Modifier.weight(1f))
+            TollFigure(
+                stringResource(R.string.fastag_left),
+                event.balance?.let { rupees(it) } ?: "—",
+                if (isLow) theme.danger else theme.ok,
+                Modifier.weight(1f),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            val keyShape = theme.buttonShape(dims)
+            Box(
+                Modifier.weight(1f).heightIn(min = dims.d(10f)).themedTap(keyShape, theme.surfaceHigh, onClick = onDismiss),
+                contentAlignment = Alignment.Center,
+            ) { Text(stringResource(R.string.action_ok), color = theme.text, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3.25f, min = 20f)) }
+            Box(
+                Modifier.weight(1f).heightIn(min = dims.d(10f)).themedTap(keyShape, Color.Transparent, border = theme.accentSoft, borderWidth = 2.dp, onClick = onClick),
+                contentAlignment = Alignment.Center,
+            ) { Text(stringResource(R.string.fastag_todays_tolls), color = theme.accentSoft, fontWeight = FontWeight.SemiBold, fontSize = dims.t(3.25f, min = 20f)) }
+        }
     }
 }
 
+/** One big figure of the toll pop-up: "TAKEN ₹145", "LEFT ₹855". */
+@Composable
+private fun TollFigure(label: String, value: String, color: Color, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Column(
+        modifier.clip(theme.buttonShape(dims)).background(theme.surfaceHigh).padding(horizontal = dims.d(3f), vertical = dims.d(2.5f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(0.5f)),
+    ) {
+        Text(label.uppercase(), color = theme.muted, fontWeight = FontWeight.Bold, fontSize = dims.t(2.25f, min = 16f), letterSpacing = 0.08.em, maxLines = 1)
+        Text(value, style = theme.numberStyle(color), fontSize = dims.t(11f, min = 48f), maxLines = 1)
+    }
+}
+
+/** How long the toll pop-up stays up. */
+private const val TOLL_CARD_MS = 8_000L
+
 /**
- * Draws over the home screen: when a toll SMS arrives, its card shows for 6 seconds at the top.
- * Only the card itself takes touches; the rest of the home screen stays usable.
+ * Draws over the home screen: when a toll SMS arrives, its pop-up shows for [TOLL_CARD_MS] over a
+ * dimmed Home (right of the rail). Tapping outside it, or OK, closes it.
  */
 @Composable
-fun TollToastHost(app: DriveApp, onOpenFastag: () -> Unit) {
-    val dims = LocalDims.current
+fun TollToastHost(app: DriveApp, onOpenFastag: () -> Unit, modifier: Modifier = Modifier) {
     val low by app.fastag.lowBalance.collectAsStateWithLifecycle()
     var card by remember { mutableStateOf<TollEvent?>(null) }
     LaunchedEffect(Unit) { app.fastag.arrivals.collect { card = it } }
     LaunchedEffect(card) {
         if (card != null) {
-            delay(6_000L)
+            delay(TOLL_CARD_MS)
             card = null
         }
     }
-    Box(Modifier.fillMaxSize().padding(top = dims.d(12f)), contentAlignment = Alignment.TopCenter) {
-        card?.let { event ->
-            TollToast(
-                event = event,
-                lowBalance = low,
-                onClick = {
-                    card = null
-                    onOpenFastag()
-                },
-            )
-        }
+    val event = card ?: return
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(Color(0xB8080A14))
+            .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) { card = null },
+        contentAlignment = Alignment.Center,
+    ) {
+        TollToast(
+            event = event,
+            lowBalance = low,
+            onClick = {
+                card = null
+                onOpenFastag()
+            },
+            onDismiss = { card = null },
+        )
     }
 }
 
@@ -256,6 +296,30 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
     val now = minuteTicker()
     val latest = remember(events) { FastagStore.latestBalance(events) }
     val totals = remember(events, now) { FastagStore.totals(events, now) }
+    // Toll SMS reading stays opt-in (Play): the question is offered once, the first time this
+    // screen opens, so it is on as soon as the driver agrees. The switch below asks again.
+    val consent by app.fastag.smsConsent.collectAsStateWithLifecycle()
+    val fastagOn by app.fastag.enabled.collectAsStateWithLifecycle()
+    var offerSms by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (fastagOn && !consent && !app.fastag.smsOffered) {
+            app.fastag.smsOffered = true
+            offerSms = true
+        }
+    }
+    if (offerSms) {
+        DisclosureDialog(
+            kind = Disclosure.FastagSms,
+            onAgree = {
+                offerSms = false
+                app.fastag.setSmsConsent(true)
+                if (!com.vikash.ampli.drive.system.RestrictedSettings.hasNotificationAccess(context)) {
+                    com.vikash.ampli.drive.system.Launchers.allowNotificationAccess(context)
+                }
+            },
+            onDecline = { offerSms = false },
+        )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(dims.d(2.4f)),
@@ -302,6 +366,11 @@ fun FastagScreen(app: DriveApp, onBack: () -> Unit) {
                     TotalTile(stringResource(R.string.fastag_month), totals.month, Modifier.weight(1f))
                 }
                 AnnualPassCard(app, Modifier.fillMaxWidth())
+                if (fastagOn && !consent) {
+                    Pane(Modifier.fillMaxWidth()) {
+                        Box(Modifier.padding(horizontal = dims.d(2.6f), vertical = dims.d(0.6f))) { FastagSmsRow(app) }
+                    }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
                     BigButton(
                         text = stringResource(R.string.fastag_recharge),

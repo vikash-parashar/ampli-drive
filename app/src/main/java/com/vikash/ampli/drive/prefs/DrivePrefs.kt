@@ -83,6 +83,16 @@ class DrivePrefs(context: Context) {
     private val _keepScreenOn = MutableStateFlow(sp.getBoolean(KEY_SCREEN_ON, true))
     val keepScreenOn: StateFlow<Boolean> = _keepScreenOn.asStateFlow()
 
+    private val _dimAtNight = MutableStateFlow(sp.getBoolean(KEY_DIM_NIGHT, true))
+
+    /** After sunset the screen dims by itself (with the switch to the night colours). On by default. */
+    val dimAtNight: StateFlow<Boolean> = _dimAtNight.asStateFlow()
+
+    fun setDimAtNight(value: Boolean) {
+        sp.edit().putBoolean(KEY_DIM_NIGHT, value).apply()
+        _dimAtNight.value = value
+    }
+
     private val _theme = MutableStateFlow(readThemeChoice())
     val theme: StateFlow<ThemeChoice> = _theme.asStateFlow()
 
@@ -502,6 +512,7 @@ class DrivePrefs(context: Context) {
     companion object {
         private const val FILE = "drive_prefs"
         private const val KEY_SCREEN_ON = "keep_screen_on"
+        private const val KEY_DIM_NIGHT = "dim_at_night"
         /** This version's theme keys (new names, so no old theme id is ever read as a choice). */
         private const val KEY_HOME_THEME = "home_theme"
         private const val KEY_HOME_THEME_AUTO_NIGHT = "home_theme_auto_night"

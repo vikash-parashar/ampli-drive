@@ -36,12 +36,6 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
  */
 internal val LocalMapPreview = staticCompositionLocalOf { false }
 
-private val MapGround = Color(0xFFE6DFCF)
-private val MapBlock = Color(0xFFDDD4C1)
-private val MapRoad = Color(0xFFF6F2E9)
-private val MapRoadEdge = Color(0xFFD6C7A3)
-private val MapWater = Color(0xFFC6D1D3)
-private val MapPark = Color(0xFFD3D9BE)
 
 /**
  * Map First's drawn map: streets, a river and a park in the map's own colours, drawn once with
@@ -49,7 +43,15 @@ private val MapPark = Color(0xFFD3D9BE)
  * screen previews). [route] adds a route line and the car, as while navigating.
  */
 @Composable
-fun MapPlaceholder(modifier: Modifier = Modifier, route: Boolean = false, routeColor: Color = Color(0xFF6B3BFF)) {
+fun MapPlaceholder(modifier: Modifier = Modifier, route: Boolean = false, routeColor: Color = LocalDriveTheme.current.accent) {
+    // The theme's own map colours: navy streets at night, white streets on Seal Blue by day.
+    val theme = LocalDriveTheme.current
+    val MapGround = theme.mapBase
+    val MapBlock = androidx.compose.ui.graphics.lerp(theme.mapBase, theme.surfaceHigh, 0.35f)
+    val MapRoad = if (theme.isLight) Color(0xFFFDFEFF) else androidx.compose.ui.graphics.lerp(theme.mapBase, theme.surfaceHigh, 0.7f)
+    val MapRoadEdge = theme.border
+    val MapWater = androidx.compose.ui.graphics.lerp(theme.mapBase, Color(0xFF3A7BD5), 0.25f)
+    val MapPark = androidx.compose.ui.graphics.lerp(theme.mapBase, Color(0xFF3FA36B), 0.2f)
     Canvas(modifier) {
         val w = size.width
         val h = size.height

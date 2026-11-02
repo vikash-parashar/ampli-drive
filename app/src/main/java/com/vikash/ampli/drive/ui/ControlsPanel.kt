@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.RestartAlt
@@ -170,10 +172,15 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
             verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
         ) {
             PanelHead(onClose)
-            // Seven tiles.
-            Row(Modifier.fillMaxWidth().height(dims.d(15f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f))) {
-                val s = status
-                val wifiOn = s?.wifiOn == true || s?.wifiConnected == true
+            // Eight tiles in two rows (design board "Controls"): Wi-Fi, Bluetooth, Android settings,
+            // Car settings (Ampli's settings when the unit has no car-settings app), EQ,
+            // Screensaver, Memory and Screenshot.
+            val car by produceState<com.vikash.ampli.drive.system.CarSettingsApp?>(null) {
+                value = withContext(Dispatchers.IO) { com.vikash.ampli.drive.system.SystemSettings.carSettings(context) }
+            }
+            val s = status
+            val wifiOn = s?.wifiOn == true || s?.wifiConnected == true
+            Row(Modifier.fillMaxWidth().height(dims.d(13f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
                 val tile = Modifier.weight(1f).fillMaxHeight()
                 PanelTile(
                     Icons.Filled.Wifi, R.string.qp_wifi,
@@ -190,16 +197,33 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                     on = bt.enabled, modifier = tile,
                     onLongClick = { QuickActions.openBluetoothSettings(context) },
                 ) { QuickActions.toggleBluetooth(context) }
+                PanelTile(Icons.Filled.Settings, R.string.android_settings, sub = stringResource(R.string.android_settings_hint), modifier = tile, onLongClick = {
+                    onClose()
+                    onOpenSettings()
+                }) {
+                    onClose()
+                    com.vikash.ampli.drive.system.SystemSettings.openAndroid(context)
+                }
+                if (car != null) {
+                    PanelTile(Icons.Filled.DirectionsCar, R.string.car_settings, sub = stringResource(R.string.car_settings_hint), modifier = tile) {
+                        onClose()
+                        if (!com.vikash.ampli.drive.system.SystemSettings.openCar(context)) toast(context, R.string.error_cannot_open_app)
+                    }
+                } else {
+                    PanelTile(Icons.Filled.Tune, R.string.qp_settings, modifier = tile, onLongClick = { com.vikash.ampli.drive.system.SystemSettings.openAndroid(context) }) {
+                        onClose()
+                        onOpenSettings()
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth().height(dims.d(13f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+                val tile = Modifier.weight(1f).fillMaxHeight()
                 PanelTile(Icons.Filled.Equalizer, R.string.qp_eq, sub = s?.eqApp, modifier = tile, onLongClick = { pickEq = true }) {
                     Shell.open(context, Shell.Control.Equalizer)
                 }
                 PanelTile(Icons.Filled.Tv, R.string.qp_screensaver, modifier = tile, onLongClick = { QuickActions.openDreamSettings(context) }) {
                     onClose()
                     PowerControl.screensaver()
-                }
-                PanelTile(Icons.Filled.Settings, R.string.qp_settings, modifier = tile, onLongClick = { QuickActions.openAndroidSettings(context) }) {
-                    onClose()
-                    onOpenSettings()
                 }
                 PanelTile(
                     Icons.Filled.CleaningServices, R.string.qp_clear,
@@ -218,7 +242,7 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                 PanelTile(Icons.Filled.Screenshot, R.string.qp_screenshot, modifier = tile, onClick = screenshot)
             }
             // Volume and brightness.
-            Row(Modifier.fillMaxWidth().height(dims.d(9.5f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f))) {
+            Row(Modifier.fillMaxWidth().height(dims.d(11f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
                 var vol by remember { mutableStateOf(QuickActions.volume(context)) }
                 PillSlider(
                     icon = Icons.AutoMirrored.Filled.VolumeUp,
@@ -255,17 +279,18 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                 }
             }
             // Screen off, Restart, Power off.
-            Row(Modifier.fillMaxWidth().height(dims.d(10.5f)), horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f))) {
+            Row(Modifier.fillMaxWidth().height(dims.d(11f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
                 val m = Modifier.weight(1f).fillMaxHeight()
                 PowerRowKey(Icons.Filled.DarkMode, R.string.power_screen_off, m) {
                     onClose()
                     PowerControl.request(context, PowerAction.ScreenOff)
                 }
-                PowerRowKey(Icons.Filled.RestartAlt, R.string.power_restart, m) {
+                // Restart in amber and Power off in SOS red, as designed.
+                PowerRowKey(Icons.Filled.RestartAlt, R.string.power_restart, m, tone = PowerTone.Warn) {
                     onClose()
                     PowerControl.request(context, PowerAction.Restart)
                 }
-                PowerRowKey(Icons.Filled.PowerSettingsNew, R.string.power_off, m) {
+                PowerRowKey(Icons.Filled.PowerSettingsNew, R.string.power_off, m, tone = PowerTone.Danger) {
                     onClose()
                     PowerControl.request(context, PowerAction.PowerOff)
                 }
@@ -343,20 +368,20 @@ private fun PanelTile(
 ) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
-    val shape = theme.cardShape(dims, 0.6f)
+    val shape = theme.buttonShape(dims)
     val fg = if (on) theme.onAccent else theme.text
     Column(
         modifier
-            .themedTap(shape, if (on) theme.accent else theme.surfaceHigh, border = theme.border, onLongClick = onLongClick, onClick = onClick)
-            .padding(dims.d(1.4f)),
+            .themedTap(shape, if (on) theme.accent else theme.surface, border = if (on) null else theme.border, borderWidth = 2.dp, onLongClick = onLongClick, onClick = onClick)
+            .padding(horizontal = dims.d(3f), vertical = dims.d(1.75f)),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Icon(icon, contentDescription = null, tint = if (on) theme.onAccent else theme.accentSoft, modifier = Modifier.size(dims.d(4f)))
+        Icon(icon, contentDescription = null, tint = if (on) theme.onAccent else theme.accentSoft, modifier = Modifier.size(dims.d(3.5f)))
         Column {
-            Text(stringResource(label), color = fg, fontSize = dims.t(2.2f, min = 13f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(label), color = fg, fontSize = dims.t(3f, min = 18f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val second = sub ?: englishLine(label)
             if (second != null) {
-                Text(second, color = if (on) fg.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(1.6f, min = 10f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(second, color = if (on) fg.copy(alpha = 0.85f) else theme.muted, fontSize = dims.t(2.25f, min = 14f), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -416,21 +441,33 @@ private fun PillSlider(
     }
 }
 
+private enum class PowerTone { Plain, Warn, Danger }
+
 @Composable
-private fun PowerRowKey(icon: ImageVector, @StringRes label: Int, modifier: Modifier, onClick: () -> Unit) {
+private fun PowerRowKey(icon: ImageVector, @StringRes label: Int, modifier: Modifier, tone: PowerTone = PowerTone.Plain, onClick: () -> Unit) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
+    val fill = when (tone) {
+        PowerTone.Plain -> theme.surfaceHigh
+        PowerTone.Warn -> theme.warning.copy(alpha = 0.16f)
+        PowerTone.Danger -> theme.danger
+    }
+    val ink = when (tone) {
+        PowerTone.Plain -> theme.text
+        PowerTone.Warn -> if (theme.isLight) theme.text else Color(0xFFFFE3B0)
+        PowerTone.Danger -> theme.onDanger
+    }
     Row(
         modifier
-            .themedTap(theme.cardShape(dims, 0.6f), theme.surfaceHigh, border = theme.border, onClick = onClick)
-            .padding(horizontal = dims.d(2.4f)),
+            .themedTap(theme.buttonShape(dims), fill, border = if (tone == PowerTone.Warn) theme.warning else theme.border, borderWidth = 2.dp, onClick = onClick)
+            .padding(horizontal = dims.d(2.5f)),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+        horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f), Alignment.CenterHorizontally),
     ) {
-        Icon(icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(4f)))
+        Icon(icon, contentDescription = null, tint = if (tone == PowerTone.Plain) theme.accentSoft else ink, modifier = Modifier.size(dims.d(4f)))
         Column {
-            Text(stringResource(label), color = theme.text, fontSize = dims.t(2.8f, min = 16f), fontWeight = FontWeight.Bold, maxLines = 1)
-            englishLine(label)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.9f, min = 11f), maxLines = 1) }
+            Text(stringResource(label), color = ink, fontSize = dims.t(3.25f, min = 18f), fontWeight = FontWeight.Bold, maxLines = 1)
+            englishLine(label)?.let { Text(it, color = ink.copy(alpha = 0.75f), fontSize = dims.t(2f, min = 13f), maxLines = 1) }
         }
     }
 }

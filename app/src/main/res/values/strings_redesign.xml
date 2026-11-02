@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Redesign round: Night / Day / Calm palettes, the Main frame, Cleaner, Android and Car settings. -->
+<resources>
+    <string name="theme_calm" translatable="false">Calm</string>
+    <string name="theme_dim_title">Dim the screen after sunset</string>
+    <string name="theme_dim_hint">Map First turns to its night colours at sunset by itself; this also lowers the brightness</string>
+    <string name="home_say_hey_ampli">Say “Hey Ampli”</string>
+    <string name="home_end_route">End route</string>
+    <string name="action_ok">OK</string>
+
+    <string name="fastag_taken">Taken</string>
+    <string name="fastag_left">Balance left</string>
+    <string name="fastag_todays_tolls">Today\'s tolls</string>
+    <string name="fastag_voice_toll">Toll paid, %1$s rupees. Balance %2$s rupees.</string>
+    <string name="fastag_voice_toll_no_balance">Toll paid, %1$s rupees.</string>
+    <string name="fastag_voice_low">FASTag balance is low, %1$s rupees. Please recharge.</string>
+    <string name="fastag_voice_recharge">FASTag recharged with %1$s rupees. Balance %2$s rupees.</string>
+    <string name="fastag_voice_recharge_no_balance">FASTag recharged with %1$s rupees.</string>
+
+    <string name="android_settings">Android settings</string>
+    <string name="android_settings_hint">Phone-style settings</string>
+    <string name="car_settings">Car settings</string>
+    <string name="car_settings_hint">The car\'s own settings</string>
+    <string name="settings_hint_system">Ampli\'s settings · Android and car settings too</string>
+    <string name="apps_clean">Car slow? Clean up apps</string>
+
+    <string name="cleaner_title">Car slow? Clean up apps</string>
+    <string name="cleaner_memory">RAM %1$s of %2$s used · %3$s storage free</string>
+    <string name="cleaner_clear_memory">Free memory</string>
+    <string name="cleaner_heaviest">Heaviest apps first</string>
+    <string name="cleaner_access_title">Show real sizes and last use</string>
+    <string name="cleaner_access_steps">Tap Allow, find Ampli Car Hub, turn on “Usage access” and come back. Until then sizes are the app file only (~).</string>
+    <string name="cleaner_access_allow">Allow</string>
+    <string name="cleaner_stop">App info</string>
+    <string name="cleaner_remove">Uninstall</string>
+    <string name="cleaner_system">System app: can only be stopped</string>
+    <string name="cleaner_last_unknown">Last use unknown</string>
+    <string name="cleaner_used_today">Opened today</string>
+    <string name="cleaner_used_yesterday">Opened yesterday</string>
+    <string name="cleaner_not_opened">Not opened for %1$d days</string>
+    <string name="cleaner_open">Open</string>
+    <string name="cleaner_auto">Put on the Auto button</string>
+    <string name="cleaner_hide">Hide from Apps</string>
+    <string name="cleaner_unhide">Show in Apps again</string>
+    <string name="cleaner_app_info">Stop (App info)</string>
+    <string name="cleaner_uninstall">Uninstall</string>
+    <string name="cleaner_sheet_hint">After “Uninstall”, Android asks once: tap OK there. System apps only get “Stop”.</string>
+</resources>

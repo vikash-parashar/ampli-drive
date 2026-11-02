@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The four home themes' palettes: body text at least 4.5:1 on every surface it sits on, white
+ * The home themes' palettes: body text at least 4.5:1 on every surface it sits on, white
  * (or black) on the accent keys, and SOS a fixed red with white text, apart from every accent.
  * Plain JVM: [HomePalettes] holds plain ARGB values.
  */
@@ -33,8 +33,26 @@ class FourThemesContrastTest {
     }
 
     @Test
-    fun exactlyFourPalettes() {
-        assertEquals(4, HomePalettes.all.size)
+    fun nightDayAndCalmPalettes() {
+        assertEquals(5, HomePalettes.all.size)
+        // The approved design colours, exactly.
+        assertEquals(0xFF0E1222L, HomePalettes.Night.background)
+        assertEquals(0xFF6FD9A8L, HomePalettes.Night.accent)
+        assertEquals(0xFF4C43B8L, HomePalettes.Night.banner)
+        assertEquals(0xFFDBF2FCL, HomePalettes.Day.background)
+        assertEquals(0xFFFD6E88L, HomePalettes.Day.accent)
+        assertEquals(0xFF072D59L, HomePalettes.Day.text)
+        assertEquals(0xFFE8B86BL, HomePalettes.Calm.accent)
+    }
+
+    @Test
+    fun noPureBlackOrWhiteSurfaces() {
+        for (p in HomePalettes.all) {
+            for (c in listOf(p.background, p.surface, p.surfaceHigh, p.text)) {
+                assertNotEquals(0xFF000000L, c)
+                assertNotEquals(0xFFFFFFFFL, c)
+            }
+        }
     }
 
     @Test
@@ -44,20 +62,34 @@ class FourThemesContrastTest {
                 check("text on $name ($p)", p.text, bg)
                 check("muted on $name ($p)", p.muted, bg)
             }
+            check("text on raised ($p)", p.text, p.surfaceHigh)
+            check("muted on raised ($p)", p.muted, p.surfaceHigh)
+            check("accent text on surface ($p)", p.accentText, p.surface)
             check("label on the accent key ($p)", p.onAccent, p.accent)
             check("ink tile text ($p)", p.onInk, p.ink)
+            check("turn banner text ($p)", p.onBanner, p.banner)
+            check("rail key ink ($p)", p.railInk, p.railKey)
         }
     }
 
     @Test
     fun mapFirstCardsReadOverTheMap() {
         val p = HomePalettes.MapFirst
-        // Worst case under the tinted card: the lightest map colour (Positron's near-white roads).
+        // Worst case under the tinted card: the lightest map colour (near-white roads).
         for (card in listOf(HomePalettes.MAP_FIRST_CARD, HomePalettes.MAP_FIRST_CARD_SOLID)) {
             val bg = Contrast.over(card, 0xFFFFFFFF)
             check("text on Map First card", p.text, bg)
             check("muted on Map First card", p.muted, bg)
         }
+        // Day cards: worst case over the darkest day map colour (navy route line).
+        val day = HomePalettes.Day
+        val dayBg = Contrast.over(HomePalettes.MAP_FIRST_DAY_CARD, 0xFF072D59)
+        check("text on Day card", day.text, dayBg)
+        check("muted on Day card", day.muted, dayBg)
+        val calm = HomePalettes.Calm
+        val calmBg = Contrast.over(HomePalettes.CALM_CARD, 0xFFFFFFFF)
+        check("text on Calm card", calm.text, calmBg)
+        check("muted on Calm card", calm.muted, calmBg)
         check("Ampli bubble text", HomePalettes.MAP_FIRST_BUBBLE_INK, HomePalettes.MAP_FIRST_BUBBLE)
         check("Ampli label in the bubble", p.accent, HomePalettes.MAP_FIRST_BUBBLE)
     }
