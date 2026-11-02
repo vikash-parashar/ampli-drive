@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -89,7 +90,7 @@ fun CallCard(card: CallAnnouncer.Card, onAnswer: () -> Unit, onLater: () -> Unit
                     listOfNotNull(stringResource(R.string.call_card_label), card.number).joinToString(" · "),
                     color = theme.muted, fontSize = dims.t(2.3f, min = 14f), maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
-                Text(card.title, color = theme.text, fontSize = dims.t(4.4f, min = 22f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(card.title, color = theme.text, fontSize = dims.t(7f, min = 28f), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 when (card.phase) {
                     CallAnnouncer.Card.Phase.Answered -> Text(stringResource(R.string.call_card_answered), color = theme.ok, fontSize = dims.t(2.5f, min = 15f))
                     CallAnnouncer.Card.Phase.TapToAnswer -> Text(stringResource(R.string.call_card_tap), color = theme.warning, fontSize = dims.t(2.5f, min = 15f))
@@ -99,8 +100,9 @@ fun CallCard(card: CallAnnouncer.Card, onAnswer: () -> Unit, onLater: () -> Unit
         }
         if (card.phase == CallAnnouncer.Card.Phase.Asking || card.phase == CallAnnouncer.Card.Phase.Listening) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
-                BigButton(stringResource(R.string.call_card_answer), onAnswer, Modifier.weight(1f), icon = Icons.Filled.Call)
-                BigButton(stringResource(R.string.call_card_later), onLater, Modifier.weight(1f), icon = Icons.Filled.CallEnd, primary = false)
+                // Red "later" and green "answer", 120 px tall (design board "Call").
+                CallKey(stringResource(R.string.call_card_later), Icons.Filled.CallEnd, theme.danger, theme.onDanger, onLater, Modifier.weight(1f))
+                CallKey(stringResource(R.string.call_card_answer), Icons.Filled.Call, theme.ok, Color(0xFF04210F), onAnswer, Modifier.weight(1f))
                 if (card.phase == CallAnnouncer.Card.Phase.Listening) ListeningPill(stringResource(R.string.call_card_say))
             }
         } else if (card.phase == CallAnnouncer.Card.Phase.TapToAnswer) {
@@ -181,6 +183,22 @@ fun MessageCard(prompt: WhatsAppReader.Prompt, onTap: (VoiceReplies.Message) -> 
 }
 
 @Composable
+private fun CallKey(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, fill: Color, ink: Color, onClick: () -> Unit, modifier: Modifier) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    Row(
+        modifier
+            .heightIn(min = maxOf(dims.d(13f), MinTouch))
+            .themedTap(theme.cardShape(dims, 1.15f), fill, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dims.d(1.5f), Alignment.CenterHorizontally),
+    ) {
+        Icon(icon, contentDescription = null, tint = ink, modifier = Modifier.size(dims.d(4.5f)))
+        Text(label, color = ink, fontWeight = FontWeight.Bold, fontSize = dims.t(3.75f, min = 22f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
 private fun ListeningPill(text: String) {
     val theme = LocalDriveTheme.current
     Pill(text = text, icon = Icons.Filled.Mic, iconTint = theme.accent)
@@ -202,21 +220,21 @@ private fun OverlayTop(visible: Boolean, content: @Composable () -> Unit) {
 private fun OverlayCard(onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
-    val shape = RoundedCornerShape(24.dp)
+    val shape = theme.cardShape(dims, 1.33f)
     Column(
         Modifier
             .padding(horizontal = dims.d(3f))
             .widthIn(max = 820.dp)
             .themedCard(
                 theme, shape,
-                fill = Brush.horizontalGradient(listOf(theme.surfaceHigh, theme.surface)),
-                border = theme.accent.copy(alpha = 0.5f),
+                fill = Brush.linearGradient(listOf(theme.surface, theme.surface)),
+                border = theme.border,
                 accentEdge = false,
                 blur = false,
             )
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = dims.d(3f), vertical = dims.d(2f)),
-        verticalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+            .padding(horizontal = dims.d(5f), vertical = dims.d(4f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(2.5f)),
     ) { content() }
 }
 
