@@ -20,7 +20,7 @@
     <string name="android_settings">Android settings</string>
     <string name="android_settings_hint">Phone-style settings</string>
     <string name="car_settings">Car settings</string>
-    <string name="car_settings_hint">The car\'s own settings</string>
+    <string name="vendor_car_settings_hint">The car\'s own settings</string>
     <string name="settings_hint_system">Ampli\'s settings · Android and car settings too</string>
     <string name="apps_clean">Car slow? Clean up apps</string>
 

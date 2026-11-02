@@ -205,7 +205,7 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                     com.vikash.ampli.drive.system.SystemSettings.openAndroid(context)
                 }
                 if (car != null) {
-                    PanelTile(Icons.Filled.DirectionsCar, R.string.car_settings, sub = stringResource(R.string.car_settings_hint), modifier = tile) {
+                    PanelTile(Icons.Filled.DirectionsCar, R.string.car_settings, sub = stringResource(R.string.vendor_car_settings_hint), modifier = tile) {
                         onClose()
                         if (!com.vikash.ampli.drive.system.SystemSettings.openCar(context)) toast(context, R.string.error_cannot_open_app)
                     }

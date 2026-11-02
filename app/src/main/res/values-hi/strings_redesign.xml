@@ -18,7 +18,7 @@
     <string name="android_settings">Android सेटिंग्स</string>
     <string name="android_settings_hint">फ़ोन जैसी सेटिंग्स</string>
     <string name="car_settings">कार सेटिंग्स</string>
-    <string name="car_settings_hint">गाड़ी की अपनी सेटिंग्स</string>
+    <string name="vendor_car_settings_hint">गाड़ी की अपनी सेटिंग्स</string>
     <string name="settings_hint_system">Ampli की सेटिंग्स · Android और गाड़ी की सेटिंग्स भी यहीं से</string>
     <string name="apps_clean">गाड़ी स्लो? ऐप्स साफ़ करो</string>
 
