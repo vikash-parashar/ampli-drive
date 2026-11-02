@@ -74,11 +74,47 @@ class PowerHelperService : AccessibilityService() {
         }
 
         /** Android's Accessibility settings, where "Ampli power helper" is switched on. */
-        fun openSettings(context: Context): Boolean = try {
-            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            true
-        } catch (_: Exception) {
-            false
+        fun openSettings(context: Context): Boolean {
+            // Some head units (TS7 and other Unisoc builds) drop the Accessibility page from their
+            // Settings app, or hide it behind a different activity: try each way in, then the
+            // main Settings screen, and say so when nothing opens.
+            for (intent in settingsIntents()) {
+                if (tryStart(context, intent)) return true
+            }
+            try {
+                android.widget.Toast.makeText(
+                    context.applicationContext,
+                    com.vikash.ampli.drive.R.string.power_setup_no_settings,
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            } catch (_: Exception) {
+            }
+            return false
+        }
+
+        /** Accessibility settings, the same page by its class name, then Android's main Settings. */
+        private fun settingsIntents(): List<Intent> = listOf(
+            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS),
+            Intent().setComponent(ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilitySettingsActivity")),
+            Intent(Settings.ACTION_SETTINGS),
+        ).map { it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+
+        private fun tryStart(context: Context, intent: Intent): Boolean {
+            return try {
+                // Before Android 11 every app is visible, so an intent nothing answers is skipped
+                // up front (some vendor builds swallow it silently otherwise). From 11 on, package
+                // visibility may hide Settings from the lookup, so it is simply started.
+                @Suppress("DEPRECATION")
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && context.packageManager.resolveActivity(intent, 0) == null) return false
+                context.startActivity(intent)
+                true
+            } catch (_: android.content.ActivityNotFoundException) {
+                false
+            } catch (_: SecurityException) {
+                false
+            } catch (_: Exception) {
+                false
+            }
         }
     }
 }

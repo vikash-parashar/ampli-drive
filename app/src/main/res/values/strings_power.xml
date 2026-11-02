@@ -74,6 +74,7 @@
     <string name="power_setup_step3">Switch it on, come back</string>
     <string name="power_setup_turn_on">Turn on</string>
     <string name="power_setup_later">Not now</string>
+    <string name="power_setup_no_settings">Could not open Settings on this unit. Open Settings › Accessibility and turn on Ampli power helper.</string>
     <string name="power_root_title">This screen restarts directly</string>
     <string name="power_root_body">This unit allows root, so Restart and Power off happen without Android\'s menu, after a 5-second countdown. Android may ask once to allow root for Ampli Car Hub.</string>
     <string name="power_root_ok">OK, continue</string>

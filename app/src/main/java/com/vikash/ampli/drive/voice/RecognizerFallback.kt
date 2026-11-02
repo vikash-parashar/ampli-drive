@@ -48,6 +48,13 @@ object RecognizerFallback {
     /** Skip the system recogniser entirely and listen offline straight away. */
     fun skipSystem(deadTurns: Int, offlineReady: Boolean): Boolean = offlineReady && deadTurns >= DEAD_AFTER
 
+    /**
+     * Go to the offline model first: no system recogniser is installed at all, or it has been
+     * skipped for showing no sign of life ([skipSystem]).
+     */
+    fun straightOffline(systemPresent: Boolean, deadTurns: Int, offlineReady: Boolean): Boolean =
+        offlineReady && (!systemPresent || deadTurns >= DEAD_AFTER)
+
     /** The dead-turn count after a turn that ended in [attempt]: any sign of life resets it. */
     fun nextDeadTurns(current: Int, attempt: SystemAttempt): Int = when {
         attempt == SystemAttempt.Heard || attempt == SystemAttempt.QuietWithActivity -> 0

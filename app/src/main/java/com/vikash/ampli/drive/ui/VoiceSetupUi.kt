@@ -70,6 +70,75 @@ private fun modelPart(model: WakeModel): VoiceModelPlan.Part {
 }
 
 /**
+ * Home, once: "Bolne ka engine nahi hai · Install karo" on units without any text-to-speech
+ * engine (the TS7), where lines that have no recording stay silent. "Install karo" opens
+ * Settings › Voice › Check voice, whose "Get speech engine" key leads to the store; the card is
+ * spent as soon as it shows (like the default-home banner) and hides while the car moves.
+ */
+@Composable
+fun TtsMissingStrip(app: DriveApp, onOpen: () -> Unit) {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val moving = isMoving(app)
+    val ttsMissing by app.voicePlayer.ttsMissing.collectAsStateWithLifecycle()
+    // ttsMissing is only known once something asked for the engine.
+    LaunchedEffect(Unit) { app.voicePlayer.ttsAvailable() }
+    val hints = remember { app.getSharedPreferences(HINTS, android.content.Context.MODE_PRIVATE) }
+    var showing by remember { mutableStateOf(false) }
+    LaunchedEffect(ttsMissing, moving) {
+        if (!showing && com.vikash.ampli.drive.voice.TtsNotice.showCard(ttsMissing, hints.getBoolean(KEY_TTS_CARD, false), moving)) {
+            showing = true
+            hints.edit().putBoolean(KEY_TTS_CARD, true).apply()
+        }
+    }
+    AnimatedVisibility(
+        visible = showing && ttsMissing && !moving,
+        enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+        exit = shrinkVertically(tween(240)) + fadeOut(tween(180)),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dims.d(1.6f), vertical = dims.d(0.6f))
+                .themedCard(
+                    theme,
+                    RoundedCornerShape(16.dp),
+                    fill = Brush.horizontalGradient(listOf(theme.surfaceHigh, theme.surface)),
+                    border = theme.warning.copy(alpha = 0.6f),
+                    accentEdge = false,
+                    blur = false,
+                )
+                .padding(horizontal = dims.d(2f), vertical = dims.d(0.9f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)),
+        ) {
+            Icon(Icons.Filled.Mic, contentDescription = null, tint = theme.warning, modifier = Modifier.size(22.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.tts_card_title),
+                    color = theme.text,
+                    fontSize = dims.t(2.4f, min = 14f),
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (!dims.compact) {
+                    Text(stringResource(R.string.tts_card_hint), color = theme.muted, fontSize = dims.t(2f, min = 12f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+            BigButton(text = stringResource(R.string.shell_home_later), onClick = { showing = false }, primary = false)
+            BigButton(text = stringResource(R.string.tts_card_action), onClick = {
+                showing = false
+                onOpen()
+            })
+        }
+    }
+}
+
+private const val HINTS = "voice_hints"
+private const val KEY_TTS_CARD = "tts_home_card_shown"
+
+/**
  * Home's thin "Getting Ampli ready… 40%" strip while the offline speech models download or
  * unpack (first start). Gone once they are ready. A tap opens Settings › Voice.
  */

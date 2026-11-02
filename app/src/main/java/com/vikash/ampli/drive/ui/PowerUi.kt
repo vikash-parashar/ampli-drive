@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -268,7 +270,15 @@ private fun androidx.compose.foundation.layout.BoxScope.HelperSetup() {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
     val context = LocalContext.current
-    PowerCard(Modifier.align(Alignment.Center).padding(horizontal = dims.d(11f)).widthIn(max = 1000.dp)) {
+    // On a 1024x600 head unit the whole card is taller than the screen: it scrolls, and the two
+    // keys come right after the explanation so they are never cut off below the bottom edge.
+    PowerCard(
+        Modifier
+            .align(Alignment.Center)
+            .padding(horizontal = dims.d(11f), vertical = dims.d(2f))
+            .widthIn(max = 1000.dp)
+            .verticalScroll(rememberScrollState()),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
             Box(Modifier.size(dims.d(10.5f)).background(theme.accent, theme.buttonShape(dims)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.PowerSettingsNew, contentDescription = null, tint = theme.onAccent, modifier = Modifier.size(dims.d(5.4f)))
@@ -281,6 +291,10 @@ private fun androidx.compose.foundation.layout.BoxScope.HelperSetup() {
         Column {
             Text(stringResource(R.string.disclosure_power_body), color = theme.text, fontSize = dims.t(2.6f, min = 15f))
             englishLine(R.string.disclosure_power_body)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.9f, min = 11f)) }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
+            BiKey(R.string.power_setup_turn_on, primary = true, modifier = Modifier.weight(1.4f)) { PowerControl.setupContinue(context) }
+            BiKey(R.string.power_setup_later, primary = false, modifier = Modifier.weight(1f)) { PowerControl.close() }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
             listOf(R.string.power_setup_step1, R.string.power_setup_step2, R.string.power_setup_step3).forEachIndexed { i, step ->
@@ -304,10 +318,6 @@ private fun androidx.compose.foundation.layout.BoxScope.HelperSetup() {
                 Text(stringResource(R.string.disclosure_power_private), color = theme.text, fontSize = dims.t(2f, min = 12f))
                 englishLine(R.string.disclosure_power_private)?.let { Text(it, color = theme.muted, fontSize = dims.t(1.5f, min = 10f)) }
             }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-            BiKey(R.string.power_setup_turn_on, primary = true, modifier = Modifier.weight(1.4f)) { PowerControl.setupContinue(context) }
-            BiKey(R.string.power_setup_later, primary = false, modifier = Modifier.weight(1f)) { PowerControl.close() }
         }
     }
 }

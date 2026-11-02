@@ -44,8 +44,11 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
         .build()
 
     sealed interface Result {
-        /** [offline]: heard by the Vosk fallback (English command phrases). */
-        data class Heard(val text: String, val offline: Boolean = false) : Result
+        /**
+         * [offline]: heard by the Vosk fallback. [quality]: how sure the offline model was (null
+         * for the system recogniser), for [SpeechGate.mayLaunch].
+         */
+        data class Heard(val text: String, val offline: Boolean = false, val quality: SpeechQuality? = null) : Result
         data object Silence : Result
         data object Unavailable : Result
     }
@@ -75,17 +78,26 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
     /**
      * Listens once. [onPartial] gets the live transcript for the overlay. Without a system
      * recogniser (or when it fails), the offline Vosk model listens instead: with [commandsOnly]
-     * it hears just the command phrases, else it transcribes freely (for "where to?").
+     * it hears just the command phrases, else it transcribes freely (for "where to?"). [mode]
+     * overrides that, e.g. [ListenMode.Replies] for "haan / na" answers.
+     *
+     * Without any system recogniser installed (SpeechRecognizer.isRecognitionAvailable false, as
+     * on the TS7) it goes straight to the offline model, without trying the system one first.
      */
-    suspend fun listen(appLanguage: String, onPartial: (String) -> Unit, commandsOnly: Boolean = true): Result {
+    suspend fun listen(
+        appLanguage: String,
+        onPartial: (String) -> Unit,
+        commandsOnly: Boolean = true,
+        mode: ListenMode = if (commandsOnly) ListenMode.Commands else ListenMode.Free,
+    ): Result {
         audio?.requestAudioFocus(listenFocus)
         try {
             lastEngine = VoiceEngine.None
             val vosk = offline
             val offlineReady = vosk != null && vosk.isReady()
             // A system recogniser that showed no sign of life lately: straight to the offline model.
-            if (vosk != null && RecognizerFallback.skipSystem(SystemRecognizerHealth.deadTurns(appContext), offlineReady)) {
-                val r = listenOffline(vosk, commandsOnly, onPartial)
+            if (vosk != null && RecognizerFallback.straightOffline(systemAvailable(), SystemRecognizerHealth.deadTurns(appContext), offlineReady)) {
+                val r = listenOffline(vosk, mode, onPartial)
                 if (r != Result.Unavailable) return r
                 // The offline model would not load: give the system recogniser its turn after all.
             }
@@ -123,15 +135,15 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
             }
             // No recogniser, every attempt failed (no Google app, no network), or a stub that
             // never heard anything: offline Vosk in the same turn.
-            if (vosk != null && offlineReady) return listenOffline(vosk, commandsOnly, onPartial)
+            if (vosk != null && offlineReady) return listenOffline(vosk, mode, onPartial)
             return Result.Unavailable
         } finally {
             audio?.abandonAudioFocusRequest(listenFocus)
         }
     }
 
-    private suspend fun listenOffline(vosk: VoskCommandListener, commandsOnly: Boolean, onPartial: (String) -> Unit): Result {
-        val r = vosk.listen(commandsOnly, onPartial)
+    private suspend fun listenOffline(vosk: VoskCommandListener, mode: ListenMode, onPartial: (String) -> Unit): Result {
+        val r = vosk.listen(mode, onPartial)
         if (r != Result.Unavailable) {
             lastEngine = vosk.lastEngine
             SystemRecognizerHealth.served(vosk.lastEngine)

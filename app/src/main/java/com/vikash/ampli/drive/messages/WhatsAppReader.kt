@@ -172,7 +172,7 @@ class WhatsAppReader(private val app: DriveApp) {
         phase(id, Prompt.Phase.Dictating)
         say(Event.MessageDictate, app.car.localized().getString(R.string.chat_voice_dictate))
         if (stopped(id)) return
-        val said = app.voice.listenOnce()?.trim()?.take(MAX_REPLY_CHARS)
+        val said = app.voice.listenOnce(com.vikash.ampli.drive.voice.ListenMode.Free)?.trim()?.take(MAX_REPLY_CHARS)
         if (said.isNullOrEmpty() || stopped(id)) {
             say(Event.MessageNotSent, app.car.localized().getString(R.string.chat_voice_not_sent))
             return

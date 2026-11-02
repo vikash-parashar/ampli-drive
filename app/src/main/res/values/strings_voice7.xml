@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Car Hub round 7: "Hey Ampli" volume, stop, time, date, weather, speed, maps, brightness and the command list. -->
 <resources>
+    <!-- Home, once, on units without any text-to-speech engine (TS7). -->
+    <string name="tts_card_title">Bolne ka engine nahi hai</string>
+    <string name="tts_card_hint">Kuch baatein sirf screen par dikhengi</string>
+    <string name="tts_card_action">Install karo</string>
     <string name="voice_answer_time">Time now</string>
     <string name="voice_answer_date">Today</string>
     <string name="voice_answer_weather">Weather here</string>

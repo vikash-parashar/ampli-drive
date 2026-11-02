@@ -179,7 +179,11 @@ class VoiceService : Service() {
     }
 
     private fun evaluate() {
-        val listen = model != null && enabled && !assistantBusy && !inCall && !promptPlaying
+        // The assistant's own flag is read directly, not only the collected copy: a follow-up
+        // listen (call / message answer) sets it synchronously, and a playback change posted in
+        // between must not reopen this microphone while the follow-up records.
+        val busyNow = assistantBusy || app.voice.busy.value
+        val listen = model != null && enabled && !busyNow && !inCall && !promptPlaying
         if (listen && speech == null) startMic() else if (!listen && speech != null) stopMic()
         if (model != null) {
             setStatus(
@@ -187,7 +191,7 @@ class VoiceService : Service() {
                     speech != null -> Status.Listening
                     inCall -> Status.Paused("call")
                     promptPlaying -> Status.Paused("navigation prompt")
-                    assistantBusy -> Status.Paused("assistant")
+                    busyNow -> Status.Paused("assistant")
                     else -> Status.Paused("retrying mic")
                 },
             )
@@ -256,10 +260,12 @@ class VoiceService : Service() {
         } catch (_: Exception) {
             return
         }
-        if (wake) {
-            stopMic()
-            app.voice.start()
-        }
+        if (!wake) return
+        // Right after a command ran, the end of a song or of Ampli's own reply must not wake it again.
+        if (SpeechGate.coolingDown(app.voice.lastActionAt, android.os.SystemClock.elapsedRealtime())) return
+        if (app.voice.busy.value) return
+        stopMic()
+        app.voice.start()
     }
 
     override fun onDestroy() {

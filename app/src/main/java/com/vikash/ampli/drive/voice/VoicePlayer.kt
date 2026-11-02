@@ -225,6 +225,9 @@ class VoicePlayer(private val app: DriveApp) {
         player?.stop()
     }
 
+    /** A recorded line is playing now. */
+    fun isPlaying(): Boolean = playing?.isActive == true
+
     /** Stops the clip and the TTS. */
     fun stop() {
         stopPlayer()

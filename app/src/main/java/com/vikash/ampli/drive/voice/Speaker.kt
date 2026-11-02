@@ -1,6 +1,7 @@
 package com.vikash.ampli.drive.voice
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -38,6 +39,8 @@ class Speaker(context: Context) {
 
     private suspend fun engine(appLanguage: String): TextToSpeech? {
         val existing = tts
+        // No engine installed at all (the TS7): don't start one and wait for it on every line.
+        if (existing == null && !enginesInstalled()) return null
         if (existing == null) {
             val done = CompletableDeferred<Boolean>()
             ready = done
@@ -55,7 +58,12 @@ class Speaker(context: Context) {
             }
             localeFor = null
         }
-        val ok = withTimeoutOrNull(INIT_TIMEOUT_MS) { ready?.await() } ?: false
+        val ok = withTimeoutOrNull(INIT_TIMEOUT_MS) { ready?.await() } ?: run {
+            // An engine that never answered counts as failed, so the next line doesn't wait again
+            // (warmUp() still starts a fresh one).
+            ready?.complete(false)
+            false
+        }
         val engine = tts ?: return null
         if (!ok) return null
         if (localeFor != appLanguage) {
@@ -76,6 +84,22 @@ class Speaker(context: Context) {
         } catch (_: Exception) {
             false
         }
+    }
+
+    /** True while the TTS engine is talking. */
+    fun isSpeaking(): Boolean = try {
+        tts?.isSpeaking == true
+    } catch (_: Exception) {
+        false
+    }
+
+    /** Any text-to-speech service is installed on the unit (Google's, the vendor's, eSpeak…). */
+    @Suppress("DEPRECATION")
+    fun enginesInstalled(): Boolean = try {
+        appContext.packageManager.queryIntentServices(Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE), 0).isNotEmpty()
+    } catch (_: Exception) {
+        // Can't tell: try the engine as before.
+        true
     }
 
     /** False when no TTS engine answered; the caller can then keep text on screen longer. */
@@ -116,8 +140,9 @@ class Speaker(context: Context) {
     suspend fun sayChecked(text: String, appLanguage: String, needFocus: Boolean = false): Boolean {
         if (text.isBlank()) return false
         val engine = engine(appLanguage) ?: run {
-            // No TTS engine on this unit: leave the reply on screen long enough to read it.
-            delay(2_500L + text.length * 50L)
+            // No TTS engine on this unit: leave the reply on screen a moment to read, but never
+            // so long that a question's answer window (call, message) is lost waiting.
+            delay(SpeechPacing.silentHoldMs(text.length))
             return false
         }
         val id = UUID.randomUUID().toString()
@@ -189,4 +214,20 @@ class Speaker(context: Context) {
         const val INIT_TIMEOUT_MS = 5_000L
         const val BOOT_RETRY_MS = 5_000L
     }
+}
+
+/** Pure timing for lines that cannot be spoken (unit-tested). */
+object SpeechPacing {
+    /** Shortest and longest time an unspoken line stays before Ampli moves on (and listens). */
+    const val SILENT_MIN_MS = 1_200L
+    const val SILENT_MAX_MS = 3_500L
+
+    /** How long an unspoken line of [chars] characters holds the conversation. */
+    fun silentHoldMs(chars: Int): Long = (SILENT_MIN_MS + chars.coerceAtLeast(0) * 30L).coerceAtMost(SILENT_MAX_MS)
+}
+
+/** Home's one-time "Bolne ka engine nahi hai · Install karo" card (unit-tested). */
+object TtsNotice {
+    /** Show it: no speech engine, never shown on this unit before, and parked. */
+    fun showCard(ttsMissing: Boolean, shownBefore: Boolean, moving: Boolean): Boolean = ttsMissing && !shownBefore && !moving
 }
