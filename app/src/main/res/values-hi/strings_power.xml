@@ -43,8 +43,6 @@
 
 
     <string name="settings_power_title">पावर बटन</string>
-    <string name="settings_power_strip">ऊपर की पट्टी में ⏻</string>
-    <string name="settings_power_strip_hint">होम पर नीचे खींचने वाली पट्टी के पास पावर बटन</string>
     <string name="settings_power_lock">डिस्प्ले पूरा बंद करें</string>
     <string name="settings_power_lock_hint">स्क्रीन बंद पर स्क्रीन लॉक होगी (device admin, सिर्फ़ लॉक)। कुछ स्क्रीन फिर सिर्फ़ इग्निशन से जागती हैं। बंद हो तो: काला पर्दा, छूने पर जागता है।</string>
 

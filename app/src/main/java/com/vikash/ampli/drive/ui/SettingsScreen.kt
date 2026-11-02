@@ -476,7 +476,6 @@ const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
 @Composable
 private fun PowerSettings(app: DriveApp, resumeTick: Int) {
     val context = LocalContext.current
-    val stripPower by app.shell.stripPower.collectAsStateWithLifecycle()
     val lockWanted by app.shell.lockScreenOff.collectAsStateWithLifecycle()
     var adminAsked by remember { mutableStateOf(0) }
     val adminActive = remember(resumeTick, adminAsked) { com.vikash.ampli.drive.system.PowerControl.adminActive(context) }
@@ -490,12 +489,6 @@ private fun PowerSettings(app: DriveApp, resumeTick: Int) {
         hint = stringResource(R.string.power_screen_off) + " · " + stringResource(R.string.qp_screensaver),
         action = stringResource(R.string.action_open),
         onClick = { com.vikash.ampli.drive.system.PowerControl.openSheet() },
-    )
-    ToggleRow(
-        title = stringResource(R.string.settings_power_strip),
-        status = stringResource(R.string.settings_power_strip_hint),
-        checked = stripPower,
-        onChange = app.shell::setStripPower,
     )
     ToggleRow(
         title = stringResource(R.string.settings_power_lock),

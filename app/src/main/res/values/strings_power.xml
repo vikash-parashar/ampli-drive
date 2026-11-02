@@ -51,8 +51,6 @@
 
     <!-- Settings › Power -->
     <string name="settings_power_title">Power keys</string>
-    <string name="settings_power_strip">⏻ in the top strip</string>
-    <string name="settings_power_strip_hint">A power key next to the pull-down strip on Home</string>
     <string name="settings_power_lock">Turn the display fully off</string>
     <string name="settings_power_lock_hint">Screen off locks the screen (device admin, lock only). Some units then wake only with the ignition. Off: a black cover that wakes on touch.</string>
 

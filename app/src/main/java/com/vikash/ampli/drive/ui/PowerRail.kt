@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,7 +35,6 @@ import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -417,7 +415,8 @@ private fun VolumePopup(state: RailVolumeState, modifier: Modifier) {
 
 /**
  * The pill at the top centre (Wi-Fi, Bluetooth, a grab bar and ⌄): tap or pull down for the quick
- * panel. The round moon key beside it opens the Power sheet (Screen off, Screensaver) (Settings › Power can hide it).
+ * panel. (The power key that sat beside it was removed with Restart / Power off; Screen off is in
+ * the quick panel and Settings › Power.)
  */
 @Composable
 private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen: () -> Unit, modifier: Modifier) {
@@ -425,7 +424,6 @@ private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen:
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
     val context = LocalContext.current
-    val showPower by app.shell.stripPower.collectAsStateWithLifecycle()
     val bt by app.bluetooth.state.collectAsStateWithLifecycle()
     val wifiOn = remember(resumeTick) {
         try {
@@ -474,16 +472,6 @@ private fun TopStrip(app: DriveApp, resumeTick: Int, quickOpen: Boolean, onOpen:
             Icon(if (bt.enabled) Icons.Filled.Bluetooth else Icons.Filled.BluetoothDisabled, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(3f)))
             Box(Modifier.width(dims.d(4.2f)).height(5.dp).background(fg.copy(alpha = 0.55f), RoundedCornerShape(50)))
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = fg, modifier = Modifier.size(dims.d(3f)))
-        }
-        if (showPower) {
-            Box(
-                Modifier
-                    .size(h)
-                    .themedTap(CircleShape, bg, border = edge, borderWidth = 2.dp, onClick = { PowerControl.openSheet() }),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Filled.DarkMode, contentDescription = stringResource(R.string.power_title), tint = fg, modifier = Modifier.size(dims.d(3.2f)))
-            }
         }
     }
 }
