@@ -104,6 +104,17 @@ fun VoiceOverlay(state: VoiceUiState, onCancel: () -> Unit, onChoose: (Int) -> U
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
+                    // What the last listen heard, small and quiet, for telling us what Ampli heard.
+                    // It stays through the next listen, until that one has a result.
+                    if (state.suna.isNotEmpty()) {
+                        Text(
+                            state.suna,
+                            color = theme.accentSoft,
+                            fontSize = dims.t(2.25f, min = 15f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     if (state.reply.isNotEmpty() && state.options.isEmpty() && state.answer == null) {
                         Text(
                             state.reply,

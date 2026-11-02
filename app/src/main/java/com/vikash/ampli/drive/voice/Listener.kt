@@ -70,6 +70,15 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
     var lastEngine: VoiceEngine = VoiceEngine.None
         private set
 
+    /** Why the last [listen] was Unavailable (offline model or microphone), or null. */
+    fun lastError(): String? = offline?.lastError
+
+    /** What the offline model last heard, even when it was thrown away as noise ("[unk]" alone). */
+    fun lastRaw(): String? = if (lastEngine.offline) offline?.lastRaw else null
+
+    /** The microphone gave only digital silence in the last offline listen. */
+    fun lastMicDead(): Boolean = lastEngine.offline && offline?.lastMicDead == true
+
     /**
      * True when the next [listen] goes to the offline model: there is no system recogniser, or
      * it has been skipped for showing no sign of life. (A system turn can still fall through to
@@ -111,9 +120,15 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
             val vosk = offline
             val offlineReady = vosk != null && vosk.isReady()
             // A system recogniser that showed no sign of life lately: straight to the offline model.
-            if (vosk != null && RecognizerFallback.straightOffline(systemAvailable(), SystemRecognizerHealth.deadTurns(appContext), offlineReady)) {
+            val straight = vosk != null && RecognizerFallback.straightOffline(systemAvailable(), SystemRecognizerHealth.deadTurns(appContext), offlineReady)
+            VoiceDebugLog.add(
+                "recognizer: system ${if (systemAvailable()) "present" else "none"}, dead turns ${SystemRecognizerHealth.deadTurns(appContext)}, " +
+                    "offline ${if (offlineReady) "ready" else "NOT ready"} → ${if (straight) "offline" else "system first"}",
+            )
+            if (vosk != null && straight) {
                 val r = listenOffline(vosk, mode, onPartial, chime)
                 if (r != Result.Unavailable) return r
+                VoiceDebugLog.add("offline listen unavailable: ${vosk.lastError}")
                 // The offline model would not load: give the system recogniser its turn after all.
             }
             val tags = VoiceLocales.recognition(appLanguage)
@@ -143,7 +158,10 @@ class Listener(context: Context, private val offline: VoskCommandListener? = nul
                 }
                 // EngineFailed without an offline model: try the next engine or language.
             }
-            turn?.let { SystemRecognizerHealth.record(appContext, it) }
+            turn?.let {
+                SystemRecognizerHealth.record(appContext, it)
+                VoiceDebugLog.add("system recognizer turn: $it")
+            }
             systemResult?.let {
                 lastEngine = VoiceEngine.System
                 SystemRecognizerHealth.served(VoiceEngine.System)

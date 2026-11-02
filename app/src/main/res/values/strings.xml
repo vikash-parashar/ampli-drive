@@ -209,6 +209,13 @@
     <string name="voice_notification_title">Listening for “Hey Ampli”</string>
     <string name="voice_notification_text">Turn this off in Settings, Voice</string>
     <string name="voice_channel">Hey Ampli wake word</string>
+    <string name="voice_suna">Heard: “%1$s”</string>
+    <string name="voice_suna_unsure">Heard (not sure): “%1$s”</string>
+    <string name="voice_suna_unclear">Heard something, didn\'t understand</string>
+    <string name="voice_suna_nothing">Heard: nothing</string>
+    <string name="voice_suna_mic_silent">Microphone gave no sound. Settings, Voice, Check voice.</string>
+    <string name="voice_suna_error">Can\'t listen: %1$s</string>
+    <string name="voice_no_player">No music started. Open Ampli MP3 or a music app once, then ask again.</string>
     <string name="voice_listening">Listening…</string>
     <string name="voice_working">One moment…</string>
     <string name="voice_cancel">Cancel</string>

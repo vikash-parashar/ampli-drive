@@ -135,7 +135,10 @@ class VoiceService : Service() {
     }
 
     private fun init() {
-        app.voice.releaseWakeMic = { stopMic() }
+        app.voice.releaseWakeMic = {
+            if (speech != null) VoiceDebugLog.add("wake mic released for the assistant")
+            stopMic()
+        }
         audio?.let {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 modeWatcher = ModeWatcher(it, ContextCompat.getMainExecutor(this), ::onAudioMode)
@@ -211,6 +214,7 @@ class VoiceService : Service() {
             s.startListening(wakeListener)
         } catch (e: IOException) {
             // Mic held by another app (a call, Google Assistant). Try again shortly.
+            VoiceDebugLog.add("wake mic busy: ${e.message}")
             setStatus(Status.Failed("mic busy: ${e.message}"))
             stopMic()
             main.postDelayed(rearm, RETRY_MS)
@@ -236,6 +240,7 @@ class VoiceService : Service() {
         override fun onFinalResult(hypothesis: String?) = Unit
         override fun onTimeout() = Unit
         override fun onError(exception: Exception?) {
+            VoiceDebugLog.add("wake mic error: ${exception?.message}")
             stopMic()
             main.postDelayed(rearm, RETRY_MS)
         }
@@ -262,8 +267,12 @@ class VoiceService : Service() {
         }
         if (!wake) return
         // Right after a command ran, the end of a song or of Ampli's own reply must not wake it again.
-        if (SpeechGate.coolingDown(app.voice.lastActionAt, android.os.SystemClock.elapsedRealtime())) return
+        if (SpeechGate.coolingDown(app.voice.lastActionAt, android.os.SystemClock.elapsedRealtime())) {
+            VoiceDebugLog.add("wake ignored: cooling down after a command")
+            return
+        }
         if (app.voice.busy.value) return
+        VoiceDebugLog.add("wake word (${if (partial) "partial" else "final"})")
         stopMic()
         app.voice.start()
     }

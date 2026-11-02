@@ -80,9 +80,21 @@ object RecognizerFallback {
     }
 
     /**
-     * Fetch the Hindi offline model by itself: a Hindi-family app language, and no system
-     * recogniser that works, and the driver has not removed the model in Settings.
+     * Fetch the Hindi offline model by itself: no system recogniser that works, the driver has not
+     * removed the model in Settings, and either a Hindi-family app language or an unmetered
+     * network ([unmetered], Wi-Fi). On offline-only units drivers answer Ampli in Hindi whatever
+     * the app language, and the English model cannot hear "gaana sunao" well; ~40 MB is fetched
+     * only on Wi-Fi for them so a phone's mobile data is not used up.
      */
-    fun wantHindiModel(parserLanguage: String, systemWorks: Boolean, removedByUser: Boolean): Boolean =
-        parserLanguage == "hi" && !systemWorks && !removedByUser
+    fun wantHindiModel(parserLanguage: String, systemWorks: Boolean, removedByUser: Boolean, unmetered: Boolean = false): Boolean =
+        !systemWorks && !removedByUser && (parserLanguage == "hi" || unmetered)
+
+    /**
+     * Which offline model hears a listen: the Hindi one when installed and either the app speaks
+     * a Hindi-family language, or this is an answer to Ampli ([followUp]) on a unit without a
+     * working system recogniser. Otherwise the English model (also the wake word's, so no second
+     * model is loaded for plain commands).
+     */
+    fun useHindiModel(parserLanguage: String, followUp: Boolean, hindiInstalled: Boolean, systemWorks: Boolean): Boolean =
+        hindiInstalled && (parserLanguage == "hi" || (followUp && !systemWorks))
 }

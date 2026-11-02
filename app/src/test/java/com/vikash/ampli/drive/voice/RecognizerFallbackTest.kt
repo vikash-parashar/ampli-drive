@@ -90,6 +90,31 @@ class RecognizerFallbackTest {
     }
 
     @Test
+    fun offlineOnlyUnitsFetchHindiOnWifiWhateverTheLanguage() {
+        // English app language, no working recogniser: Hindi on Wi-Fi only (not on mobile data).
+        assertTrue(RecognizerFallback.wantHindiModel("en", systemWorks = false, removedByUser = false, unmetered = true))
+        assertFalse(RecognizerFallback.wantHindiModel("en", systemWorks = false, removedByUser = false, unmetered = false))
+        // Removed in Settings stays removed; a working system recogniser needs no model.
+        assertFalse(RecognizerFallback.wantHindiModel("en", systemWorks = false, removedByUser = true, unmetered = true))
+        assertFalse(RecognizerFallback.wantHindiModel("en", systemWorks = true, removedByUser = false, unmetered = true))
+        // Hindi-family languages still fetch it on any network.
+        assertTrue(RecognizerFallback.wantHindiModel("hi", systemWorks = false, removedByUser = false, unmetered = false))
+    }
+
+    @Test
+    fun hindiModelHearsAnswersOnOfflineOnlyUnits() {
+        // English app, offline-only unit, Hindi installed: answers to Ampli go to the Hindi model.
+        assertTrue(RecognizerFallback.useHindiModel("en", followUp = true, hindiInstalled = true, systemWorks = false))
+        // Plain commands after a bare beep stay on the English (wake word) model: one model loaded.
+        assertFalse(RecognizerFallback.useHindiModel("en", followUp = false, hindiInstalled = true, systemWorks = false))
+        assertFalse(RecognizerFallback.useHindiModel("en", followUp = true, hindiInstalled = false, systemWorks = false))
+        assertFalse(RecognizerFallback.useHindiModel("en", followUp = true, hindiInstalled = true, systemWorks = true))
+        // Hindi-family languages always use it when it is there.
+        assertTrue(RecognizerFallback.useHindiModel("hi", followUp = false, hindiInstalled = true, systemWorks = true))
+        assertFalse(RecognizerFallback.useHindiModel("hi", followUp = true, hindiInstalled = false, systemWorks = false))
+    }
+
+    @Test
     fun offlineEnginesAreMarked() {
         assertTrue(VoiceEngine.OfflineEnglish.offline)
         assertTrue(VoiceEngine.OfflineHindi.offline)

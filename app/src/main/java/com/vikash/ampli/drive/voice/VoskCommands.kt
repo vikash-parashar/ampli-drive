@@ -50,6 +50,19 @@ object VoskCommands {
         "kya haal hai", "ke haal sai", "tum kaun ho", "chutkula sunao", "kya bol sakta hoon",
         "screen band karo", "screen off karo", "display band karo",
         "radd karo",
+        // How drivers really ask for music, the music keys and the volume when answering Ampli.
+        "gana sunao", "gaana sunao", "gaane sunao", "gane sunao", "gaana suna do", "gana suna do",
+        "gaana lagao", "gana lagao", "gaane lagao", "gaana chala do", "gana chala do", "gaane chalao",
+        "gaana baja do", "gana bajao", "gaane bajao", "koi gaana chalao", "koi gaana sunao", "koi gana lagao",
+        "song chalao", "song lagao", "song sunao", "song bajao", "song chala do",
+        "music sunao", "music lagao", "music bajao", "music chala do", "music suna do",
+        "bhajan sunao", "bhajan chalao", "bhajan lagao", "bhajan bajao",
+        "gaana band kar", "gaana band kar do", "gana band karo", "gaane band karo", "gaana rok do",
+        "music band kar do", "music roko", "song band karo", "song roko",
+        "agla chalao", "agla gaana chalao", "agla song", "agla laga do", "next gaana", "agla gana lagao",
+        "pichla chalao", "pichla song", "pichla gaana chalao",
+        "awaaz badha do", "awaz badha do", "awaaz tez kar do", "awaaz kam kar do", "awaaz dheemi karo",
+        "volume badha do", "volume kam kar do",
     )
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
@@ -86,6 +99,19 @@ object VoskCommands {
         "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
         // Screen off.
         "स्क्रीन बंद करो", "स्क्रीन ऑफ करो",
+        // How drivers really ask for music, the music keys and the volume when answering Ampli.
+        "गाना सुनाओ", "गाने सुनाओ", "गाना सुना दो", "गाने सुना दो", "गाना लगाओ", "गाने लगाओ",
+        "गाना चला दो", "गाने चलाओ", "गाना बजा दो", "गाने बजाओ", "कोई गाना चलाओ", "कोई गाना सुनाओ", "कोई गाना लगाओ",
+        "म्यूजिक चलाओ", "म्यूजिक बजाओ", "म्यूजिक लगाओ", "म्यूजिक सुनाओ", "सॉन्ग चलाओ", "सॉन्ग लगाओ",
+        "भजन सुनाओ", "भजन चलाओ", "भजन लगाओ", "भजन बजाओ",
+        "गाना बंद कर", "गाना बंद कर दो", "गाने बंद करो", "गाना रोक दो", "म्यूजिक बंद करो", "म्यूजिक बंद कर दो",
+        "अगला चलाओ", "अगला गाना चलाओ", "अगला लगाओ", "अगला गाना लगाओ", "पिछला चलाओ", "पिछला गाना चलाओ",
+        "आवाज बढ़ा दो", "आवाज कम कर दो", "आवाज तेज करो", "आवाज तेज कर दो", "आवाज धीमी करो",
+        "वॉल्यूम बढ़ाओ", "वॉल्यूम कम करो", "वॉल्यूम बढ़ा दो",
+        // English said by drivers whose app is in English but whose unit hears them through the
+        // Hindi model (offline-only units answer Ampli with it): as the Hindi model writes them.
+        "प्ले म्यूजिक", "म्यूजिक प्ले करो", "गाना प्ले करो", "प्ले करो", "नेक्स्ट सॉन्ग", "नेक्स्ट", "स्टॉप",
+        "पॉज़ करो", "वॉल्यूम अप", "वॉल्यूम डाउन", "कैंसल", "हेलो",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
@@ -196,6 +222,18 @@ object HinglishSpelling {
         "rasta" to listOf("raasta", "rastaa"),
         "dikhao" to listOf("dikhaao", "dikao"),
         "le" to listOf("lay", "lae"),
+        "suna" to listOf("soona", "sunna", "sunaa"),
+        "lagao" to listOf("lagaao", "lagau", "lagaw"),
+        "laga" to listOf("lagaa", "lagga"),
+        "gaane" to listOf("gane", "gaaney", "ganey"),
+        "gane" to listOf("gaane", "ganey"),
+        "bhajan" to listOf("bhajjan", "bajan", "bhajans"),
+        "koi" to listOf("koee", "koy", "koyi"),
+        "badha" to listOf("badhaa", "barha", "bada"),
+        "kar" to listOf("karr", "kur"),
+        "dheemi" to listOf("dheemee", "dhimi", "deemi"),
+        "rok" to listOf("roak", "roke"),
+        "tez" to listOf("tej", "taze"),
     )
 
     /** The grammar to give the model, and the spellings to turn back ([restore]). */

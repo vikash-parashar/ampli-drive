@@ -144,6 +144,9 @@ class Speaker(context: Context, val bundled: AmpliVoice = AmpliVoice(context)) {
         return isAvailable()
     }
 
+    /** The audio mode now, for the voice log (0 normal, 1 ringtone, 2 call, 3 communication). */
+    fun audioMode(): Int = audio?.mode ?: -1
+
     /** A phone call is ringing or in progress (also Bluetooth calls through the head unit). */
     fun inCall(): Boolean = when (audio?.mode) {
         AudioManager.MODE_IN_CALL, AudioManager.MODE_IN_COMMUNICATION, AudioManager.MODE_RINGTONE -> true

@@ -202,6 +202,10 @@ object VoiceActions {
      * the one playing, else the phone over Bluetooth or any other session, else (for play) Ampli
      * MP3's Car mode. False when nothing could be sent.
      */
+    /** Where the last [transport] went ("session com.x", "phone keys", "media key"…), for the voice log. */
+    @Volatile var lastTransportTarget: String = ""
+        private set
+
     fun transport(app: DriveApp, action: Transport): Boolean {
         val list = sessions(app)
         val info = infos(list)
@@ -217,6 +221,12 @@ object VoiceActions {
             musicActive = active,
             lastSource = lastSource,
         )
+        lastTransportTarget = when (target) {
+            is MediaTarget.Target.Session -> "session ${target.packageName}"
+            MediaTarget.Target.PhoneKeys -> "phone keys"
+            MediaTarget.Target.OpenAmpli -> "open Ampli MP3"
+            MediaTarget.Target.MediaKey -> "media key (${list.size} sessions, music ${if (active) "on" else "off"})"
+        }
         val code = when (action) {
             Transport.Play -> KeyEvent.KEYCODE_MEDIA_PLAY
             Transport.Pause -> KeyEvent.KEYCODE_MEDIA_PAUSE

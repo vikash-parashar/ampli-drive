@@ -54,6 +54,7 @@ import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
 import com.vikash.ampli.drive.voice.Listener
 import com.vikash.ampli.drive.voice.RecognizerFallback
 import com.vikash.ampli.drive.voice.SystemRecognizerHealth
+import com.vikash.ampli.drive.voice.VoiceDebugLog
 import com.vikash.ampli.drive.voice.VoiceEngine
 import com.vikash.ampli.drive.voice.VoiceLocales
 import com.vikash.ampli.drive.voice.VoiceService
@@ -268,6 +269,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                     VoiceLocales.parserLanguage(language),
                     sysWorks,
                     app.hindiModel.removedByUser(),
+                    unmetered = com.vikash.ampli.drive.voice.VoskCommandListener.unmetered(app),
                 )
                 DiagRow(
                     "Hindi offline model (commands)",
@@ -283,7 +285,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         is WakeModel.State.Failed -> "FAILED: ${m.message}"
                     } + (app.hindiModel.loadError?.let { " · load error: $it" } ?: ""),
                     if (hindi == WakeModel.State.Ready) true else if (hindiLanguage && !sysPresent) false else null,
-                    action = if (hindiLanguage && (hindi == WakeModel.State.Missing || hindi is WakeModel.State.Failed)) {
+                    action = if ((hindiLanguage || !sysWorks) && (hindi == WakeModel.State.Missing || hindi is WakeModel.State.Failed)) {
                         stringResource(R.string.vcheck_download)
                     } else {
                         null
@@ -440,9 +442,65 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 voiceTest?.let { DiagRow("Ampli voice test", it, if (it.contains("NOT")) false else null) }
                 Text(stringResource(R.string.vcheck_listen_hint), color = LocalDriveTheme.current.muted, fontSize = dims.t(2.1f, min = 12f))
             }
+            VoiceLogSection()
         }
     }
 }
+
+/**
+ * The last voice events ([VoiceDebugLog]): wake, Ampli speaking, the microphone, what the
+ * recogniser returned and what Ampli did with it. Copy or Share sends it to us as plain text.
+ */
+@Composable
+private fun VoiceLogSection() {
+    val dims = LocalDims.current
+    val theme = LocalDriveTheme.current
+    val context = LocalContext.current
+    val entries by VoiceDebugLog.flow.collectAsStateWithLifecycle()
+    DiagSection("Voice log (last ${VoiceDebugLog.MAX} events)") {
+        Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f))) {
+            BigButton(text = "Copy", onClick = {
+                val text = voiceLogReport(context)
+                try {
+                    val cm = context.getSystemService(android.content.ClipboardManager::class.java)
+                    cm?.setPrimaryClip(android.content.ClipData.newPlainText("Ampli voice log", text))
+                    android.widget.Toast.makeText(context, "Voice log copied", android.widget.Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                }
+            }, primary = false)
+            BigButton(text = "Share", onClick = {
+                try {
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_SUBJECT, "Ampli voice log")
+                        .putExtra(Intent.EXTRA_TEXT, voiceLogReport(context))
+                    context.startActivity(Intent.createChooser(send, "Share voice log").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                } catch (_: Exception) {
+                    android.widget.Toast.makeText(context, "No app to share with: use Copy", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }, primary = false)
+            BigButton(text = "Clear", onClick = { VoiceDebugLog.clear() }, primary = false)
+        }
+        if (entries.isEmpty()) {
+            Text("Nothing yet. Say \"Hey Ampli\" and answer, then come back here.", color = theme.muted, fontSize = dims.t(2.1f, min = 12f))
+        } else {
+            Text(
+                VoiceDebugLog.text(entries.reversed()),
+                color = theme.text,
+                fontFamily = FontFamily.Monospace,
+                fontSize = dims.t(1.9f, min = 11f),
+                lineHeight = dims.t(2.6f, min = 15f),
+            )
+        }
+    }
+}
+
+/** The shared text: app version, device and Android version, then the log oldest first. */
+private fun voiceLogReport(context: Context): String =
+    "Ampli ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · ${Build.MANUFACTURER} ${Build.MODEL} · " +
+        "Android ${Build.VERSION.RELEASE} · ${Build.HARDWARE}\n" +
+        "system recognizer: ${if (SpeechRecognizer.isRecognitionAvailable(context)) "present" else "none"}\n\n" +
+        VoiceDebugLog.text()
 
 /** Settings › About › Diagnostics. */
 @Composable
