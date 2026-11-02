@@ -83,6 +83,14 @@ private fun DiagSection(title: String, content: @Composable () -> Unit) {
     }
 }
 
+/** A TTS engine's name as the driver knows it ("eSpeak NG"), from its package. */
+private fun engineLabel(context: android.content.Context, pkg: String): String = try {
+    val pm = context.packageManager
+    pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString().ifBlank { pkg }
+} catch (_: Exception) {
+    pkg
+}
+
 /** One fact. [ok] null = neutral (no icon colour). */
 @Composable
 private fun DiagRow(label: String, value: String, ok: Boolean? = null, action: String? = null, onAction: () -> Unit = {}) {
@@ -284,8 +292,24 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 )
             }
             DiagSection("Speech recognition") {
-                DiagRow("System recognizer present", yes(sysPresent), sysPresent)
-                DiagRow(
+                val hindiReady = hindiLanguage && app.hindiModel.isInstalled()
+                val offlineReady = model == WakeModel.State.Ready || hindiReady
+                // With Ampli's offline listening ready, Android's own speech service is optional:
+                // Google's app registers none on Android 8.1, and that is fine, not a failure.
+                val optional = offlineReady && !sysWorks
+                if (offlineReady) {
+                    DiagRow(
+                        "Listening",
+                        if (sysWorks) "Ampli offline listening: ready (backup to the Android speech service)" else "Ampli offline listening: ready (Google not needed)",
+                        true,
+                    )
+                }
+                if (optional && !sysPresent) {
+                    DiagRow("Android speech service", "not available on this unit (optional)", null)
+                } else {
+                    DiagRow("System recognizer present", yes(sysPresent), if (optional) null else sysPresent)
+                }
+                if (sysPresent) DiagRow(
                     "System recognizer working",
                     when {
                         !sysPresent -> "no (none installed)"
@@ -294,14 +318,14 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         sysDeadTurns > 0 -> "no response last turn"
                         else -> "yes (or not tried yet)"
                     },
-                    if (!sysPresent) null else sysWorks && sysDeadTurns == 0,
+                    if (!sysPresent || optional) null else sysWorks && sysDeadTurns == 0,
                 )
                 DiagRow("Last turn served by", lastEngine.label, if (lastEngine == VoiceEngine.None) null else true)
-                DiagRow("SpeechRecognizer available", yes(sysRecognizer), sysRecognizer)
-                DiagRow("Recognizer setting", recognizerSetting ?: "(none)", null)
-                DiagRow("Recognition services", services.joinToString(", ").ifEmpty { "(none installed)" }, services.isNotEmpty())
-                val hindiReady = hindiLanguage && app.hindiModel.isInstalled()
-                val offlineReady = model == WakeModel.State.Ready || hindiReady
+                if (!(optional && !sysPresent)) {
+                    DiagRow("SpeechRecognizer available", yes(sysRecognizer), if (optional) null else sysRecognizer)
+                    DiagRow("Recognizer setting", recognizerSetting ?: "(none)", null)
+                    DiagRow("Recognition services", services.joinToString(", ").ifEmpty { "(none installed)" }, if (optional) null else services.isNotEmpty())
+                }
                 val systemUsable = sysWorks
                 val offlineName = if (hindiReady) "offline Hindi model" else "offline English model (with Hinglish)"
                 DiagRow(
@@ -316,22 +340,38 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                 )
             }
             DiagSection("Text to speech") {
+                // Which engine speaks now, first and in green; a missing Google engine is not a fault.
+                var usedFor by remember { mutableStateOf<BundledTts.Engine?>(null) }
+                val bundledStateTop by app.speaker.bundled.files.state.collectAsStateWithLifecycle()
+                LaunchedEffect(bundledStateTop, language, tick) { usedFor = app.speaker.engineFor(language) }
+                val systemName = remember(tts?.defaultEngine) { tts?.defaultEngine?.let { engineLabel(context, it) } }
+                val speaks = usedFor != null && usedFor != BundledTts.Engine.None
+                DiagRow(
+                    "Speaking with",
+                    when (usedFor) {
+                        null -> "checking…"
+                        BundledTts.Engine.System -> systemName ?: "system TTS engine"
+                        BundledTts.Engine.Bundled -> "Ampli voice"
+                        BundledTts.Engine.None -> "recorded Ampli lines only"
+                    },
+                    usedFor?.let { it != BundledTts.Engine.None },
+                )
                 if (tts == null) {
                     DiagRow("Engine", "starting…", null)
                 } else {
                     DiagRow(
                         "Engines installed",
                         tts.engines.joinToString(", ").ifEmpty { "(none)" },
-                        tts.engines.isNotEmpty(),
-                        action = if (tts.engines.isEmpty() || !tts.ready) stringResource(R.string.vcheck_get_tts) else null,
+                        if (speaks) null else tts.engines.isNotEmpty(),
+                        action = if (!speaks && (tts.engines.isEmpty() || !tts.ready)) stringResource(R.string.vcheck_get_tts) else null,
                         onAction = { openPlayStore(context, "com.google.android.tts") },
                     )
-                    DiagRow("Default engine", tts.defaultEngine ?: "(none)", tts.ready)
+                    DiagRow("Default engine", tts.defaultEngine ?: "(none)", if (speaks) null else tts.ready)
                     DiagRow(
                         "Hindi voice (hi-IN)",
                         langText(tts.hindi),
-                        tts.hindi >= TextToSpeech.LANG_AVAILABLE,
-                        action = if (tts.ready && tts.hindi < TextToSpeech.LANG_AVAILABLE) stringResource(R.string.vcheck_tts_settings) else null,
+                        if (tts.hindi >= TextToSpeech.LANG_AVAILABLE) true else if (speaks) null else false,
+                        action = if (!speaks && tts.ready && tts.hindi < TextToSpeech.LANG_AVAILABLE) stringResource(R.string.vcheck_tts_settings) else null,
                         onAction = {
                             try {
                                 context.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -340,7 +380,7 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                             }
                         },
                     )
-                    DiagRow("English voice (en-IN)", langText(tts.english), tts.english >= TextToSpeech.LANG_AVAILABLE)
+                    DiagRow("English voice (en-IN)", langText(tts.english), if (tts.english >= TextToSpeech.LANG_AVAILABLE) true else if (speaks) null else false)
                 }
                 // Ampli's own offline voice engine (shipped with the app; speaks when the unit has none).
                 val bundledFiles = app.speaker.bundled.files
@@ -356,18 +396,6 @@ fun VoiceCheckScreen(app: DriveApp, onBack: () -> Unit) {
                         null
                     },
                     onAction = { bundledFiles.ensure() },
-                )
-                var usedFor by remember { mutableStateOf<BundledTts.Engine?>(null) }
-                LaunchedEffect(bundledState, language, tick) { usedFor = app.speaker.engineFor(language) }
-                DiagRow(
-                    "Used for speech",
-                    when (usedFor) {
-                        null -> "checking…"
-                        BundledTts.Engine.System -> "system TTS engine"
-                        BundledTts.Engine.Bundled -> "Ampli voice engine"
-                        BundledTts.Engine.None -> "NONE: recorded lines only"
-                    },
-                    usedFor?.let { it != BundledTts.Engine.None },
                 )
             }
             DiagSection("Tests") {
