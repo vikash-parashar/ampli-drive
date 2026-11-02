@@ -67,6 +67,18 @@ object VoiceCommandCatalog {
                 item("Petrol pump", "Diesel pump", "Charging station"),
                 item("Police aage hai", "Accident ahead", "आगे जाम है"),
                 item("Mobile camera ahead", "मोबाइल कैमरा आगे है"),
+                item("Camera here", "Aage naka hai", "कैमरा लगा है"),
+                item("No camera here", "Police hat gayi", "कैमरा नहीं है"),
+                item("Long queue at CNG", "CNG pe line lambi hai", "पंप खाली है"),
+            ),
+        ),
+        Group(
+            R.string.voice_cmds_diary,
+            listOf(
+                item("Petrol filled", "1000 ka petrol", "पचास लीटर"),
+                item("How much did I save?", "Kitna challan bachaya", "कितना चालान बचाया"),
+                item("Remind me later", "Break baad mein", "ब्रेक बाद में"),
+                item("Connect hotspot", "Hotspot jodo", "हॉटस्पॉट जोड़ो"),
             ),
         ),
         Group(

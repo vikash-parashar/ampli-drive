@@ -327,7 +327,7 @@
     <string name="parked_how">Saved from GPS when the car stops or the screen goes off. Accuracy depends on GPS signal.</string>
     <string name="break_title">Time for a break</string>
     <string name="break_body">You have been driving for %1$s hours. Stop for a short rest.</string>
-    <string name="break_voice">You have been driving for %1$s hours. Please take a short break.</string>
+    <string name="break_voice">You have been driving for %1$s hours. Time for a cup of chai and a short break, then we carry on.</string>
     <string name="break_driving_for">Driving for %1$s</string>
     <string name="break_find_dhaba">Find a dhaba</string>
     <string name="break_find_fuel">Petrol pump</string>

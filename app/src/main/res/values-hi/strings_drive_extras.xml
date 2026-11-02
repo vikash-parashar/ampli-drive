@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_cmds_diary">डायरी, बचत और हॉटस्पॉट</string>
+
+    <string name="x_camera_saved">यहाँ कैमरा सेव कर दिया। जब तक आप “कैमरा नहीं है” न बोलें, रहेगा।</string>
+    <string name="x_gone_camera">ठीक है, यहाँ से कैमरा हटा दिया।</string>
+    <string name="x_gone_police">ठीक है, पुलिस नाका हटा दिया।</string>
+    <string name="x_gone_jam">ठीक है, जाम खुला मान लिया।</string>
+    <string name="x_gone_nothing">यहाँ पास में कुछ रिपोर्ट नहीं था।</string>
+
+    <string name="x_queue_saved_long">नोट किया: %1$s पर लंबी लाइन है।</string>
+    <string name="x_queue_saved_short">नोट किया: %1$s पर लाइन नहीं है।</string>
+    <string name="x_queue_no_pump">400 मीटर में कोई पंप नहीं। पंप पर पहुँचकर बोलिए।</string>
+    <string name="x_queue_long">लंबी लाइन · %1$d मिनट पहले</string>
+    <string name="x_queue_short">लाइन नहीं · %1$d मिनट पहले</string>
+    <string name="x_side_same">आगे, आपकी तरफ़</string>
+    <string name="x_side_other">आगे, दूसरी तरफ़</string>
+    <string name="x_side_behind">पीछे छूट गया</string>
+
+    <string name="x_fuel_ask">कितने का? रुपये या लीटर बोलिए।</string>
+    <string name="x_fuel_saved">सेव किया: %1$s, लगभग %2$s लीटर।</string>
+    <string name="x_fuel_not_saved">रकम समझ नहीं आई। खर्च में जोड़ दीजिए।</string>
+    <string name="x_diary_title">पेट्रोल डायरी</string>
+    <string name="x_diary_hint">हर बार “पेट्रोल भरवाया 1000” बोलिए। माइलेज दो भराई के बीच के GPS किलोमीटर से निकलता है।</string>
+    <string name="x_diary_month">इस महीने: %1$s</string>
+    <string name="x_diary_kmpl">पिछली भराई: %1$s किमी प्रति लीटर</string>
+    <string name="x_diary_assume">आवाज़ से बोली भराई फ़ुल टैंक मानी जाती है। सिर्फ़ रुपये बोलने पर लीटर %1$s प्रति लीटर (आपका पिछला दाम) से निकलते हैं।</string>
+
+    <string name="x_challan_title">चालान बचत</string>
+    <string name="x_challan_count">चेतावनी के बाद %1$d बार धीमे हुए</string>
+    <string name="x_challan_amount">लगभग %1$s – %2$s बचे</string>
+    <string name="x_challan_km">यह लगभग %1$d किमी की गाड़ी चलाई के बराबर है (%2$s प्रति किमी)</string>
+    <string name="x_challan_assume">कैमरा या स्पीड लिमिट की चेतावनी के 20 सेकंड के अंदर लिमिट तक धीमे होने पर गिना जाता है। जुर्माना मान लिया: कार (LMV, ओवरस्पीड) के लिए ₹1,000 – ₹2,000। सिर्फ़ इसी यूनिट पर रहता है।</string>
+    <string name="x_challan_answer">चेतावनी के बाद आप %1$d बार धीमे हुए। लगभग %2$s से %3$s का चालान बचा।</string>
+    <string name="x_challan_none">अभी कुछ नहीं गिना। कैमरा चेतावनी पर धीमे होइए, यहाँ जुड़ता जाएगा।</string>
+
+    <string name="x_break_snoozed">ठीक है, थोड़ी देर बाद याद दिला दूँगा।</string>
+
+    <string name="x_hotspot_title">फ़ोन हॉटस्पॉट</string>
+    <string name="x_hotspot_hint">यूनिट में SIM नहीं है। एक बार फ़ोन का हॉटस्पॉट चुनिए (पहले Wi-Fi सेटिंग में उससे जुड़ जाइए), फ़ोन पास होने पर Car Hub खुद जुड़ जाएगा।</string>
+    <string name="x_hotspot_android10">इस Android में ऐप Wi-Fi से नहीं जुड़ सकते। Wi-Fi सेटिंग इस्तेमाल कीजिए।</string>
+    <string name="x_hotspot_auto">अपने आप जोड़ें</string>
+    <string name="x_hotspot_auto_hint">जब फ़ोन ब्लूटूथ से जुड़े या हॉटस्पॉट दिखे</string>
+    <string name="x_hotspot_pick">हॉटस्पॉट नेटवर्क</string>
+    <string name="x_hotspot_no_saved">अभी कोई Wi-Fi सेव नहीं। एक बार Wi-Fi सेटिंग में फ़ोन हॉटस्पॉट से जुड़िए।</string>
+    <string name="x_hotspot_phone">फ़ोन (ब्लूटूथ)</string>
+    <string name="x_hotspot_any_phone">कोई भी फ़ोन</string>
+    <string name="x_hotspot_status">Wi-Fi पर: %1$s</string>
+    <string name="x_hotspot_connect">अभी जोड़ें</string>
+    <string name="x_wifi_settings">Wi-Fi सेटिंग</string>
+    <string name="x_hotspot_joining">%1$s से जोड़ रहा हूँ।</string>
+    <string name="x_hotspot_none">पहले सेटिंग में फ़ोन हॉटस्पॉट चुनिए। Wi-Fi सेटिंग खोल रहा हूँ।</string>
+    <string name="x_hotspot_unsupported">Wi-Fi सेटिंग खोल रहा हूँ। वहाँ फ़ोन हॉटस्पॉट चुनिए।</string>
+
+    <string name="x_resume_title">गाड़ी स्टार्ट होने पर</string>
+    <string name="x_resume_music">गाना फिर से चलाएँ</string>
+    <string name="x_resume_music_hint">पिछली बार वाला म्यूज़िक ऐप चलता है</string>
+    <string name="x_resume_route">अधूरा रास्ता फिर से</string>
+    <string name="x_resume_route_hint">6 घंटे के अंदर, अगर अभी पहुँचे नहीं</string>
+    <string name="x_route_resumed">%1$s का रास्ता फिर से चालू।</string>
+
+    <string name="x_offline_title">ऑफ़लाइन नक्शा</string>
+    <string name="x_offline_hint">एक इलाके का नक्शा यूनिट में रखता है, ताकि बिना इंटरनेट चले। सिर्फ़ Wi-Fi पर डाउनलोड होता है।</string>
+    <string name="x_offline_size">लगभग %1$d MB चाहिए · %2$d MB खाली</string>
+    <string name="x_offline_ready">%1$s तैयार · %2$d MB</string>
+    <string name="x_offline_progress">डाउनलोड हो रहा है… %1$d%%</string>
+    <string name="x_offline_paused">%1$d%% पर रुका</string>
+    <string name="x_offline_needs_wifi">डाउनलोड के लिए Wi-Fi से जुड़िए (मोबाइल डेटा पर नहीं)।</string>
+    <string name="x_offline_no_space">जगह कम है: लगभग %1$d MB और कुछ खाली जगह चाहिए।</string>
+    <string name="x_offline_failed">डाउनलोड नहीं हुआ: %1$s</string>
+    <string name="x_offline_pause">रोकें</string>
+    <string name="x_offline_resume">जारी रखें</string>
+    <string name="x_offline_download">डाउनलोड</string>
+    <string name="x_offline_delete">हटाएँ</string>
+    <string name="x_region_haryana_ncr">हरियाणा + दिल्ली NCR</string>
+    <string name="x_region_delhi_ncr">दिल्ली NCR</string>
+    <string name="x_region_tricity">चंडीगढ़ ट्राइसिटी</string>
+    <string name="x_region_around">मेरे आसपास 40 किमी</string>
+</resources>

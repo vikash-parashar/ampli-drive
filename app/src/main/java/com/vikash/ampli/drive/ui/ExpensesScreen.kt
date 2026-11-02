@@ -126,6 +126,9 @@ fun ExpensesScreen(app: DriveApp, onBack: () -> Unit, onUnlockPro: () -> Unit) {
                         Modifier.fillMaxWidth(), icon = Icons.Filled.FileDownload, primary = false,
                     )
                     Text(stringResource(R.string.expenses_tolls_auto), fontSize = dims.t(2.2f), color = theme.muted)
+                    // "1000 ka petrol" by voice, this month's spend, and the challans saved.
+                    FuelDiaryNote(fills)
+                    ChallanCard(app, perKm)
                 }
                 Pane(Modifier.weight(1.1f).fillMaxHeight()) {
                     if (rows.isEmpty()) {

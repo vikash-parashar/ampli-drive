@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.view.KeyEvent
 import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.MainActivity
+import com.vikash.ampli.drive.nav.UnfinishedRoute
 import com.vikash.ampli.drive.prefs.AutoStartMode
 import com.vikash.ampli.drive.system.AmpliMusic
 import com.vikash.ampli.drive.system.AppResolver
@@ -225,6 +226,7 @@ object CarStart {
         runSource = null
         val now = mark(context)
         val settings = prefs.autoStart.value
+        var freshStart = false
 
         // Welcome audio: "Jai Baba Ki {name} Ji, aaj kit ka plan hai?" (Haryanvi) or a plain welcome (Standard).
         // Its own once-per-start record, so a phone connecting first can't use up the greeting.
@@ -234,6 +236,7 @@ object CarStart {
                 app.startLog.add(source, greeted = false, reason = "already greeted for this start")
             } else {
                 prefs.lastGreetMark = now.encode()
+                freshStart = true
                 prefs.lastCarStartAt = now.wallMs
                 // Ampli startup animation first (Settings › Startup animation), then "Jai Baba Ki…".
                 // Never over the map while driving (an ACC or quick-boot event can arrive on the move,
@@ -262,7 +265,11 @@ object CarStart {
             }
         }
 
-        if (settings.mode == AutoStartMode.Off) return
+        if (settings.mode == AutoStartMode.Off) {
+            // Settings › When the car starts: carry on with the music and the route of the last drive.
+            if (freshStart) resumeLastDrive(context, app)
+            return
+        }
         val lastAuto = StartPolicy.RunMark.decode(prefs.lastAutoStartMark)
         // A phone connecting shortly after boot is the same start: one auto start only.
         if (!StartPolicy.shouldRun(lastAuto, now, if (trigger == StartTrigger.PhoneConnected) StartTrigger.Ignition else trigger)) return
@@ -297,12 +304,41 @@ object CarStart {
     }
 
     /**
+     * Resume on start (both on by default): the in-app route that was running when the car was
+     * switched off (within 6 hours, not yet arrived), then the music app used last. Never opens
+     * anything over the map while moving except the route itself, which is the map.
+     */
+    private suspend fun resumeLastDrive(context: Context, app: DriveApp) {
+        val extras = app.extras
+        if (extras.resumeRoute.value) {
+            val saved = extras.savedRoute
+            val here = app.speedTracker.state.value.location
+            if (UnfinishedRoute.shouldResume(saved, System.currentTimeMillis(), here?.latitude, here?.longitude) && saved != null) {
+                app.navigator.start(com.vikash.ampli.drive.nav.NavDestination(saved.name, saved.area, saved.lat, saved.lon))
+                try {
+                    val lang = app.car.language()
+                    app.voicePlayer.sayPlain(app.car.localized(lang).getString(com.vikash.ampli.drive.R.string.x_route_resumed, saved.name), lang, null)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                }
+            } else if (saved != null) {
+                extras.savedRoute = null
+            }
+        }
+        if (extras.resumeMusic.value && !DriveLock.movingNow(app.speedTracker.state.value.speedKmh)) {
+            startMusic(context, app, preferred = app.prefs.lastMediaPackage)
+        }
+    }
+
+    /**
      * Music in the chosen app: open it, then press "play" through its media session, a media
      * button sent to it, or the system's last media app, whichever works.
      */
-    private suspend fun startMusic(context: Context, app: DriveApp) {
+    private suspend fun startMusic(context: Context, app: DriveApp, preferred: String? = null) {
         app.prefs.applyMusicDefault { AmpliMusic.installed(context) }
-        val pkg = app.prefs.musicPackage.value
+        val pkg = preferred?.takeIf { context.packageManager.getLaunchIntentForPackage(it) != null }
+            ?: app.prefs.musicPackage.value
             ?: AmpliMusic.PACKAGE.takeIf { AmpliMusic.installed(context) }
             ?: AppResolver.guessMusicPackage(context)
         // Ampli opens in its Car mode; play is pressed below through its media session.
