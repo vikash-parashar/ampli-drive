@@ -234,13 +234,20 @@ class VoicePlayer(private val app: DriveApp) {
      */
     private suspend fun awaitEnd(exo: ExoPlayer, clipCount: Int, done: CompletableDeferred<Boolean>): Result {
         val start = android.os.SystemClock.elapsedRealtime()
+        // The known-length deadline counts from when sound actually started, so a slow start
+        // (decoder warm-up on a weak unit) never cuts the end of the line.
+        var playingSince: Long? = null
         while (true) {
             val finished = withTimeoutOrNull(POLL_MS) { done.await() }
             if (finished != null) return if (finished) Result.Played else Result.Failed
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (playingSince == null && exo.isPlaying) playingSince = now
             val known = totalDurationMs(exo)
-            val elapsed = android.os.SystemClock.elapsedRealtime() - start
-            if (elapsed >= SpeechCompletion.clipDeadlineMs(known, clipCount)) {
-                return if (known != null) Result.Played else Result.Failed
+            val since = playingSince
+            if (known != null && since != null) {
+                if (now - since >= SpeechCompletion.clipDeadlineMs(known, clipCount)) return Result.Played
+            } else if (now - start >= SpeechCompletion.clipDeadlineMs(null, clipCount)) {
+                return Result.Failed
             }
         }
     }
