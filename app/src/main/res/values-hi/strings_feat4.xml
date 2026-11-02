@@ -91,7 +91,7 @@
     <string name="bhajan_hint_days">चालू: %1$s, दिन की पहली बार</string>
     <string name="bhajan_hint_every_morning">चालू: हर सुबह, पहली बार</string>
     <string name="bhajan_choose">दिन, भजन और आवाज़</string>
-    <string name="bhajan_rules">धीमी आवाज़ में बजता है और गाना शुरू होने, फ़ोन आने या “Hey Ampli” बोलने पर रुक जाता है। एक भजन मुफ़्त; बाकी Pro में। सिर्फ़ Ampli की अपनी रिकॉर्डिंग।</string>
+    <string name="bhajan_rules">हर दिन का भजन: सोम शिव, मंगल हनुमान, बुध गणेश, गुरु विष्णु, शुक्र दुर्गा माँ, शनि शनिदेव, रवि सूर्य देव। Ampli का अपना भजन हो तो वो, नहीं तो आपके अपने गानों में से मिलता भजन (कुछ डाउनलोड नहीं होता)। धीमे बजता है और गाना, कॉल या “Hey Ampli” पर रुक जाता है।</string>
     <string name="bhajan_sheet_title">भजन की सेटिंग</string>
     <string name="bhajan_when">कब बजे</string>
     <string name="bhajan_every_morning">हर सुबह पहली बार</string>
@@ -104,4 +104,12 @@
     <string name="bhajan_card_day">%1$s की राम राम</string>
     <string name="bhajan_card_playing">छोटा भजन चल रया सै (%1$d सेकंड)</string>
     <string name="bhajan_card_stop">छोड़ दे</string>
+    <string name="bhajan_none_found">इस स्क्रीन में %1$s का कोई भजन नहीं मिला। Ampli MP3 के Music फ़ोल्डर में भजन डाल दो, फिर हर हफ़्ते यहीं बजेगा।</string>
+    <string name="deity_shiv">शिव जी</string>
+    <string name="deity_hanuman">हनुमान जी</string>
+    <string name="deity_ganesh">गणेश जी</string>
+    <string name="deity_vishnu">विष्णु जी</string>
+    <string name="deity_durga">दुर्गा माँ</string>
+    <string name="deity_shani">शनिदेव</string>
+    <string name="deity_surya">सूर्य देव</string>
 </resources>

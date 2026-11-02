@@ -434,6 +434,7 @@ private fun failureText(context: Context, session: NavSession): String {
         NavSession.Failure.NoRoute -> context.getString(R.string.nav_fail_no_route, name)
         NavSession.Failure.Busy -> context.getString(R.string.nav_fail_busy)
         NavSession.Failure.Server -> context.getString(R.string.nav_fail_server)
+        NavSession.Failure.Unreachable -> context.getString(R.string.nav_fail_unreachable, name)
         NavSession.Failure.NoLocation -> context.getString(R.string.nav_fail_no_location)
         NavSession.Failure.PlaceNotFound -> context.getString(R.string.nav_fail_not_found, name)
     }

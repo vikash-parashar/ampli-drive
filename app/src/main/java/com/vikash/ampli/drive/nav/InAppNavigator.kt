@@ -58,7 +58,7 @@ data class NavSession(
 ) {
     enum class Phase { Idle, Routing, Active, Failed, Arrived }
 
-    enum class Failure { NoLocation, Network, NoRoute, Busy, Server, PlaceNotFound }
+    enum class Failure { NoLocation, Network, NoRoute, Busy, Server, PlaceNotFound, Unreachable }
 
     /** The map and the home card show navigation for these phases. */
     val visible: Boolean get() = phase != Phase.Idle
@@ -160,7 +160,7 @@ class InAppNavigator(private val app: DriveApp) {
             val places = try {
                 PlaceSearch.search(query, here)
             } catch (e: Exception) {
-                fail(dest, NavSession.Failure.Network, "Place search: ${e.message}")
+                fail(dest, if (isOnline()) NavSession.Failure.Unreachable else NavSession.Failure.Network, "Place search: ${e.javaClass.simpleName}: ${e.message}")
                 return@launch
             }
             val best = places.firstOrNull()
@@ -179,7 +179,11 @@ class InAppNavigator(private val app: DriveApp) {
         reset()
         val dest = NavDestination(query)
         _state.value = NavSession(phase = NavSession.Phase.Failed, destination = dest,
-            failure = if (network) NavSession.Failure.Network else NavSession.Failure.PlaceNotFound)
+            failure = when {
+                !network -> NavSession.Failure.PlaceNotFound
+                isOnline() -> NavSession.Failure.Unreachable
+                else -> NavSession.Failure.Network
+            })
         _openRequest.value++
     }
 
@@ -296,11 +300,18 @@ class InAppNavigator(private val app: DriveApp) {
         }
     }
 
-    private fun failureOf(r: RouteResult.Reason) = when (r) {
-        RouteResult.Reason.Network -> NavSession.Failure.Network
-        RouteResult.Reason.NoRoute -> NavSession.Failure.NoRoute
-        RouteResult.Reason.Busy -> NavSession.Failure.Busy
-        RouteResult.Reason.Server -> NavSession.Failure.Server
+    private fun failureOf(r: RouteResult.Reason) = failureFor(r, online = isOnline())
+
+    /**
+     * The unit has a connected network. Not NetworkCapabilities VALIDATED: vendor Android 8.1
+     * ROMs (TS7) often never mark Wi-Fi validated, which would make every failure "no internet".
+     */
+    private fun isOnline(): Boolean = try {
+        val cm = app.getSystemService(android.net.ConnectivityManager::class.java)
+        @Suppress("DEPRECATION")
+        cm?.activeNetworkInfo?.isConnected == true
+    } catch (_: Exception) {
+        true
     }
 
     private fun fail(dest: NavDestination, failure: NavSession.Failure, detail: String?) {
@@ -430,4 +441,13 @@ class InAppNavigator(private val app: DriveApp) {
         /** Further than this to the next manoeuvre: say "keep going straight" instead. */
         const val LONG_STRAIGHT_M = 2_000
     }
+}
+
+/** The failure the driver sees for a routing failure: "no internet" only when the unit is offline. */
+internal fun failureFor(r: RouteResult.Reason, online: Boolean): NavSession.Failure = when (r) {
+    RouteResult.Reason.Network -> if (online) NavSession.Failure.Unreachable else NavSession.Failure.Network
+    RouteResult.Reason.NoRoute -> NavSession.Failure.NoRoute
+    RouteResult.Reason.Busy -> NavSession.Failure.Busy
+    RouteResult.Reason.Server -> NavSession.Failure.Server
+    RouteResult.Reason.Unreachable -> NavSession.Failure.Unreachable
 }

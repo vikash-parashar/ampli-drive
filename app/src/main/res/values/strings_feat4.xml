@@ -102,7 +102,7 @@
     <string name="bhajan_hint_days">On: %1$s, first start of the day</string>
     <string name="bhajan_hint_every_morning">On: every morning, first start</string>
     <string name="bhajan_choose">Days, bhajan and volume</string>
-    <string name="bhajan_rules">Plays low and stops when music starts, a call rings or you say “Hey Ampli”. One bhajan is free; the rest need Pro. Only Ampli\'s own recordings.</string>
+    <string name="bhajan_rules">Each day has its bhajan: Mon Shiv, Tue Hanuman, Wed Ganesh, Thu Vishnu, Fri Durga Maa, Sat Shani Dev, Sun Surya Dev. It plays an Ampli original if this version has one, else a matching song from your own music (nothing is downloaded). Plays low and stops when music starts, a call rings or you say “Hey Ampli”.</string>
     <string name="bhajan_sheet_title">Bhajan settings</string>
     <string name="bhajan_when">When to play</string>
     <string name="bhajan_every_morning">Every morning, first start</string>
@@ -115,4 +115,12 @@
     <string name="bhajan_card_day">Ram Ram this %1$s</string>
     <string name="bhajan_card_playing">A short bhajan is playing (%1$d seconds)</string>
     <string name="bhajan_card_stop">Stop</string>
+    <string name="bhajan_none_found">No %1$s bhajan found on this unit. Copy a bhajan into Ampli MP3 (Music folder) and it will play here every week.</string>
+    <string name="deity_shiv">Shiv ji</string>
+    <string name="deity_hanuman">Hanuman ji</string>
+    <string name="deity_ganesh">Ganesh ji</string>
+    <string name="deity_vishnu">Vishnu ji</string>
+    <string name="deity_durga">Durga Maa</string>
+    <string name="deity_shani">Shani Dev</string>
+    <string name="deity_surya">Surya Dev</string>
 </resources>

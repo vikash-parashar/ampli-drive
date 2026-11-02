@@ -21,6 +21,7 @@
     <string name="auto_button_hint">अपने फ़ोन-लिंक ऐप को देर तक दबाकर इस बटन पर लगाएँ</string>
     <string name="map_allow_text">मैप और अपनी स्पीड देखने के लिए लोकेशन की अनुमति दें</string>
     <string name="map_allow_button">लोकेशन की अनुमति दें</string>
+    <string name="map_you_are_here">आप यहाँ हैं</string>
     <string name="map_waiting_fix">GPS सिग्नल का इंतज़ार…</string>
     <string name="map_location_off">मैप देखने के लिए लोकेशन चालू करें</string>
     <string name="map_open_google_maps">Google Maps खोलें</string>
@@ -685,6 +686,7 @@
     <string name="nav_fail_title">नेविगेशन शुरू नहीं हो सका</string>
     <string name="nav_fail_network">इंटरनेट नहीं है, इसलिए %1$s का रास्ता नहीं आ सका।</string>
     <string name="nav_fail_no_route">%1$s तक सड़क का रास्ता नहीं मिला।</string>
+    <string name="nav_fail_unreachable">%1$s का रास्ता लाने वाला सर्वर नहीं मिला। इंटरनेट चालू है; फिर कोशिश करें या Google Maps में खोलें।</string>
     <string name="nav_fail_busy">रास्ते का सर्वर अभी व्यस्त है।</string>
     <string name="nav_fail_server">रास्ते के सर्वर ने ठीक जवाब नहीं दिया।</string>
     <string name="nav_fail_no_location">अभी GPS नहीं मिला, इसलिए रास्ता शुरू नहीं हो सका। थोड़ी देर बाद फिर कोशिश करें।</string>
