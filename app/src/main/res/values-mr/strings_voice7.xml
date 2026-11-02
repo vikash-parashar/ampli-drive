@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">नकाशा उघडत आहे.</string>
     <string name="voice_bt_settings_opening">ब्लूटूथ सेटिंग्ज उघडत आहे.</string>
     <string name="voice_commands_opening">हे सगळं तुम्ही बोलू शकता.</string>
-    <string name="voice_brightness_value">प्रकाश %1$d%%</string>
+    <string name="voice_brightness_value">प्रकाश %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub ला सिस्टम सेटिंग्ज बदलण्याची परवानगी द्या, मग पुन्हा सांगा.</string>
     <string name="voice_brightness_entry">बोलून प्रकाश बदला (“सिस्टम सेटिंग्ज बदला” परवानगी हवी)</string>
     <string name="voice_commands_entry">मी काय बोलू शकतो? सर्व व्हॉइस कमांड</string>

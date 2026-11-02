@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">नकासो उगडटा।</string>
     <string name="voice_bt_settings_opening">ब्लूटूथ सेटिंग उगडटा।</string>
     <string name="voice_commands_opening">हें सगळें तुमी म्हणूं येता।</string>
-    <string name="voice_brightness_value">उजवाड %1$d%%</string>
+    <string name="voice_brightness_value">उजवाड %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub क सिस्टम सेटिंग बदलपाची परवानगी दियात, मागीर परत म्हणात।</string>
     <string name="voice_brightness_entry">उलोवन उजवाड बदलात (“सिस्टम सेटिंग बदल” परवानगी जाय)</string>
     <string name="voice_commands_entry">हांव कितें म्हणूं येता? सगळ्यो वॉइस कमांड</string>

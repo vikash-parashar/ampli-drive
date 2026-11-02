@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">正在打开地图。</string>
     <string name="voice_bt_settings_opening">正在打开蓝牙设置。</string>
     <string name="voice_commands_opening">以下是您可以说的全部内容。</string>
-    <string name="voice_brightness_value">亮度 %1$d%%</string>
+    <string name="voice_brightness_value">亮度 %1$d/%2$d</string>
     <string name="voice_brightness_permission">请允许 Car Hub 修改系统设置，然后再问一次。</string>
     <string name="voice_brightness_entry">语音调节亮度（需要“修改系统设置”权限）</string>
     <string name="voice_commands_entry">我可以说什么？全部语音命令</string>

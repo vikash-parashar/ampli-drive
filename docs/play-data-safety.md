@@ -70,8 +70,8 @@ Requested only from Car › Dashcam (Pro, off by default) on units that have a c
 ### Bluetooth (`BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` with `neverForLocation`)
 Connected phone name, OBD-II dongle (Pro), BLE tyre-pressure sensors (Pro). Scan results are never used for location.
 
-### Accessibility service (`BIND_ACCESSIBILITY_SERVICE`): "Ampli power helper"
-Off until the driver turns it on from a one-time card that explains it (prominent disclosure: `disclosure_power_body` / `disclosure_power_private`, shown before Android's Accessibility settings open). Purpose: head units without physical buttons. It calls only `performGlobalAction` for `GLOBAL_ACTION_POWER_DIALOG` (Restart / Power off, which the driver then taps in Android's own menu), `GLOBAL_ACTION_RECENTS` (long press on Apps) and `GLOBAL_ACTION_TAKE_SCREENSHOT` (Android 9+), each only after a tap in Car Hub. Config (`res/xml/power_helper.xml`): no event types, `canRetrieveWindowContent="false"`, `canPerformGestures="false"`. It collects, stores and sends nothing, so it adds nothing to the Data safety form. Not declared as an accessibility tool (`isAccessibilityTool` is not set); the Play declaration describes it as above.
+### Accessibility service
+None. Car Hub declares no accessibility service (the former "Ampli power helper" was removed together with Restart / Power off). Remove the accessibility declaration from Play Console with the release that ships this.
 
 ### Device admin (`BIND_DEVICE_ADMIN`, `force-lock` only)
 Settings › Power › "Turn the display fully off" (off by default) asks Android's "Activate device admin app?" screen so Screen off can call `lockNow()`. Only the `force-lock` policy is declared (`res/xml/device_admin.xml`); turning the setting off calls `removeActiveAdmin`. No data involved.

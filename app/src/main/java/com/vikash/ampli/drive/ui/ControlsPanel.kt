@@ -2,7 +2,6 @@ package com.vikash.ampli.drive.ui
 
 import android.Manifest
 import android.app.Activity
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,8 +36,6 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Equalizer
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Screenshot
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tv
@@ -72,9 +69,9 @@ import com.vikash.ampli.drive.DriveApp
 import com.vikash.ampli.drive.R
 import com.vikash.ampli.drive.system.PowerAction
 import com.vikash.ampli.drive.system.PowerControl
-import com.vikash.ampli.drive.system.PowerHelperService
 import com.vikash.ampli.drive.system.QuickActions
 import com.vikash.ampli.drive.system.ScreenBrightness
+import com.vikash.ampli.drive.system.BrightnessSteps
 import com.vikash.ampli.drive.system.ScreenShot
 import com.vikash.ampli.drive.system.Shell
 import com.vikash.ampli.drive.ui.theme.LocalDriveTheme
@@ -87,8 +84,8 @@ import java.util.Date
 
 /**
  * The quick panel from the rail's Controls key or the top strip: the time, seven tiles (Wi-Fi,
- * Bluetooth, EQ, Screensaver, Settings, Clear memory, Screenshot), Volume and Brightness sliders
- * and Screen off / Restart / Power off. Long press on a tile opens its Android page.
+ * Bluetooth, EQ, Screensaver, Settings, Clear memory, Screenshot), the Volume slider, the
+ * six-step Brightness control and Screen off. Long press on a tile opens its Android page.
  */
 @Composable
 internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, onOpenSettings: () -> Unit) {
@@ -134,23 +131,15 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
         }
     }
     val storageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { startCapture() }
+    // Android's capture prompt only (Android 8 and 9, the TS7 included); the tile is not shown
+    // where that cannot work (Android 10+ needs a foreground service for it).
     val screenshot = {
         onClose()
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PowerHelperService.connected -> scope.launch {
-                // The panel closes first so it is not in the picture.
-                delay(350L)
-                if (!ScreenShot.viaHelper()) toast(context, R.string.qp_shot_failed) else toast(context, R.string.qp_shot_android)
-            }
-            ScreenShot.projectionWorks -> {
-                if (!QuickActions.hasStorageWrite(context) && !app.shell.askedStorage) {
-                    app.shell.askedStorage = true
-                    storageLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                } else {
-                    startCapture()
-                }
-            }
-            else -> toast(context, R.string.qp_shot_needs_helper)
+        if (!QuickActions.hasStorageWrite(context) && !app.shell.askedStorage) {
+            app.shell.askedStorage = true
+            storageLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            startCapture()
         }
         Unit
     }
@@ -239,7 +228,9 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                         }
                     }
                 }
-                PanelTile(Icons.Filled.Screenshot, R.string.qp_screenshot, modifier = tile, onClick = screenshot)
+                if (ScreenShot.projectionWorks) {
+                    PanelTile(Icons.Filled.Screenshot, R.string.qp_screenshot, modifier = tile, onClick = screenshot)
+                }
             }
             // Volume and brightness.
             Row(Modifier.fillMaxWidth().height(dims.d(11f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
@@ -254,14 +245,15 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                     val max = vol?.max ?: return@PillSlider
                     vol = QuickActions.setVolume(context, Math.round(f * max)) ?: vol
                 }
-                var bright by remember {
-                    mutableStateOf(QuickActions.brightnessPercent(context, windowPercent(activity)) ?: 50)
-                }
+                // Six steps like the unit's own quick app (BrightnessSteps has the one table).
+                // Night dim may have set Car Hub's window; the panel shows the system step.
+                var bright by remember { mutableStateOf(QuickActions.brightnessStep(context) ?: 3) }
                 PillSlider(
                     icon = Icons.Filled.BrightnessMedium,
                     label = R.string.qp_brightness,
-                    fraction = bright / 100f,
-                    value = "$bright%",
+                    fraction = bright / BrightnessSteps.COUNT.toFloat(),
+                    value = "$bright/${BrightnessSteps.COUNT}",
+                    segments = BrightnessSteps.COUNT,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     onStart = {
                         // Once: ask for "Modify system settings" so the whole screen dims, not just Car Hub.
@@ -274,25 +266,18 @@ internal fun ControlsPanel(app: DriveApp, open: Boolean, onClose: () -> Unit, on
                         }
                     },
                 ) { f ->
-                    bright = Math.round(f * 100).coerceIn(1, 100)
-                    QuickActions.setBrightness(activity, context, bright)
+                    val step = BrightnessSteps.fromFraction(f)
+                    if (step != bright) {
+                        bright = step
+                        QuickActions.setBrightnessStep(activity, context, step)
+                    }
                 }
             }
-            // Screen off, Restart, Power off.
+            // Screen off (Restart and Power off were removed: the unit's MCU owns power).
             Row(Modifier.fillMaxWidth().height(dims.d(11f)), horizontalArrangement = Arrangement.spacedBy(dims.d(2f))) {
-                val m = Modifier.weight(1f).fillMaxHeight()
-                PowerRowKey(Icons.Filled.DarkMode, R.string.power_screen_off, m) {
+                PowerRowKey(Icons.Filled.DarkMode, R.string.power_screen_off, Modifier.weight(1f).fillMaxHeight()) {
                     onClose()
                     PowerControl.request(context, PowerAction.ScreenOff)
-                }
-                // Restart in amber and Power off in SOS red, as designed.
-                PowerRowKey(Icons.Filled.RestartAlt, R.string.power_restart, m, tone = PowerTone.Warn) {
-                    onClose()
-                    PowerControl.request(context, PowerAction.Restart)
-                }
-                PowerRowKey(Icons.Filled.PowerSettingsNew, R.string.power_off, m, tone = PowerTone.Danger) {
-                    onClose()
-                    PowerControl.request(context, PowerAction.PowerOff)
                 }
             }
         }
@@ -318,9 +303,6 @@ private fun toast(context: android.content.Context, @StringRes id: Int) {
     } catch (_: Exception) {
     }
 }
-
-private fun windowPercent(activity: Activity?): Int? =
-    activity?.window?.attributes?.screenBrightness?.takeIf { it >= 0f }?.let { Math.round(it * 100) }
 
 /** The panel's fill: opaque on every theme (nothing behind it is blurred). */
 @Composable
@@ -399,6 +381,7 @@ private fun PillSlider(
     value: String,
     modifier: Modifier,
     onStart: () -> Boolean = { true },
+    segments: Int = 0,
     onChange: (Float) -> Unit,
 ) {
     val theme = LocalDriveTheme.current
@@ -425,6 +408,20 @@ private fun PillSlider(
             },
     ) {
         Box(Modifier.fillMaxHeight().width(maxWidth * fraction.coerceIn(0f, 1f)).clip(shape).background(theme.accent))
+        // Stepped control (Brightness): thin marks between the steps.
+        if (segments > 1) {
+            val mark = theme.muted.copy(alpha = 0.35f)
+            for (i in 1 until segments) {
+                Box(
+                    Modifier
+                        .padding(start = maxWidth * (i.toFloat() / segments))
+                        .padding(vertical = dims.d(2.2f))
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(mark),
+                )
+            }
+        }
         Row(
             Modifier.fillMaxSize().padding(horizontal = dims.d(2.6f)),
             verticalAlignment = Alignment.CenterVertically,
@@ -441,30 +438,20 @@ private fun PillSlider(
     }
 }
 
-private enum class PowerTone { Plain, Warn, Danger }
-
 @Composable
-private fun PowerRowKey(icon: ImageVector, @StringRes label: Int, modifier: Modifier, tone: PowerTone = PowerTone.Plain, onClick: () -> Unit) {
+private fun PowerRowKey(icon: ImageVector, @StringRes label: Int, modifier: Modifier, onClick: () -> Unit) {
     val theme = LocalDriveTheme.current
     val dims = LocalDims.current
-    val fill = when (tone) {
-        PowerTone.Plain -> theme.surfaceHigh
-        PowerTone.Warn -> theme.warning.copy(alpha = 0.16f)
-        PowerTone.Danger -> theme.danger
-    }
-    val ink = when (tone) {
-        PowerTone.Plain -> theme.text
-        PowerTone.Warn -> if (theme.isLight) theme.text else Color(0xFFFFE3B0)
-        PowerTone.Danger -> theme.onDanger
-    }
+    val fill = theme.surfaceHigh
+    val ink = theme.text
     Row(
         modifier
-            .themedTap(theme.buttonShape(dims), fill, border = if (tone == PowerTone.Warn) theme.warning else theme.border, borderWidth = 2.dp, onClick = onClick)
+            .themedTap(theme.buttonShape(dims), fill, border = theme.border, borderWidth = 2.dp, onClick = onClick)
             .padding(horizontal = dims.d(2.5f)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f), Alignment.CenterHorizontally),
     ) {
-        Icon(icon, contentDescription = null, tint = if (tone == PowerTone.Plain) theme.accentSoft else ink, modifier = Modifier.size(dims.d(4f)))
+        Icon(icon, contentDescription = null, tint = theme.accentSoft, modifier = Modifier.size(dims.d(4f)))
         Column {
             Text(stringResource(label), color = ink, fontSize = dims.t(3.25f, min = 18f), fontWeight = FontWeight.Bold, maxLines = 1)
             englishLine(label)?.let { Text(it, color = ink.copy(alpha = 0.75f), fontSize = dims.t(2f, min = 13f), maxLines = 1) }

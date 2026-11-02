@@ -476,12 +476,9 @@ const val PRIVACY_POLICY_URL = "https://ampliapps.in/privacy/carhub/"
 @Composable
 private fun PowerSettings(app: DriveApp, resumeTick: Int) {
     val context = LocalContext.current
-    val stripPower by app.shell.stripPower.collectAsStateWithLifecycle()
     val lockWanted by app.shell.lockScreenOff.collectAsStateWithLifecycle()
     var adminAsked by remember { mutableStateOf(0) }
     val adminActive = remember(resumeTick, adminAsked) { com.vikash.ampli.drive.system.PowerControl.adminActive(context) }
-    val helperOn = remember(resumeTick) { com.vikash.ampli.drive.system.PowerHelperService.enabled(context) }
-    val rooted = remember { com.vikash.ampli.drive.system.PowerControl.rooted() }
     val adminLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
     ) { adminAsked++ }
@@ -489,28 +486,9 @@ private fun PowerSettings(app: DriveApp, resumeTick: Int) {
     LinkRow(
         icon = Icons.Filled.PowerSettingsNew,
         title = stringResource(R.string.settings_power_title),
-        hint = stringResource(R.string.settings_power_hint),
+        hint = stringResource(R.string.power_screen_off) + " · " + stringResource(R.string.qp_screensaver),
         action = stringResource(R.string.action_open),
         onClick = { com.vikash.ampli.drive.system.PowerControl.openSheet() },
-    )
-    LinkRow(
-        icon = Icons.Filled.Shield,
-        title = stringResource(R.string.power_helper_name),
-        hint = stringResource(
-            when {
-                rooted -> R.string.settings_power_root
-                helperOn -> R.string.settings_power_helper_on
-                else -> R.string.settings_power_helper_off
-            },
-        ),
-        action = stringResource(R.string.action_open),
-        onClick = { com.vikash.ampli.drive.system.PowerHelperService.openSettings(context) },
-    )
-    ToggleRow(
-        title = stringResource(R.string.settings_power_strip),
-        status = stringResource(R.string.settings_power_strip_hint),
-        checked = stripPower,
-        onChange = app.shell::setStripPower,
     )
     ToggleRow(
         title = stringResource(R.string.settings_power_lock),

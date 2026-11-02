@@ -65,16 +65,6 @@ class ShellPrefs(context: Context) {
             if (value == null) sp.edit().remove(KEY_EQ_COMPONENT).apply() else sp.edit().putString(KEY_EQ_COMPONENT, value).apply()
         }
 
-    private val _stripPower = MutableStateFlow(sp.getBoolean(KEY_STRIP_POWER, true))
-
-    /** Settings › Power: the ⏻ key next to the pull-down handle at the top of Home. */
-    val stripPower: StateFlow<Boolean> = _stripPower.asStateFlow()
-
-    fun setStripPower(value: Boolean) {
-        sp.edit().putBoolean(KEY_STRIP_POWER, value).apply()
-        _stripPower.value = value
-    }
-
     private val _lockScreenOff = MutableStateFlow(sp.getBoolean(KEY_LOCK_SCREEN_OFF, false))
 
     /**
@@ -89,12 +79,7 @@ class ShellPrefs(context: Context) {
         _lockScreenOff.value = value
     }
 
-    /** The rooted unit's "restarts directly" note was shown once. */
-    var rootNoticeSeen: Boolean
-        get() = sp.getBoolean(KEY_ROOT_NOTICE, false)
-        set(value) = sp.edit().putBoolean(KEY_ROOT_NOTICE, value).apply()
-
-    /** Brightness slider: Android's "Modify system settings" page was opened once already. */
+    /** Brightness control: Android's "Modify system settings" page was opened once already. */
     var askedWriteSettings: Boolean
         get() = sp.getBoolean(KEY_ASKED_WRITE_SETTINGS, false)
         set(value) = sp.edit().putBoolean(KEY_ASKED_WRITE_SETTINGS, value).apply()
@@ -142,9 +127,7 @@ class ShellPrefs(context: Context) {
         private const val KEY_EQ_COMPONENT = "eq_component"
         private const val KEY_HIDDEN_APPS = "hidden_apps"
         private const val KEY_GREET_BANNER = "greet_home_banner_shown"
-        private const val KEY_STRIP_POWER = "strip_power"
         private const val KEY_LOCK_SCREEN_OFF = "lock_screen_off"
-        private const val KEY_ROOT_NOTICE = "root_notice_seen"
         private const val KEY_ASKED_WRITE_SETTINGS = "asked_write_settings"
         private const val KEY_ASKED_STORAGE = "asked_storage"
 

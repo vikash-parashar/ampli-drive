@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">نقشہ کھول رہے ہیں۔</string>
     <string name="voice_bt_settings_opening">بلوٹوتھ سیٹنگز کھول رہے ہیں۔</string>
     <string name="voice_commands_opening">یہ رہا سب کچھ جو آپ کہہ سکتے ہیں۔</string>
-    <string name="voice_brightness_value">روشنی %1$d%%</string>
+    <string name="voice_brightness_value">روشنی %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub کو سسٹم سیٹنگز بدلنے کی اجازت دیں، پھر دوبارہ کہیں۔</string>
     <string name="voice_brightness_entry">بول کر روشنی بدلیں (“سسٹم سیٹنگز بدلیں” اجازت چاہیے)</string>
     <string name="voice_commands_entry">میں کیا کہہ سکتا ہوں؟ تمام وائس کمانڈز</string>

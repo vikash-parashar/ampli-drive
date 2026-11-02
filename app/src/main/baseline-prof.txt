@@ -443,8 +443,6 @@ HSPLcom/vikash/ampli/drive/system/AppResolver;->**(**)**
 Lcom/vikash/ampli/drive/system/AppResolver;
 HSPLcom/vikash/ampli/drive/system/AppRole;->**(**)**
 Lcom/vikash/ampli/drive/system/AppRole;
-HSPLcom/vikash/ampli/drive/system/BrightnessMath;->**(**)**
-Lcom/vikash/ampli/drive/system/BrightnessMath;
 HSPLcom/vikash/ampli/drive/system/BtPermissions;->**(**)**
 Lcom/vikash/ampli/drive/system/BtPermissions;
 HSPLcom/vikash/ampli/drive/system/FavouriteCallsLogic;->**(**)**

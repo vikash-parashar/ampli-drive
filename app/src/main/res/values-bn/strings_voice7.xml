@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">মানচিত্র খুলছি।</string>
     <string name="voice_bt_settings_opening">ব্লুটুথ সেটিংস খুলছি।</string>
     <string name="voice_commands_opening">আপনি যা যা বলতে পারেন, সব এখানে।</string>
-    <string name="voice_brightness_value">উজ্জ্বলতা %1$d%%</string>
+    <string name="voice_brightness_value">উজ্জ্বলতা %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub কে সিস্টেম সেটিংস বদলানোর অনুমতি দিন, তারপর আবার বলুন।</string>
     <string name="voice_brightness_entry">বলে উজ্জ্বলতা বদলান (“সিস্টেম সেটিংস বদলান” অনুমতি লাগবে)</string>
     <string name="voice_commands_entry">আমি কী বলতে পারি? সব ভয়েস কমান্ড</string>

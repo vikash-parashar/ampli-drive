@@ -329,23 +329,6 @@
             android:exported="false"
             android:foregroundServiceType="camera" />
 
-        <!-- "Ampli power helper" (off until the driver turns it on in Accessibility settings): only
-             presses Android's own keys for a unit without buttons: the power menu (Restart / Power
-             off), recent apps and, on Android 9+, a screenshot. It receives no events and cannot
-             read the screen (res/xml/power_helper.xml). -->
-        <service
-            android:name=".system.PowerHelperService"
-            android:exported="true"
-            android:label="@string/power_helper_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/power_helper" />
-        </service>
-
         <!-- Settings › Power › Turn the display fully off (off by default): device admin with the
              force-lock policy only, so Screen off can lock the screen. -->
         <receiver

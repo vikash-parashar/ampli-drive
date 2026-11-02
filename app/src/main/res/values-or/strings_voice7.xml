@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">ମାନଚିତ୍ର ଖୋଲୁଛି।</string>
     <string name="voice_bt_settings_opening">ବ୍ଲୁଟୁଥ ସେଟିଂସ ଖୋଲୁଛି।</string>
     <string name="voice_commands_opening">ଆପଣ କହିପାରୁଥିବା ସବୁ ଏଠାରେ ଅଛି।</string>
-    <string name="voice_brightness_value">ଆଲୋକ %1$d%%</string>
+    <string name="voice_brightness_value">ଆଲୋକ %1$d/%2$d</string>
     <string name="voice_brightness_permission">Car Hub କୁ ସିଷ୍ଟମ ସେଟିଂସ ବଦଳାଇବା ଅନୁମତି ଦିଅନ୍ତୁ, ତା\'ପରେ ପୁଣି କୁହନ୍ତୁ।</string>
     <string name="voice_brightness_entry">କହି ଆଲୋକ ବଦଳାନ୍ତୁ (“ସିଷ୍ଟମ ସେଟିଂସ ବଦଳାନ୍ତୁ” ଅନୁମତି ଦରକାର)</string>
     <string name="voice_commands_entry">ମୁଁ କ\'ଣ କହିପାରିବି? ସମସ୍ତ ଭଏସ କମାଣ୍ଡ</string>

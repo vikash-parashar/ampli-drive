@@ -94,10 +94,7 @@ sealed interface VoiceIntent {
     /** "What can I say?", "kya kya bol sakte hain": the full command list. */
     data object WhatCanISay : VoiceIntent
 
-    /**
-     * "Screen band karo", "restart karo", "power off karo": the Power keys by voice. Restart and
-     * Power off always ask "हाँ / नहीं" first; Screen off counts down and "radd karo" stops it.
-     */
+    /** "Screen band karo": Screen off by voice; it counts down and "radd karo" stops it. */
     data class Power(val action: PowerAction) : VoiceIntent
     data object Cancel : VoiceIntent
     data class Unknown(val text: String) : VoiceIntent
@@ -432,28 +429,26 @@ object VoiceIntents {
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     /**
-     * "Screen band karo", "turn off the screen", "restart karo", "reboot", "power off karo",
-     * "gaadi ki screen band karo" (the whole unit). Power off is checked first, as its phrases
-     * contain "screen band". Never with music or navigation words ("restart the song").
+     * "Screen band karo", "turn off the screen". Car Hub has no Restart or Power off: "restart
+     * karo", "reboot", "power off karo", "gaadi ki screen band karo" do nothing (Unknown), so they
+     * neither turn the screen off nor fall through to "off" (mute) or "band karo" (stop). Never
+     * with music or navigation words ("restart the song").
      */
     private fun power(t: String, kw: Keywords): VoiceIntent? {
         if (kw.music.any { has(t, it) } || POWER_NOT.any { has(t, it) }) return null
         return when {
-            POWER_OFF.any { has(t, it) } -> VoiceIntent.Power(PowerAction.PowerOff)
-            POWER_RESTART.any { has(t, it) } -> VoiceIntent.Power(PowerAction.Restart)
+            UNIT_POWER.any { has(t, it) } -> VoiceIntent.Unknown(t)
             SCREEN_OFF.any { has(t, it) } -> VoiceIntent.Power(PowerAction.ScreenOff)
             else -> null
         }
     }
 
-    private val POWER_OFF = listOf(
+    /** Restart / power off the whole unit: not offered, and never mistaken for Screen off or mute. */
+    private val UNIT_POWER = listOf(
         "power off", "poweroff", "switch off the unit", "switch off the system", "turn off the unit", "turn off the system",
         "shut down", "shutdown", "power band karo", "power band", "gaadi ki screen band", "gadi ki screen band",
         "gaadi ka system band", "system band karo", "पावर ऑफ", "पावर ऑफ़", "पावर बंद", "गाड़ी की स्क्रीन बंद", "गाडी की स्क्रीन बंद",
         "सिस्टम बंद करो", "शट डाउन", "शटडाउन",
-    ).flatMap { nuktaForms(normalize(it)) }.distinct()
-
-    private val POWER_RESTART = listOf(
         "restart", "re start", "reboot", "re boot", "restart karo", "reboot karo", "रीस्टार्ट", "री स्टार्ट", "रिस्टार्ट",
         "रीबूट", "री बूट",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()

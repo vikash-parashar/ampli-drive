@@ -21,8 +21,8 @@ object VoskCommands {
         // Fuel finder and road reports.
         "nearest cng pump", "cng pump", "petrol pump", "diesel pump", "charging station", "fuel station",
         "police ahead", "accident ahead", "traffic jam ahead", "mobile camera ahead",
-        // Power keys by voice (Restart and Power off always ask first).
-        "screen off", "turn off the screen", "restart", "reboot", "power off", "shut down",
+        // Screen off by voice.
+        "screen off", "turn off the screen",
     )
 
     /**
@@ -48,8 +48,8 @@ object VoskCommands {
         "tyre pressure kitna hai", "service kab hai", "engine kaisa hai",
         "police aage hai", "aage jam hai", "accident aage hai", "mobile camera aage hai",
         "kya haal hai", "ke haal sai", "tum kaun ho", "chutkula sunao", "kya bol sakta hoon",
-        "screen band karo", "screen off karo", "display band karo", "restart karo", "power off karo",
-        "gaadi ki screen band karo", "radd karo",
+        "screen band karo", "screen off karo", "display band karo",
+        "radd karo",
     )
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
@@ -84,15 +84,15 @@ object VoskCommands {
         // Fuel finder and road reports.
         "सीएनजी पंप कहाँ है", "सीएनजी पंप", "पेट्रोल पंप", "डीजल पंप", "चार्जिंग स्टेशन",
         "पुलिस आगे है", "एक्सीडेंट आगे है", "आगे जाम है", "मोबाइल कैमरा आगे है",
-        // Power keys.
-        "स्क्रीन बंद करो", "स्क्रीन ऑफ करो", "रीस्टार्ट करो", "पावर ऑफ करो", "गाड़ी की स्क्रीन बंद करो",
+        // Screen off.
+        "स्क्रीन बंद करो", "स्क्रीन ऑफ करो",
     )
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
 
     /**
      * Short answers to Ampli's questions (incoming call "uthaun?", "suna doon?", "bhej doon?",
-     * restart "pakka?"), for the English model. A small grammar of its own, so a "haan" said over
+     * the screen-off countdown), for the English model. A small grammar of its own, so a "haan" said over
      * a ringtone or music is picked out instead of being transcribed as some English word. Each
      * phrase must mean something to [com.vikash.ampli.drive.calls.VoiceReplies] (unit-tested);
      * words the model lacks are dropped by Vosk, so English twins are listed too.
@@ -107,7 +107,7 @@ object VoskCommands {
         // Messages.
         "suna de", "sunao", "suna do", "padh de", "read", "read it", "skip", "chhod de",
         "jawab de", "jawab bhej", "reply", "bhej de", "bhej do", "send", "send it", "mat bhej", "galat",
-        // Stop / cancel (the restart question, the screen-off countdown).
+        // Stop / cancel (the screen-off countdown).
         "cancel", "cancel karo", "radd karo", "ruko", "band karo", "stop",
     )
 

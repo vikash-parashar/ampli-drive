@@ -79,7 +79,7 @@ class QuickPanelScreenshotTest {
                 QuickControlsPanel(
                     visible = true,
                     tiles = quickTiles(
-                        Shell.Status(wifiOn = true, wifiConnected = true, ssid = "Vikash Hotspot", brightnessPct = 70, volumePct = 45, eqApp = null),
+                        Shell.Status(wifiOn = true, wifiConnected = true, ssid = "Vikash Hotspot", brightnessStep = 4, volumePct = 45, eqApp = null),
                         btSupported = true,
                         btOn = true,
                         btDevice = phone?.name,

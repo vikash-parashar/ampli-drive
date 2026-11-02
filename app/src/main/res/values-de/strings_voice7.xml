@@ -40,7 +40,7 @@
     <string name="voice_maps_opening">Ich öffne die Karte.</string>
     <string name="voice_bt_settings_opening">Ich öffne die Bluetooth-Einstellungen.</string>
     <string name="voice_commands_opening">Hier ist alles, was du sagen kannst.</string>
-    <string name="voice_brightness_value">Helligkeit %1$d%%</string>
+    <string name="voice_brightness_value">Helligkeit %1$d/%2$d</string>
     <string name="voice_brightness_permission">Erlaube Car Hub, Systemeinstellungen zu ändern, und frag dann noch einmal.</string>
     <string name="voice_brightness_entry">Helligkeit per Sprache (braucht „Systemeinstellungen ändern“)</string>
     <string name="voice_commands_entry">Was kann ich sagen? Alle Sprachbefehle</string>
