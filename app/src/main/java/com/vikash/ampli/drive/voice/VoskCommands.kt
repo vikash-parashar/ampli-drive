@@ -2,6 +2,37 @@ package com.vikash.ampli.drive.voice
 
 /** The phrases the offline recogniser listens for. Each must parse in [VoiceIntents] (unit-tested). */
 object VoskCommands {
+    /**
+     * Every way of asking for music the field reports showed ("gana baja", "gana chala de",
+     * "gana suna de"): each music noun with each play verb, plus the verbs alone (said right
+     * after the follow-up chime). In grammar mode Vosk only ever outputs grammar phrases, so a
+     * form missing here comes out as some other phrase or "[unk]". Words the model lacks get a
+     * known spelling through [HinglishSpelling].
+     */
+    val MUSIC_NOUNS_ROMAN = listOf("gana", "gaana", "gaane", "gane", "song", "songs", "music", "gaana koi", "koi gana", "bhajan")
+    val MUSIC_VERBS_ROMAN = listOf(
+        "baja", "bajao", "baja de", "baja do", "bajaa de", "chala", "chalao", "chala de", "chala do", "chalaa de",
+        "suna", "sunao", "suna de", "suna do", "sunaa de", "laga", "lagao", "laga de", "laga do",
+        "play", "play karo", "chalu karo", "shuru karo",
+    )
+    val MUSIC_PLAY_ROMAN: List<String> = musicMatrix(
+        MUSIC_NOUNS_ROMAN, MUSIC_VERBS_ROMAN,
+        verbOnly = listOf("baja de", "chala de", "suna de", "laga de", "baja do", "bajao", "chalao", "play karo"),
+    )
+
+    val MUSIC_NOUNS_HINDI = listOf("गाना", "गाने", "सॉन्ग", "म्यूजिक", "कोई गाना", "भजन")
+    val MUSIC_VERBS_HINDI = listOf(
+        "बजा", "बजाओ", "बजा दे", "बजा दो", "चला", "चलाओ", "चला दे", "चला दो", "सुना", "सुनाओ", "सुना दे", "सुना दो",
+        "लगा", "लगाओ", "लगा दे", "लगा दो", "प्ले करो", "चालू करो", "शुरू करो",
+    )
+    val MUSIC_PLAY_HINDI: List<String> = musicMatrix(
+        MUSIC_NOUNS_HINDI, MUSIC_VERBS_HINDI,
+        verbOnly = listOf("बजा दे", "चला दे", "सुना दे", "लगा दे", "बजा दो", "चला दो"),
+    )
+
+    private fun musicMatrix(nouns: List<String>, verbs: List<String>, verbOnly: List<String>): List<String> =
+        nouns.flatMap { n -> verbs.map { v -> "$n $v" } } + verbOnly
+
     val COMMANDS = listOf(
         "navigate", "navigate to", "take me home", "take me to",
         "go home", "go to office", "take me to office", "ghar chalo", "office chalo",
@@ -77,7 +108,8 @@ object VoskCommands {
         "pichla chalao", "pichla song", "pichla gaana chalao",
         "awaaz badha do", "awaz badha do", "awaaz tez kar do", "awaaz kam kar do", "awaaz dheemi karo",
         "volume badha do", "volume kam kar do",
-    )
+    ) + MUSIC_PLAY_ROMAN
+
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
     val FOLLOW_UPS = listOf("more", "a bit more", "again", "aur", "thoda aur", "aur tez", "aur kam")
@@ -135,7 +167,7 @@ object VoskCommands {
         // Hindi model (offline-only units answer Ampli with it): as the Hindi model writes them.
         "प्ले म्यूजिक", "म्यूजिक प्ले करो", "गाना प्ले करो", "प्ले करो", "नेक्स्ट सॉन्ग", "नेक्स्ट", "स्टॉप",
         "पॉज़ करो", "वॉल्यूम अप", "वॉल्यूम डाउन", "कैंसल", "हेलो",
-    )
+    ) + MUSIC_PLAY_HINDI
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
 
@@ -268,6 +300,17 @@ object HinglishSpelling {
         "jodo" to listOf("jodho", "jordo"),
         "khadi" to listOf("khari", "khaadi"),
         "gaadi" to listOf("gadi", "gaari", "gari"),
+        // Music play verbs ("gana baja de", "gana chalu karo").
+        "baja" to listOf("bajaa", "bajja", "bhaja"),
+        "bajaa" to listOf("baja", "bajja"),
+        "chala" to listOf("chalaa", "challa", "chalah"),
+        "chalaa" to listOf("chala", "challa"),
+        "sunaa" to listOf("suna", "sunna"),
+        "lagaa" to listOf("laga", "lagga"),
+        "de" to listOf("dey", "day", "dee"),
+        "chalu" to listOf("chaalu", "chaloo", "chaaloo"),
+        "shuru" to listOf("shuroo", "shoeroo", "suru"),
+        "songs" to listOf("song"),
     )
 
     /** The grammar to give the model, and the spellings to turn back ([restore]). */

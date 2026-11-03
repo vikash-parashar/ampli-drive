@@ -195,6 +195,9 @@ object VoiceIntents {
                 else -> VoiceIntent.PlayLocal(query)
             }
         }
+        // "Gana baja", "gaana chalu karo", "गाना सुना दे": a music word plus any play verb is
+        // music, whatever the exact form, and never a place search.
+        musicByKeyword(t)?.let { return it }
         if (kw.call.any { has(t, it) }) {
             return VoiceIntent.CallContact(trimFillers(remove(t, kw.call), kw.fillers))
         }
@@ -207,6 +210,44 @@ object VoiceIntents {
         if (words <= 6 && kw.greeting.any { has(t, it) }) return VoiceIntent.Greeting
         return VoiceIntent.Unknown(text.trim())
     }
+
+    /**
+     * The keyword fallback for music: a music noun ([MUSIC_NOUNS]) and a play verb stem
+     * ([PLAY_STEMS]: baj-, chal-, sun-, lag-, play, chalu, shuru and the Devanagari ones) anywhere
+     * in the utterance. "Bhajan" plays a bhajan; everything else resumes / starts the music.
+     * Navigation forms of "chal" ("chalo", "le chal") don't count, so "gaane wali gali chalo"
+     * stays a place.
+     */
+    internal fun musicByKeyword(t: String): VoiceIntent? {
+        val words = t.split(' ').filter { it.isNotEmpty() }
+        val bhajan = words.firstOrNull { it == "bhajan" || it == "भजन" || it == "bhajans" }
+        if (bhajan == null && words.none { it in MUSIC_NOUNS }) return null
+        val verb = words.any { w -> w !in NAV_CHAL && PLAY_STEMS.any { w.startsWith(it) } }
+        if (!verb) return null
+        return if (bhajan != null) VoiceIntent.PlayLocal(if (bhajan == "bhajans") "bhajan" else bhajan) else VoiceIntent.Resume
+    }
+
+    /** True when the utterance names music ("gana", "song", "भजन"…): never a place search. */
+    fun mentionsMusic(text: String): Boolean {
+        val words = normalize(text).split(' ')
+        return words.any { it in MUSIC_NOUNS || it == "bhajan" || it == "bhajans" || it == "भजन" }
+    }
+
+    private val MUSIC_NOUNS = setOf(
+        "gana", "gaana", "gaane", "gane", "ganaa", "gaanaa", "ganna", "song", "songs", "music", "musik", "geet",
+        "गाना", "गाने", "गानो", "गीत", "म्यूजिक", "म्यूज़िक", "मुझिक", "सॉन्ग", "सोंग", "सॉन्ग्स", "संगीत",
+    ).map { normalize(it) }.toSet()
+
+    private val PLAY_STEMS = listOf(
+        "baj", "chal", "sun", "lag", "play", "shuru", "start",
+        "बज", "चला", "चल", "सुन", "लग", "प्ले", "चालू", "शुरू", "स्टार्ट",
+    ).map { normalize(it) }
+
+    /** "Chal" forms that mean going somewhere, not playing. */
+    private val NAV_CHAL = setOf(
+        "chalo", "chal", "chalen", "chale", "chalna", "chalte", "chalun", "chaliye", "chalenge",
+        "चलो", "चल", "चलें", "चले", "चलना", "चलते", "चलूं", "चलिए", "चलेंगे",
+    ).map { normalize(it) }.toSet()
 
     /**
      * Car questions, English and Hindi (any app language). Checked before "navigate", because
@@ -1086,9 +1127,16 @@ object VoiceIntents {
         play = listOf(
             "बजाओ", "बजा दो", "चलाओ", "चला दो", "सुनाओ", "लगाओ", "प्ले करो", "प्ले", "bajao", "baja do",
             "chalao", "chala do", "sunao", "lagao", "play karo", "सुना दो", "suna do",
+            // "Baja de", "chala de", "suna de", "laga de" (Haryanvi / everyday "de"), and the long-vowel spellings.
+            "baja de", "bajaa de", "bajade", "bajaa do", "chala de", "chalaa de", "chalaa do", "chalade",
+            "suna de", "sunaa de", "sunaa do", "sunade", "laga de", "laga do", "lagaa de", "lagaa do",
+            "बजा दे", "चला दे", "सुना दे", "लगा दे", "लगा दो", "बजाइए", "चलाइए", "सुनाइए", "लगाइए",
         ),
         resume = listOf("गाना चालू करो", "फिर से चलाओ", "gaana chalu karo", "music chalu karo", "म्यूजिक चालू करो"),
-        music = listOf("गाना", "गाने", "म्यूजिक", "म्यूज़िक", "संगीत", "gana", "gaana", "gane", "gaane", "sangeet", "सॉन्ग", "सोंग"),
+        music = listOf(
+            "गाना", "गाने", "म्यूजिक", "म्यूज़िक", "संगीत", "gana", "gaana", "gane", "gaane", "gaanaa", "ganaa", "sangeet",
+            "सॉन्ग", "सोंग", "सॉन्ग्स", "गीत",
+        ),
         local = listOf("स्टोरेज", "यूएसबी", "पेन ड्राइव", "पेनड्राइव", "मेमोरी", "memory"),
         bluetooth = listOf("ब्लूटूथ", "फ़ोन", "फोन", "मोबाइल"),
         camera = listOf("कैमरा", "कैमरे", "kamera"),

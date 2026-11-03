@@ -76,6 +76,8 @@ object RecognizerFallback {
      */
     fun offlineNeedsWhereTo(heard: String?, parserLanguage: String): Boolean {
         if (heard.isNullOrBlank()) return true
+        // Music words are never a place: the assistant plays music for them instead.
+        if (VoiceIntents.mentionsMusic(heard)) return false
         return VoiceIntents.parse(heard, parserLanguage) is VoiceIntent.Unknown
     }
 

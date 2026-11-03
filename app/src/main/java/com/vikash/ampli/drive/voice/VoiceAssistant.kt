@@ -18,6 +18,7 @@ import com.vikash.ampli.drive.system.Launchers
 import com.vikash.ampli.drive.system.PowerAction
 import com.vikash.ampli.drive.system.PowerControl
 import com.vikash.ampli.drive.system.PowerPlan
+import com.vikash.ampli.drive.system.RestrictedSettings
 import com.vikash.ampli.drive.calls.VoiceReplies
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -460,6 +461,11 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             is VoiceIntent.Unknown -> return when (expect) {
                 Expect.Open, Expect.Destination -> {
+                    // "Gana …" in any form the parser missed is music, never a place search.
+                    if (VoiceIntents.mentionsMusic(text)) {
+                        transport(VoiceActions.Transport.Play, HaryanviLines.Event.MusicPlay)
+                        return null
+                    }
                     val dest = VoiceIntents.destinationFrom(text, parserLang)
                     val saved = VoiceIntents.savedKind(dest)
                     when {
@@ -924,6 +930,12 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun search(destination: String, res: Context, lang: String): Expect? {
+        // Music words never go to the geocoder ("gana suna de" once listed "Суна, 3795 km").
+        if (VoiceIntents.mentionsMusic(destination)) {
+            VoiceDebugLog.add("search: \"$destination\" names music, playing instead")
+            transport(VoiceActions.Transport.Play, HaryanviLines.Event.MusicPlay)
+            return null
+        }
         _state.update { it.copy(phase = VoiceUiState.Phase.Working, options = emptyList()) }
         val here = app.speedTracker.state.value.location
         // Search while Ampli says "Searching for…".
@@ -1378,6 +1390,12 @@ class VoiceAssistant(private val app: DriveApp) {
             // A bare media key with no player behind it does nothing at all: say so instead of
             // leaving the driver waiting for music that never comes.
             kotlinx.coroutines.delay(PLAY_CHECK_MS)
+            if (!VoiceActions.isPlaying(app) && !RestrictedSettings.hasNotificationAccess(app)) {
+                // Without notification access no player can be seen or resumed: open the
+                // driver's music app (the last one, Ampli MP3, or the guess) and press play there.
+                VoiceDebugLog.add("music: no notification access, opening the music app")
+                com.vikash.ampli.drive.car.CarStart.startMusic(app, app, preferred = app.prefs.lastMediaPackage)
+            }
             if (!VoiceActions.isPlaying(app)) {
                 VoiceDebugLog.add("music: nothing started playing")
                 val lang = language()

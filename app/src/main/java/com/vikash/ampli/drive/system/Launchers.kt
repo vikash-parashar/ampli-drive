@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
@@ -111,10 +112,15 @@ object Launchers {
     fun openNotificationAccess(context: Context) {
         // Android 13+: if access is still off on return, show the "restricted settings" guide.
         RestrictedSettings.arm(context)
-        val component = ComponentName(context, DriveNotificationListener::class.java)
-        val detail = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
-            .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, component.flattenToString())
-        if (start(context, detail, null)) return
+        // The per-app switch exists from Android 11; head units on 8.1 / 9 / 10 get the list
+        // (ACTION_NOTIFICATION_LISTENER_SETTINGS), and units whose ROM removed that screen get
+        // App info.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val component = ComponentName(context, DriveNotificationListener::class.java)
+            val detail = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+                .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, component.flattenToString())
+            if (start(context, detail, null)) return
+        }
         if (start(context, Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), null)) return
         openAppDetails(context)
     }
@@ -149,6 +155,10 @@ object Launchers {
         if (failMessage != null) toast(context, failMessage)
         false
     } catch (_: SecurityException) {
+        if (failMessage != null) toast(context, failMessage)
+        false
+    } catch (_: RuntimeException) {
+        // Some head-unit ROMs throw other errors for a stripped Settings screen.
         if (failMessage != null) toast(context, failMessage)
         false
     }
