@@ -109,7 +109,8 @@ class RestrictedSettingsTest {
         assertFalse(RestrictedSettings.before.value)
         assertFalse(RestrictedSettings.armed.value)
         assertFalse(savedArmed())
-        assertTrue(shadowOf(app).nextStartedActivity.action!!.startsWith("android.settings.NOTIFICATION_LISTENER"))
+        // Android 8.1 has no per-app detail screen: the listener list opens directly.
+        assertEquals(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS, shadowOf(app).nextStartedActivity.action)
     }
 
     @Test
