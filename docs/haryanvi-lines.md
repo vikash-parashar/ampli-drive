@@ -814,10 +814,10 @@ Calls and chat messages answered by voice, service reminders at car start and th
 | Call picked up | फोन जुड़ ग्या, बात कर। | Phone jud gaya, baat kar. | The call is connected, talk. |
 | Call declined | ठीक सै, बाद मैं बात कर लियो। | Theek sai, baad main baat kar liyo. | OK, talk later. |
 | Call declined | फोन काट दिया, गाड्डी पै ध्यान दे। | Phone kaat diya, gaaddi pai dhyan de. | Call declined, keep your eyes on the road. |
-| Call declined | काट दिया भाई, पाछै कर लेंगे। | Kaat diya bhai, paachhe kar lenge. | Declined, brother, we'll call back later. |
+| Call declined | काट दिया भाई, पाछै कर ल्यांगे। | Kaat diya bhai, paachhe kar lyaange. | Declined, brother, we'll call back later. |
 | Can't pick up by voice | भाई, यो फोन मैं ना ठा सकूं, स्क्रीन पै बटन दबा दे। | Bhai, yo phone main na tha sakun, screen pai button daba de. | Brother, I can't pick this one up, press the button on the screen. |
 | Can't pick up by voice | बटन दबा कै ठा ले भाई, मेरे तै ना होया। | Button daba ke tha le bhai, mere te na hoya. | Press the button to pick up, I couldn't do it. |
-| Can't pick up by voice | फोन आळा बटन दबा दे, मैं ना ठा पाया। | Phone aala button daba de, main na tha paaya. | Press the phone button, I couldn't pick up. |
+| Can't pick up by voice | फोन आळा बटन दबा दे, मेरे तै ना ठाया ग्या। | Phone aala button daba de, mere te na thaaya gya. | Press the phone button, I couldn't pick up. |
 | Chat message arrived | %1$s का %2$s आया सै, सुणाऊं? | %1$s ka %2$s aaya sai, sunaun? | A {app} message from {name}, shall I read it? |
 | Chat message arrived | %2$s पै %1$s का मैसेज सै, सुणा द्यूं? | %2$s pai %1$s ka message sai, suna dyun? | {name} sent a message on {app}, read it out? |
 | Chat message arrived | भाई, %1$s नै %2$s भेज्या सै, सुणाऊं के? | Bhai, %1$s ne %2$s bhejya sai, sunaun ke? | Brother, {name} sent a {app} message, shall I read it? |
@@ -826,7 +826,7 @@ Calls and chat messages answered by voice, service reminders at car start and th
 | Reply? | जवाब लिख द्यूं? | Jawab likh dyun? | Shall I write a reply? |
 | Say the reply | बोल भाई, के लिखूं? | Bol bhai, ke likhun? | Go ahead, brother, what shall I write? |
 | Say the reply | हाँ, बोल दे के भेजणा सै। | Haan, bol de ke bhejna sai. | Yes, say what to send. |
-| Say the reply | बोल, मैं लिख रया सूं। | Bol, main likh raya sun. | Speak, I'm writing. |
+| Say the reply | बोल, मैं लिखूं सूं। | Bol, main likhun sun. | Speak, I'm writing. |
 | Confirm the reply | न्यू लिख्या सै: %1$s। भेज द्यूं? | Nyu likhya sai: %1$s. Bhej dyun? | I wrote: {text}. Send it? |
 | Confirm the reply | %1$s। यो भेज द्यूं? | %1$s. Yo bhej dyun? | {text}. Send this? |
 | Confirm the reply | जवाब सै: %1$s। ठीक सै, भेज द्यूं? | Jawab sai: %1$s. Theek sai, bhej dyun? | The reply is: {text}. OK to send? |

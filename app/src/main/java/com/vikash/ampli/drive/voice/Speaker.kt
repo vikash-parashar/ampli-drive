@@ -166,8 +166,14 @@ class Speaker(context: Context, val bundled: AmpliVoice = AmpliVoice(context)) {
         sayChecked(text, appLanguage, needFocus)
     }
 
-    /** [say] that returns false when nothing could be spoken (no engine, focus refused, speak failed). */
-    suspend fun sayChecked(text: String, appLanguage: String, needFocus: Boolean = false): Boolean {
+    /**
+     * [say] that returns false when nothing could be spoken (no engine, focus refused, speak failed).
+     * Haryanvi in Latin letters (spoken with [RomanSpeech.LANG]) is respelt for the English voice first.
+     */
+    suspend fun sayChecked(text: String, appLanguage: String, needFocus: Boolean = false): Boolean =
+        speakNow(RomanSpeech.forVoice(text, appLanguage), appLanguage, needFocus)
+
+    private suspend fun speakNow(text: String, appLanguage: String, needFocus: Boolean): Boolean {
         if (text.isBlank()) return false
         when (engineFor(appLanguage)) {
             BundledTts.Engine.Bundled -> return sayBundled(text, appLanguage, needFocus)

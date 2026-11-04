@@ -40,31 +40,31 @@ object ChatLines {
             Line("मैं तो एकदम बढ़िया सूं, तू सुणा, के हाल सै?", "Main to ekdam badhiya sun, tu suna, ke haal sai?", "I'm great. How are you?"),
             Line("मौज मैं सूं भाई! तेरा दिन किसा जा रया सै?", "Mauj mein sun bhai! Tera din kisa ja raya sai?", "Having fun! How is your day going?"),
             Line("चकाचक सूं, गाड्डी भी राजी, मैं भी राजी। तू बता, कित चालणा सै?", "Chakachak sun, gaadi bhi raazi, main bhi raazi. Tu bata, kit chalna sai?", "All great: the car is happy and so am I. Where to?"),
-            Line("बढ़िया सूं जी, थारे साथ सफर मैं मजा आवै सै। तू ठीक सै?", "Badhiya sun ji, thaare saath safar mein maza aave sai. Tu theek sai?", "I'm fine, travelling with you is fun. Are you well?"),
+            Line("बढ़िया सूं जी, थारे गेल्यां सफर मैं घणा मजा आवै सै। तू ठीक सै ना?", "Badhiya sun ji, thaare gelyan safar mein ghana maza aave sai. Tu theek sai na?", "I'm fine, travelling with you is fun. Are you well?"),
             Line("सब बढ़िया सै भाई! गाणा हो या चुटकला, बोल दिए, मैं हाजिर सूं।", "Sab badhiya sai bhai! Gaana ho ya chutkula, bol diye, main haazir sun.", "All good! A song or a joke, just ask."),
         ),
         Topic.WhoAreYou to listOf(
             Line("मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे।", "Main Ampli sun, thaari gaadi ki saathan. Raasta, gaane, khabar ar chutkule, sab mere jimme.", "I'm Ampli, your car's companion: routes, songs, news and jokes are on me."),
-            Line("मेरा नाम एम्पली सै, देसी बोली आळी थारी कार असिस्टेंट।", "Mera naam Ampli sai, desi boli aali thaari car assistant.", "My name is Ampli, your car assistant who speaks desi."),
+            Line("मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं।", "Mera naam Ampli sai, thaari gaadi ki desi saathan, theth Haryanvi bolun sun.", "My name is Ampli, your car assistant who speaks desi."),
             Line("एम्पली सूं भाई! तू बोल, मैं हाजिर।", "Ampli sun bhai! Tu bol, main haazir.", "I'm Ampli! Just say it, I'm here."),
-            Line("मैं एम्पली, थारे सफर की साथी। बिना नेट भी बात करूं सूं।", "Main Ampli, thaare safar ki saathi. Bina net bhi baat karun sun.", "I'm Ampli, your travel buddy. I talk even without internet."),
+            Line("मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं।", "Main Ampli sun, thaare safar ki saathan. Net na ho to bhi baat kar lyun sun.", "I'm Ampli, your travel buddy. I talk even without internet."),
         ),
         Topic.Thanks to listOf(
-            Line("कोई बात ना भाई, यो तो मेरा काम सै।", "Koi baat na bhai, yo to mera kaam sai.", "No problem, that's my job."),
+            Line("कोए बात ना भाई, यो तो मेरा काम सै।", "Koye baat na bhai, yo to mera kaam sai.", "No problem, that's my job."),
             Line("राम राम जी, जद मर्जी बुला लिए।", "Ram Ram ji, jad marzi bula liye.", "Anytime, just call me."),
-            Line("थारा भी धन्यवाद, आराम तै चलाइए।", "Thaara bhi dhanyawad, aaram te chalaiye.", "Thank you too. Drive easy."),
-            Line("अरे इसमैं धन्यवाद के बात, अपणे ए तो सैं।", "Arre ismein dhanyawad ke baat, apne e to sain.", "No need for thanks, we're family."),
-            Line("खुश रह भाई, सफर बढ़िया रहे।", "Khush reh bhai, safar badhiya rahe.", "Stay happy, have a good trip."),
+            Line("जीता रह भाई, आराम तै चलाइए।", "Jeeta reh bhai, aaram te chalaiye.", "Thank you too. Drive easy."),
+            Line("अरै इसमैं धन्यवाद की के बात, आपां तो अपणे सां।", "Arai ismein dhanyawad ki ke baat, aapaan to apne saan.", "No need for thanks, we're family."),
+            Line("खुश रह भाई, थारा सफर बढ़िया रहवै।", "Khush reh bhai, thaara safar badhiya rahve.", "Stay happy, have a good trip."),
         ),
         // Each ends by offering a joke: "haan" then tells one.
         Topic.Bored to listOf(
-            Line("बोर क्यूं होणा भाई, मैं सूं ना! एक चुटकला सुणा दूं?", "Bore kyun hona bhai, main sun na! Ek chutkula suna doon?", "Why be bored, I'm here! Shall I tell a joke?"),
-            Line("चाल, बोरियत भगावां। गाणा भी लगा सकूं, खबर भी सुणा सकूं। पहल्यां एक चुटकला हो जा?", "Chaal, boriyat bhagaavaan. Gaana bhi laga sakun, khabar bhi suna sakun. Pehle ek chutkula ho ja?", "Let's chase boredom away. I can play songs or read the news. A joke first?"),
+            Line("बोर क्यूं होवै भाई, मैं सूं ना! एक चुटकला सुणाऊं?", "Bore kyun hove bhai, main sun na! Ek chutkula sunaaun?", "Why be bored, I'm here! Shall I tell a joke?"),
+            Line("चाल, बोरियत भगावां। गाणा लगा द्यूं, खबर सुणा द्यूं, पर पहलां एक चुटकला हो ज्या?", "Chaal, boriyat bhagaavaan. Gaana laga dyun, khabar suna dyun, par pahlaan ek chutkula ho jya?", "Let's chase boredom away. I can play songs or read the news. A joke first?"),
             Line("गपशप का टैम सै! हंसी मजाक तै शुरू करां, चुटकला सुणैगा?", "Gapshap ka time sai! Hasi mazaak te shuru karaan, chutkula sunega?", "Chat time! Shall we start with a joke?"),
-            Line("अकेला ना सै तू, मैं साथ सूं। एक मजेदार बात सुणा दूं?", "Akela na sai tu, main saath sun. Ek mazedaar baat suna doon?", "You're not alone, I'm with you. Shall I tell you something funny?"),
+            Line("तू एकला कोनी, मैं गेल्यां सूं। एक मजेदार बात सुणाऊं?", "Tu ekla koni, main gelyan sun. Ek mazedaar baat sunaaun?", "You're not alone, I'm with you. Shall I tell you something funny?"),
         ),
         Topic.Morning to listOf(
-            Line("सुबह की राम राम!", "Subah ki Ram Ram!", "Good morning!"),
+            Line("सवेरे की राम राम!", "Savere ki Ram Ram!", "Good morning!"),
             Line("सवेरे सवेरे राम राम जी!", "Savere savere Ram Ram ji!", "Good morning to you!"),
         ),
         Topic.Afternoon to listOf(
@@ -72,8 +72,8 @@ object ChatLines {
             Line("राम राम जी, दोपहर हो ली!", "Ram Ram ji, dopahar ho li!", "Good afternoon to you!"),
         ),
         Topic.Evening to listOf(
-            Line("शाम की राम राम!", "Shaam ki Ram Ram!", "Good evening!"),
-            Line("साँझ की राम राम जी!", "Saanjh ki Ram Ram ji!", "Good evening to you!"),
+            Line("साँझ की राम राम!", "Saanjh ki Ram Ram!", "Good evening!"),
+            Line("साँझ हो ली, राम राम जी!", "Saanjh ho li, Ram Ram ji!", "Good evening to you!"),
         ),
         Topic.Night to listOf(
             Line("रात की राम राम!", "Raat ki Ram Ram!", "Good evening!"),
@@ -86,37 +86,37 @@ object ChatLines {
             Line("दिन बढ़िया जावै, सड़क पै ध्यान राखिए।", "Din badhiya jaave, sadak pe dhyaan raakhiye.", "Have a great day, keep your eyes on the road."),
         ),
         Topic.NewsMore to listOf(
-            Line("और सुणणी हो तो बोल, और खबर।", "Aur sunni ho to bol, aur khabar.", "Say 'more news' for more."),
+            Line("और सुणणी हो तो बोल दे, और खबर।", "Aur sunni ho to bol de, aur khabar.", "Say 'more news' for more."),
         ),
         Topic.NewsEnd to listOf(
-            Line("बस, इब्बे इतणी ए खबर सैं।", "Bas, ibbe itni e khabar sain.", "That's all the headlines for now."),
-            Line("इब्बे की खबर पूरी, थोड़ी देर मैं फेर पूछ लिए।", "Ibbe ki khabar poori, thodi der mein fer poochh liye.", "That's the news for now, ask again later."),
+            Line("बस, इब खातर इतणी ए खबर सैं।", "Bas, ib khaatir itni e khabar sain.", "That's all the headlines for now."),
+            Line("इब की खबर पूरी, थोड़ी वार पाछै फेर पूछ लिए।", "Ib ki khabar poori, thodi vaar paachhe fer poochh liye.", "That's the news for now, ask again later."),
         ),
         Topic.NewsOffline to listOf(
-            Line("नेट कोन्या चल रया, खबर ना मिल सकी।", "Net kona chal rya, khabar na mil saki.", "There's no internet, so I couldn't get the news."),
-            Line("इंटरनेट ना सै भाई, फोन का हॉटस्पॉट जोड़ ले, फेर खबर सुणाऊंगा।", "Internet na sai bhai, phone ka hotspot jod le, fer khabar sunaunga.", "No internet. Connect the phone hotspot and I'll read the news."),
+            Line("नेट कोनी चाल रया, खबर कोनी मिली।", "Net koni chaal raya, khabar koni mili.", "There's no internet, so I couldn't get the news."),
+            Line("नेट कोनी भाई, फोन का हॉटस्पॉट जोड़ ले, फेर खबर सुणा द्यूं।", "Net koni bhai, phone ka hotspot jod le, fer khabar suna dyun.", "No internet. Connect the phone hotspot and I'll read the news."),
         ),
         Topic.NewsFailed to listOf(
-            Line("खबर आळी साइट तै जवाब ना आया, थोड़ी देर मैं फेर पूछ लिए।", "Khabar aali site te jawab na aaya, thodi der mein fer poochh liye.", "The news site didn't answer. Ask again in a bit."),
-            Line("खबर ना मिल सकी भाई, नेट ढीला सै शायद।", "Khabar na mil saki bhai, net dheela sai shaayad.", "Couldn't get the news, the connection may be slow."),
+            Line("खबर आळी साइट तै जवाब कोनी आया, थोड़ी वार पाछै फेर पूछ लिए।", "Khabar aali site te jawab koni aaya, thodi vaar paachhe fer poochh liye.", "The news site didn't answer. Ask again in a bit."),
+            Line("खबर कोनी मिली भाई, नेट ढीला चाल रया सै शायद।", "Khabar koni mili bhai, net dheela chaal raya sai shaayad.", "Couldn't get the news, the connection may be slow."),
         ),
         Topic.NewsNotSetUp to listOf(
-            Line("खबर का इंतजाम अभी ना सै।", "Khabar ka intezaam abhi na sai.", "News isn't set up yet."),
+            Line("खबर आळा जुगाड़ इब ताईं कोनी लाग्या।", "Khabar aala jugaad ib taayin koni laagya.", "News isn't set up yet."),
         ),
         Topic.NewsNoHindiVoice to listOf(
-            Line("खबर स्क्रीन पै दिखा दी सै।", "Khabar screen pe dikha di sai, Hindi awaaz na mili.", "The headlines are on the screen; there's no Hindi voice to read them."),
+            Line("खबर स्क्रीन पै दिखा दी सै।", "Khabar screen pe dikha di sai, Hindi awaaz koni mili.", "The headlines are on the screen; there's no Hindi voice to read them."),
         ),
         Topic.WeatherOffline to listOf(
-            Line("मौसम की खबर ना मिल सकी, नेट कोन्या चल रया।", "Mausam ki khabar na mil saki, net kona chal rya.", "No weather right now: there's no internet."),
+            Line("मौसम का हाल कोनी मिल्या, नेट कोनी चाल रया।", "Mausam ka haal koni milya, net koni chaal raya.", "No weather right now: there's no internet."),
         ),
         Topic.WeatherNoLocation to listOf(
-            Line("मौसम खातर गाड्डी की जगह का बेरा ना पाट्या।", "Mausam khaatir gaadi ki jagah ka bera na paatya.", "No weather: I don't know where the car is yet."),
+            Line("गाड्डी की जगहां का इब ताईं बेरा कोनी पाट्या, मौसम थोड़ी वार मैं बताऊं।", "Gaadi ki jagahaan ka ib taayin bera koni paatya, mausam thodi vaar mein bataaun.", "No weather: I don't know where the car is yet."),
         ),
         Topic.WeatherFailed to listOf(
-            Line("मौसम की जाणकारी अभी ना मिली।", "Mausam ki jaankaari abhi na mili.", "Couldn't get the weather just now."),
+            Line("इब मौसम का हाल कोनी मिल सक्या।", "Ib mausam ka haal koni mil sakya.", "Couldn't get the weather just now."),
         ),
         Topic.RainTip to listOf(
-            Line("बारिश के आसार सैं, छाता साथ राखिए।", "Baarish ke aasaar sain, chhaata saath raakhiye.", "Rain is likely, keep an umbrella handy."),
+            Line("मींह आण के आसार सैं, छाता गेल्यां राखिए।", "Meenh aan ke aasaar sain, chhaata gelyan raakhiye.", "Rain is likely, keep an umbrella handy."),
         ),
     )
 
@@ -182,20 +182,20 @@ object ChatLines {
             Sky.Clear -> "आसमान साफ सै"
             Sky.PartlyCloudy -> "थोड़े बादळ सैं"
             Sky.Cloudy -> "बादळ छाए सैं"
-            Sky.Rain -> "बारिश हो री सै"
-            Sky.HeavyRain -> "तेज बारिश सै"
+            Sky.Rain -> "मींह पड़ रया सै"
+            Sky.HeavyRain -> "जोर का मींह सै"
             Sky.Thunder -> "गरज अर बिजळी सै"
-            Sky.Fog -> "कोहरा सै"
-            Sky.Snow -> "बर्फ पड़ री सै"
+            Sky.Fog -> "धुंध सै"
+            Sky.Snow -> "बरफ पड़ री सै"
         }
         Script.Roman -> when (sky) {
             Sky.Clear -> "aasmaan saaf sai"
             Sky.PartlyCloudy -> "thode baadal sain"
             Sky.Cloudy -> "baadal chhaaye sain"
-            Sky.Rain -> "baarish ho ri sai"
-            Sky.HeavyRain -> "tez baarish sai"
+            Sky.Rain -> "meenh pad raya sai"
+            Sky.HeavyRain -> "jor ka meenh sai"
             Sky.Thunder -> "garaj ar bijli sai"
-            Sky.Fog -> "kohra sai"
+            Sky.Fog -> "dhundh sai"
             Sky.Snow -> "barf pad ri sai"
         }
         Script.English -> when (sky) {
