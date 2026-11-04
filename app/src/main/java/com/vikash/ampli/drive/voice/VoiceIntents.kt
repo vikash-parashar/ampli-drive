@@ -72,10 +72,19 @@ sealed interface VoiceIntent {
     data object DashcamSave : VoiceIntent
     data object Greeting : VoiceIntent
 
-    /** Small talk: "के हाल सै?", "कौन सै तू?", "चुटकला सुणा". */
+    /**
+     * Small talk: "के हाल सै?", "कौन सै तू?", "चुटकला सुणा", "thank you", "bore ho raha hoon".
+     * [Talk.More]: "ek aur", "aur suna": one more of whatever Ampli just told (a joke or the news).
+     */
     data class SmallTalk(val kind: Talk) : VoiceIntent
 
-    enum class Talk { HowAreYou, WhoAreYou, Joke }
+    enum class Talk { HowAreYou, WhoAreYou, Joke, Thanks, Bored, More }
+
+    /** "Aaj ka din kaisa hai", "aaj kya hai": the date, the vaar and its deity, the weather, a wish. */
+    data object DayToday : VoiceIntent
+
+    /** "Aaj ki taaza khabar", "news batao", "samachar sunao"; [more]: "aur khabar", "agli khabar". */
+    data class News(val more: Boolean = false) : VoiceIntent
 
     /** Car questions: "how many km to next service", "tyre pressure", "engine status", "where did I park". */
     data object ServiceDue : VoiceIntent
@@ -156,6 +165,10 @@ object VoiceIntents {
         val playWord = kw.play.any { has(t, it) }
         if (!playWord) volume(t)?.let { return it }
         if (trimFillers(t, STOP_FILLERS) in STOP_EXACT) return VoiceIntent.Stop
+        // "Aage ka" (the next song) only on its own: "aage ka rasta" is no song.
+        if (trimFillers(t, STOP_FILLERS) in NEXT_EXACT) return VoiceIntent.Next
+        // "Ek aur", "aur suna": one more joke or headline (before "sunao" plays a song called "aur").
+        if (trimFillers(t, STOP_FILLERS) in MORE_CHAT) return VoiceIntent.SmallTalk(VoiceIntent.Talk.More)
         // Before "cancel" ("line nahi hai", "camera nahi hai") and the road reports.
         driveDiary(t)?.let { return it }
         if (words <= 4 && kw.cancel.any { has(t, it) }) return VoiceIntent.Cancel
@@ -175,7 +188,11 @@ object VoiceIntents {
         carQuestion(t)?.let { return it }
         // "Barish ke gaane bajao" is music and "take me to the weather station" a place.
         if (!(playWord && kw.music.any { has(t, it) }) && kw.navigate.none { has(t, it) }) infoQuestion(t)?.let { return it }
-        if (words <= 8) smallTalk(t)?.let { return it }
+        if (words <= 8) {
+            // Before "play": "khabar sunao" and "chutkula suna de" are no song names.
+            news(t)?.let { return it }
+            smallTalk(t)?.let { return it }
+        }
         if (kw.camera.any { has(t, it) }) return VoiceIntent.NextCamera
         if (SPEED.any { has(t, it) }) return VoiceIntent.Speed
         if (!playWord) screenCommand(t)?.let { return it }
@@ -302,8 +319,18 @@ object VoiceIntents {
         return null
     }
 
+    /**
+     * Right after a joke or the news Ampli listens once more: "aur", "ek aur", "aur suna", "one
+     * more" asks for the next one. Only those on their own ("aur gaana chalao" is music).
+     */
+    fun asksForMore(text: String): Boolean {
+        val t = trimFillers(stripWakeWord(normalize(text)), STOP_FILLERS)
+        return t.isNotEmpty() && (t in MORE_CHAT || MORE.any { it == t })
+    }
+
     /** "What time is it", "kitne baje", "aaj kya date hai", "mausam kaisa hai", "baarish hogi kya". */
     private fun infoQuestion(t: String): VoiceIntent? = when {
+        DAY.any { has(t, it) } -> VoiceIntent.DayToday
         DATE.any { has(t, it) } -> VoiceIntent.DateToday
         TIME.any { has(t, it) } -> VoiceIntent.TimeNow
         RAIN.any { has(t, it) } -> VoiceIntent.Weather(rain = true)
@@ -388,12 +415,13 @@ object VoiceIntents {
         "up", "increase", "raise", "louder", "higher", "more", "badhao", "badha do", "badhaao", "badhai", "tez",
         "tej", "tez karo", "zyada", "jyada", "unchi", "oonchi", "upar", "बढ़ाओ", "बढ़ा दो", "बढ़ाइए", "बढ़ा", "बढाओ", "बढा दो",
         "तेज़", "तेज", "ज़्यादा", "ज्यादा", "ऊंची", "ऊँची", "ऊपर", "बधा", "बढ़ा दे", "बधा दे", "अप",
+        "badha de", "badhaa de", "badha", "tez kar de", "tej kar de", "तेज कर दे", "तेज़ कर दे",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val DOWN = listOf(
         "down", "decrease", "lower", "reduce", "less", "softer", "quieter", "kam", "kam karo", "kam kar do", "dheemi",
         "dheema", "dheere", "halki", "neeche", "niche", "कम", "कम करो", "कम कर दो", "धीमी", "धीमा", "धीरे", "हल्की",
-        "नीचे", "घटाओ", "ghatao", "थोड़ी कम", "डाउन",
+        "नीचे", "घटाओ", "ghatao", "थोड़ी कम", "डाउन", "kam kar de", "कम कर दे", "dheere kar de", "धीरे कर दे",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val FULL = listOf(
@@ -415,11 +443,16 @@ object VoiceIntents {
     private val LOUDER = listOf(
         "louder", "turn it up", "turn up the music", "make it louder", "a bit louder", "थोड़ा तेज़", "thoda tez",
         "gaana tez karo", "गाना तेज़ करो", "गाना तेज करो",
+        // Haryanvi / everyday "kar de": "tez kar de", "thoda tez kar de".
+        "tez kar de", "tez kar do", "tej kar de", "thoda tez kar de", "तेज कर दे", "तेज़ कर दे", "तेज कर दो", "तेज़ कर दो",
+        "gaana tez kar de", "गाना तेज कर दे",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val QUIETER = listOf(
         "quieter", "softer", "too loud", "turn it down", "turn down the music", "make it quieter", "थोड़ा धीरे",
         "thoda dheere", "gaana dheere karo", "गाना धीरे करो", "gaana kam karo", "गाना कम करो",
+        "dheere kar de", "dheere kar do", "dheere karo", "thoda dheere kar de", "धीरे कर दे", "धीरे कर दो", "धीरे करो",
+        "gaana dheere kar de", "gaana kam kar de", "गाना धीरे कर दे", "गाना कम कर दे",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     /** "More" after a volume change. */
@@ -432,6 +465,25 @@ object VoiceIntents {
     private val STOP_EXACT = listOf(
         "stop", "stop it", "stop karo", "stop kar do", "ruko", "rukko", "ruk jao", "ruk ja", "band karo", "band kar do",
         "band kar", "रुको", "रुक जाओ", "रुक जा", "बंद करो", "बंद कर दो", "बंद कर", "स्टॉप", "स्टॉप करो", "थम जा", "tham ja",
+        // Haryanvi: "rok de", "thamja", "chup kar ja". Music only (or the end of the talk), never the route.
+        "rok de", "rok do", "roko", "rok", "rok ja", "band kar de", "thamja", "tham jao", "thaam ja",
+        "chup", "chup kar", "chup kar ja", "chup kar jaa", "chup karo", "chup kar de", "chup ho ja", "chup ho jao",
+        "रोक दे", "रोक दो", "रोको", "रोक", "रोक जा", "बंद कर दे", "थमजा", "थम जाओ", "थाम जा",
+        "चुप", "चुप कर", "चुप कर जा", "चुप करो", "चुप कर दे", "चुप हो जा", "चुप हो जाओ",
+    ).flatMap { nuktaForms(normalize(it)) }.toSet()
+
+    /** "Aage ka" alone: the next song. */
+    private val NEXT_EXACT = listOf(
+        "aage ka", "aage wala", "aage ka laga de", "aage ka chala de", "aage ka gaana", "aage wala gaana", "aage ka laga",
+        "आगे का", "आगे वाला", "आगे का लगा दे", "आगे का चला दे", "आगे का गाना", "आगे वाला गाना",
+    ).flatMap { nuktaForms(normalize(it)) }.toSet()
+
+    /** "Ek aur", "aur suna": one more joke or headline. Only on their own. */
+    private val MORE_CHAT = listOf(
+        "ek aur", "ek aur suna", "ek aur sunao", "ek aur suna de", "aur suna", "aur sunao", "aur suna de", "kuch aur suna",
+        "kuch aur sunao", "aur batao", "aur bata", "aur bata de", "one more", "another one", "tell me another", "tell me more",
+        "एक और", "एक और सुना", "एक और सुनाओ", "एक और सुना दे", "और सुना", "और सुनाओ", "और सुना दे", "कुछ और सुना",
+        "कुछ और सुनाओ", "और बताओ", "और बता", "और बता दे", "इक और", "ik aur",
     ).flatMap { nuktaForms(normalize(it)) }.toSet()
 
     private val STOP_FILLERS = listOf("please", "now", "abhi", "अभी", "jara", "zara", "ज़रा", "जरा", "प्लीज़", "प्लीज", "bhai", "भाई")
@@ -450,6 +502,14 @@ object VoiceIntents {
         "kitne baje", "kitne baj gaye", "kitna time hua", "time batao", "time bata", "kai baje", "ke baje", "samay kya",
         "कितने बजे", "कितने बज गए", "टाइम क्या", "क्या टाइम", "कितना टाइम हुआ", "टाइम बताओ", "समय क्या", "समय बताओ",
         "कै बजे", "के बजे", "कै बज गे", "टैम के होया", "taim ke hoya",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    /** The day as a whole: date, vaar, weather and a wish (DATE alone is just the date). */
+    private val DAY = listOf(
+        "aaj ka din kaisa", "aaj ka din kisa", "aaj ka din", "aaj kaisa din", "aaj kya hai", "aaj ke sai", "aaj ki tareekh",
+        "aaj ki taareekh", "aaj ki taarikh", "aaj ki tareek", "how is today", "how s today",
+        "how is the day", "aaj ke din ka haal", "aaj ka haal", "din kaisa hai aaj",
+        "आज का दिन कैसा", "आज का दिन किसा", "आज का दिन", "आज कैसा दिन", "आज क्या है", "आज के सै", "आज का हाल",
     ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val DATE = listOf(
@@ -824,14 +884,48 @@ object VoiceIntents {
     private fun smallTalk(t: String): VoiceIntent? = when {
         TALK_JOKE.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.Joke)
         TALK_WHO.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.WhoAreYou)
+        TALK_THANKS.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.Thanks)
+        TALK_BORED.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.Bored)
         TALK_HOW.any { has(t, it) } -> VoiceIntent.SmallTalk(VoiceIntent.Talk.HowAreYou)
         else -> null
     }
 
+    /** "Aaj ki taaza khabar", "news batao", "samachar sunao"; "aur khabar" / "agli khabar" for more. */
+    private fun news(t: String): VoiceIntent? {
+        if (NEWS.none { has(t, it) }) return null
+        return VoiceIntent.News(more = NEWS_MORE.any { has(t, it) })
+    }
+
+    private val NEWS = listOf(
+        "news", "the news", "headlines", "headline", "khabar", "khabren", "khabrein", "khabre", "kabar", "samachar",
+        "samaachar", "taaza khabar", "taza khabar",
+        "खबर", "खबरें", "ख़बर", "ख़बरें", "समाचार", "न्यूज़", "न्यूज", "हेडलाइन", "हेडलाइंस", "ताज़ा खबर", "ताजा खबर",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val NEWS_MORE = listOf(
+        "aur", "agli", "next", "more", "aage ki", "baaki", "और", "अगली", "आगे की", "बाकी",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
     private val TALK_JOKE = listOf(
         "joke", "jokes", "tell me a joke", "something funny", "चुटकला", "चुटकुला", "चुटकले", "चुटकुले",
         "जोक", "chutkula", "chutkala", "chutkule", "chutkale",
-    ).map { normalize(it) }
+        // "Hasa de", "koi mazedaar baat suna".
+        "hasa de", "hansa de", "hasa do", "hansa do", "hasao", "hansao", "hasa", "hansa", "mazedaar", "mazedar", "majedar",
+        "majedaar", "funny", "हंसा दे", "हँसा दे", "हंसा दो", "हँसा दो", "हंसाओ", "हँसाओ", "हंसा", "हँसा", "मज़ेदार", "मजेदार",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val TALK_THANKS = listOf(
+        "thank you", "thanks", "thank u", "thanku", "thankyou", "dhanyawad", "dhanyavad", "dhanyavaad", "dhanyawaad",
+        "shukriya", "shukria", "meherbani", "थैंक यू", "थैंक्यू", "थैंक्स", "धन्यवाद", "शुक्रिया", "मेहरबानी",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
+
+    private val TALK_BORED = listOf(
+        "bore ho raha", "bore ho rahi", "bore ho rya", "bore ho ri", "bore ho gaya", "bore ho gya", "main bore", "bored",
+        "i am bored", "i m bored", "talk to me", "baat kar", "baat karo", "baat kar le", "baatein karo", "kuch baat kar",
+        "mujhse baat karo", "akela hoon", "akela sun",
+        "बोर हो रहा", "बोर हो रही", "बोर हो र्या", "बोर हो री", "बोर हो गया", "मैं बोर", "बात कर", "बात करो", "बात कर ले",
+        "बातें करो", "कुछ बात कर", "मुझसे बात करो", "अकेला हूँ",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val TALK_WHO = listOf(
         "who are you", "what is your name", "what s your name", "your name",
@@ -839,13 +933,17 @@ object VoiceIntents {
         "तेरा नाम", "तुम्हारा नाम", "आपका नाम", "थारा नाम",
         "kaun sai tu", "tu kaun sai", "kaun hai tu", "tu kaun hai", "tum kaun ho", "aap kaun ho",
         "tera naam", "tumhara naam", "aapka naam", "thara naam",
+        "kon hai tu", "tu kon hai", "kaun se tu", "tu kaun se", "कौन से तू", "तू कौन से",
     ).map { normalize(it) }
 
     private val TALK_HOW = listOf(
         "how are you", "how r you", "how is it going", "what s up",
         "के हाल सै", "के हाल", "क्या हाल है", "क्या हाल", "कैसे हो", "कैसा है", "कैसी हो", "हाल चाल",
         "ke haal", "kya haal", "kaise ho", "kaisa hai", "haal chaal",
-    ).map { normalize(it) }
+        // "Ke haal se", "kaisa sai", "sab badhiya ke?" (a bare "sab badhiya" is an answer, see FollowUp).
+        "kaisa sai", "kaisa se", "kaisi hai", "sab badhiya ke", "sab badhiya hai kya", "sab theek hai kya", "kya chal raha",
+        "kya chal rya", "के हाल से", "कैसा सै", "कैसी है", "सब बढ़िया के", "सब बढ़िया है क्या", "सब ठीक है क्या", "क्या चल रहा",
+    ).flatMap { nuktaForms(normalize(it)) }.distinct()
 
     private val REPORT = listOf(
         "report a problem", "report problem", "report an issue", "report a bug", "report bug",
@@ -1144,6 +1242,9 @@ object VoiceIntents {
             "गाना बंद", "गाना रोको", "म्यूजिक बंद", "म्यूज़िक बंद", "संगीत बंद", "gana band", "gaana band",
             "music band", "gana roko", "gaana roko", "music roko", "गाना रोक दो", "gaana rok do", "pause karo", "पॉज़",
             "पॉज", "पॉज़ करो", "गाने बंद", "gaane band", "gane band", "song band", "song roko", "सॉन्ग बंद",
+            // "Gaana rok de", "gaana thamja", "gaana chup kar".
+            "gaana rok", "gana rok", "gaane rok", "gane rok", "song rok", "music rok", "gaana tham", "gana tham",
+            "gaana chup", "gana chup", "गाना रोक", "गाने रोक", "म्यूजिक रोक", "गाना थम", "गाना चुप",
         ),
         next = listOf(
             "अगला गाना", "अगला", "agla gana", "agla gaana", "agla", "अगले वाला", "aagla", "आगला", "gaana badlo", "gana badlo",
@@ -1166,7 +1267,12 @@ object VoiceIntents {
             "एंड्रॉयड ऑटो", "एंड्रॉइड ऑटो", "फ़ोन जोड़ो", "फोन जोड़ो", "फ़ोन कनेक्ट", "फोन कनेक्ट",
             "phone jodo", "phone connect karo",
         ),
-        greeting = listOf("नमस्ते", "नमस्कार", "हैलो", "हेलो", "कैसे हो", "namaskar", "kaise ho"),
+        greeting = listOf(
+            "नमस्ते", "नमस्कार", "हैलो", "हेलो", "कैसे हो", "namaskar", "kaise ho",
+            // "Ram Ram", "good morning": the greeting answers by the time of day.
+            "ram ram", "राम राम", "jai ram ji ki", "जय राम जी की", "gud morning", "गुड मॉर्निंग", "गुड मोर्निंग", "गुड इवनिंग",
+            "suprabhat", "सुप्रभात", "pranam", "प्रणाम",
+        ),
         fillers = listOf(
             "मुझे", "मेरे", "मेरा", "मेरी", "को", "पर", "में", "तक", "से", "के", "की", "का", "ज़रा", "जरा",
             "प्लीज़", "प्लीज", "वाला", "वाली", "वाले", "है", "करो", "कोई", "koi", "mujhe", "mere", "mera", "meri", "ko",

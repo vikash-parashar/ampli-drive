@@ -57,6 +57,9 @@ object VoskCommands {
         // Camera and police reports, pump queues, fuel diary, challan counter, break, hotspot.
         "camera here", "no camera here", "police gone", "long queue at cng", "no queue at the pump",
         "petrol filled", "how much did i save", "remind me later", "connect hotspot",
+        // Talking with Ampli: thanks, greetings, the day, the news, another joke.
+        "thank you", "thanks", "good morning", "good evening", "how is today", "tell me the news", "news",
+        "headlines", "tell me another", "one more", "i am bored", "talk to me",
     )
 
     /**
@@ -108,12 +111,30 @@ object VoskCommands {
         "pichla chalao", "pichla song", "pichla gaana chalao",
         "awaaz badha do", "awaz badha do", "awaaz tez kar do", "awaaz kam kar do", "awaaz dheemi karo",
         "volume badha do", "volume kam kar do",
+        // Talking with Ampli (Haryanvi / Hindi): how are you, greetings, who are you, thanks, bored.
+        "suna de kya haal hai", "kya haal hai bhai", "ke haal se", "kaisa hai", "kaise ho", "sab badhiya ke",
+        "kya chal raha hai", "ram ram", "ram ram ji", "jai ram ji ki", "kaun hai tu", "tera naam kya hai",
+        "tera naam ke se", "dhanyawad", "shukriya", "bore ho raha hoon", "baat kar", "baat karo", "mujhse baat karo",
+        // The day, the news, jokes.
+        "aaj ka din kaisa hai", "aaj ka din kaisa rahega", "aaj kya hai", "aaj ki tareekh",
+        "aaj ki taaza khabar", "taaza khabar sunao", "taaza khabar suna de", "khabar suna", "khabar sunao", "khabar suna de",
+        "news batao", "news sunao", "samachar sunao", "samachar", "aur khabar", "agli khabar",
+        "chutkula suna", "chutkula suna de", "joke suna", "joke sunao", "hasa de", "koi mazedaar baat suna",
+        "ek aur chutkula", "ek aur", "aur suna", "aur sunao", "ek aur suna",
+        // Music in Haryanvi: stop, next, previous, louder / softer.
+        "gaana rok de", "gana rok de", "gaana band kar de", "gana band kar de", "rok de", "roko", "tham ja", "thamja",
+        "chup kar ja", "chup", "chup kar", "agla laga de", "agla gaana laga de", "aage ka", "pichla laga de",
+        "awaaz badha de", "tez kar de", "awaaz kam kar de", "dheere kar de",
     ) + MUSIC_PLAY_ROMAN
 
 
     /** Only right after a volume change ("aur" / "more"); see VoiceIntents.volumeFollowUp. */
-    val FOLLOW_UPS = listOf("more", "a bit more", "again", "aur", "thoda aur", "aur tez", "aur kam")
-    val HINDI_FOLLOW_UPS = listOf("और", "थोड़ा और", "और तेज", "और कम")
+    val FOLLOW_UPS = listOf(
+        "more", "a bit more", "again", "aur", "thoda aur", "aur tez", "aur kam",
+        // After a joke or the news: one more.
+        "ek aur", "aur suna", "aur sunao", "ek aur suna", "aur khabar",
+    )
+    val HINDI_FOLLOW_UPS = listOf("और", "थोड़ा और", "और तेज", "और कम", "एक और", "और सुना", "और सुनाओ", "एक और सुना", "और खबर")
 
     /** Only while a list of places is showing. */
     val CHOICES = listOf(
@@ -167,6 +188,19 @@ object VoskCommands {
         // Hindi model (offline-only units answer Ampli with it): as the Hindi model writes them.
         "प्ले म्यूजिक", "म्यूजिक प्ले करो", "गाना प्ले करो", "प्ले करो", "नेक्स्ट सॉन्ग", "नेक्स्ट", "स्टॉप",
         "पॉज़ करो", "वॉल्यूम अप", "वॉल्यूम डाउन", "कैंसल", "हेलो",
+        // Talking with Ampli (Haryanvi / Hindi).
+        "सुना दे क्या हाल है", "के हाल से", "कैसा है", "कैसे हो", "सब बढ़िया के", "क्या चल रहा है",
+        "राम राम", "राम राम जी", "जय राम जी की", "गुड मॉर्निंग", "कौन है तू", "तेरा नाम क्या है", "तेरा नाम के से",
+        "थैंक यू", "धन्यवाद", "शुक्रिया", "बोर हो रहा हूँ", "बात कर", "बात करो", "मुझसे बात करो",
+        // The day, the news, jokes.
+        "आज का दिन कैसा है", "आज का दिन कैसा रहेगा", "आज क्या है",
+        "आज की ताजा खबर", "ताजा खबर सुनाओ", "ताजा खबर सुना दे", "खबर सुना", "खबर सुनाओ", "खबर सुना दे",
+        "समाचार सुनाओ", "समाचार", "न्यूज सुनाओ", "और खबर", "अगली खबर",
+        "चुटकुला सुना", "चुटकुला सुना दे", "चुटकला सुना दे", "जोक सुना", "हंसा दे", "कोई मजेदार बात सुना", "एक और चुटकुला",
+        "एक और", "और सुना", "और सुनाओ", "एक और सुना",
+        // Music in Haryanvi.
+        "गाना रोक दे", "गाना बंद कर दे", "रोक दे", "रोको", "थम जा", "चुप कर जा", "चुप", "चुप कर",
+        "अगला लगा दे", "अगला गाना लगा दे", "आगे का", "पिछला लगा दे", "आवाज बढ़ा दे", "तेज कर दे", "आवाज कम कर दे", "धीरे कर दे",
     ) + MUSIC_PLAY_HINDI
 
     val HINDI_CHOICES = listOf("पहला", "दूसरा", "तीसरा", "पहली", "दूसरी", "तीसरी", "एक", "दो", "तीन")
@@ -311,6 +345,27 @@ object HinglishSpelling {
         "chalu" to listOf("chaalu", "chaloo", "chaaloo"),
         "shuru" to listOf("shuroo", "shoeroo", "suru"),
         "songs" to listOf("song"),
+        // Talking with Ampli: the news, jokes, the day, thanks.
+        "khabar" to listOf("khabbar", "kabar", "khaber"),
+        "taaza" to listOf("taza", "taja", "tazaa"),
+        "haal" to listOf("hal", "hall"),
+        "samachar" to listOf("samaachar", "samachaar"),
+        "shukriya" to listOf("shukriyaa", "shukria"),
+        "dhanyawad" to listOf("dhanyavad", "dhanyawaad", "dhanyavaad"),
+        "tareekh" to listOf("tarikh", "tareek"),
+        "kaisa" to listOf("kaisaa", "kesa"),
+        "chutkula" to listOf("chutkulla", "chutkala"),
+        "mazedaar" to listOf("mazedar", "majedar"),
+        "hasa" to listOf("hansa", "hassa"),
+        "chup" to listOf("chupp", "choop"),
+        "tham" to listOf("thaam", "thum"),
+        "thamja" to listOf("thamjaa"),
+        "aage" to listOf("aagey", "aghe"),
+        "dheere" to listOf("dhere", "dheerey"),
+        "baat" to listOf("baath", "bat"),
+        "kaun" to listOf("kon", "kaon"),
+        "naam" to listOf("nam", "naem"),
+        "agli" to listOf("agali", "aagli"),
     )
 
     /** The grammar to give the model, and the spellings to turn back ([restore]). */
