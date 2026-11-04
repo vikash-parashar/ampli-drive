@@ -551,10 +551,10 @@ class VoiceAssistant(private val app: DriveApp) {
                         )
                     } catch (_: Exception) {
                     }
-                    styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, res.getString(R.string.plink_title)))
+                    styled(res, lang, HaryanviLines.Event.CommandDone, spoken(res, lang, R.string.voice_auto_opening, res.getString(R.string.plink_title)))
                 } else if (label != null) {
                     // Haryanvi desi: "ठीक सै, कर दिया।"
-                    styled(res, lang, HaryanviLines.Event.CommandDone, res.getString(R.string.voice_auto_opening, label))
+                    styled(res, lang, HaryanviLines.Event.CommandDone, spoken(res, lang, R.string.voice_auto_opening, label))
                 } else {
                     say(res, lang, R.string.voice_auto_missing)
                 }
@@ -563,7 +563,7 @@ class VoiceAssistant(private val app: DriveApp) {
             is VoiceIntent.CallContact -> {
                 Launchers.openDialer(app)
                 if (intent.name.isNotEmpty()) {
-                    say(res, lang, res.getString(R.string.voice_call, intent.name))
+                    say(res, lang, spoken(res, lang, R.string.voice_call, intent.name))
                 } else {
                     say(res, lang, R.string.voice_call_any)
                 }
@@ -766,7 +766,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val time = android.text.format.DateFormat.getTimeFormat(res).format(java.util.Date())
         val date = now.toLocalDate().format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(dateLocale(res)))
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Time, res.getString(R.string.voice_answer_time), time, date))
-        speakAnswer(res.getString(R.string.voice_time_is, time), lang, AnswerClips.time(now.hour, now.minute, app.desi.enabled))
+        speakAnswer(spoken(res, lang, R.string.voice_time_is, time), lang, AnswerClips.time(now.hour, now.minute, app.desi.enabled))
         holdAnswer(shownAt)
     }
 
@@ -778,7 +778,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val full = today.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(locale))
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Date, res.getString(R.string.voice_answer_date), big, full))
         speakAnswer(
-            res.getString(R.string.voice_date_is, full),
+            spoken(res, lang, R.string.voice_date_is, full),
             lang,
             AnswerClips.date(today.dayOfWeek.value, today.dayOfMonth, today.monthValue, app.desi.enabled),
         )
@@ -804,8 +804,8 @@ class VoiceAssistant(private val app: DriveApp) {
         val title = res.getString(R.string.voice_answer_weather)
         val here = app.speedTracker.state.value.location
         if (here == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
-            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_no_location)))
+            speakAnswer(spoken(res, lang, R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
             holdAnswer(shownAt)
             return
         }
@@ -838,12 +838,12 @@ class VoiceAssistant(private val app: DriveApp) {
                 speakAnswer(text, lang, AnswerClips.weather(w.sky, w.temperatureC, w.rainLikely, rainQuestion, desiOn), standIn)
             }
             com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Offline -> {
-                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_weather_offline)))
-                speakAnswer(res.getString(R.string.voice_weather_offline), lang, AnswerClips.line("wx_offline", desiOn), standIn = null)
+                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_weather_offline)))
+                speakAnswer(spoken(res, lang, R.string.voice_weather_offline), lang, AnswerClips.line("wx_offline", desiOn), standIn = null)
             }
             com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Failed -> {
-                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_weather_failed)))
-                speakAnswer(res.getString(R.string.voice_weather_failed), lang, AnswerClips.line("wx_failed", desiOn), standIn = null)
+                showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_weather_failed)))
+                speakAnswer(spoken(res, lang, R.string.voice_weather_failed), lang, AnswerClips.line("wx_failed", desiOn), standIn = null)
             }
         }
         holdAnswer(shownAt)
@@ -854,11 +854,11 @@ class VoiceAssistant(private val app: DriveApp) {
         val title = res.getString(R.string.voice_answer_speed)
         val kmh = app.speedTracker.state.value.speedKmh?.let { kotlin.math.round(it).toInt() }
         if (kmh == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
-            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_no_location)))
+            speakAnswer(spoken(res, lang, R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
         } else {
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Speed, title, res.getString(R.string.voice_speed_value, kmh)))
-            speakAnswer(res.getString(R.string.voice_speed_is, kmh), lang, AnswerClips.speed(kmh, app.desi.enabled))
+            speakAnswer(spoken(res, lang, R.string.voice_speed_is, kmh), lang, AnswerClips.speed(kmh, app.desi.enabled))
         }
         holdAnswer(shownAt)
     }
@@ -869,8 +869,8 @@ class VoiceAssistant(private val app: DriveApp) {
         val title = res.getString(R.string.voice_answer_volume)
         val r = com.vikash.ampli.drive.media.VoiceVolume.apply(app.getSystemService(android.media.AudioManager::class.java), action, level)
         if (r == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_volume_failed)))
-            speakAnswer(res.getString(R.string.voice_volume_failed), lang, emptyList(), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_volume_failed)))
+            speakAnswer(spoken(res, lang, R.string.voice_volume_failed), lang, emptyList(), standIn = null)
             holdAnswer(shownAt)
             return null
         }
@@ -906,11 +906,11 @@ class VoiceAssistant(private val app: DriveApp) {
     private suspend fun stopNavigation(res: Context, lang: String) {
         if (app.navigator.state.value.visible) {
             app.navigator.stop()
-            speakAnswer(res.getString(R.string.voice_nav_stopped), lang, AnswerClips.line("nav_stopped", app.desi.enabled))
+            speakAnswer(spoken(res, lang, R.string.voice_nav_stopped), lang, AnswerClips.line("nav_stopped", app.desi.enabled))
             return
         }
         // Google Maps' guidance can't be ended from outside; say how.
-        val text = res.getString(R.string.voice_nav_stop_maps)
+        val text = spoken(res, lang, R.string.voice_nav_stop_maps)
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, res.getString(R.string.voice_answer_navigation), "", text))
         speakAnswer(text, lang, emptyList(), standIn = null)
         holdAnswer(System.currentTimeMillis() - ANSWER_HOLD_MS / 2)
@@ -923,8 +923,8 @@ class VoiceAssistant(private val app: DriveApp) {
         val r = com.vikash.ampli.drive.system.ScreenBrightness.change(app, up)
         if (r == null) {
             com.vikash.ampli.drive.system.ScreenBrightness.openPermission(app)
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_brightness_permission)))
-            speakAnswer(res.getString(R.string.voice_brightness_permission), lang, emptyList(), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_brightness_permission)))
+            speakAnswer(spoken(res, lang, R.string.voice_brightness_permission), lang, emptyList(), standIn = null)
         } else {
             val value = res.getString(R.string.voice_brightness_value, r, com.vikash.ampli.drive.system.BrightnessSteps.COUNT)
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Brightness, title, value))
@@ -941,7 +941,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val label = res.getString(if (kind == SavedKind.Office) R.string.place_office else R.string.place_home)
         val saved = app.places.get(kind)
         if (saved == null) {
-            val text = res.getString(R.string.place_not_set, label)
+            val text = spoken(res, lang, R.string.place_not_set, label)
             android.widget.Toast.makeText(app, text, android.widget.Toast.LENGTH_LONG).show()
             say(res, lang, text)
             return
@@ -978,7 +978,7 @@ class VoiceAssistant(private val app: DriveApp) {
             return null
         }
         if (places.isEmpty()) {
-            say(res, lang, res.getString(R.string.voice_no_places, destination))
+            say(res, lang, spoken(res, lang, R.string.voice_no_places, destination))
             return Expect.Destination
         }
         if (places.size == 1) {
@@ -1035,8 +1035,8 @@ class VoiceAssistant(private val app: DriveApp) {
         val title = res.getString(R.string.voice_fuel_title) + if (filter != com.vikash.ampli.drive.fuel.FuelFilter.All) " · " + res.getString(fuelLabel(filter)) else ""
         val here = app.speedTracker.state.value.location
         if (here == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
-            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_no_location)))
+            speakAnswer(spoken(res, lang, R.string.voice_no_location), lang, AnswerClips.line("no_location", desiOn), standIn = null)
             holdAnswer(shownAt)
             return null
         }
@@ -1048,9 +1048,9 @@ class VoiceAssistant(private val app: DriveApp) {
         val picker = com.vikash.ampli.drive.voice.LinePicker()
         val first = hits.firstOrNull()
         if (first == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_fuel_none)))
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_fuel_none)))
             speakAnswer(
-                res.getString(R.string.voice_fuel_none), lang,
+                spoken(res, lang, R.string.voice_fuel_none), lang,
                 com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, null) { picker.pickIndexed(it) },
                 standIn = HaryanviLines.Event.FuelNone,
             )
@@ -1067,7 +1067,7 @@ class VoiceAssistant(private val app: DriveApp) {
             s.copy(options = hits.map { h -> Place(com.vikash.ampli.drive.ui.stationName(res, h.station), null, h.station.lat, h.station.lon, h.distanceM / 1000.0) })
         }
         speakAnswer(
-            res.getString(R.string.voice_fuel_answer, name, km), lang,
+            spoken(res, lang, R.string.voice_fuel_answer, name, km), lang,
             com.vikash.ampli.drive.fuel.FuelVoice.clips(filter, first.distanceM) { picker.pickIndexed(it) },
             standIn = com.vikash.ampli.drive.fuel.FuelVoice.foundEvent(filter),
         )
@@ -1095,21 +1095,21 @@ class VoiceAssistant(private val app: DriveApp) {
             },
         )
         if (!com.vikash.ampli.drive.cameras.RadarTier.allowed(com.vikash.ampli.drive.cameras.RadarFeature.Reports, app.prefs.pro.value.isPro)) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, res.getString(R.string.voice_report_pro)))
-            speakAnswer(res.getString(R.string.voice_report_pro), lang, emptyList(), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, spoken(res, lang, R.string.voice_report_pro)))
+            speakAnswer(spoken(res, lang, R.string.voice_report_pro), lang, emptyList(), standIn = null)
             holdAnswer(shownAt)
             return
         }
         val gps = app.speedTracker.state.value
         val here = gps.location
         if (here == null) {
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, label, res.getString(R.string.voice_no_location)))
-            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, label, spoken(res, lang, R.string.voice_no_location)))
+            speakAnswer(spoken(res, lang, R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
             holdAnswer(shownAt)
             return
         }
         app.roadReports.add(kind, here, gps.speedKmh)
-        val text = res.getString(R.string.voice_report_saved, label)
+        val text = spoken(res, lang, R.string.voice_report_saved, label)
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, label, text))
         styled(res, lang, HaryanviLines.Event.ReportSaved, text)
         holdAnswer(shownAt)
@@ -1122,8 +1122,8 @@ class VoiceAssistant(private val app: DriveApp) {
         val here = app.speedTracker.state.value.location
         if (here == null) {
             val shownAt = System.currentTimeMillis()
-            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", res.getString(R.string.voice_no_location)))
-            speakAnswer(res.getString(R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
+            showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", spoken(res, lang, R.string.voice_no_location)))
+            speakAnswer(spoken(res, lang, R.string.voice_no_location), lang, AnswerClips.line("no_location", app.desi.enabled), standIn = null)
             holdAnswer(shownAt)
         }
         return here
@@ -1147,7 +1147,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val shownAt = System.currentTimeMillis()
         app.cameras.report(here, gps.speedKmh)
         share("camera", here)
-        val text = res.getString(R.string.x_camera_saved)
+        val text = spoken(res, lang, R.string.x_camera_saved)
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Report, title, res.getString(R.string.radar_item_fixed), text))
         styled(res, lang, HaryanviLines.Event.ReportSaved, text)
         holdAnswer(shownAt)
@@ -1170,7 +1170,8 @@ class VoiceAssistant(private val app: DriveApp) {
             VoiceIntent.Gone.Jam -> app.roadReports.removeNear(setOf(com.vikash.ampli.drive.cameras.ReportKind.Jam), lat, lon)
         }
         if (removed > 0) share(if (what == VoiceIntent.Gone.Camera) "camera_gone" else what.name.lowercase() + "_gone", here)
-        val text = res.getString(
+        val text = spoken(
+            res, lang,
             when {
                 removed == 0 -> R.string.x_gone_nothing
                 what == VoiceIntent.Gone.Camera -> R.string.x_gone_camera
@@ -1191,7 +1192,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val hits = app.fuel.nearby(here.latitude, here.longitude, filter, limit = 5)
         val pump = com.vikash.ampli.drive.fuel.PumpQueues.pumpAt(hits)
         if (pump == null) {
-            val text = res.getString(R.string.x_queue_no_pump)
+            val text = spoken(res, lang, R.string.x_queue_no_pump)
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", text))
             speakAnswer(text, lang, emptyList(), standIn = null)
             holdAnswer(shownAt)
@@ -1226,7 +1227,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val fuel = com.vikash.ampli.drive.car.FuelDiary.fuelFor(said, fills)
         val fill = com.vikash.ampli.drive.car.FuelDiary.fill(r, l, fuel, fills, store.odometerKm.value, System.currentTimeMillis())
         if (fill == null) {
-            val text = res.getString(R.string.x_fuel_not_saved)
+            val text = spoken(res, lang, R.string.x_fuel_not_saved)
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Problem, title, "—", text))
             speakAnswer(text, lang, emptyList(), standIn = null)
             holdAnswer(shownAt)
@@ -1236,7 +1237,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val locale = res.resources.configuration.locales[0]
         val litresText = String.format(locale, "%.1f", fill.litres)
         val money = com.vikash.ampli.drive.ui.rupees(fill.rupees)
-        val text = res.getString(R.string.x_fuel_saved, money, litresText)
+        val text = spoken(res, lang, R.string.x_fuel_saved, money, litresText)
         val kmpl = com.vikash.ampli.drive.car.FuelDiary.lastKmPerLitre(store.fills.value, fuel)
         val detail = kmpl?.let { res.getString(R.string.x_diary_kmpl, String.format(locale, "%.1f", it)) } ?: text
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Fuel, title, money, detail))
@@ -1250,7 +1251,7 @@ class VoiceAssistant(private val app: DriveApp) {
         val n = app.extras.challanCount.value
         val title = res.getString(R.string.x_challan_title)
         if (n <= 0) {
-            val text = res.getString(R.string.x_challan_none)
+            val text = spoken(res, lang, R.string.x_challan_none)
             showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, title, "0", text))
             speakAnswer(text, lang, emptyList())
             holdAnswer(shownAt)
@@ -1258,7 +1259,7 @@ class VoiceAssistant(private val app: DriveApp) {
         }
         val low = com.vikash.ampli.drive.ui.rupees(com.vikash.ampli.drive.cameras.ChallanSaver.savedLow(n).toDouble())
         val high = com.vikash.ampli.drive.ui.rupees(com.vikash.ampli.drive.cameras.ChallanSaver.savedHigh(n).toDouble())
-        val text = res.getString(R.string.x_challan_answer, n, low, high)
+        val text = spoken(res, lang, R.string.x_challan_answer, n, low, high)
         showAnswer(VoiceAnswer(VoiceAnswer.Kind.Info, title, "$low – $high", res.getString(R.string.x_challan_assume)))
         speakAnswer(text, lang, emptyList())
         holdAnswer(shownAt)
@@ -1278,7 +1279,7 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             else -> {
                 app.hotspot.connectNow()
-                say(res, lang, res.getString(R.string.x_hotspot_joining, ssid))
+                say(res, lang, spoken(res, lang, R.string.x_hotspot_joining, ssid))
             }
         }
     }
@@ -1288,9 +1289,9 @@ class VoiceAssistant(private val app: DriveApp) {
         fun answer(meters: Double, limit: Int?): String {
             val km = String.format(locale, "%.1f", meters / 1000.0)
             return if (limit != null) {
-                res.getString(R.string.voice_camera_next_ahead, km, limit)
+                spoken(res, lang, R.string.voice_camera_next_ahead, km, limit)
             } else {
-                res.getString(R.string.voice_camera_next_ahead_nolimit, km)
+                spoken(res, lang, R.string.voice_camera_next_ahead_nolimit, km)
             }
         }
         // A live alert on screen is the best answer; otherwise search 20 km ahead in the database.
@@ -1352,7 +1353,7 @@ class VoiceAssistant(private val app: DriveApp) {
         if (!VoiceActions.hasAudioPermission(app)) {
             say(res, lang, R.string.voice_music_permission)
         } else {
-            say(res, lang, res.getString(R.string.voice_song_not_found, query))
+            say(res, lang, spoken(res, lang, R.string.voice_song_not_found, query))
         }
     }
 
@@ -1579,7 +1580,23 @@ class VoiceAssistant(private val app: DriveApp) {
         app.voicePlayer.say(desi)
     }
 
-    private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, res.getString(id))
+    private suspend fun say(res: Context, lang: String, @StringRes id: Int) = say(res, lang, spoken(res, lang, id))
+
+    /**
+     * What Ampli says for the string [id]: in the Haryanvi style on a Hindi or Haryanvi unit, the
+     * everyday Haryanvi reply from [DesiReplies] when it has one; otherwise the string itself.
+     */
+    private fun spoken(res: Context, lang: String, @StringRes id: Int, vararg args: Any): String {
+        if (app.desi.enabled && DesiReplies.appliesTo(lang)) {
+            val name = try {
+                res.resources.getResourceEntryName(id)
+            } catch (_: Exception) {
+                null
+            }
+            name?.let { DesiReplies.format(it, *args) }?.let { return it }
+        }
+        return if (args.isEmpty()) res.getString(id) else res.getString(id, *args)
+    }
 
     /**
      * "Screen band karo": the screen-off countdown shows and Ampli listens once for "radd karo".
