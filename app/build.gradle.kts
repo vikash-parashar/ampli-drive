@@ -64,6 +64,13 @@ android {
         buildConfigField("String", "OFFLINE_MAP_STYLE_URL", "\"${env("OFFLINE_MAP_STYLE_URL")}\"")
         // Small JSON on our own server that can move the servers above without an update (RemoteConfig).
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"${env("REMOTE_CONFIG_URL")}\"")
+        // "Hey Ampli, aaj ki taaza khabar": a public Hindi RSS feed whose headline titles are read out
+        // (voice/NewsRepository.kt). Default: PIB Hindi press releases, whose copyright policy allows
+        // free reproduction with the source credited (Ampli says "PIB ki taaza khabar" first).
+        // Override with the NEWS_FEED_URL environment variable or Gradle property (-PNEWS_FEED_URL= turns it off).
+        val newsFeedUrl = env("NEWS_FEED_URL").ifEmpty { (project.findProperty("NEWS_FEED_URL") as String?)?.trim()?.replace("\"", "") }
+            ?: "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3"
+        buildConfigField("String", "NEWS_FEED_URL", "\"$newsFeedUrl\"")
         // Pro launch offer line ("Launch price ₹1,499, later ₹2,500"). Set LAUNCH_OFFER=false when it ends.
         buildConfigField("boolean", "LAUNCH_OFFER", "${env("LAUNCH_OFFER") != "false"}")
 
