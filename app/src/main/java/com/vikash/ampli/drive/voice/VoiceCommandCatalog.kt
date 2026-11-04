@@ -22,8 +22,8 @@ object VoiceCommandCatalog {
             R.string.voice_cmds_music,
             listOf(
                 item("Play", "Gaana chalao", "गाना बजाओ"),
-                item("Pause", "Gaana band karo", "गाना रोको"),
-                item("Stop", "Ruko", "बंद करो"),
+                item("Pause", "Gaana band karo", "गाना रोक दे"),
+                item("Stop", "Rok de", "चुप कर जा"),
                 item("Play next song", "Agla gaana", "अगला गाना"),
                 item("Previous", "Pichla gaana", "पिछला गाना"),
                 item("Play Kesariya", "Kesariya bajao", "केसरिया लगाओ"),
@@ -48,6 +48,8 @@ object VoiceCommandCatalog {
                 item("How is the weather?", "Mausam kaisa hai?", "मौसम कैसा है?"),
                 item("Will it rain?", "Baarish hogi kya?", "बारिश होगी?"),
                 item("What's my speed?", "Speed kitni hai?", "स्पीड कितनी है?"),
+                item("How is today?", "Aaj ka din kaisa hai?", "आज का दिन कैसा है?"),
+                item("Tell me the news", "Aaj ki taaza khabar", "समाचार सुनाओ"),
             ),
         ),
         Group(
@@ -112,6 +114,7 @@ object VoiceCommandCatalog {
                 item("Report a problem", "शिकायत"),
                 item("What can I say?", "Kya kya bol sakte hain?", "Cancel"),
                 item("How are you?", "Tell me a joke", "चुटकुला सुनाओ"),
+                item("Thank you", "Hasa de", "बोर हो रहा हूँ"),
             ),
         ),
     )
