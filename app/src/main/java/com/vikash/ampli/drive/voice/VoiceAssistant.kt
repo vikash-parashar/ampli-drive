@@ -98,10 +98,20 @@ class VoiceAssistant(private val app: DriveApp) {
      * (offline, commands are tried first and "where to?" is asked only when none is heard);
      * [Destination]: a place name after "where to?" (commands still win when one is said).
      */
-    private enum class Expect { Nothing, Open, Destination, Choice, MoreVolume }
+    private enum class Expect { Nothing, Open, Destination, Choice, MoreVolume, MoreJoke, MoreNews, OfferJoke }
 
     /** The last volume change, for a follow-up "aur" / "more". */
     private var lastVolume = VoiceIntent.VolumeAction.Show
+
+    /** Conversation: varied lines, the joke deck (no repeats), the headlines read so far. */
+    private val chatPicker = ChatPicker()
+    private val jokes = JokeDeck()
+    private val news by lazy { NewsRepository(app) }
+    private var newsFetchedAt = 0L
+    private var newsNext = 0
+
+    /** What "ek aur" / "aur suna" continues when said on its own: the news or (default) a joke. */
+    private var lastChat = Expect.MoreJoke
 
     /**
      * When the last session that ran a command ended (elapsedRealtime; 0 = never). The wake word
@@ -318,8 +328,8 @@ class VoiceAssistant(private val app: DriveApp) {
                     return
                 }
                 Listener.Result.Silence -> {
-                    // After a volume change, silence just means "that's enough".
-                    if (expect == Expect.MoreVolume) return
+                    // After a volume change, a joke or the news, silence just means "that's enough".
+                    if (expect == Expect.MoreVolume || expect == Expect.MoreJoke || expect == Expect.MoreNews) return
                     // Ampli said something and heard nothing back: one short line, then close.
                     // After a bare beep (usually a false wake) it stays quiet.
                     if (FollowUp.onSilence(spokeLine || expect != Expect.Nothing) == FollowUp.Silence.CloseWithLine) {
@@ -340,13 +350,17 @@ class VoiceAssistant(private val app: DriveApp) {
             }
             val quality = (result as? Listener.Result.Heard)?.quality
             _state.update { it.copy(heard = text, phase = VoiceUiState.Phase.Working) }
-            val intent = VoiceIntents.parse(text, parserLang, expectingChoice = expect == Expect.Choice)
+            var intent = VoiceIntents.parse(text, parserLang, expectingChoice = expect == Expect.Choice)
+            intent = chatFollowUp(intent, text, expect)
             VoiceDebugLog.add("intent: $intent")
             // A plain answer to Ampli's question ("haan", "badhiya", "sab theek", "nahi"): never a
             // place search. Fine → ask where to; no → OK, and close.
             if (intent is VoiceIntent.Unknown && expect != Expect.Choice && expect != Expect.MoreVolume) {
                 when (FollowUp.reply(text)) {
-                    FollowUp.Reply.Fine -> {
+                    // "Badhiya" after a joke or the news: that was enough, no "where to?".
+                    FollowUp.Reply.Fine -> if (expect == Expect.MoreJoke || expect == Expect.MoreNews) {
+                        return
+                    } else {
                         styled(res, lang, HaryanviLines.Event.AskDestination, res.getString(R.string.voice_where_to))
                         expect = Expect.Destination
                         return@repeat
@@ -492,7 +506,8 @@ class VoiceAssistant(private val app: DriveApp) {
                         Expect.Choice
                     }
                 }
-                Expect.Nothing -> {
+                // After a joke or the news nothing is searched: an unclear word is no place name.
+                Expect.Nothing, Expect.MoreJoke, Expect.MoreNews, Expect.OfferJoke -> {
                     styled(res, lang, HaryanviLines.Event.NotUnderstood, res.getString(R.string.voice_not_understood))
                     null
                 }
@@ -626,6 +641,11 @@ class VoiceAssistant(private val app: DriveApp) {
                 dateAnswer(res, lang)
                 return null
             }
+            VoiceIntent.DayToday -> {
+                dayAnswer(res, lang)
+                return null
+            }
+            is VoiceIntent.News -> return newsAnswer(intent.more, res, lang)
             is VoiceIntent.Weather -> {
                 weatherAnswer(intent.rain, res, lang)
                 return null
@@ -1363,23 +1383,167 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     /**
-     * "के हाल सै?", "कौन सै तू?", "चुटकला सुणा". Haryanvi desi lines; the Standard style answers
-     * plainly (how are you gets the usual greeting, as before).
+     * Small talk: "के हाल सै?", "कौन सै तू?", "चुटकला सुणा", "thank you", "bore ho raha hoon",
+     * "ek aur". Varied lines from [ChatLines] and [Jokes] in the phone voice; on a unit that cannot
+     * speak at all, the recorded Haryanvi lines (how are you, who are you, a joke) as before.
      */
-    private suspend fun smallTalk(kind: VoiceIntent.Talk, res: Context, lang: String): Expect? = when (kind) {
-        VoiceIntent.Talk.HowAreYou -> {
-            val desi = app.desi.line(HaryanviLines.Event.TalkHowAreYou)
-            if (desi != null) speakDesi(desi) else say(res, lang, greeting(res))
-            Expect.Open
+    private suspend fun smallTalk(kind: VoiceIntent.Talk, res: Context, lang: String): Expect? {
+        val (script, voice) = chatScript(lang)
+        return when (kind) {
+            VoiceIntent.Talk.HowAreYou -> {
+                chat(ChatLines.howAreYou(LocalTime.now().hour, script, chatPicker), voice) {
+                    val desi = app.desi.line(HaryanviLines.Event.TalkHowAreYou)
+                    if (desi != null) speakDesi(desi) else say(res, lang, greeting(res))
+                }
+                Expect.Open
+            }
+            VoiceIntent.Talk.WhoAreYou -> {
+                chat(chatPicker.pick(ChatLines.Topic.WhoAreYou).text(script), voice) {
+                    styled(res, lang, HaryanviLines.Event.TalkWhoAreYou, res.getString(R.string.voice_who_am_i))
+                }
+                null
+            }
+            VoiceIntent.Talk.Joke -> tellJoke(script, voice, res, lang)
+            VoiceIntent.Talk.Thanks -> {
+                chat(chatPicker.pick(ChatLines.Topic.Thanks).text(script), voice)
+                null
+            }
+            VoiceIntent.Talk.Bored -> {
+                // Ends in "chutkula suna doon?": a "haan" then tells one ([chatFollowUp]).
+                chat(chatPicker.pick(ChatLines.Topic.Bored).text(script), voice)
+                Expect.OfferJoke
+            }
+            VoiceIntent.Talk.More -> if (lastChat == Expect.MoreNews) newsAnswer(more = true, res = res, lang = lang) else tellJoke(script, voice, res, lang)
         }
-        VoiceIntent.Talk.WhoAreYou -> {
-            styled(res, lang, HaryanviLines.Event.TalkWhoAreYou, res.getString(R.string.voice_who_am_i))
-            null
+    }
+
+    /**
+     * What a short answer means right after Ampli's own line: "ek aur" / "aur suna" after a joke
+     * or the news is one more of the same, "haan" after "chutkula suna doon?" is a joke, and
+     * "one more" after a volume change stays the volume's "aur".
+     */
+    private fun chatFollowUp(intent: VoiceIntent, text: String, expect: Expect): VoiceIntent = when (expect) {
+        Expect.MoreVolume -> if (intent == VoiceIntent.SmallTalk(VoiceIntent.Talk.More)) VoiceIntent.Unknown(text) else intent
+        Expect.MoreJoke -> if (VoiceIntents.asksForMore(text)) VoiceIntent.SmallTalk(VoiceIntent.Talk.Joke) else intent
+        Expect.MoreNews -> if (VoiceIntents.asksForMore(text)) VoiceIntent.News(more = true) else intent
+        Expect.OfferJoke -> if (FollowUp.reply(text) == FollowUp.Reply.Fine || VoiceIntents.asksForMore(text)) {
+            VoiceIntent.SmallTalk(VoiceIntent.Talk.Joke)
+        } else {
+            intent
         }
-        VoiceIntent.Talk.Joke -> {
+        else -> intent
+    }
+
+    /**
+     * Which wording the conversation lines use and the voice that says them: Haryanvi in
+     * Devanagari with the Hindi voice, else in Latin letters with the Indian English voice; plain
+     * English when the app is in English and the Haryanvi style is off.
+     */
+    private suspend fun chatScript(lang: String): Pair<ChatLines.Script, String> {
+        val parser = VoiceLocales.parserLanguage(lang)
+        if (!app.desi.enabled && parser != "hi") return ChatLines.Script.English to (if (parser == "en") lang else "en")
+        return if (speaker.hasVoice(HINDI)) ChatLines.Script.Deva to "hi" else ChatLines.Script.Roman to "en-IN"
+    }
+
+    /**
+     * Says a conversation line in the phone voice. On a unit that cannot speak at all, [fallback]
+     * (a recorded line) when there is one; else the line stays on screen a moment.
+     */
+    private suspend fun chat(text: String, voice: String, fallback: (suspend () -> Unit)? = null) {
+        if (fallback != null && !app.voicePlayer.ttsAvailable()) {
+            fallback()
+            return
+        }
+        speaking(text)
+        speaker.say(text, voice)
+    }
+
+    /** "Chutkula suna": the next joke from the deck, then Ampli listens for "ek aur". */
+    private suspend fun tellJoke(script: ChatLines.Script, voice: String, res: Context, lang: String): Expect {
+        lastChat = Expect.MoreJoke
+        chat(jokes.next().text(script), voice) {
             styled(res, lang, HaryanviLines.Event.TalkJoke, res.getString(R.string.voice_joke))
-            null
         }
+        return Expect.MoreJoke
+    }
+
+    /**
+     * "Aaj ka din kaisa hai": the date and vaar, the day's deity (as the bhajan feature has it),
+     * the real weather where the car is (or plainly why there is none) and a driving wish.
+     */
+    private suspend fun dayAnswer(res: Context, lang: String) {
+        val shownAt = System.currentTimeMillis()
+        val (script, voice) = chatScript(lang)
+        val today = java.time.LocalDate.now()
+        val locale = dateLocale(res)
+        val big = today.format(java.time.format.DateTimeFormatter.ofPattern("d MMMM", locale))
+        val full = today.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(locale))
+        showAnswer(VoiceAnswer(VoiceAnswer.Kind.Date, res.getString(R.string.voice_answer_date), big, full))
+        val here = app.speedTracker.state.value.location
+        val weather = if (here == null) {
+            ChatLines.DayWeather.NoLocation
+        } else {
+            _state.update { it.copy(phase = VoiceUiState.Phase.Working) }
+            when (val r = app.nowWeather.get(here.latitude, here.longitude)) {
+                is com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Ok -> ChatLines.DayWeather.Now(
+                    r.weather.sky,
+                    r.weather.temperatureC?.let { kotlin.math.round(it).toInt() },
+                    r.weather.rainLikely,
+                )
+                com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Offline -> ChatLines.DayWeather.Offline
+                com.vikash.ampli.drive.weather.NowWeatherRepository.Result.Failed -> ChatLines.DayWeather.Failed
+            }
+        }
+        chat(ChatLines.dayAnswer(today, weather, script, chatPicker), voice)
+        holdAnswer(shownAt)
+    }
+
+    /**
+     * "Aaj ki taaza khabar": the first [NewsFeed.BATCH] headline titles of the public feed, the
+     * source said first; "aur khabar" reads the next ones. Offline or a failed fetch says so;
+     * nothing is ever made up. The headlines are Hindi: without a Hindi voice they are shown.
+     */
+    private suspend fun newsAnswer(more: Boolean, res: Context, lang: String): Expect? {
+        var (script, voice) = chatScript(lang)
+        _state.update { it.copy(phase = VoiceUiState.Phase.Working) }
+        val r = news.get()
+        if (r !is NewsRepository.Result.Ok) {
+            val topic = when (r) {
+                NewsRepository.Result.Offline -> ChatLines.Topic.NewsOffline
+                NewsRepository.Result.NotSetUp -> ChatLines.Topic.NewsNotSetUp
+                else -> ChatLines.Topic.NewsFailed
+            }
+            chat(chatPicker.pick(topic).text(script), voice)
+            return null
+        }
+        if (r.fetchedAt != newsFetchedAt || !more) {
+            newsFetchedAt = r.fetchedAt
+            newsNext = 0
+        }
+        val batch = NewsFeed.batch(r.titles, newsNext)
+        if (batch.isEmpty()) {
+            chat(chatPicker.pick(ChatLines.Topic.NewsEnd).text(script), voice)
+            return null
+        }
+        val first = newsNext == 0
+        newsNext += batch.size
+        val moreLeft = newsNext < r.titles.size
+        lastChat = Expect.MoreNews
+        val devanagari = batch.any { t -> t.any { it in '\u0900'..'\u097F' } }
+        if (devanagari && script != ChatLines.Script.Deva) {
+            if (speaker.hasVoice(HINDI)) {
+                script = ChatLines.Script.Deva
+                voice = "hi"
+            } else {
+                // No voice can read Hindi headlines: say so, and leave them on screen to read.
+                chat(chatPicker.pick(ChatLines.Topic.NewsNoHindiVoice).text(script), voice)
+                _state.update { it.copy(reply = NewsFeed.speech(r.source, batch, ChatLines.Script.Deva, first, moreLeft = false)) }
+                kotlinx.coroutines.delay(ANSWER_HOLD_MS)
+                return if (moreLeft) Expect.MoreNews else null
+            }
+        }
+        chat(NewsFeed.speech(r.source, batch, script, first, moreLeft), voice)
+        return if (moreLeft) Expect.MoreNews else null
     }
 
     /** Music keys by voice, with the desi acknowledgement when that style is on. */
@@ -1485,6 +1649,8 @@ class VoiceAssistant(private val app: DriveApp) {
 
     private companion object {
         const val MAX_TURNS = 4
+
+        val HINDI: Locale = Locale.forLanguageTag("hi-IN")
 
         /** How long an error stays on screen before the overlay closes. */
         const val ERROR_SHOW_MS = 3_000L
