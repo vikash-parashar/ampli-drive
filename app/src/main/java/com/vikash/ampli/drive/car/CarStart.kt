@@ -335,7 +335,8 @@ object CarStart {
      * Music in the chosen app: open it, then press "play" through its media session, a media
      * button sent to it, or the system's last media app, whichever works.
      */
-    private suspend fun startMusic(context: Context, app: DriveApp, preferred: String? = null) {
+    /** Opens the music app ([preferred], the driver's pick, Ampli MP3 or a guess) and presses play. */
+    internal suspend fun startMusic(context: Context, app: DriveApp, preferred: String? = null) {
         app.prefs.applyMusicDefault { AmpliMusic.installed(context) }
         val pkg = preferred?.takeIf { context.packageManager.getLaunchIntentForPackage(it) != null }
             ?: app.prefs.musicPackage.value

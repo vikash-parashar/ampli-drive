@@ -19,14 +19,15 @@ data class Place(
 )
 
 /**
- * Destination search through Photon (OpenStreetMap geocoding with location bias).
+ * Destination search through Photon (OpenStreetMap geocoding with location bias). Results farther
+ * than [PlaceFilter.MAX_KM] from the car (outside India without a fix) are never offered.
  *
  * The endpoint comes from RemoteConfig (BuildConfig.GEOCODER_URL underneath). Release builds must
  * point it at our own Photon (deploy/osrm-photon); only debug builds default to the public komoot
  * server, which is for light testing and not allowed for a paid app.
  */
 object PlaceSearch {
-    private const val FETCH = 5
+    private const val FETCH = 8
     const val KEEP = 3
 
     /** Throws IOException on network trouble; an empty list means nothing matched. */
@@ -34,7 +35,10 @@ object PlaceSearch {
         val endpoint = com.vikash.ampli.drive.config.RemoteConfig.current().geocoderUrl
         if (endpoint.isBlank()) throw java.io.IOException("Place search server not configured")
         val q = URLEncoder.encode(query, "UTF-8")
-        val bias = if (near != null) "&lat=${near.latitude}&lon=${near.longitude}" else ""
+        // Biased to the car and boxed to [PlaceFilter.MAX_KM] around it (India without a fix), so a
+        // misheard word never lists places on another continent; [parse] drops any that slip by.
+        val bias = (if (near != null) "&lat=${near.latitude}&lon=${near.longitude}" else "") +
+            "&bbox=" + PlaceFilter.bbox(near?.latitude, near?.longitude)
         val url = URL("$endpoint${if (endpoint.contains('?')) "&" else "?"}q=$q$bias&limit=$FETCH")
         val conn = url.openConnection() as HttpURLConnection
         try {
@@ -72,6 +76,7 @@ object PlaceSearch {
                 Location.distanceBetween(it.latitude, it.longitude, lat, lon, r)
                 r[0] / 1000.0
             }
+            if (!PlaceFilter.keep(lat, lon, km, p.str("countrycode"))) continue
             out += Place(name, area, lat, lon, km)
         }
         // Same place twice (a node and a way): keep the first.
