@@ -265,7 +265,7 @@ class AssistantChatLinesTest {
             assertFalse(s, s.startsWith("Mausam:") || s.contains("Mausam: "))
             assertTrue(s, s.contains("Budhvaar") && s.contains("Ganesh ji"))
         }
-        assertTrue(ChatLines.dayAnswer(day, ChatLines.DayWeather.Offline, ChatLines.Script.Roman, p).contains("net kona chal rya"))
+        assertTrue(ChatLines.dayAnswer(day, ChatLines.DayWeather.Offline, ChatLines.Script.Roman, p).contains("net koni chaal raya"))
     }
 }
 
@@ -397,7 +397,7 @@ class NewsFeedTest {
     @Test
     fun offlineSaysSoHonestly() {
         val lines = ChatLines.lines(ChatLines.Topic.NewsOffline)
-        assertTrue(lines.any { it.roman == "Net kona chal rya, khabar na mil saki." })
+        assertTrue(lines.any { it.roman == "Net koni chaal raya, khabar koni mili." })
         for (l in lines + ChatLines.lines(ChatLines.Topic.NewsFailed)) {
             // No headline, no source: just why there is none.
             assertTrue(l.roman, l.roman.contains("khabar", ignoreCase = true) || l.roman.contains("net", ignoreCase = true))
