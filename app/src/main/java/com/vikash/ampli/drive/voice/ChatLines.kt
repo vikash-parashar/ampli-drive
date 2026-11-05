@@ -8,8 +8,10 @@ import kotlin.random.Random
 
 /**
  * Ampli's conversation lines (Hey Ampli small talk, "aaj ka din kaisa hai", the news and the
- * jokes' companions), plain Kotlin and unit-tested. They are spoken by the phone voice (TTS), so
- * unlike [HaryanviLines] they have no recordings and can be changed freely.
+ * jokes' companions), plain Kotlin and unit-tested. Each line without a blank is in the voice
+ * pack ([BankClips], ids "chat_<topic>_<nn>"): the recorded voice says it when its clip is bundled
+ * and up to date, else the phone voice (TTS). An edited line falls back to TTS until it is
+ * recorded again.
  *
  * Each [Line] has [Line.deva] for the Hindi voice, [Line.roman] for the English voice when the
  * unit has no Hindi voice, and [Line.en], spoken when the app is in English and the Haryanvi
@@ -246,7 +248,10 @@ object ChatLines {
 
     /** "Ke haal sai" answered with the time-of-day greeting first: "Subah ki Ram Ram! Main to ekdam badhiya sun…". */
     fun howAreYou(hour: Int, script: Script, picker: ChatPicker): String =
-        picker.pick(timeOfDay(hour)).text(script) + " " + picker.pick(Topic.HowAreYou).text(script)
+        howAreYou(picker.pick(timeOfDay(hour)), picker.pick(Topic.HowAreYou), script)
+
+    /** [greeting] (the time of day) then [answer] (a [Topic.HowAreYou] line). */
+    fun howAreYou(greeting: Line, answer: Line, script: Script): String = greeting.text(script) + " " + answer.text(script)
 }
 
 /**

@@ -6,7 +6,8 @@ import kotlin.random.Random
 /**
  * Ampli's own short jokes ("chutkula suna", "hasa de"): original, family-safe, about cars, chai,
  * traffic, the weather, family and the village. No caste, religion, gender or body jokes and no
- * politics; AssistantChatTest checks a banned-word list over all of them.
+ * politics; AssistantChatTest checks a banned-word list over all of them. Each is in the voice
+ * pack ([BankClips], "joke_<nn>" by position): recorded when its clip is up to date, else TTS.
  */
 object Jokes {
     val ALL: List<Line> = listOf(

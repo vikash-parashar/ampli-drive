@@ -94,11 +94,13 @@ jobs:
           MALE_OWNER: ${{ needs.list-voices.outputs.male_owner }}
           FEMALE_ID: ${{ needs.list-voices.outputs.female_id }}
           FEMALE_OWNER: ${{ needs.list-voices.outputs.female_owner }}
-          # Character budget per run (the Starter plan has a monthly quota). Repo variable VOICE_MAX_CHARS
-          # overrides it; 0 means no limit.
-          VOICE_MAX_CHARS: ${{ vars.VOICE_MAX_CHARS || '3000' }}
+          # Character budget per run (the Starter plan has a monthly quota): max_chars in the committed
+          # voice/voice-pack-run.json, else repo variable VOICE_MAX_CHARS, else 3000; 0 means no limit.
+          VOICE_MAX_CHARS: ${{ vars.VOICE_MAX_CHARS }}
+          # Voices: the dispatch input, else "voices" in voice/voice-pack-run.json, else male,female.
+          VOICES: ${{ inputs.voices }}
         run: |
-          python3 scripts/voice_pack.py generate --voices "${{ inputs.voices || 'male,female' }}" \
+          python3 scripts/voice_pack.py generate ${VOICES:+--voices "$VOICES"} \
             ${{ (github.event_name == 'push' || inputs.only_missing) && '--only-missing' || '' }}
 
       - name: Open a PR with the clips
