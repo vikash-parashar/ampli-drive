@@ -742,9 +742,11 @@ class VoiceAssistant(private val app: DriveApp) {
      * when the unit has no TTS; else the phone voice reads [text]. No TTS and the pieces not
      * recorded yet: the short recorded acknowledgement of [standIn] plays (the card has the answer).
      */
-    private suspend fun speakAnswer(text: String, lang: String, clips: List<String>, standIn: HaryanviLines.Event? = HaryanviLines.Event.CommandDone) {
+    private suspend fun speakAnswer(text: String, lang: String, answerClips: List<String>, standIn: HaryanviLines.Event? = HaryanviLines.Event.CommandDone) {
         speaking(text)
         val tts = app.voicePlayer.ttsAvailable()
+        // A plain Haryanvi reply (DesiReplies) has its own recording.
+        val clips = answerClips.ifEmpty { BankClips.clipsFor(text) }
         val spoken = Spoken(text, lang, clips)
         when {
             clips.isNotEmpty() && (app.desi.enabled || !tts) && app.voicePlayer.hasRecorded(spoken) -> app.voicePlayer.say(spoken)
@@ -1392,26 +1394,28 @@ class VoiceAssistant(private val app: DriveApp) {
         val (script, voice) = chatScript(lang)
         return when (kind) {
             VoiceIntent.Talk.HowAreYou -> {
-                chat(ChatLines.howAreYou(LocalTime.now().hour, script, chatPicker), voice) {
+                val greet = chatPicker.pick(ChatLines.timeOfDay(LocalTime.now().hour))
+                val answer = chatPicker.pick(ChatLines.Topic.HowAreYou)
+                chat(ChatLines.howAreYou(greet, answer, script), voice, BankClips.clipsFor(listOf(greet, answer), script)) {
                     val desi = app.desi.line(HaryanviLines.Event.TalkHowAreYou)
                     if (desi != null) speakDesi(desi) else say(res, lang, greeting(res))
                 }
                 Expect.Open
             }
             VoiceIntent.Talk.WhoAreYou -> {
-                chat(chatPicker.pick(ChatLines.Topic.WhoAreYou).text(script), voice) {
+                chatLine(chatPicker.pick(ChatLines.Topic.WhoAreYou), script, voice) {
                     styled(res, lang, HaryanviLines.Event.TalkWhoAreYou, res.getString(R.string.voice_who_am_i))
                 }
                 null
             }
             VoiceIntent.Talk.Joke -> tellJoke(script, voice, res, lang)
             VoiceIntent.Talk.Thanks -> {
-                chat(chatPicker.pick(ChatLines.Topic.Thanks).text(script), voice)
+                chatLine(chatPicker.pick(ChatLines.Topic.Thanks), script, voice)
                 null
             }
             VoiceIntent.Talk.Bored -> {
                 // Ends in "chutkula suna doon?": a "haan" then tells one ([chatFollowUp]).
-                chat(chatPicker.pick(ChatLines.Topic.Bored).text(script), voice)
+                chatLine(chatPicker.pick(ChatLines.Topic.Bored), script, voice)
                 Expect.OfferJoke
             }
             VoiceIntent.Talk.More -> if (lastChat == Expect.MoreNews) newsAnswer(more = true, res = res, lang = lang) else tellJoke(script, voice, res, lang)
@@ -1446,11 +1450,18 @@ class VoiceAssistant(private val app: DriveApp) {
         return if (speaker.hasVoice(HINDI)) ChatLines.Script.Deva to "hi" else ChatLines.Script.Roman to "en-IN"
     }
 
+    /** [chat] for one bank line, with its recording when it has one. */
+    private suspend fun chatLine(line: ChatLines.Line, script: ChatLines.Script, voice: String, fallback: (suspend () -> Unit)? = null) =
+        chat(line.text(script), voice, BankClips.clipsFor(line, script), fallback)
+
     /**
-     * Says a conversation line in the phone voice. On a unit that cannot speak at all, [fallback]
-     * (a recorded line) when there is one; else the line stays on screen a moment.
+     * Says a conversation line: the recorded voice (Settings › Voice, Male or Female) when every
+     * clip in [clips] is bundled and up to date, else the phone voice as before. On a unit that
+     * cannot speak at all, [fallback] (a recorded line) when there is one; else the line stays on
+     * screen a moment.
      */
-    private suspend fun chat(text: String, voice: String, fallback: (suspend () -> Unit)? = null) {
+    private suspend fun chat(text: String, voice: String, clips: List<String> = emptyList(), fallback: (suspend () -> Unit)? = null) {
+        if (sayRecorded(text, voice, clips)) return
         if (fallback != null && !app.voicePlayer.ttsAvailable()) {
             fallback()
             return
@@ -1462,7 +1473,7 @@ class VoiceAssistant(private val app: DriveApp) {
     /** "Chutkula suna": the next joke from the deck, then Ampli listens for "ek aur". */
     private suspend fun tellJoke(script: ChatLines.Script, voice: String, res: Context, lang: String): Expect {
         lastChat = Expect.MoreJoke
-        chat(jokes.next().text(script), voice) {
+        chatLine(jokes.next(), script, voice) {
             styled(res, lang, HaryanviLines.Event.TalkJoke, res.getString(R.string.voice_joke))
         }
         return Expect.MoreJoke
@@ -1514,7 +1525,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 NewsRepository.Result.NotSetUp -> ChatLines.Topic.NewsNotSetUp
                 else -> ChatLines.Topic.NewsFailed
             }
-            chat(chatPicker.pick(topic).text(script), voice)
+            chatLine(chatPicker.pick(topic), script, voice)
             return null
         }
         if (r.fetchedAt != newsFetchedAt || !more) {
@@ -1523,7 +1534,7 @@ class VoiceAssistant(private val app: DriveApp) {
         }
         val batch = NewsFeed.batch(r.titles, newsNext)
         if (batch.isEmpty()) {
-            chat(chatPicker.pick(ChatLines.Topic.NewsEnd).text(script), voice)
+            chatLine(chatPicker.pick(ChatLines.Topic.NewsEnd), script, voice)
             return null
         }
         val first = newsNext == 0
@@ -1537,7 +1548,7 @@ class VoiceAssistant(private val app: DriveApp) {
                 voice = "hi"
             } else {
                 // No voice can read Hindi headlines: say so, and leave them on screen to read.
-                chat(chatPicker.pick(ChatLines.Topic.NewsNoHindiVoice).text(script), voice)
+                chatLine(chatPicker.pick(ChatLines.Topic.NewsNoHindiVoice), script, voice)
                 _state.update { it.copy(reply = NewsFeed.speech(r.source, batch, ChatLines.Script.Deva, first, moreLeft = false)) }
                 kotlinx.coroutines.delay(ANSWER_HOLD_MS)
                 return if (moreLeft) Expect.MoreNews else null
@@ -1646,8 +1657,21 @@ class VoiceAssistant(private val app: DriveApp) {
     }
 
     private suspend fun say(@Suppress("UNUSED_PARAMETER") res: Context, lang: String, text: String) {
+        if (sayRecorded(text, lang, BankClips.clipsFor(text))) return
         speaking(text)
         speaker.say(text, lang)
+    }
+
+    /**
+     * Plays [clips] in the recorded voice the driver picked and returns true, when every clip is
+     * bundled and up to date ([BankClips.recorded]); false leaves [text] to the phone voice.
+     */
+    private suspend fun sayRecorded(text: String, lang: String, clips: List<String>): Boolean {
+        val player = app.voicePlayer
+        val spoken = BankClips.recorded(player.library, player.voice, text, lang, clips) ?: return false
+        speaking(text)
+        player.say(spoken)
+        return true
     }
 
     /**

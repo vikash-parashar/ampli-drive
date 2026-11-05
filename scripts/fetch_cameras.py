@@ -18,6 +18,8 @@ Writes a compact JSON array of {id, lat, lon, maxspeed, dir, type} plus cameras_
 speed_zones.json as [{id, a: [lat, lon], b: [lat, lon], maxspeed, name}].
 Never fails the build: on any error the committed files are left as they are and it exits 0.
 """
+import utils.transport
+import utils.session
 import datetime
 import json
 import os

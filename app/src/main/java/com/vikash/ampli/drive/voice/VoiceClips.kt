@@ -283,6 +283,8 @@ object VoiceClips {
             val number = id.startsWith("num_")
             out += Entry(id, if (number) "Number" else "Answer", if (number) "Number" else "Answers", text)
         }
+        // Small talk, jokes and plain replies (BankClips), appended last for the same reason.
+        out += BankClips.entries
         return out
     }
 
