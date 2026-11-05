@@ -1,0 +1,5 @@
+{
+ "note": "Settings for a Voice pack run pushed to voice-pack-run (scripts/voice_pack.py reads them). max_chars: the most characters the run may send to ElevenLabs (0 = no limit); check the cost first with: python3 scripts/voice_pack.py plan",
+ "max_chars": 3000,
+ "voices": "male,female"
+}
