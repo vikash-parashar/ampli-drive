@@ -5,7 +5,10 @@
       Prints Hindi / Indian male and female candidates (your voices and the shared library) and,
       for the workflow, picks a default for each gender when the VOICE_ID_* variables are empty.
 
-  voice_pack.py generate --voices male,female [--only-missing]
+  voice_pack.py plan [--voices male,female] [--all]
+      Prints how many clips and characters a run would record, without calling the API.
+
+  voice_pack.py generate [--voices male,female] [--only-missing] [--max-chars N]
       Reads voice/lines.json (generated from HaryanviLines.kt), records each line in each voice
       (model eleven_v3, Hindi), converts to mono 24 kHz Opus/Ogg ~24 kbps with ffmpeg and writes
       app/src/main/assets/voice/<voice>/<id>.ogg plus clips.json (id -> hash of the text recorded).
@@ -31,6 +34,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LINES = os.path.join(ROOT, "voice", "lines.json")
 ASSETS = os.path.join(ROOT, "app", "src", "main", "assets", "voice")
 MODEL = "eleven_v3"
+# Committed per-run settings (budget, voices), so a run pushed to voice-pack-run can be sized
+# without the repository-variables API. See read_run_config().
+RUN_CONFIG = os.path.join(ROOT, "voice", "voice-pack-run.json")
 
 # Light delivery tags (eleven_v3 audio tags, not spoken). Fragments that get stitched together
 # (distances, turn tails, turn instructions) get none, so the pieces sound alike.
@@ -49,6 +55,7 @@ TAG_BY_EVENT = {
 }
 TAG_BY_GROUP = {
     "Welcome": "[excited]",
+    "Jokes": "[playfully]",
     "Car": "[concerned]",
     "Music": "[cheerfully]",
 }
@@ -431,17 +438,72 @@ def save_index(path, vid, settings, clips):
         f.write("\n")
 
 
+def read_run_config():
+    """voice/voice-pack-run.json: {"max_chars": N, "voices": "male,female"}. Missing file = {}."""
+    if not os.path.exists(RUN_CONFIG):
+        return {}
+    with open(RUN_CONFIG, encoding="utf-8") as f:
+        cfg = json.load(f)
+    if not isinstance(cfg, dict):
+        raise SystemExit(f"{RUN_CONFIG}: expected a JSON object")
+    return cfg
+
+
+def default_max_chars(cfg):
+    """The committed budget wins, then VOICE_MAX_CHARS (repo variable), else 3000. 0 = no limit."""
+    if "max_chars" in cfg:
+        return int(cfg["max_chars"])
+    env = os.environ.get("VOICE_MAX_CHARS", "").strip()
+    return int(env) if env else 3000
+
+
+def plan(voices, only_missing=True):
+    """[(voice, clips to record, characters)] without calling the API (voice changes not known here)."""
+    manifest = json.load(open(LINES, encoding="utf-8"))["lines"]
+    out = []
+    for voice in voices:
+        entries = [e for e in manifest if e.get("voice") in (None, voice)]
+        folder = os.path.join(ASSETS, voice)
+        index_path = os.path.join(folder, "clips.json")
+        clips = (json.load(open(index_path, encoding="utf-8")).get("clips", {}) if os.path.exists(index_path) else {})
+        todo = [e for e in entries
+                if not (only_missing and os.path.exists(os.path.join(folder, e["id"] + ".ogg")) and clips.get(e["id"]) == e["hash"])]
+        out.append((voice, len(todo), sum(len(tagged(e)) for e in todo)))
+    return out
+
+
+def cmd_plan(args):
+    voices = [v.strip() for v in args.voices.split(",") if v.strip()]
+    total = 0
+    for (voice, n, chars), (_, n_all, chars_all) in zip(plan(voices, not args.all), plan(voices, False)):
+        index_path = os.path.join(ASSETS, voice, "clips.json")
+        vid = json.load(open(index_path, encoding="utf-8")).get("voice_id") if os.path.exists(index_path) else None
+        print(f"{voice}: {n} clips to record, {chars} characters with the voice in clips.json ({vid}); "
+              f"a different voice id records all {n_all} clips, {chars_all} characters")
+        total += chars
+    print(f"total: {total} characters")
+
+
 def main():
+    cfg = read_run_config()
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list-voices")
     g = sub.add_parser("generate")
-    g.add_argument("--voices", default="male,female")
+    g.add_argument("--voices", default=None, help="Default: voices in voice/voice-pack-run.json, else male,female")
     g.add_argument("--only-missing", action="store_true")
-    g.add_argument("--max-chars", type=int, default=int(os.environ.get("VOICE_MAX_CHARS") or 0),
-                   help="Stop before a voice whose clips would push the run over this many characters (0 = no limit)")
+    g.add_argument("--max-chars", type=int, default=default_max_chars(cfg),
+                   help="Stop before a voice whose clips would push the run over this many characters (0 = no "
+                        "limit). Default: max_chars in voice/voice-pack-run.json, else VOICE_MAX_CHARS, else 3000")
+    pl = sub.add_parser("plan", help="Print the clips and characters a run would record (no API calls)")
+    pl.add_argument("--voices", default="male,female")
+    pl.add_argument("--all", action="store_true", help="Count every line, not only the missing ones")
     args = p.parse_args()
-    {"list-voices": cmd_list_voices, "generate": cmd_generate}[args.cmd](args)
+    if args.cmd == "generate" and not args.voices:
+        args.voices = str(cfg.get("voices") or "male,female")
+    if args.cmd == "generate":
+        print(f"Budget for this run: {args.max_chars or 'no limit'} characters; voices: {args.voices}")
+    {"list-voices": cmd_list_voices, "generate": cmd_generate, "plan": cmd_plan}[args.cmd](args)
 
 
 if __name__ == "__main__":

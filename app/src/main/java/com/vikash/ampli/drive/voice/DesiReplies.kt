@@ -18,6 +18,8 @@ import java.util.Locale
  * may be the one talking. Safety replies (SOS, crash) are never here: they stay plain and clear.
  * Written in Devanagari for the Hindi voice (eSpeak NG's and Ampli's own both read ण, ळ and
  * the nasal सूं / सैं right; Latin Haryanvi through an English voice does not).
+ * A reply without a blank is also in the voice pack ([BankClips], "desi_<name>"): the picked
+ * recorded voice says it when its clip is up to date, else the phone voice.
  */
 object DesiReplies {
 
