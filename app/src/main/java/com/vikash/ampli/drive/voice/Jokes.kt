@@ -6,7 +6,8 @@ import kotlin.random.Random
 /**
  * Ampli's own short jokes ("chutkula suna", "hasa de"): original, family-safe, about cars, chai,
  * traffic, the weather, family and the village. No caste, religion, gender or body jokes and no
- * politics; AssistantChatTest checks a banned-word list over all of them.
+ * politics; AssistantChatTest checks a banned-word list over all of them. Each is in the voice
+ * pack ([BankClips], "joke_<nn>" by position): recorded when its clip is up to date, else TTS.
  */
 object Jokes {
     val ALL: List<Line> = listOf(
@@ -26,8 +27,8 @@ object Jokes {
             "The jam was so long I had tea and lunch in the car, and now I'm getting ready for bed.",
         ),
         Line(
-            "मौसम आळे नै कहया धूप रहवैगी, ताऊ छाता ले कै चाल पड़्या। बोल्या, मौसम का भरोसा ना सै, छाते का सै।",
-            "Mausam aale ne kaha dhoop rahvegi, Tau chhaata le ke chaal padya. Bola, mausam ka bharosa na sai, chhaate ka sai.",
+            "मौसम आळे नै कहया धूप रहवैगी, ताऊ छाता ले कै चाल पड़्या। बोल्या, मौसम का भरोसा कोनी, छाते का सै।",
+            "Mausam aale ne kaha dhoop rahvegi, Tau chhaata le ke chaal padya. Bola, mausam ka bharosa koni, chhaate ka sai.",
             "The forecast said sunshine; Tau took his umbrella anyway. Can't trust the weather, can trust the umbrella.",
         ),
         Line(
@@ -36,8 +37,8 @@ object Jokes {
             "A buffalo blocked the village road. I honked, and she looked at me as if the road was hers and the fault mine.",
         ),
         Line(
-            "पेट्रोल पंप आळे नै पूछ्या, कितणे का डालूं? ताऊ बोल्या, इतणे का कि रोहतक जा कै वापस आ जाऊं अर घर आळयां नै कहाणी सुणा सकूं।",
-            "Petrol pump aale ne poochha, kitne ka daalun? Tau bola, itne ka ki Rohtak ja ke waapas aa jaaun ar ghar aalyan ne kahaani suna sakun.",
+            "पेट्रोल पंप आळे नै पूछ्या, कितणे का डालूं? ताऊ बोल्या, इतणे का कि रोहतक जा कै उल्टा आ ज्याऊं अर घर आळयां नै कहाणी सुणा सकूं।",
+            "Petrol pump aale ne poochha, kitne ka daalun? Tau bola, itne ka ki Rohtak ja ke ulta aa jyaun ar ghar aalyan ne kahaani suna sakun.",
             "The pump attendant asked how much. Tau said: enough to reach Rohtak, come back, and still tell the family the story.",
         ),
         Line(
@@ -56,8 +57,8 @@ object Jokes {
             "I bought a new car and the neighbour said congratulations. I said: congratulate the instalment, it'll visit every month.",
         ),
         Line(
-            "मोबाइल की बैटरी अर ताऊ का सबर, दोनूं जाम मैं एक साथ खतम होवैं सैं।",
-            "Mobile ki battery ar Tau ka sabar, donu jam mein ek saath khatam hove sain.",
+            "मोबाइल की बैटरी अर ताऊ का सबर, दोनूं जाम मैं एकसाथ मुक ज्यां सैं।",
+            "Mobile ki battery ar Tau ka sabar, donu jam mein eksaath muk jyaan sain.",
             "The phone battery and Tau's patience run out together in a traffic jam.",
         ),
         Line(
@@ -66,8 +67,8 @@ object Jokes {
             "A boy asked Tau what runs fastest. Tau said: the monthly salary, gone as soon as it comes.",
         ),
         Line(
-            "मन्नै गाड्डी धोई, अर उसे दिन बारिश आ गई। इब तो बादळ भी मेरा टाइम टेबल देख कै आवैं सैं।",
-            "Manne gaadi dhoyi, ar usse din baarish aa gayi. Ib to baadal bhi mera time table dekh ke aave sain.",
+            "मन्नै गाड्डी धोई, अर उस्से दिन मींह आ ग्या। इब तो बादळ भी मेरा टाइम टेबल देख कै आवैं सैं।",
+            "Manne gaadi dhoyi, ar usse din meenh aa gya. Ib to baadal bhi mera time table dekh ke aave sain.",
             "I washed the car and it rained that very day. Now even the clouds follow my timetable.",
         ),
         Line(
@@ -76,8 +77,8 @@ object Jokes {
             "A village shop sign said: cash today, credit tomorrow. Tau goes every day and asks: when does tomorrow come?",
         ),
         Line(
-            "ताई नै नया फोन लिया, अर पहले दिन ए चालीस सेल्फी ले ली। फोन बोल्या, मेरी मेमोरी भर गई, ताई की खुशी ना भरी।",
-            "Tai ne naya phone liya, ar pehle din e chaalis selfie le li. Phone bola, meri memory bhar gayi, Tai ki khushi na bhari.",
+            "ताई नै नया फोन लिया, अर पहले ए दिन चालीस सेल्फी ले ली। फोन बोल्या, मेरी मेमोरी भर गई, ताई की खुशी ना भरी।",
+            "Tai ne naya phone liya, ar pehle e din chaalis selfie le li. Phone bola, meri memory bhar gayi, Tai ki khushi na bhari.",
             "Tai took forty selfies on her new phone's first day. The phone said: my memory is full, her joy isn't.",
         ),
         Line(
@@ -126,8 +127,8 @@ object Jokes {
             "The horn broke, so Tau leaned out of the window and went beep beep himself.",
         ),
         Line(
-            "मन्नै पूछ्या, ताऊ, जीपीएस पै भरोसा सै? ताऊ बोल्या, हां, पर चाय की दुकान मैं खुद ढूंढूंगा, जीपीएस नै स्वाद का के बेरा।",
-            "Manne poochha, Tau, GPS pe bharosa sai? Tau bola, haan, par chai ki dukaan main khud dhoondhunga, GPS ne swaad ka ke bera.",
+            "मन्नै पूछ्या, ताऊ, जीपीएस पै भरोसा सै? ताऊ बोल्या, हां, पर चाय की दुकान तो खुद टोहूंगा, जीपीएस नै स्वाद का के बेरा।",
+            "Manne poochha, Tau, GPS pe bharosa sai? Tau bola, haan, par chai ki dukaan to khud tohunga, GPS ne swaad ka ke bera.",
             "I asked Tau if he trusts the GPS. Yes, he said, but I'll find the tea stall myself; GPS knows nothing about taste.",
         ),
         Line(
@@ -196,8 +197,8 @@ object Jokes {
             "Thunder, lightning, and the whole village ran to take the washing off the roofs. For forecasts, the village grandma beats everyone.",
         ),
         Line(
-            "मन्नै एम्पली तै पूछ्या, तू थकती ना? एम्पली बोली, मैं तो बस बोलूं सूं, चलाणा तो तन्नै सै, तू थक ज्या तो रुक जाइए।",
-            "Manne Ampli te poochha, tu thakti na? Ampli boli, main to bas bolun sun, chalaana to tanne sai, tu thak jya to ruk jaaiye.",
+            "मन्नै एम्पली तै पूछ्या, तू थकदी कोनी? एम्पली बोली, मैं तो बस बोलूं सूं, चलाणा तो तन्नै सै, तू थक ज्या तो रुक जाइए।",
+            "Manne Ampli te poochha, tu thakdi koni? Ampli boli, main to bas bolun sun, chalaana to tanne sai, tu thak jya to ruk jaaiye.",
             "I asked Ampli if she ever gets tired. She said: I only talk, you do the driving, so stop if you get tired.",
         ),
         Line(
