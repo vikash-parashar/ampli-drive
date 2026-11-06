@@ -29,7 +29,7 @@
     <string name="wx_fog">धुंध</string>
     <string name="wx_snow">बर्फ</string>
     <string name="voice_speed_value">%1$d किमी/घंटा</string>
-    <string name="voice_speed_is">थारी स्पीड %1$d किलोमीटर प्रति घंटा सै।</string>
+    <string name="voice_speed_is">थारी स्पीड %1$d किलोमीटर घंटे की सै।</string>
     <string name="voice_volume_value">%1$d / 10</string>
     <string name="voice_volume_muted">आवाज बंद</string>
     <string name="voice_volume_steps">स्टेप %1$d / %2$d</string>
