@@ -119,19 +119,9 @@ fun MapPane(
                     // the destination search (Ampli map) or Google Maps.
                     Box(Modifier.fillMaxSize().clickable(onClick = if (nav.visible) onOpenNav else onOpenNavigation))
                     val mapStatus by MapDiagnostics.status.collectAsStateWithLifecycle()
-                    Text(
-                        if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · © OpenStreetMap contributors" else GLANCE_ATTRIBUTION,
-                        fontSize = dims.t(1.6f, min = 10f),
-                        color = Color(0xFF3F3A44),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            // Full-bleed Home: the cards cover the bottom corners, so the credit sits top centre.
-                            .align(if (fullBleed) Alignment.TopCenter else Alignment.BottomEnd)
-                            .padding(dims.d(1f))
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color.White.copy(alpha = 0.75f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    MapCredit(
+                        // Full-bleed Home: the cards cover the bottom corners, so the credit sits top centre.
+                        Modifier.align(if (fullBleed) Alignment.TopCenter else Alignment.BottomEnd).padding(dims.d(1f)),
                     )
                     // Theme style and fallback both failed: say so instead of a blank or grey pane.
                     if (mapStatus.unavailable) {
@@ -297,4 +287,25 @@ fun NextTurnCard(turn: NextTurn, onClick: () -> Unit, modifier: Modifier = Modif
             )
         }
     }
+}
+
+/**
+ * The map's licence credit ("© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors"), required
+ * wherever the map shows: on the map itself, and above the More sheet while that sheet covers it.
+ */
+@Composable
+internal fun MapCredit(modifier: Modifier = Modifier) {
+    val dims = LocalDims.current
+    val mapStatus by MapDiagnostics.status.collectAsStateWithLifecycle()
+    Text(
+        if (mapStatus.basic) stringResource(R.string.map_basic_note) + " · © OpenStreetMap contributors" else GLANCE_ATTRIBUTION,
+        fontSize = dims.t(1.6f, min = 10f),
+        color = Color(0xFF3F3A44),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(Color.White.copy(alpha = 0.75f))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
 }

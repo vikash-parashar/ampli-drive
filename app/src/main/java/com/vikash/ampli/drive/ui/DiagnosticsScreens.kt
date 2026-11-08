@@ -705,6 +705,8 @@ fun DiagnosticsScreen(app: DriveApp, onBack: () -> Unit) {
                 }
             }
             DiagSection("Network") {
+            // Which TLS stack routing and place search use (Conscrypt below Android 10).
+            DiagRow("TLS", if (com.vikash.ampli.drive.system.ModernTls.installed) "Conscrypt (bundled)" else "Platform", null)
                 for ((url, result) in net) DiagRow(url.removePrefix("https://").substringBefore('/'), result, result.startsWith("HTTP 2") || result.startsWith("HTTP 3"))
                 BigButton(text = stringResource(R.string.action_retry), onClick = { netRun++ }, primary = false)
             }
@@ -736,6 +738,7 @@ private fun probe(url: String): String {
     val started = SystemClock.elapsedRealtime()
     return try {
         val c = URL(url).openConnection() as HttpURLConnection
+        com.vikash.ampli.drive.system.ModernTls.apply(c)
         c.connectTimeout = 8000
         c.readTimeout = 8000
         c.requestMethod = "GET"

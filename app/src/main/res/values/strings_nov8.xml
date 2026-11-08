@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Speedometer styles, the sleeve music card and the Google Maps fallback when routing fails. -->
+<resources>
+    <!-- Settings › Speedometer -->
+    <string name="speedo_title">Speedometer</string>
+    <string name="speedo_hint">How Home shows your speed. The colour follows the speed and turns red over the limit.</string>
+    <string name="speedo_style_neon">Neon Arc</string>
+    <string name="speedo_style_halo">Halo Ring</string>
+    <string name="speedo_style_road">Road Strip</string>
+    <string name="speedo_style_retro">Retro Dial</string>
+
+    <!-- The speed bands and the info next to the speedometer (Hinglish, as designed). -->
+    <string name="speedo_band_calm" translatable="false">Aaram se</string>
+    <string name="speedo_band_cruise" translatable="false">Cruise</string>
+    <string name="speedo_band_fast" translatable="false">Tez</string>
+    <string name="speedo_band_over" translatable="false">Dheere karo</string>
+    <string name="speedo_limit_caption" translatable="false">Seema %1$d</string>
+    <string name="speedo_trip" translatable="false">Trip</string>
+    <string name="speedo_avg" translatable="false">Avg</string>
+    <string name="speedo_gps" translatable="false">GPS</string>
+    <string name="speedo_km" translatable="false">km</string>
+
+    <!-- Home music card: phone audio over Bluetooth without track info. -->
+    <string name="music_phone_audio" translatable="false">Phone se gaana</string>
+    <string name="music_sleeve_label" translatable="false">Now spinning</string>
+    <string name="music_sleeve_side" translatable="false">Side A</string>
+    <string name="music_sleeve_phone" translatable="false">From your phone</string>
+
+    <!-- In-app routing failed: offer Google Maps instead. -->
+    <string name="nav_route_fallback_title" translatable="false">Raasta nahi mil paaya</string>
+    <string name="nav_route_fallback_text" translatable="false">Ampli ka raasta server abhi jawab nahi de raha. Google Maps mein khol dein?</string>
+    <string name="nav_route_fallback_action" translatable="false">Google Maps mein kholo</string>
+</resources>

@@ -41,6 +41,7 @@ object PlaceSearch {
             "&bbox=" + PlaceFilter.bbox(near?.latitude, near?.longitude)
         val url = URL("$endpoint${if (endpoint.contains('?')) "&" else "?"}q=$q$bias&limit=$FETCH")
         val conn = url.openConnection() as HttpURLConnection
+        com.vikash.ampli.drive.system.ModernTls.apply(conn)
         try {
             conn.connectTimeout = 8_000
             conn.readTimeout = 8_000

@@ -814,10 +814,10 @@ Calls and chat messages answered by voice, service reminders at car start and th
 | Call picked up | फोन जुड़ ग्या, बात कर। | Phone jud gaya, baat kar. | The call is connected, talk. |
 | Call declined | ठीक सै, बाद मैं बात कर लियो। | Theek sai, baad main baat kar liyo. | OK, talk later. |
 | Call declined | फोन काट दिया, गाड्डी पै ध्यान दे। | Phone kaat diya, gaaddi pai dhyan de. | Call declined, keep your eyes on the road. |
-| Call declined | काट दिया भाई, पाछै कर लेंगे। | Kaat diya bhai, paachhe kar lenge. | Declined, brother, we'll call back later. |
+| Call declined | काट दिया भाई, पाछै कर ल्यांगे। | Kaat diya bhai, paachhe kar lyaange. | Declined, brother, we'll call back later. |
 | Can't pick up by voice | भाई, यो फोन मैं ना ठा सकूं, स्क्रीन पै बटन दबा दे। | Bhai, yo phone main na tha sakun, screen pai button daba de. | Brother, I can't pick this one up, press the button on the screen. |
 | Can't pick up by voice | बटन दबा कै ठा ले भाई, मेरे तै ना होया। | Button daba ke tha le bhai, mere te na hoya. | Press the button to pick up, I couldn't do it. |
-| Can't pick up by voice | फोन आळा बटन दबा दे, मैं ना ठा पाया। | Phone aala button daba de, main na tha paaya. | Press the phone button, I couldn't pick up. |
+| Can't pick up by voice | फोन आळा बटन दबा दे, मेरे तै ना ठाया ग्या। | Phone aala button daba de, mere te na thaaya gya. | Press the phone button, I couldn't pick up. |
 | Chat message arrived | %1$s का %2$s आया सै, सुणाऊं? | %1$s ka %2$s aaya sai, sunaun? | A {app} message from {name}, shall I read it? |
 | Chat message arrived | %2$s पै %1$s का मैसेज सै, सुणा द्यूं? | %2$s pai %1$s ka message sai, suna dyun? | {name} sent a message on {app}, read it out? |
 | Chat message arrived | भाई, %1$s नै %2$s भेज्या सै, सुणाऊं के? | Bhai, %1$s ne %2$s bhejya sai, sunaun ke? | Brother, {name} sent a {app} message, shall I read it? |
@@ -826,7 +826,7 @@ Calls and chat messages answered by voice, service reminders at car start and th
 | Reply? | जवाब लिख द्यूं? | Jawab likh dyun? | Shall I write a reply? |
 | Say the reply | बोल भाई, के लिखूं? | Bol bhai, ke likhun? | Go ahead, brother, what shall I write? |
 | Say the reply | हाँ, बोल दे के भेजणा सै। | Haan, bol de ke bhejna sai. | Yes, say what to send. |
-| Say the reply | बोल, मैं लिख रया सूं। | Bol, main likh raya sun. | Speak, I'm writing. |
+| Say the reply | बोल, मैं लिखूं सूं। | Bol, main likhun sun. | Speak, I'm writing. |
 | Confirm the reply | न्यू लिख्या सै: %1$s। भेज द्यूं? | Nyu likhya sai: %1$s. Bhej dyun? | I wrote: {text}. Send it? |
 | Confirm the reply | %1$s। यो भेज द्यूं? | %1$s. Yo bhej dyun? | {text}. Send this? |
 | Confirm the reply | जवाब सै: %1$s। ठीक सै, भेज द्यूं? | Jawab sai: %1$s. Theek sai, bhej dyun? | The reply is: {text}. OK to send? |
@@ -848,6 +848,140 @@ Calls and chat messages answered by voice, service reminders at car start and th
 | Dashcam clip saved | क्लिप सेव कर दी भाई। | Clip save kar di bhai. | Clip saved, brother. |
 | Dashcam clip saved | पिछला वीडियो संभाल लिया। | Pichhla video sambhaal liya. | Kept the last video safe. |
 | Dashcam clip saved | रिकॉर्डिंग बचा ली, मिटैगी कोनी। | Recording bacha li, mitegi koni. | Recording saved, it won't be erased. |
+
+## Recorded small talk, jokes and replies
+
+Hey Ampli's small talk (`ChatLines.kt`), the jokes (`Jokes.kt`) and the plain Haryanvi replies (`DesiReplies.kt`) used to be phone voice only. Each line without a blank is now in voice/lines.json (groups Chat, Jokes and Replies) so the voice-pack workflow records it in both voices; the app plays the clip when the picked voice (Male / Female) has it up to date, else the phone voice says the line as before. The source of truth stays in those three files (and their tests); this list is generated from voice/lines.json.
+
+- 43 small-talk lines (`chat_<topic>_<nn>`; the three "who are you" lines that say साथी / साथण are worded per voice, `_m` and `_f`), 42 jokes (`joke_<nn>`), 36 replies (`desi_<string name>`).
+- Not recorded, always the phone voice: replies with a place, name or number filled in (`%1$s` in DesiReplies.kt), the "aaj ka din kaisa hai" answer (date, deity and weather) and the news headlines.
+
+| Clip id | Devanagari |
+|---|---|
+| chat_how_are_you_01 | मैं तो एकदम बढ़िया सूं, तू सुणा, के हाल सै? |
+| chat_how_are_you_02 | मौज मैं सूं भाई! तेरा दिन किसा जा रया सै? |
+| chat_how_are_you_03 | चकाचक सूं, गाड्डी भी राजी, मैं भी राजी। तू बता, कित चालणा सै? |
+| chat_how_are_you_04 | बढ़िया सूं जी, थारे गेल्यां सफर मैं घणा मजा आवै सै। तू ठीक सै ना? |
+| chat_how_are_you_05 | सब बढ़िया सै भाई! गाणा हो या चुटकला, बोल दिए, मैं हाजिर सूं। |
+| chat_who_are_you_01_m | मैं एम्पली सूं, थारी गाड्डी का साथी। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे। |
+| chat_who_are_you_01_f | मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे। |
+| chat_who_are_you_02_m | मेरा नाम एम्पली सै, थारी गाड्डी का देसी साथी, ठेठ हरियाणवी बोलूं सूं। |
+| chat_who_are_you_02_f | मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं। |
+| chat_who_are_you_03 | एम्पली सूं भाई! तू बोल, मैं हाजिर। |
+| chat_who_are_you_04_m | मैं एम्पली सूं, थारे सफर का साथी। नेट ना हो तो भी बात कर ल्यूं सूं। |
+| chat_who_are_you_04_f | मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं। |
+| chat_thanks_01 | कोए बात ना भाई, यो तो मेरा काम सै। |
+| chat_thanks_02 | राम राम जी, जद मर्जी बुला लिए। |
+| chat_thanks_03 | जीता रह भाई, आराम तै चलाइए। |
+| chat_thanks_04 | अरै इसमैं धन्यवाद की के बात, आपां तो अपणे सां। |
+| chat_thanks_05 | खुश रह भाई, थारा सफर बढ़िया रहवै। |
+| chat_bored_01 | बोर क्यूं होवै भाई, मैं सूं ना! एक चुटकला सुणाऊं? |
+| chat_bored_02 | चाल, बोरियत भगावां। गाणा लगा द्यूं, खबर सुणा द्यूं, पर पहलां एक चुटकला हो ज्या? |
+| chat_bored_03 | गपशप का टैम सै! हंसी मजाक तै शुरू करां, चुटकला सुणैगा? |
+| chat_bored_04 | तू एकला कोनी, मैं गेल्यां सूं। एक मजेदार बात सुणाऊं? |
+| chat_morning_01 | सवेरे की राम राम! |
+| chat_morning_02 | सवेरे सवेरे राम राम जी! |
+| chat_afternoon_01 | दोपहर की राम राम! |
+| chat_afternoon_02 | राम राम जी, दोपहर हो ली! |
+| chat_evening_01 | साँझ की राम राम! |
+| chat_evening_02 | साँझ हो ली, राम राम जी! |
+| chat_night_01 | रात की राम राम! |
+| chat_night_02 | राम राम जी, रात हो री सै! |
+| chat_day_wish_01 | आराम तै चलाइए, सफर बढ़िया रहे। |
+| chat_day_wish_02 | बेल्ट लगा ले अर मौज तै चाल। |
+| chat_day_wish_03 | पाणी साथ राखिए अर धीरे चलाइए। |
+| chat_day_wish_04 | दिन बढ़िया जावै, सड़क पै ध्यान राखिए। |
+| chat_news_more_01 | और सुणणी हो तो बोल दे, और खबर। |
+| chat_news_end_01 | बस, इब खातर इतणी ए खबर सैं। |
+| chat_news_end_02 | इब की खबर पूरी, थोड़ी वार पाछै फेर पूछ लिए। |
+| chat_news_offline_01 | नेट कोनी चाल रया, खबर कोनी मिली। |
+| chat_news_offline_02 | नेट कोनी भाई, फोन का हॉटस्पॉट जोड़ ले, फेर खबर सुणा द्यूं। |
+| chat_news_failed_01 | खबर आळी साइट तै जवाब कोनी आया, थोड़ी वार पाछै फेर पूछ लिए। |
+| chat_news_failed_02 | खबर कोनी मिली भाई, नेट ढीला चाल रया सै शायद। |
+| chat_news_not_set_up_01 | खबर आळा जुगाड़ इब ताईं कोनी लाग्या। |
+| chat_news_no_hindi_voice_01 | खबर स्क्रीन पै दिखा दी सै। |
+| chat_weather_offline_01 | मौसम का हाल कोनी मिल्या, नेट कोनी चाल रया। |
+| chat_weather_no_location_01 | गाड्डी की जगहां का इब ताईं बेरा कोनी पाट्या, मौसम थोड़ी वार मैं बताऊं। |
+| chat_weather_failed_01 | इब मौसम का हाल कोनी मिल सक्या। |
+| chat_rain_tip_01 | मींह आण के आसार सैं, छाता गेल्यां राखिए। |
+| joke_01 | ताऊ नै जीपीएस लगाया। जीपीएस बोल्या, यू-टर्न ले लो। ताऊ बोल्या, पहल्यां तू अपणा मन बणा ले, मैं तो सीधा ए जांगा! |
+| joke_02 | चाय आळे तै पूछ्या, चाय गरम सै? बोल्या, इतणी गरम कि गाड्डी का हीटर बंद कर दे! |
+| joke_03 | जाम इतणा लांबा था कि मन्नै गाड्डी मैं ए चाय पी ली, रोटी खा ली, अर इब रात की नींद की तैयारी सै। |
+| joke_04 | मौसम आळे नै कहया धूप रहवैगी, ताऊ छाता ले कै चाल पड़्या। बोल्या, मौसम का भरोसा कोनी, छाते का सै। |
+| joke_05 | गाम की सड़क पै भैंस नै रास्ता रोक लिया। मन्नै हॉर्न बजाया, तो भैंस नै इसा देख्या जणूं सड़क उसकी हो अर गलती मेरी। |
+| joke_06 | पेट्रोल पंप आळे नै पूछ्या, कितणे का डालूं? ताऊ बोल्या, इतणे का कि रोहतक जा कै उल्टा आ ज्याऊं अर घर आळयां नै कहाणी सुणा सकूं। |
+| joke_07 | स्पीड ब्रेकर नै गाड्डी तै पूछ्या, इतणी जल्दी कित की? गाड्डी बोली, तेरे तै मिलण की, पर धीरे धीरे। |
+| joke_08 | मन्नै ताई तै कहया, AC चला दूं? ताई बोली, खिड़की खोल दे, गाम की हवा फ्री सै अर असली भी। |
+| joke_09 | नई गाड्डी ली, तो पड़ोसी बोल्या, बधाई हो! मन्नै कहया, बधाई तो किस्त नै दे, वा हर महीने मिलण आवैगी। |
+| joke_10 | मोबाइल की बैटरी अर ताऊ का सबर, दोनूं जाम मैं एकसाथ मुक ज्यां सैं। |
+| joke_11 | छोरे नै पूछ्या, ताऊ, सबतै तेज कौण भाज्जै सै? ताऊ बोल्या, महीने की तनखा, आंदे ए चाली जावै सै। |
+| joke_12 | मन्नै गाड्डी धोई, अर उस्से दिन मींह आ ग्या। इब तो बादळ भी मेरा टाइम टेबल देख कै आवैं सैं। |
+| joke_13 | गाम मैं एक दुकान पै लिख्या था: आज नकद, कल उधार। ताऊ रोज जावै, अर रोज पूछै, कल कद आवैगी? |
+| joke_14 | ताई नै नया फोन लिया, अर पहले ए दिन चालीस सेल्फी ले ली। फोन बोल्या, मेरी मेमोरी भर गई, ताई की खुशी ना भरी। |
+| joke_15 | ठंड इतणी सै कि चाय का कप हाथ मैं ले कै बैठ्या सूं, पीणा भूल ग्या, सेकणा याद सै। |
+| joke_16 | गर्मी इतणी सै कि गाड्डी की सीट पै बैठदे ए मन करै, पहल्यां इसनै भी पाणी पिला दूं। |
+| joke_17 | ताऊ तै पूछ्या, गाड्डी कितणा एवरेज देवै सै? ताऊ बोल्या, एवरेज तो ठीक सै, बस पंप आळे नै मेरा बजट बिगाड़ दिया। |
+| joke_18 | मन्नै एम्पली तै कहया, चुटकला सुणा। एम्पली बोली, पहल्यां बेल्ट लगा ले, हंसी मैं भी सेफ्टी जरूरी सै! |
+| joke_19 | छोरे नै कहया, ताऊ, मैं ड्राइवर बणूंगा। ताऊ बोल्या, पहल्यां घर की साइकिल की चेन चढ़ा कै दिखा। |
+| joke_20 | टोल पै लाइन इतणी लांबी थी कि मन्नै पाछली गाड्डी आळे तै दोस्ती कर ली, इब वो ब्याह मैं भी बुलावैगा। |
+| joke_21 | ताऊ नै पार्किंग मैं गाड्डी इतणी सीधी खड़ी करी कि लाइन भी शरमा गई। |
+| joke_22 | डॉक्टर नै ताऊ तै कहया, रोज चाल्या कर। ताऊ बोल्या, चालूं तो सूं, रोज गाड्डी मैं रोहतक तक! |
+| joke_23 | गाड्डी का हॉर्न खराब हो ग्या, तो ताऊ खिड़की तै बाहर मुंह काढ़ कै खुद ए पीं पीं करण लाग ग्या। |
+| joke_24 | मन्नै पूछ्या, ताऊ, जीपीएस पै भरोसा सै? ताऊ बोल्या, हां, पर चाय की दुकान तो खुद टोहूंगा, जीपीएस नै स्वाद का के बेरा। |
+| joke_25 | कोहरा इतणा था कि आगे आळी गाड्डी की बत्ती देख कै चाल रया था, बेरा पाट्या वो भी मेरी बत्ती देख कै चाल रया था। |
+| joke_26 | नई सड़क बणी, ताऊ बोल्या, इतणी चिकणी सै कि गाड्डी भी सोचैगी, आज किस खुशी मैं? |
+| joke_27 | पप्पू नै गाड्डी धुलवाई, अर रास्ते मैं भैंस नै कीचड़ उछाळ दिया। भैंस बोली, नजर ना लाग ज्या! |
+| joke_28 | ताऊ नै नया स्मार्ट फोन लिया। इब ताऊ फोन तै बोलै, अर फोन ताऊ तै। ताई कहवै, मेरे तै भी कोई बात कर ल्यो! |
+| joke_29 | चाय इतणी मीठी थी कि चाय आळे नै बिल गेल्लां डॉक्टर का नंबर भी दे दिया। |
+| joke_30 | मन्नै ताऊ तै कहया, गाड्डी मैं गाणा लगा दूं? ताऊ बोल्या, लगा दे, पर रागणी, ना तो गाड्डी भी ना चालैगी। |
+| joke_31 | ससुराल जांदे होए ताऊ नै गाड्डी इतणी चमकाई कि रास्ते मैं लोग बोले, कोई बारात आ री सै के? |
+| joke_32 | हाईवे पै बोर्ड लिख्या था: धीरे चलो, घर पै कोई इंतजार कर रया सै। ताऊ बोल्या, हां, छोरा अपणा होमवर्क ले कै! |
+| joke_33 | गाम मैं नेट इतणा धीरे चालै सै कि वीडियो लोड होंदे होंदे खबर पुराणी हो जावै। |
+| joke_34 | ताऊ तै किसे नै पूछ्या, सबतै बढ़िया गाड्डी कौणसी? ताऊ बोल्या, जो घर तै ढाबे तक बिना रुके पहुंचा दे। |
+| joke_35 | मन करया डाइट करूं, फेर ढाबे पै परांठा देख्या, अर डाइट नै खुद कहया, काल तै शुरू करांगे। |
+| joke_36 | रिवर्स करदे टैम गाड्डी बीप बीप करै। ताऊ बोल्या, हां भाई, देख रया सूं, तू तो मेरे मास्टर तै भी घणा टोक्कै सै। |
+| joke_37 | बादळ गरज्या, बिजळी चमकी, अर गाम के सारे छात तै कपड़े ठाण भाज्जे। मौसम बताण मैं तो गाम की दादी सबतै तेज सै। |
+| joke_38 | मन्नै एम्पली तै पूछ्या, तू थकदी कोनी? एम्पली बोली, मैं तो बस बोलूं सूं, चलाणा तो तन्नै सै, तू थक ज्या तो रुक जाइए। |
+| joke_39 | ताऊ की गाड्डी इतणी पुराणी सै कि उसकी आरसी पै फोटो भी ब्लैक एंड व्हाइट सै। |
+| joke_40 | छोरी नै पूछ्या, पापा, गाड्डी की सबतै जरूरी चीज के सै? पापा बोले, ब्रेक, क्यूंकि रुकणा भी एक कला सै। |
+| joke_41 | ताऊ नै कहया, म्हारे टैम मैं गाड्डी मैं जीपीएस ना था। मैं बोल्या, फेर रास्ता कींकर मिलता? ताऊ बोल्या, हर चौराहे पै एक ताऊ खड़ा मिलता! |
+| joke_42 | गाड्डी की डिग्गी मैं इतणा सामान था कि लाग्या पूरा गाम ए साथ ले आए। |
+| desi_voice_mic_denied | सेटिंग्स मैं जा कै माइक की इजाजत दे दे भाई, फेर बोलिए। |
+| desi_voice_unavailable | बोली पिछाणण आळा इंजन इब ताईं त्यार कोनी। सेटिंग्स, आवाज़, आवाज़ जाँचें खोल कै देख ले। |
+| desi_voice_music_permission | सेटिंग्स, वॉइस मैं गाण्यां की इजाजत दे दे, फेर बजा द्यूं। |
+| desi_voice_brightness_permission | पहलां Car Hub नै सिस्टम सेटिंग बदलण की इजाजत दे दे, फेर बोलिए। |
+| desi_voice_volume_failed | Android नै आवाज कोनी बदलण दी, कदे डू नॉट डिस्टर्ब तो चालू ना सै? |
+| desi_power_say_screen_off | स्क्रीन बंद करूं सूं। रोकणी हो तो बोल दे, रद्द करो। |
+| desi_voice_say_number | नंबर बोल दे भाई, जिंयां “दूसरी आळी”। |
+| desi_voice_search_failed | इब टोह कोनी होई, नेट चाल रया सै के, देख ले। |
+| desi_voice_found_one | एक जगहां मिली सै। |
+| desi_voice_nav_failed | रास्ता कोनी खुल्या, एक बार फेर बोल दे। |
+| desi_voice_nav_stopped | ठीक सै, रास्ता बंद कर दिया। |
+| desi_voice_nav_stop_maps | Car Hub मैं तो कोए रास्ता कोनी चाल रया। Google Maps आळा रास्ता बंद करणा हो तो Maps मैं X दबा दे। |
+| desi_voice_no_location | इब GPS तै गाड्डी की जगहां कोनी मिली। |
+| desi_voice_bt_playing | ले, थारे फोन तै बजा दिया। |
+| desi_voice_bt_start_phone | फोन पै गाणा चला दे भाई, बाजण लाग ज्या तो फेर मैं संभाल ल्यूं। |
+| desi_voice_auto_missing | इस यूनिट मैं Android Auto या फोन जोड़ण आळा ऐप कोनी मिल्या। |
+| desi_voice_call_any | ले, फोन खोल दिया। |
+| desi_voice_no_player | कोए गाणा कोनी चाल्या। एक बार Ampli MP3 या कोए गाण्यां का ऐप खोल ले, फेर बोलिए। |
+| desi_voice_feedback | मदद अर राय आळा पेज खोल दिया। गाड्डी रुकैगी जद फॉर्म खुलैगा। |
+| desi_dashcam_voice_not_recording | डैशकैम इब रिकॉर्ड कोनी कर रया। |
+| desi_x_hotspot_unsupported | वाई-फाई सेटिंग खोल दी, ओड़ै फोन का हॉटस्पॉट चुण ले। |
+| desi_x_hotspot_none | पहलां सेटिंग मैं फोन का हॉटस्पॉट चुण ले, वाई-फाई सेटिंग खोल दी सै। |
+| desi_voice_report_pro | सड़क रिपोर्ट Pro मैं आवै सै। |
+| desi_voice_weather_offline | नेट कोनी चाल रया, ज्यां तै इब मौसम कोनी देख सकदे। |
+| desi_voice_weather_failed | मौसम का हाल इब कोनी मिल्या, थोड़ी वार पाछै पूछ लिए। |
+| desi_voice_camera_none_ahead | आगै 20 किलोमीटर ताईं कोए स्पीड कैमरा कोनी। |
+| desi_voice_fuel_none | 50 किलोमीटर ताईं कोए स्टेशन कोनी मिल्या। |
+| desi_x_camera_saved | आड़ै कैमरा सेव कर दिया। जद ताईं तू “कैमरा नहीं है” ना बोलै, रहवैगा। |
+| desi_x_gone_camera | ठीक सै, आड़ै तै कैमरा हटा दिया। |
+| desi_x_gone_jam | ठीक सै, जाम खुल्या मान लिया। |
+| desi_x_gone_police | ठीक सै, पुलिस का नाका हटा दिया। |
+| desi_x_gone_nothing | आड़ै धोरै कुछ रिपोर्ट कोनी था। |
+| desi_x_queue_no_pump | 400 मीटर मैं कोए पंप कोनी। पंप पै पहोंच कै बोलिए। |
+| desi_x_fuel_ask | कितणे का भरवाया? रुपये बोल दे या लीटर। |
+| desi_x_fuel_not_saved | रकम समझ कोनी आई, खर्चे मैं हाथ तै जोड़ दिए। |
+| desi_x_challan_none | इब ताईं कुछ कोनी गिण्या। कैमरा की चेतावणी पै धीरे होया कर, आड़ै जुड़दा जावैगा। |
 
 ## Not in this list
 

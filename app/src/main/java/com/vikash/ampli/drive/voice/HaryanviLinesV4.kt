@@ -32,12 +32,12 @@ internal val LINES_V4: Map<Event, List<Line>> = mapOf(
     Event.CallRejected to listOf(
         Line("ठीक सै, बाद मैं बात कर लियो।", "Theek sai, baad main baat kar liyo.", "OK, talk later."),
         Line("फोन काट दिया, गाड्डी पै ध्यान दे।", "Phone kaat diya, gaaddi pai dhyan de.", "Call declined, keep your eyes on the road."),
-        Line("काट दिया भाई, पाछै कर लेंगे।", "Kaat diya bhai, paachhe kar lenge.", "Declined, brother, we'll call back later."),
+        Line("काट दिया भाई, पाछै कर ल्यांगे।", "Kaat diya bhai, paachhe kar lyaange.", "Declined, brother, we'll call back later."),
     ),
     Event.CallManual to listOf(
         Line("भाई, यो फोन मैं ना ठा सकूं, स्क्रीन पै बटन दबा दे।", "Bhai, yo phone main na tha sakun, screen pai button daba de.", "Brother, I can't pick this one up, press the button on the screen."),
         Line("बटन दबा कै ठा ले भाई, मेरे तै ना होया।", "Button daba ke tha le bhai, mere te na hoya.", "Press the button to pick up, I couldn't do it."),
-        Line("फोन आळा बटन दबा दे, मैं ना ठा पाया।", "Phone aala button daba de, main na tha paaya.", "Press the phone button, I couldn't pick up."),
+        Line("फोन आळा बटन दबा दे, मेरे तै ना ठाया ग्या।", "Phone aala button daba de, mere te na thaaya gya.", "Press the phone button, I couldn't pick up."),
     ),
     Event.MessageAnnounce to listOf(
         Line("%1\$s का %2\$s आया सै, सुणाऊं?", "%1\$s ka %2\$s aaya sai, sunaun?", "A {app} message from {name}, shall I read it?"),
@@ -52,7 +52,7 @@ internal val LINES_V4: Map<Event, List<Line>> = mapOf(
     Event.MessageDictate to listOf(
         Line("बोल भाई, के लिखूं?", "Bol bhai, ke likhun?", "Go ahead, brother, what shall I write?"),
         Line("हाँ, बोल दे के भेजणा सै।", "Haan, bol de ke bhejna sai.", "Yes, say what to send."),
-        Line("बोल, मैं लिख रया सूं।", "Bol, main likh raya sun.", "Speak, I'm writing."),
+        Line("बोल, मैं लिखूं सूं।", "Bol, main likhun sun.", "Speak, I'm writing."),
     ),
     Event.MessageConfirm to listOf(
         Line("न्यू लिख्या सै: %1\$s। भेज द्यूं?", "Nyu likhya sai: %1\$s. Bhej dyun?", "I wrote: {text}. Send it?"),

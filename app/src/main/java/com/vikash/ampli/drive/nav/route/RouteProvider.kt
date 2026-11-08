@@ -105,7 +105,7 @@ class OsrmRouteProvider(
 
     private fun fetch(u: String): RouteResult {
         val conn = try {
-            URL(u).openConnection() as HttpURLConnection
+            (URL(u).openConnection() as HttpURLConnection).also { com.vikash.ampli.drive.system.ModernTls.apply(it) }
         } catch (e: IOException) {
             return RouteResult.Failed(classify(e), e.message)
         }

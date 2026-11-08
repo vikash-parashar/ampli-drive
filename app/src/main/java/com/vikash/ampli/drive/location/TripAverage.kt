@@ -11,6 +11,9 @@ class TripAverage {
     private var lastAtMs = -1L
     private var lastMovingAtMs = -1L
 
+    /** Distance driven this trip (km), from the same moving fixes as the average. */
+    val tripKm: Float get() = distanceKm.toFloat()
+
     /** Average in km/h, or null until the car has moved for [MIN_MOVING_MS]. */
     val averageKmh: Float?
         get() = if (movingMs < MIN_MOVING_MS) null else (distanceKm / (movingMs / 3_600_000.0)).toFloat()

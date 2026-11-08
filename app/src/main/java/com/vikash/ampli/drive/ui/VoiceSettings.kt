@@ -44,6 +44,7 @@ import com.vikash.ampli.drive.voice.VoicePack
 import com.vikash.ampli.drive.voice.VoiceService
 import com.vikash.ampli.drive.voice.WakeModel
 import com.vikash.ampli.drive.prefs.NavApp
+import com.vikash.ampli.drive.prefs.SpeedoStyle
 import com.vikash.ampli.drive.prefs.VoiceStyle
 
 /** Settings › Voice: the wake-word switch, its model download, and the permissions voice needs. */
@@ -364,6 +365,32 @@ internal fun NavigateWithCard(app: DriveApp) {
             Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
                 Chip(stringResource(R.string.nav_with_ampli), navApp == NavApp.Ampli, { app.prefs.setNavApp(NavApp.Ampli) })
                 Chip(stringResource(R.string.nav_with_google), navApp == NavApp.GoogleMaps, { app.prefs.setNavApp(NavApp.GoogleMaps) })
+            }
+        }
+    }
+}
+
+/**
+ * Settings › Speedometer: how Home draws the speed (Neon Arc, Halo Ring, Road Strip, Retro Dial).
+ * Kept in DrivePrefs like the other settings; Home switches at once.
+ */
+@Composable
+internal fun SpeedometerCard(app: DriveApp) {
+    val dims = LocalDims.current
+    val style by app.prefs.speedoStyle.collectAsStateWithLifecycle()
+    SettingCard {
+        Column(verticalArrangement = Arrangement.spacedBy(dims.d(1.2f))) {
+            CardTitle(stringResource(R.string.speedo_title), stringResource(R.string.speedo_hint))
+            Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.4f))) {
+                for ((s, label) in listOf(
+                    SpeedoStyle.NeonArc to R.string.speedo_style_neon,
+                    SpeedoStyle.HaloRing to R.string.speedo_style_halo,
+                    SpeedoStyle.RoadStrip to R.string.speedo_style_road,
+                    SpeedoStyle.RetroDial to R.string.speedo_style_retro,
+                )) {
+                    // 80 px keys, like every other control the driver may reach for.
+                    Chip(stringResource(label), style == s, { app.prefs.setSpeedoStyle(s) }, Modifier.heightIn(min = 80.dp))
+                }
             }
         }
     }

@@ -200,6 +200,13 @@ android {
     }
 }
 
+// JVM unit tests (Robolectric) bring their own desktop Conscrypt (conscrypt-openjdk-uber) with the
+// same org.conscrypt classes; the Android build, which needs the device's native library, must not
+// shadow it there.
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    exclude(group = "org.conscrypt", module = "conscrypt-android")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -221,6 +228,8 @@ dependencies {
     implementation(libs.media3.exoplayer)
     // Parking-spot QR on the "Where's my car" screen.
     implementation(libs.zxing.core)
+    // TLS 1.3 and current ciphers on Android 8.1 (the TS7): installed first at start on API < 29 (ModernTls).
+    implementation(libs.conscrypt.android)
 
     // "Hey Ampli" wake word and offline commands. The speech models (~36 + ~42 MB) come from the
     // :voicemodels asset pack in Play installs and are downloaded at runtime by sideloaded APKs.

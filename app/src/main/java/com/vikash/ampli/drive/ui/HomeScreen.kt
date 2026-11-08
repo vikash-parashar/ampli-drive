@@ -161,6 +161,14 @@ fun HomeScreen(
         }
     }
     val locationPrompt by remember { derivedStateOf { !gpsState.value.hasPermission || gpsState.value.location == null } }
+    // The speedometer's trip numbers, in the steps they are shown in (0.1 km, whole km/h, metres).
+    val speedoStyle by app.prefs.speedoStyle.collectAsStateWithLifecycle()
+    val tripTenths by remember { derivedStateOf { gpsState.value.tripKm?.let { (it * 10f).roundToInt() } } }
+    val avgWhole by remember { derivedStateOf { gpsState.value.avgKmh?.roundToInt() } }
+    val gpsFix by remember { derivedStateOf { gpsState.value.speedKmh != null } }
+    val accuracyM by remember {
+        derivedStateOf { gpsState.value.location?.takeIf { gpsState.value.speedKmh != null && it.hasAccuracy() }?.accuracy?.roundToInt() }
+    }
     val listening by remember {
         derivedStateOf { voiceState.value.phase == com.vikash.ampli.drive.voice.VoiceUiState.Phase.Listening }
     }
@@ -244,6 +252,13 @@ fun HomeScreen(
         place = placeName,
         destination = nav.destination?.name?.takeIf { nav.visible },
         hasFix = !locationPrompt,
+        speedo = SpeedoUi(
+            style = speedoStyle,
+            tripKm = tripTenths?.let { it / 10f },
+            avgKmh = avgWhole?.toFloat(),
+            gpsFix = gpsFix,
+            accuracyM = accuracyM,
+        ),
     )
     // Pull down from the top row, like a phone's quick settings.
     val pullDown = Modifier.pointerInput(Unit) {
@@ -378,6 +393,19 @@ internal class HomeUi(
     val destination: String? = null,
     /** A location fix exists (the map card draws the name and the car's dot). */
     val hasFix: Boolean = false,
+    /** Settings › Speedometer and the trip numbers next to it. */
+    val speedo: SpeedoUi = SpeedoUi(),
+)
+
+/** The speedometer's style and what it shows besides the speed: all from the GPS, never made up. */
+internal class SpeedoUi(
+    val style: com.vikash.ampli.drive.prefs.SpeedoStyle = com.vikash.ampli.drive.prefs.SpeedoStyle.NeonArc,
+    /** This trip's distance (0.1 km steps) and moving average, null until known. */
+    val tripKm: Float? = null,
+    val avgKmh: Float? = null,
+    /** A fresh GPS fix drives the speed (the dot is green) and its accuracy in metres. */
+    val gpsFix: Boolean = false,
+    val accuracyM: Int? = null,
 )
 
 /**
@@ -466,6 +494,8 @@ internal class MusicUi(
     val sourceIcon: ImageBitmap? = null,
     /** Phone audio over Bluetooth (the unit's BT music app, or the phone itself). */
     val bluetooth: Boolean = false,
+    /** Phone audio without a title: "Phone se gaana" and the phone's name (see [MusicCardText]). */
+    val noTrackInfo: Boolean = false,
 )
 
 @Composable
@@ -482,24 +512,33 @@ private fun musicUi(app: DriveApp): MusicUi {
     val sourceIcon = remember(np?.packageName) { np?.packageName?.let { com.vikash.ampli.drive.media.MediaSources.icon(context, it) } }
     val openMusic = { Launchers.openMusic(context); Unit }
     return when {
-        np != null -> MusicUi(
-            title = np.title ?: np.sourceLabel ?: stringResource(R.string.music_unknown_track),
-            artist = np.artist,
-            sourceLine = when {
-                btSource -> listOfNotNull("Bluetooth", phoneName).joinToString(" · ")
-                np.packageName == com.vikash.ampli.drive.media.MediaHub.AMPLI_PACKAGE -> "Ampli MP3"
-                else -> np.sourceLabel
-            },
-            sourceIcon = if (btSource) null else sourceIcon,
-            bluetooth = btSource,
-            playing = np.isPlaying,
-            art = art,
-            controls = true,
-            onPlayPause = app.mediaHub::playPause,
-            onNext = app.mediaHub::next,
-            onPrevious = app.mediaHub::previous,
-            onOpen = openMusic,
-        )
+        np != null -> {
+            val labels = MusicCardText.labels(
+                bluetooth = btSource,
+                ampli = np.packageName == com.vikash.ampli.drive.media.MediaHub.AMPLI_PACKAGE,
+                title = np.title,
+                artist = np.artist,
+                appLabel = np.sourceLabel,
+                phoneName = phoneName,
+                phoneAudio = stringResource(R.string.music_phone_audio),
+                unknownTrack = stringResource(R.string.music_unknown_track),
+            )
+            MusicUi(
+                title = labels.title,
+                artist = labels.artist,
+                sourceLine = labels.source,
+                noTrackInfo = labels.noTrackInfo,
+                sourceIcon = if (btSource) null else sourceIcon,
+                bluetooth = btSource,
+                playing = np.isPlaying,
+                art = art,
+                controls = true,
+                onPlayPause = app.mediaHub::playPause,
+                onNext = app.mediaHub::next,
+                onPrevious = app.mediaHub::previous,
+                onOpen = openMusic,
+            )
+        }
         phoneName != null -> MusicUi(
             title = stringResource(R.string.phone_music_title),
             artist = phoneName,
@@ -936,8 +975,8 @@ private fun BigGlanceHome(ui: HomeUi, pullDown: Modifier, map: (@Composable () -
             GaugeSpeedCard(ui, tile, Modifier.weight(1.2f).fillMaxHeight())
             // Map: streets, the place name, the car's dot on top.
             DepthMapCard(ui, tile, map, Modifier.weight(1f).fillMaxHeight())
-            // Playing: source badge, the title's first words under the disc, bars.
-            DepthMusicCard(ui, tile, Modifier.weight(1f).fillMaxHeight())
+            // Playing: the record sleeve with the title, the record sliding out while it plays.
+            SleeveMusicCard(ui, tile, Modifier.weight(1f).fillMaxHeight())
         }
         Row(Modifier.fillMaxWidth().height(maxOf(dims.d(15f), MinTouch)), horizontalArrangement = Arrangement.spacedBy(gap)) {
             val keyShape = theme.cardShape(dims, 0.8f)
@@ -1027,8 +1066,8 @@ private fun MapFirstHome(ui: HomeUi, pullDown: Modifier, places: @Composable () 
         Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
             MapFirstMapCard(ui, places, map, Modifier.weight(1f).fillMaxHeight())
             Column(Modifier.width(dims.d(49f)).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(gap)) {
-                MapFirstSpeedCard(ui, Modifier.fillMaxWidth().weight(0.42f))
-                MapFirstMusicCard(ui, Modifier.fillMaxWidth().weight(0.58f))
+                MapFirstSpeedCard(ui, Modifier.fillMaxWidth().weight(0.5f))
+                MapFirstMusicCard(ui, Modifier.fillMaxWidth().weight(0.5f))
             }
         }
         MapFirstDock(ui, Modifier.fillMaxWidth().height(dims.d(13f)))
@@ -1199,49 +1238,47 @@ private fun MapFirstMapCard(ui: HomeUi, places: @Composable () -> Unit, map: @Co
     }
 }
 
-/** Speed in Barlow Condensed at 128 px with the limit sign, and the alert strip under it. */
+/**
+ * The speedometer the driver picked (Settings › Speedometer) with the limit sign, trip, average
+ * and GPS on its right, and the alert strip under it.
+ */
 @Composable
 private fun MapFirstSpeedCard(ui: HomeUi, modifier: Modifier) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
     val shape = theme.cardShape(dims)
-    val fill = if (ui.over) theme.danger else theme.surface
-    val fg = if (ui.over) theme.onDanger else theme.text
-    BoxWithConstraints(modifier.themedCard(theme, shape, fill = androidx.compose.ui.graphics.SolidColor(fill), border = if (ui.over) theme.danger else theme.border)) {
-        val tall = maxHeight
-        Column(
-            Modifier.fillMaxSize().padding(horizontal = dims.d(3f), vertical = dims.d(2.5f)),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(Modifier.fillMaxWidth().weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(dims.d(1f))) {
-                    val bySpace = with(LocalDensity.current) { (tall * 0.5f).toSp().value }
-                    SpeedNumber(ui.speed, fg, minOf(dims.uSp * 16f, bySpace).coerceAtLeast(48f).sp)
-                    Text(speedFoot(ui, withLimit = false), color = if (ui.over) theme.onDanger else theme.muted, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.75f, min = 18f), maxLines = 1, modifier = Modifier.padding(bottom = dims.d(1.5f)))
-                }
-                if (ui.limit != null) LimitBadge(ui.limit, dims.d(12f))
-            }
-            ui.alert?.let { a ->
-                val danger = a.alert.danger
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = dims.d(6f))
-                        .clip(RoundedCornerShape(dims.d(1.5f)))
-                        .background(if (danger && !ui.over) theme.danger else theme.warning.copy(alpha = 0.16f))
-                        .clickable(onClick = a.onClick)
-                        .padding(horizontal = dims.d(2f)),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(dims.d(1.25f)),
-                ) {
-                    val c = when {
-                        danger && !ui.over -> theme.onDanger
-                        ui.over -> theme.onDanger
-                        else -> theme.warning
-                    }
-                    Icon(Icons.Filled.Warning, contentDescription = null, tint = c, modifier = Modifier.size(dims.d(3f)))
-                    Text(a.alert.line, color = c, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.5f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
+    Column(
+        modifier
+            .themedCard(theme, shape, fill = androidx.compose.ui.graphics.SolidColor(theme.background), border = theme.border)
+            .padding(horizontal = dims.d(1.5f), vertical = dims.d(1.5f)),
+        verticalArrangement = Arrangement.spacedBy(dims.d(1f)),
+    ) {
+        Speedometer(
+            style = ui.speedo.style,
+            speedKmh = ui.speed?.toFloat(),
+            limit = ui.limit,
+            tripKm = ui.speedo.tripKm,
+            avgKmh = ui.speedo.avgKmh,
+            gpsFix = ui.speedo.gpsFix,
+            accuracyM = ui.speedo.accuracyM,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+        )
+        ui.alert?.let { a ->
+            val danger = a.alert.danger
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = dims.d(6f))
+                    .clip(RoundedCornerShape(dims.d(1.5f)))
+                    .background(if (danger) theme.danger else theme.warning.copy(alpha = 0.16f))
+                    .clickable(onClick = a.onClick)
+                    .padding(horizontal = dims.d(2f)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dims.d(1.25f)),
+            ) {
+                val c = if (danger) theme.onDanger else theme.warning
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = c, modifier = Modifier.size(dims.d(3f)))
+                Text(a.alert.line, color = c, fontWeight = FontWeight.SemiBold, fontSize = dims.t(2.5f, min = 18f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
