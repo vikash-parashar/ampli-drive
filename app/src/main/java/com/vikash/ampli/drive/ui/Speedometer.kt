@@ -108,7 +108,7 @@ private const val INFO_H = 508f
 private const val INFO_H_NO_SIGN = 282f
 
 /** Barlow Condensed (numbers, labels) for the Canvas text, with a plain bold fallback. */
-private class SpeedoText(context: android.content.Context) {
+private class SpeedoText(private val context: android.content.Context) {
     private fun font(id: Int, fallback: Int): Typeface = try {
         androidx.core.content.res.ResourcesCompat.getFont(context, id) ?: Typeface.create(Typeface.DEFAULT, fallback)
     } catch (_: Exception) {
