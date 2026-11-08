@@ -74,63 +74,69 @@ fun MoreSheet(app: DriveApp, onDismiss: () -> Unit, onTile: (MoreTile) -> Unit, 
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onDismiss),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        val radius = if (theme.radius <= 0f) 0.dp else dims.d(4.4f)
-        val shape = if (radius == 0.dp) RectangleShape else RoundedCornerShape(topStart = radius, topEnd = radius)
-        // Map First's sheet is the slate card colour, solid: it sits over the live map.
-        val sheetColor = if (theme.style == HomeStyle.MapFirst) theme.background else theme.background
-        Column(
-            Modifier
-                .padding(horizontal = dims.d(3f))
-                .fillMaxWidth()
-                .fillMaxHeight(0.82f)
-                .then(if (theme.cardStyle == CardStyle.Brutal) Modifier.hardShadow(shape, theme.border) else Modifier)
-                .themedSurface(theme, shape, sheetColor, border = if (theme.borderWidth > 0.dp) theme.border else null, borderWidth = theme.borderWidth)
-                // Taps inside the sheet must not close it.
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
-                .padding(dims.d(3.2f)),
-            verticalArrangement = Arrangement.spacedBy(dims.d(2.2f)),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(3f))) {
-                Text(
-                    stringResource(R.string.more_sheet_title),
-                    color = theme.text,
-                    fontFamily = theme.numberFont.family,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = dims.t(5.4f, min = 26f),
-                    maxLines = 1,
-                )
-                Text(
-                    stringResource(R.string.more_say),
-                    color = theme.muted,
-                    fontSize = dims.t(2.8f, min = 16f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Box(
-                    Modifier
-                        .heightIn(min = MinTouch)
-                        .widthIn(min = dims.d(18f))
-                        .themedTap(if (theme.radius <= 0f) RectangleShape else CircleShape, theme.accent, onClick = onDismiss)
-                        .padding(horizontal = dims.d(3f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(stringResource(R.string.action_close), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(3.2f, min = 18f))
+        // The map's licence credit sits above the sheet, never under or against it (the sheet
+        // covers the map's own credit). Only the themes whose Home shows the map.
+        val showsMap = theme.style == HomeStyle.MapFirst || theme.style == HomeStyle.BigGlance
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
+            if (showsMap) MapCredit(Modifier.padding(horizontal = dims.d(3f), vertical = dims.d(1f)))
+            val radius = if (theme.radius <= 0f) 0.dp else dims.d(4.4f)
+            val shape = if (radius == 0.dp) RectangleShape else RoundedCornerShape(topStart = radius, topEnd = radius)
+            // Map First's sheet is the slate card colour, solid: it sits over the live map.
+            val sheetColor = if (theme.style == HomeStyle.MapFirst) theme.background else theme.background
+            Column(
+                Modifier
+                    .padding(horizontal = dims.d(3f))
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.82f)
+                    .then(if (theme.cardStyle == CardStyle.Brutal) Modifier.hardShadow(shape, theme.border) else Modifier)
+                    .themedSurface(theme, shape, sheetColor, border = if (theme.borderWidth > 0.dp) theme.border else null, borderWidth = theme.borderWidth)
+                    // Taps inside the sheet must not close it.
+                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+                    .padding(dims.d(3.2f)),
+                verticalArrangement = Arrangement.spacedBy(dims.d(2.2f)),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dims.d(3f))) {
+                    Text(
+                        stringResource(R.string.more_sheet_title),
+                        color = theme.text,
+                        fontFamily = theme.numberFont.family,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = dims.t(5.4f, min = 26f),
+                        maxLines = 1,
+                    )
+                    Text(
+                        stringResource(R.string.more_say),
+                        color = theme.muted,
+                        fontSize = dims.t(2.8f, min = 16f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Box(
+                        Modifier
+                            .heightIn(min = MinTouch)
+                            .widthIn(min = dims.d(18f))
+                            .themedTap(if (theme.radius <= 0f) RectangleShape else CircleShape, theme.accent, onClick = onDismiss)
+                            .padding(horizontal = dims.d(3f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(stringResource(R.string.action_close), color = theme.onAccent, fontWeight = FontWeight.Bold, fontSize = dims.t(3.2f, min = 18f))
+                    }
                 }
-            }
-            val gap = dims.d(2f)
-            Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
-                for (row in MoreTile.entries.chunked(MoreTile.COLUMNS)) {
-                    Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
-                        for (tile in row) {
-                            MoreTileView(
-                                title = moreTitle(tile),
-                                hint = hints[tile],
-                                icon = moreIcon(tile),
-                                onClick = { onTile(tile) },
-                                onLongClick = if (tile == MoreTile.Phone) onPhoneLong else null,
-                                modifier = Modifier.weight(1f).fillMaxHeight(),
-                            )
+                val gap = dims.d(2f)
+                Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
+                    for (row in MoreTile.entries.chunked(MoreTile.COLUMNS)) {
+                        Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                            for (tile in row) {
+                                MoreTileView(
+                                    title = moreTitle(tile),
+                                    hint = hints[tile],
+                                    icon = moreIcon(tile),
+                                    onClick = { onTile(tile) },
+                                    onLongClick = if (tile == MoreTile.Phone) onPhoneLong else null,
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                )
+                            }
                         }
                     }
                 }
