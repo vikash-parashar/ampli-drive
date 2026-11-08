@@ -34,7 +34,16 @@ object BankClips {
         val out = ArrayList<VoiceClips.Entry>()
         for ((topic, lines) in ChatLines.all) {
             lines.forEachIndexed { i, l ->
-                if (recordable(l.deva)) out += VoiceClips.Entry(chatId(topic, i), "Chat${topic.name}", GROUP_CHAT, l.deva)
+                if (!recordable(l.deva)) return@forEachIndexed
+                val id = chatId(topic, i)
+                val event = "Chat${topic.name}"
+                if (l.devaF != null) {
+                    // Worded per voice: each voice records its own ("साथी" / "साथण").
+                    out += VoiceClips.Entry(id + VoiceClips.MALE_SUFFIX, event, GROUP_CHAT, l.deva, VoicePack.Male.key)
+                    out += VoiceClips.Entry(id + VoiceClips.FEMALE_SUFFIX, event, GROUP_CHAT, l.devaF, VoicePack.Female.key)
+                } else {
+                    out += VoiceClips.Entry(id, event, GROUP_CHAT, l.deva)
+                }
             }
         }
         Jokes.ALL.forEachIndexed { i, l ->
@@ -62,6 +71,8 @@ object BankClips {
         for ((line, id) in byLine) {
             m.putIfAbsent(line.deva, id)
             m.putIfAbsent(line.roman, id)
+            line.devaF?.let { m.putIfAbsent(it, id) }
+            line.romanF?.let { m.putIfAbsent(it, id) }
         }
         for ((name, text) in DesiReplies.LINES) if (recordable(text)) m.putIfAbsent(text, desiId(name))
         m

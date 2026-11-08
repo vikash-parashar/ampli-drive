@@ -19,11 +19,26 @@ import kotlin.random.Random
  */
 object ChatLines {
 
-    data class Line(val deva: String, val roman: String, val en: String) {
-        fun text(script: Script): String = when (script) {
-            Script.Deva -> deva
-            Script.Roman -> roman
-            Script.English -> en
+    /**
+     * [devaF] / [romanF]: the female voice's wording when it differs ("साथण" for "साथी"); [deva] /
+     * [roman] are then the male wording, said by the male voice and the phone voice. Such a line
+     * is recorded as <id>_m and <id>_f, like [HaryanviLines.Line].
+     */
+    data class Line(
+        val deva: String,
+        val roman: String,
+        val en: String,
+        val devaF: String? = null,
+        val romanF: String? = null,
+    ) {
+        /** The wording for [script], in [voice]'s grammatical gender when the line has one per voice. */
+        fun text(script: Script, voice: VoicePack? = null): String {
+            val female = voice == VoicePack.Female
+            return when (script) {
+                Script.Deva -> if (female && devaF != null) devaF else deva
+                Script.Roman -> if (female && romanF != null) romanF else roman
+                Script.English -> en
+            }
         }
     }
 
@@ -46,10 +61,29 @@ object ChatLines {
             Line("सब बढ़िया सै भाई! गाणा हो या चुटकला, बोल दिए, मैं हाजिर सूं।", "Sab badhiya sai bhai! Gaana ho ya chutkula, bol diye, main haazir sun.", "All good! A song or a joke, just ask."),
         ),
         Topic.WhoAreYou to listOf(
-            Line("मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे।", "Main Ampli sun, thaari gaadi ki saathan. Raasta, gaane, khabar ar chutkule, sab mere jimme.", "I'm Ampli, your car's companion: routes, songs, news and jokes are on me."),
-            Line("मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं।", "Mera naam Ampli sai, thaari gaadi ki desi saathan, theth Haryanvi bolun sun.", "My name is Ampli, your car assistant who speaks desi."),
+            // "साथी" for the male voice (Jeet) and the phone voice, "साथण" for the female voice.
+            Line(
+                "मैं एम्पली सूं, थारी गाड्डी का साथी। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे।",
+                "Main Ampli sun, thaari gaadi ka saathi. Raasta, gaane, khabar ar chutkule, sab mere jimme.",
+                "I'm Ampli, your car's companion: routes, songs, news and jokes are on me.",
+                devaF = "मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे।",
+                romanF = "Main Ampli sun, thaari gaadi ki saathan. Raasta, gaane, khabar ar chutkule, sab mere jimme.",
+            ),
+            Line(
+                "मेरा नाम एम्पली सै, थारी गाड्डी का देसी साथी, ठेठ हरियाणवी बोलूं सूं।",
+                "Mera naam Ampli sai, thaari gaadi ka desi saathi, theth Haryanvi bolun sun.",
+                "My name is Ampli, your car assistant who speaks desi.",
+                devaF = "मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं।",
+                romanF = "Mera naam Ampli sai, thaari gaadi ki desi saathan, theth Haryanvi bolun sun.",
+            ),
             Line("एम्पली सूं भाई! तू बोल, मैं हाजिर।", "Ampli sun bhai! Tu bol, main haazir.", "I'm Ampli! Just say it, I'm here."),
-            Line("मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं।", "Main Ampli sun, thaare safar ki saathan. Net na ho to bhi baat kar lyun sun.", "I'm Ampli, your travel buddy. I talk even without internet."),
+            Line(
+                "मैं एम्पली सूं, थारे सफर का साथी। नेट ना हो तो भी बात कर ल्यूं सूं।",
+                "Main Ampli sun, thaare safar ka saathi. Net na ho to bhi baat kar lyun sun.",
+                "I'm Ampli, your travel buddy. I talk even without internet.",
+                devaF = "मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं।",
+                romanF = "Main Ampli sun, thaare safar ki saathan. Net na ho to bhi baat kar lyun sun.",
+            ),
         ),
         Topic.Thanks to listOf(
             Line("कोए बात ना भाई, यो तो मेरा काम सै।", "Koye baat na bhai, yo to mera kaam sai.", "No problem, that's my job."),

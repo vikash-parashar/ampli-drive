@@ -1450,9 +1450,12 @@ class VoiceAssistant(private val app: DriveApp) {
         return if (speaker.hasVoice(HINDI)) ChatLines.Script.Deva to "hi" else ChatLines.Script.Roman to "en-IN"
     }
 
-    /** [chat] for one bank line, with its recording when it has one. */
+    /**
+     * [chat] for one bank line, with its recording when it has one, in the picked voice's gender
+     * ("साथी" for Jeet and the phone voice, "साथण" for the female voice).
+     */
     private suspend fun chatLine(line: ChatLines.Line, script: ChatLines.Script, voice: String, fallback: (suspend () -> Unit)? = null) =
-        chat(line.text(script), voice, BankClips.clipsFor(line, script), fallback)
+        chat(line.text(script, app.voicePlayer.voice), voice, BankClips.clipsFor(line, script), fallback)
 
     /**
      * Says a conversation line: the recorded voice (Settings › Voice, Male or Female) when every

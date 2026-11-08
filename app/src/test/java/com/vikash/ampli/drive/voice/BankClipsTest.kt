@@ -1,6 +1,7 @@
 package com.vikash.ampli.drive.voice
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -24,7 +25,16 @@ class BankClipsTest {
         for ((topic, lines) in ChatLines.all) {
             lines.forEachIndexed { i, line ->
                 val id = BankClips.chatId(topic, i)
-                assertEquals(id, line.deva, manifest.getValue(id).text)
+                if (line.devaF == null) {
+                    assertEquals(id, line.deva, manifest.getValue(id).text)
+                } else {
+                    // Worded per voice: each voice records its own wording.
+                    assertNull(id, manifest[id])
+                    assertEquals(id, line.deva, manifest.getValue(id + "_m").text)
+                    assertEquals("male", manifest.getValue(id + "_m").voice)
+                    assertEquals(id, line.devaF, manifest.getValue(id + "_f").text)
+                    assertEquals("female", manifest.getValue(id + "_f").voice)
+                }
                 assertEquals(listOf(id), BankClips.clipsFor(line, ChatLines.Script.Deva))
                 // The Latin wording is the same line: the recording says it in Devanagari.
                 assertEquals(listOf(id), BankClips.clipsFor(line, ChatLines.Script.Roman))
@@ -33,6 +43,32 @@ class BankClipsTest {
         }
         assertEquals("chat_how_are_you_01", BankClips.chatId(ChatLines.Topic.HowAreYou, 0))
         assertEquals("chat_news_no_hindi_voice_01", BankClips.chatId(ChatLines.Topic.NewsNoHindiVoice, 0))
+    }
+
+    @Test
+    fun whoAreYouIsMaleForTheMaleVoiceAndFemaleForTheFemaleVoice() {
+        val line = ChatLines.lines(ChatLines.Topic.WhoAreYou)[0]
+        for (voice in listOf(VoicePack.Male, VoicePack.Tts, null)) {
+            val deva = line.text(ChatLines.Script.Deva, voice)
+            assertTrue(deva, deva.contains("थारी गाड्डी का साथी"))
+            assertFalse(deva, deva.contains("साथण"))
+            assertTrue(line.text(ChatLines.Script.Roman, voice).contains("gaadi ka saathi"))
+        }
+        assertTrue(line.text(ChatLines.Script.Deva, VoicePack.Female).contains("थारी गाड्डी की साथण"))
+        assertTrue(line.text(ChatLines.Script.Roman, VoicePack.Female).contains("gaadi ki saathan"))
+        // No line the male voice says calls Ampli "साथण".
+        for ((_, lines) in ChatLines.all) for (l in lines) {
+            assertFalse(l.deva, l.text(ChatLines.Script.Deva, VoicePack.Male).contains("साथण"))
+            assertFalse(l.roman, l.text(ChatLines.Script.Roman, VoicePack.Male).contains("saathan"))
+        }
+        // The male voice plays chat_who_are_you_01_m, the female voice chat_who_are_you_01_f.
+        val clips = BankClips.clipsFor(line, ChatLines.Script.Deva)
+        assertEquals(listOf("chat_who_are_you_01"), clips)
+        val male = library(VoicePack.Male, "chat_who_are_you_01_m")
+        assertEquals(listOf("chat_who_are_you_01_m"), male.plan(VoicePack.Male, Spoken(line.deva, "hi", clips)))
+        val female = library(VoicePack.Female, "chat_who_are_you_01_f")
+        assertEquals(listOf("chat_who_are_you_01_f"), female.plan(VoicePack.Female, Spoken(line.devaF!!, "hi", clips)))
+        assertEquals(listOf("chat_who_are_you_01"), BankClips.clipsFor(line.devaF!!))
     }
 
     @Test

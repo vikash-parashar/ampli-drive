@@ -853,7 +853,7 @@ Calls and chat messages answered by voice, service reminders at car start and th
 
 Hey Ampli's small talk (`ChatLines.kt`), the jokes (`Jokes.kt`) and the plain Haryanvi replies (`DesiReplies.kt`) used to be phone voice only. Each line without a blank is now in voice/lines.json (groups Chat, Jokes and Replies) so the voice-pack workflow records it in both voices; the app plays the clip when the picked voice (Male / Female) has it up to date, else the phone voice says the line as before. The source of truth stays in those three files (and their tests); this list is generated from voice/lines.json.
 
-- 43 small-talk lines (`chat_<topic>_<nn>`), 42 jokes (`joke_<nn>`), 36 replies (`desi_<string name>`).
+- 43 small-talk lines (`chat_<topic>_<nn>`; the three "who are you" lines that say साथी / साथण are worded per voice, `_m` and `_f`), 42 jokes (`joke_<nn>`), 36 replies (`desi_<string name>`).
 - Not recorded, always the phone voice: replies with a place, name or number filled in (`%1$s` in DesiReplies.kt), the "aaj ka din kaisa hai" answer (date, deity and weather) and the news headlines.
 
 | Clip id | Devanagari |
@@ -863,10 +863,13 @@ Hey Ampli's small talk (`ChatLines.kt`), the jokes (`Jokes.kt`) and the plain Ha
 | chat_how_are_you_03 | चकाचक सूं, गाड्डी भी राजी, मैं भी राजी। तू बता, कित चालणा सै? |
 | chat_how_are_you_04 | बढ़िया सूं जी, थारे गेल्यां सफर मैं घणा मजा आवै सै। तू ठीक सै ना? |
 | chat_how_are_you_05 | सब बढ़िया सै भाई! गाणा हो या चुटकला, बोल दिए, मैं हाजिर सूं। |
-| chat_who_are_you_01 | मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे। |
-| chat_who_are_you_02 | मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं। |
+| chat_who_are_you_01_m | मैं एम्पली सूं, थारी गाड्डी का साथी। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे। |
+| chat_who_are_you_01_f | मैं एम्पली सूं, थारी गाड्डी की साथण। रास्ता, गाणे, खबर अर चुटकले, सब मेरे जिम्मे। |
+| chat_who_are_you_02_m | मेरा नाम एम्पली सै, थारी गाड्डी का देसी साथी, ठेठ हरियाणवी बोलूं सूं। |
+| chat_who_are_you_02_f | मेरा नाम एम्पली सै, थारी गाड्डी की देसी साथण, ठेठ हरियाणवी बोलूं सूं। |
 | chat_who_are_you_03 | एम्पली सूं भाई! तू बोल, मैं हाजिर। |
-| chat_who_are_you_04 | मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं। |
+| chat_who_are_you_04_m | मैं एम्पली सूं, थारे सफर का साथी। नेट ना हो तो भी बात कर ल्यूं सूं। |
+| chat_who_are_you_04_f | मैं एम्पली सूं, थारे सफर की साथण। नेट ना हो तो भी बात कर ल्यूं सूं। |
 | chat_thanks_01 | कोए बात ना भाई, यो तो मेरा काम सै। |
 | chat_thanks_02 | राम राम जी, जद मर्जी बुला लिए। |
 | chat_thanks_03 | जीता रह भाई, आराम तै चलाइए। |
