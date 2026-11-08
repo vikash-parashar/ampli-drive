@@ -144,6 +144,8 @@ class DriveApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Android 8.1 head units: modern TLS (Conscrypt) first, before anything opens a connection.
+        com.vikash.ampli.drive.system.ModernTls.install()
         // Weak units: no decorative motion, a lighter map (LiteMode). Decided once per start.
         com.vikash.ampli.drive.prefs.LiteMode.enabled =
             com.vikash.ampli.drive.prefs.LiteMode.resolve(prefs.liteMode, lowEnd)

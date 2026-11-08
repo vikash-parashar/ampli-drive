@@ -57,6 +57,7 @@ import com.vikash.ampli.drive.map.GLANCE_ATTRIBUTION
 import com.vikash.ampli.drive.map.GlanceMap
 import com.vikash.ampli.drive.nav.Maneuver
 import com.vikash.ampli.drive.nav.NavSession
+import com.vikash.ampli.drive.nav.routingServerFailed
 import com.vikash.ampli.drive.nav.route.RouteProgress
 import com.vikash.ampli.drive.nav.route.RouteStep
 import com.vikash.ampli.drive.nav.route.RouteTracker
@@ -394,18 +395,27 @@ fun NavigationScreen(app: DriveApp, onBack: () -> Unit) {
                 },
                 modifier = Modifier.align(Alignment.Center),
             )
-            NavSession.Phase.Failed -> NavMessageCard(
-                title = stringResource(R.string.nav_fail_title),
-                body = failureText(context, session),
-                busy = false,
-                onRetry = { app.navigator.retry() },
-                onGoogle = { app.navigator.openInGoogleMaps(context) },
-                onClose = {
-                    app.navigator.stop()
-                    onBack()
-                },
-                modifier = Modifier.align(Alignment.Center),
-            )
+            NavSession.Phase.Failed -> {
+                // The route server could not be reached (or answered badly) while the internet is
+                // on, e.g. a TLS handshake that fails on Android 8.1: offer Google Maps first, in
+                // Hinglish, when an app on the unit can take the destination.
+                val serverDown = routingServerFailed(session.failure)
+                val canMaps = remember { com.vikash.ampli.drive.voice.VoiceActions.canNavigate(context) }
+                NavMessageCard(
+                    title = stringResource(if (serverDown) R.string.nav_route_fallback_title else R.string.nav_fail_title),
+                    body = if (serverDown && canMaps) stringResource(R.string.nav_route_fallback_text) else failureText(context, session),
+                    busy = false,
+                    onRetry = { app.navigator.retry() },
+                    onGoogle = if (canMaps) ({ app.navigator.openInGoogleMaps(context); Unit }) else null,
+                    googleLabel = stringResource(if (serverDown) R.string.nav_route_fallback_action else R.string.nav_open_google),
+                    googleFirst = serverDown,
+                    onClose = {
+                        app.navigator.stop()
+                        onBack()
+                    },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
             NavSession.Phase.Idle -> Unit
         }
 
@@ -644,9 +654,12 @@ private fun NavMessageCard(
     body: String?,
     busy: Boolean,
     onRetry: (() -> Unit)?,
-    onGoogle: () -> Unit,
+    onGoogle: (() -> Unit)?,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    googleLabel: String = stringResource(R.string.nav_open_google),
+    /** The route server failed: Google Maps is the main way on, so it comes first and filled. */
+    googleFirst: Boolean = false,
 ) {
     val dims = LocalDims.current
     val theme = LocalDriveTheme.current
@@ -665,8 +678,9 @@ private fun NavMessageCard(
             Text(body, color = theme.muted, fontSize = dims.t(2.8f, min = 16f), textAlign = TextAlign.Center)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(dims.d(1.6f)), verticalAlignment = Alignment.CenterVertically) {
-            if (onRetry != null) BigButton(text = stringResource(R.string.action_retry), onClick = onRetry, icon = Icons.Filled.Refresh)
-            BigButton(text = stringResource(R.string.nav_open_google), onClick = onGoogle, icon = Icons.Filled.Map, primary = onRetry == null && !busy)
+            if (googleFirst && onGoogle != null) BigButton(text = googleLabel, onClick = onGoogle, icon = Icons.Filled.Map, primary = true)
+            if (onRetry != null) BigButton(text = stringResource(R.string.action_retry), onClick = onRetry, icon = Icons.Filled.Refresh, primary = !googleFirst || onGoogle == null)
+            if (!googleFirst && onGoogle != null) BigButton(text = googleLabel, onClick = onGoogle, icon = Icons.Filled.Map, primary = onRetry == null && !busy)
             BigButton(text = stringResource(R.string.action_close), onClick = onClose, primary = false)
         }
     }

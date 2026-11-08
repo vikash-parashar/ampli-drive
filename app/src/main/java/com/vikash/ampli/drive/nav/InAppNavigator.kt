@@ -472,3 +472,10 @@ internal fun failureFor(r: RouteResult.Reason, online: Boolean): NavSession.Fail
     RouteResult.Reason.Server -> NavSession.Failure.Server
     RouteResult.Reason.Unreachable -> NavSession.Failure.Unreachable
 }
+
+/**
+ * The route server itself failed while the unit is online (TLS handshake, server down, busy or a
+ * bad answer): Car Hub then offers Google Maps for the same destination.
+ */
+internal fun routingServerFailed(f: NavSession.Failure?): Boolean =
+    f == NavSession.Failure.Unreachable || f == NavSession.Failure.Server || f == NavSession.Failure.Busy

@@ -21,6 +21,8 @@ vosk = "0.3.47"
 # JVM screenshot tests (no emulator): Robolectric native graphics + Roborazzi.
 # Parking-spot QR code (Apache-2.0). Core only: pure Java, no camera or scanning UI.
 zxing = "3.5.3"
+# Modern TLS (1.3, current ciphers) for routing and place search on Android 8.1 head units (Apache-2.0).
+conscrypt = "2.8.0"
 robolectric = "4.14.1"
 roborazzi = "1.40.1"
 
@@ -40,6 +42,7 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+conscrypt-android = { group = "org.conscrypt", name = "conscrypt-android", version.ref = "conscrypt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }

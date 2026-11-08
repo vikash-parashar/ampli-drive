@@ -221,6 +221,8 @@ dependencies {
     implementation(libs.media3.exoplayer)
     // Parking-spot QR on the "Where's my car" screen.
     implementation(libs.zxing.core)
+    // TLS 1.3 and current ciphers on Android 8.1 (the TS7): installed first at start on API < 29 (ModernTls).
+    implementation(libs.conscrypt.android)
 
     // "Hey Ampli" wake word and offline commands. The speech models (~36 + ~42 MB) come from the
     // :voicemodels asset pack in Play installs and are downloaded at runtime by sideloaded APKs.

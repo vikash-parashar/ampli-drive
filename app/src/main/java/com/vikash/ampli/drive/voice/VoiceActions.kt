@@ -37,10 +37,18 @@ object VoiceActions {
     fun startNavigation(context: Context, place: Place): Boolean {
         val nav = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${place.lat},${place.lon}&mode=d"))
             .setPackage(Launchers.GOOGLE_MAPS)
-        if (start(context, nav)) return true
+        if (startResolved(context, nav)) return true
         val label = Uri.encode(place.name)
         val geo = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${place.lat},${place.lon}?q=${place.lat},${place.lon}($label)"))
-        return start(context, geo)
+        return startResolved(context, geo)
+    }
+
+    /** Google Maps (or any map app through geo:) can take a destination on this unit. */
+    fun canNavigate(context: Context): Boolean {
+        val pm = context.packageManager
+        val nav = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=0,0&mode=d")).setPackage(Launchers.GOOGLE_MAPS)
+        val geo = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=0,0"))
+        return nav.resolveActivity(pm) != null || geo.resolveActivity(pm) != null
     }
 
     /**
@@ -51,8 +59,8 @@ object VoiceActions {
         if (query.isBlank()) return false
         val nav = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${Uri.encode(query)}&mode=d"))
             .setPackage(Launchers.GOOGLE_MAPS)
-        if (start(context, nav)) return true
-        return start(context, Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=${Uri.encode(query)}")))
+        if (startResolved(context, nav)) return true
+        return startResolved(context, Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=${Uri.encode(query)}")))
     }
 
     // ---------------------------------------------------------------------------- Local music
@@ -327,6 +335,10 @@ object VoiceActions {
     }
 
     // ------------------------------------------------------------------------------- Helpers
+
+    /** [start], only when an app on the unit takes [intent] (checked first, so nothing is thrown). */
+    private fun startResolved(context: Context, intent: Intent): Boolean =
+        intent.resolveActivity(context.packageManager) != null && start(context, intent)
 
     private fun start(context: Context, intent: Intent): Boolean = try {
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
