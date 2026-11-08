@@ -171,6 +171,8 @@ fun SettingsScreen(
                 dimAtNight = dimAtNight,
                 onDimAtNight = app.prefs::setDimAtNight,
             )
+            // Settings › Speedometer: Neon Arc, Halo Ring, Road Strip or Retro Dial.
+            SpeedometerCard(app = app)
             if (BuildConfig.TEST_BUILD) {
                 ToggleRow(
                     title = stringResource(R.string.pro_test_title),

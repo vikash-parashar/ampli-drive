@@ -40,6 +40,8 @@ data class GpsState(
     val noFixLong: Boolean = false,
     /** Trip average over moving time (see [TripAverage]), km/h. */
     val avgKmh: Float? = null,
+    /** Distance driven this trip (km, see [TripAverage.tripKm]); null before the car has moved. */
+    val tripKm: Float? = null,
     /** Last speed-giving fix: elapsedRealtime ms, provider name and whether it carried a speed. */
     val lastFixElapsedMs: Long = 0L,
     val lastFixProvider: String? = null,
@@ -190,7 +192,7 @@ class SpeedTracker(
     /** Ignition on: a new trip for the average speed. */
     fun resetTrip() {
         trip.reset()
-        _state.update { it.copy(avgKmh = null) }
+        _state.update { it.copy(avgKmh = null, tripKm = null) }
     }
 
     @SuppressLint("MissingPermission")
@@ -382,6 +384,7 @@ class SpeedTracker(
                 source = source,
                 noFixLong = false,
                 avgKmh = avg,
+                tripKm = trip.tripKm.takeIf { it > 0f },
                 lastFixElapsedMs = lastFixAt,
                 lastFixProvider = location.provider,
                 lastFixHasSpeed = location.hasSpeed(),

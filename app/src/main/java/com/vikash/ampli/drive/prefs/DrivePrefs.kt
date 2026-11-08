@@ -36,6 +36,18 @@ enum class NavApp(val key: String) {
     }
 }
 
+/** Settings › Speedometer: how Home draws the speed. [NeonArc] until the driver picks one. */
+enum class SpeedoStyle(val key: String) {
+    NeonArc("neon_arc"),
+    HaloRing("halo_ring"),
+    RoadStrip("road_strip"),
+    RetroDial("retro_dial");
+
+    companion object {
+        fun from(key: String?): SpeedoStyle = entries.firstOrNull { it.key == key } ?: NeonArc
+    }
+}
+
 /** Settings › When the car starts. */
 enum class AutoStartMode(val key: String) {
     Off("off"),
@@ -170,6 +182,15 @@ class DrivePrefs(context: Context) {
     fun setNavApp(value: NavApp) {
         sp.edit().putString(KEY_NAV_APP, value.key).apply()
         _navApp.value = value
+    }
+
+    /** Settings › Speedometer: Neon Arc (default), Halo Ring, Road Strip or Retro Dial. */
+    private val _speedoStyle = MutableStateFlow(SpeedoStyle.from(sp.getString(KEY_SPEEDO_STYLE, null)))
+    val speedoStyle: StateFlow<SpeedoStyle> = _speedoStyle.asStateFlow()
+
+    fun setSpeedoStyle(value: SpeedoStyle) {
+        sp.edit().putString(KEY_SPEEDO_STYLE, value.key).apply()
+        _speedoStyle.value = value
     }
 
     private val _mapTextureMode = MutableStateFlow(sp.getBoolean(KEY_MAP_TEXTURE, true))
@@ -567,6 +588,7 @@ class DrivePrefs(context: Context) {
         private const val KEY_PHONE_AUTOPLAY = "phone_music_autoplay"
         private const val KEY_GREET_MARK = "greet_run_mark"
         private const val KEY_AUTOSTART_MARK = "autostart_run_mark"
+        private const val KEY_SPEEDO_STYLE = "speedo_style"
 
         const val WAKE_SENS_DEFAULT = 3
 

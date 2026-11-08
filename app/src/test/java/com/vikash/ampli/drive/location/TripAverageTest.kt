@@ -34,4 +34,16 @@ class TripAverageTest {
         repeat(61) { t.onSpeed(at, 20f); at += 1000 }
         assertEquals(20f, t.averageKmh!!, 0.5f)
     }
+
+    @Test
+    fun tripDistanceCountsMovingFixesOnly() {
+        val t = TripAverage()
+        var at = 0L
+        // 60 s at 60 km/h is 1 km; standing still adds nothing.
+        repeat(61) { t.onSpeed(at, 60f); at += 1000 }
+        repeat(30) { t.onSpeed(at, 0f); at += 1000 }
+        assertEquals(1f, t.tripKm, 0.02f)
+        t.reset()
+        assertEquals(0f, t.tripKm, 0f)
+    }
 }
