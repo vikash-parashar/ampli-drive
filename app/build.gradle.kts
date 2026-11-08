@@ -200,6 +200,13 @@ android {
     }
 }
 
+// JVM unit tests (Robolectric) bring their own desktop Conscrypt (conscrypt-openjdk-uber) with the
+// same org.conscrypt classes; the Android build, which needs the device's native library, must not
+// shadow it there.
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    exclude(group = "org.conscrypt", module = "conscrypt-android")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

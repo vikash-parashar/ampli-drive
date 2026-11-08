@@ -32,17 +32,30 @@ object ModernTls {
     /** Call first thing in Application.onCreate, before any HTTPS connection is made. */
     fun install() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || provider != null) return
+        // JVM unit tests (Robolectric) have no Android native library for Conscrypt.
+        if (Build.FINGERPRINT == "robolectric") return
+        var inserted: Provider? = null
         try {
+            // Loads the native library; false on an odd ABI or a ROM that refuses it.
+            if (!org.conscrypt.Conscrypt.isAvailable()) {
+                Log.w(TAG, "Conscrypt not available: keeping the platform TLS")
+                return
+            }
             val p = org.conscrypt.Conscrypt.newProvider()
-            Security.insertProviderAt(p, 1)
+            // A fully working context first, then the provider goes in front.
             val ctx = SSLContext.getInstance("TLS", p)
             ctx.init(null, null, null)
+            Security.insertProviderAt(p, 1)
+            inserted = p
             factory = ctx.socketFactory
             provider = p
             // Every other HttpsURLConnection in the app (weather, news, feedback) gets it too.
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
         } catch (t: Throwable) {
-            // Missing native library on an odd ABI, or a ROM that refuses: keep the platform TLS.
+            // Something failed half way: take Conscrypt out again and keep the platform TLS.
+            inserted?.let { Security.removeProvider(it.name) }
+            factory = null
+            provider = null
             Log.w(TAG, "Conscrypt not installed: ${t.javaClass.simpleName}: ${t.message}")
         }
     }
